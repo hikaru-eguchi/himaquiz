@@ -5,6 +5,12 @@ const config: Config = {
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/articles/**/*.md',
+  ],
+  // @ts-expect-error Tailwind 型定義が safelist を認識しない場合がある
+  safelist: [
+    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    'p', 'a', 'ul', 'ol', 'li', 'blockquote', 'code', 'pre', 'strong', 'em',
   ],
   theme: {
     extend: {
@@ -22,4 +28,5 @@ const config: Config = {
   },
   plugins: [require('@tailwindcss/typography')],
 }
+
 export default config

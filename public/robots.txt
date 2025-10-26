@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://www.trendlab.jp
+
+# Sitemaps
+Sitemap: https://www.trendlab.jp/sitemap.xml

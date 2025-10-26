@@ -1,14 +1,46 @@
 import Link from 'next/link';
+import fs from 'fs';
+import path from 'path';
+import matter from 'gray-matter';
 
-export default function HomePage() {
-  const featuredArticles = [
-    { id: 1, title: '記事タイトル1' },
-    { id: 2, title: '記事タイトル2' },
-    { id: 3, title: '記事タイトル3' },
-    { id: 4, title: '記事タイトル4' },
-    { id: 5, title: '記事タイトル5' },
-    { id: 6, title: '記事タイトル6' },
-  ];
+interface ArticleMeta {
+  id: string;
+  title: string;
+  date: string;
+  author: string;
+}
+
+async function getSortedArticlesData(): Promise<ArticleMeta[]> {
+  const articlesDirectory = path.join(process.cwd(), 'src', 'articles');
+  const fileNames = fs.readdirSync(articlesDirectory);
+
+  const allArticlesData = fileNames.map((fileName) => {
+    const id = fileName.replace(/\.md$/, '');
+    const fullPath = path.join(articlesDirectory, fileName);
+    const fileContents = fs.readFileSync(fullPath, 'utf8');
+    const matterResult = matter(fileContents);
+
+    return {
+      id,
+      ...(matterResult.data as { title: string; date: string; author: string }),
+    };
+  });
+
+  // Sort articles by date in descending order
+  const sortedArticles = allArticlesData.sort((a, b) => {
+    if (a.date < b.date) {
+      return 1;
+    } else {
+      return -1;
+    }
+  });
+
+  // Return the top 6 articles
+  return sortedArticles.slice(0, 6);
+}
+
+export default async function HomePage() {
+  const featuredArticles = await getSortedArticlesData();
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -29,7 +61,7 @@ export default function HomePage() {
               <div className="p-8">
                 <h3 className="font-bold text-2xl mb-3 text-gray-900 group-hover:text-brand-dark transition-colors">{article.title}</h3>
                 <p className="text-gray-800 text-base mb-4">
-                  ここに記事の簡単な説明が入ります...
+                  <time dateTime={new Date(article.date).toISOString()}>{new Date(article.date).toLocaleDateString('ja-JP')}</time> by {article.author}
                 </p>
               </div>
               <div className="px-8 pb-6">
