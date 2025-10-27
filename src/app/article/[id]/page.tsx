@@ -4,6 +4,7 @@ import matter from 'gray-matter';
 import { remark } from 'remark';
 import html from 'remark-html';
 import remarkGfm from 'remark-gfm';
+import type { Metadata } from 'next';
 
 interface ArticleData {
   id: string;
@@ -11,6 +12,7 @@ interface ArticleData {
   date: string;
   author: string;
   contentHtml: string;
+  description?: string;
 }
 
 export async function generateStaticParams() {
@@ -26,33 +28,69 @@ async function getArticleData(id: string): Promise<ArticleData> {
   const fullPath = path.join(process.cwd(), 'src', 'articles', `${decodeURIComponent(id)}.md`);
   const fileContents = fs.readFileSync(fullPath, 'utf8');
 
-  // Use gray-matter to parse the post metadata section
   const matterResult = matter(fileContents);
 
-  // Use remark to convert markdown into HTML string
   const processedContent = await remark().use(html).use(remarkGfm).process(matterResult.content);
   const contentHtml = processedContent.toString();
 
-  // Combine the data with the id and contentHtml
+  // description は front-matter に書いてある場合に使う
+  const description = (matterResult.data as { description?: string })?.description;
+
   return {
     id,
     contentHtml,
     ...(matterResult.data as { title: string; date: string; author: string }),
+    description,
+  };
+}
+
+// 記事ごとのメタ情報を生成
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+  const awaitedParams = await Promise.resolve(params);
+  const articleData = await getArticleData(awaitedParams.id);
+
+  return {
+    title: articleData.title,
+    description:
+      articleData.description ||
+      `${new Date(articleData.date).toLocaleDateString('ja-JP')} の記事: ${articleData.title}`,
+    openGraph: {
+      title: articleData.title,
+      description:
+        articleData.description ||
+        `${new Date(articleData.date).toLocaleDateString('ja-JP')} の記事: ${articleData.title}`,
+      type: 'article',
+      publishedTime: new Date(articleData.date).toISOString(),
+      authors: [articleData.author],
+    },
   };
 }
 
 export default async function ArticleDetailPage({ params }: { params: { id: string } }) {
-  const awaitedParams = await Promise.resolve(params); // Explicitly await, even if not a Promise
-  const id = (awaitedParams as { id: string }).id;
+  const awaitedParams = await Promise.resolve(params);
+  const id = awaitedParams.id;
   const articleData = await getArticleData(id);
 
   return (
-    <div className="bg-white shadow-lg rounded-xl p-12">
-      <h1 className="text-5xl font-extrabold text-gray-900 mb-8 text-center text-red-500">{articleData.title}</h1>
-      <p className="text-gray-500 text-center mb-4">
-        <time dateTime={new Date(articleData.date).toISOString()}>{new Date(articleData.date).toLocaleDateString('ja-JP')}</time> by {articleData.author}
+    <article className="max-w-5xl mx-auto p-8 md:p-12 bg-white shadow-lg rounded-xl">
+      {/* タイトル */}
+      <h1 className="text-5xl md:text-3xl font-extrabold text-gray-900 mb-6 text-center">
+        {articleData.title}
+      </h1>
+
+      {/* 著者・日付 */}
+      <p className="text-gray-500 text-center mb-8 text-sm md:text-base">
+        <time dateTime={new Date(articleData.date).toISOString()}>
+          {new Date(articleData.date).toLocaleDateString('ja-JP')}
+        </time>{' '}
+        by {articleData.author}
       </p>
-      <div className="prose prose-lg max-w-3xl mx-auto text-gray-600" dangerouslySetInnerHTML={{ __html: articleData.contentHtml }} />
-    </div>
+
+      {/* 記事本文 */}
+      <div
+        className="prose prose-lg md:prose-xl max-w-none mx-auto text-gray-700"
+        dangerouslySetInnerHTML={{ __html: articleData.contentHtml }}
+      />
+    </article>
   );
 }

@@ -7,11 +7,9 @@ const config: Config = {
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
     './src/articles/**/*.md',
   ],
-  // @ts-expect-error Tailwind 型定義が safelist を認識しない場合がある
-  safelist: [
-    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-    'p', 'a', 'ul', 'ol', 'li', 'blockquote', 'code', 'pre', 'strong', 'em',
-  ],
+  corePlugins: {
+    preflight: false, // これで base layer 無効化
+  },
   theme: {
     extend: {
       fontFamily: {
@@ -22,6 +20,23 @@ const config: Config = {
           light: '#FFDAB9',
           DEFAULT: '#FFA500',
           dark: '#FF8C00',
+        },
+      },
+      typography: {
+        DEFAULT: {
+          css: {
+            h2: {
+              fontSize: '2rem',      // 文字サイズ
+              fontWeight: '600',     // 太さ
+              color: '#1f2937',      // 文字色
+              backgroundColor: '#f3f4f6', // 薄いグレー
+              padding: '0.25rem 0.5rem',
+              borderRadius: '0.25rem',
+              marginTop: '1em',
+              marginBottom: '1em',
+            },
+            p: { marginTop: '1em', marginBottom: '1em' },
+          },
         },
       },
     },

@@ -1,1 +1,17 @@
 @import "tailwindcss";
+
+.prose h2 {
+  @apply text-2xl font-semibold bg-gray-100 px-2 py-5 rounded;
+}
+.prose h3 {
+  @apply text-xl font-medium px-2 py-1 rounded my-3;
+}
+.prose {
+  @apply text-lg; /* もともと text-base の場合は少し大きくなる */
+}
+.prose p {
+  @apply my-6; /* 上下マージンを増やす */
+}
+.prose img {
+  @apply w-full max-w-4xl mx-auto rounded-lg;
+}

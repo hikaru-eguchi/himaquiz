@@ -44,12 +44,7 @@ export default async function HomePage() {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <div className="bg-white text-gray-900 text-center py-24 rounded-xl max-w-5xl mx-auto">
-        <h1 className="text-6xl font-extrabold tracking-tight">トレンドラボ</h1>
-        <p className="text-xl mt-4 max-w-2xl mx-auto">話題になっていることや役立つ情報を、どこよりも分かりやすく発信します。</p>
-      </div>
-
-      <section className="py-16">
+      <section>
         <h2 className="text-4xl font-bold text-center mb-12 text-gray-900">話題の記事</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           {featuredArticles.map((article) => (
