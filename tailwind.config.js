@@ -1,6 +1,5 @@
-import type { Config } from 'tailwindcss'
-
-const config: Config = {
+/** @type {import('tailwindcss').Config} */
+const config = {
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -26,9 +25,9 @@ const config: Config = {
         DEFAULT: {
           css: {
             h2: {
-              fontSize: '2rem',      // 文字サイズ
-              fontWeight: '600',     // 太さ
-              color: '#1f2937',      // 文字色
+              fontSize: '2rem',         // 文字サイズ
+              fontWeight: '600',        // 太さ
+              color: '#1f2937',         // 文字色
               backgroundColor: '#f3f4f6', // 薄いグレー
               padding: '0.25rem 0.5rem',
               borderRadius: '0.25rem',
@@ -42,6 +41,6 @@ const config: Config = {
     },
   },
   plugins: [require('@tailwindcss/typography')],
-}
+};
 
-export default config
+module.exports = config;
