@@ -31,16 +31,16 @@ export default function RootLayout({
             {/* ナビゲーションリンク */}
             <nav className="flex justify-center flex-wrap gap-8 text-lg font-medium">
               <Link
-                href="/about"
+                href="/"
                 className="text-gray-700 hover:text-gray-900 no-underline transition-colors"
               >
-                サイト紹介
+                話題の記事
               </Link>
               <Link
                 href="/profile"
                 className="text-gray-700 hover:text-gray-900 no-underline transition-colors"
               >
-                プロフィール
+                サイト紹介
               </Link>
               <Link
                 href="/privacy"
