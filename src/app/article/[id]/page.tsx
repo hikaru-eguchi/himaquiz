@@ -10,7 +10,6 @@ interface ArticleData {
   id: string;
   title: string;
   date: string;
-  author: string;
   contentHtml: string;
   description?: string;
 }
@@ -39,7 +38,7 @@ async function getArticleData(id: string): Promise<ArticleData> {
   return {
     id,
     contentHtml,
-    ...(matterResult.data as { title: string; date: string; author: string }),
+    ...(matterResult.data as { title: string; date: string;}),
     description,
   };
 }
@@ -61,7 +60,6 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
         `${new Date(articleData.date).toLocaleDateString('ja-JP')} の記事: ${articleData.title}`,
       type: 'article',
       publishedTime: new Date(articleData.date).toISOString(),
-      authors: [articleData.author],
     },
   };
 }
@@ -83,7 +81,6 @@ export default async function ArticleDetailPage({ params }: { params: { id: stri
         <time dateTime={new Date(articleData.date).toISOString()}>
           {new Date(articleData.date).toLocaleDateString('ja-JP')}
         </time>{' '}
-        by {articleData.author}
       </p>
 
       {/* 記事本文 */}

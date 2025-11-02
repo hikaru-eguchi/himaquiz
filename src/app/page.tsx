@@ -2,12 +2,13 @@ import Link from 'next/link';
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
+import Image from "next/image";
 
 interface ArticleMeta {
   id: string;
   title: string;
   date: string;
-  author: string;
+  thumbnail?: string;
 }
 
 async function getSortedArticlesData(): Promise<ArticleMeta[]> {
@@ -22,7 +23,7 @@ async function getSortedArticlesData(): Promise<ArticleMeta[]> {
 
     return {
       id,
-      ...(matterResult.data as { title: string; date: string; author: string }),
+      ...(matterResult.data as { title: string; date: string; thumbnail?: string }),
     };
   });
 
@@ -53,10 +54,19 @@ export default async function HomePage() {
               href={`/article/${article.id}`}
               className="block bg-white rounded-xl shadow-md hover:shadow-2xl transition-shadow duration-300 ease-in-out overflow-hidden group"
             >
+              {article.thumbnail && (
+                <Image
+                  src={article.thumbnail}
+                  alt={article.title}
+                  width={600}
+                  height={400}
+                  className="w-full h-48 object-cover"
+                />
+              )}
               <div className="p-8">
                 <h3 className="font-bold text-2xl mb-3 text-gray-900 group-hover:text-brand-dark transition-colors">{article.title}</h3>
                 <p className="text-gray-800 text-base mb-4">
-                  <time dateTime={new Date(article.date).toISOString()}>{new Date(article.date).toLocaleDateString('ja-JP')}</time> by {article.author}
+                  <time dateTime={new Date(article.date).toISOString()}>{new Date(article.date).toLocaleDateString('ja-JP')}</time>
                 </p>
               </div>
               <div className="px-8 pb-6">
