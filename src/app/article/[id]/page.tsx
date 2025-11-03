@@ -5,6 +5,7 @@ import { remark } from 'remark';
 import html from 'remark-html';
 import remarkGfm from 'remark-gfm';
 import type { Metadata } from 'next';
+import Breadcrumb from "@/components/Breadcrumb";
 
 interface ArticleData {
   id: string;
