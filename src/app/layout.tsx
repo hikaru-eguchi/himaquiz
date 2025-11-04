@@ -5,9 +5,32 @@ import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
-export const metadata: Metadata = {
-  title: "トレンドラボ",
-  description: "話題になっていることや役立つ情報を発信するサイト",
+export const metadata = {
+  title: {
+    default: 'トレンドラボ',
+    template: '%s | トレンドラボ'
+  },
+  description: '話題のニュースやトレンド情報をお届けするメディアサイト。',
+  metadataBase: new URL('https://www.trendlab.jp'),
+  openGraph: {
+    title: 'トレンドラボ',
+    description: '話題のニュースやトレンド情報をお届けするメディアサイト。',
+    url: 'https://www.trendlab.jp',
+    siteName: 'トレンドラボ',
+    images: [
+      {
+        url: '/images/ogp-default.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'トレンドラボ'
+      }
+    ],
+    locale: 'ja_JP',
+    type: 'website',
+  },
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({

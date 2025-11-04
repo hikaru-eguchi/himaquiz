@@ -9,6 +9,7 @@ interface ArticleMeta {
   title: string;
   date: string;
   thumbnail?: string;
+  description?: string;
 }
 
 async function getSortedArticlesData(): Promise<ArticleMeta[]> {

@@ -12,6 +12,7 @@ interface ArticleData {
   date: string;
   contentHtml: string;
   description?: string;
+  thumbnail?: string;
 }
 
 export async function generateStaticParams() {
@@ -32,14 +33,18 @@ async function getArticleData(id: string): Promise<ArticleData> {
   const processedContent = await remark().use(html).use(remarkGfm).process(matterResult.content);
   const contentHtml = processedContent.toString();
 
-  // description は front-matter に書いてある場合に使う
-  const description = (matterResult.data as { description?: string })?.description;
+  // front-matter から description と thumbnail を取得
+  const { description, thumbnail } = matterResult.data as {
+    description?: string;
+    thumbnail?: string;
+  };
 
   return {
     id,
     contentHtml,
     ...(matterResult.data as { title: string; date: string;}),
     description,
+    thumbnail,
   };
 }
 
@@ -58,8 +63,19 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
       description:
         articleData.description ||
         `${new Date(articleData.date).toLocaleDateString('ja-JP')} の記事: ${articleData.title}`,
+      url: `https://www.trendlab.jp/article/${params.id}`,
+      siteName: 'トレンドラボ',
+      images: [
+        {
+          url: articleData.thumbnail || '/images/ogp-default.jpg',
+          width: 1200,
+          height: 630,
+          alt: articleData.title,
+        },
+      ],
       type: 'article',
       publishedTime: new Date(articleData.date).toISOString(),
+      locale: 'ja_JP',
     },
   };
 }
