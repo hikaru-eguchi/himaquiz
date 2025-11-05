@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
+import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -40,6 +41,23 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
+      <head>
+        {/* Googleタグ（gtag.js）を読み込み */}
+        <Script
+          strategy="afterInteractive"
+          src="https://www.googletagmanager.com/gtag/js?id=G-CXCJWQ1EQX"
+        />
+
+        {/* 設定スクリプトを挿入 */}
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-CXCJWQ1EQX');
+          `}
+        </Script>
+      </head>
       <body className={`${inter.variable} font-sans bg-stone-100 text-gray-800`}>
         <div className="flex flex-col min-h-screen">
           {/* ヘッダー */}
