@@ -110,7 +110,7 @@ export default async function ArticleDetailPage({
   return (
     <article className="max-w-5xl mx-auto p-8 md:p-12 bg-white shadow-lg rounded-xl">
       {/* タイトル */}
-      <h1 className="text-5xl md:text-3xl font-extrabold text-gray-900 mb-6 text-center">
+      <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-6 text-center">
         {articleData.title}
       </h1>
 

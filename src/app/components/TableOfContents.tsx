@@ -19,7 +19,7 @@ export default function TableOfContents({ content }: Props) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(content, "text/html");
 
-    // ✅ h2タグだけ取得
+    // h2タグだけ取得
     const elements = Array.from(doc.querySelectorAll("h2"));
 
     const headingList = elements
@@ -42,9 +42,9 @@ export default function TableOfContents({ content }: Props) {
   if (headings.length === 0) return null;
 
   return (
-    <nav className="border border-black rounded-lg p-4 my-6 bg-white max-w-[50%] mx-auto">
+    <nav className="border border-black rounded-lg p-4 my-6 bg-white w-full sm:w-1/2 mx-auto">
       {/* タイトル部分 */}
-      <p className="font-bold text-center text-2xl mb-3 border-b border-gray-400 pb-1">
+      <p className="font-bold text-center text-xl mb-3 border-b border-gray-400 pb-1">
         目次
       </p>
 

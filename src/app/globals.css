@@ -36,3 +36,15 @@
 html {
   scroll-behavior: smooth;
 }
+
+
+.prose table {
+  @apply border-collapse w-full;
+}
+.prose table th,
+.prose table td {
+  @apply border border-gray-300 p-2;
+}
+.prose table thead th {
+  @apply bg-gray-100;
+}
