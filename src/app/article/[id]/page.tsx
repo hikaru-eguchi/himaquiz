@@ -7,6 +7,8 @@ import remarkGfm from "remark-gfm";
 import remarkSlug from "remark-slug";
 import remarkAutolinkHeadings from "remark-autolink-headings";
 import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
 
 // 👇 追加：TableOfContentsコンポーネントを読み込む
 import TableOfContents from "@/app/components//TableOfContents";
@@ -19,6 +21,27 @@ interface ArticleData {
   contentHtml: string;
   description?: string;
   thumbnail?: string;
+}
+
+// ===== 記事一覧を取得（関連記事用にも再利用） =====
+async function getAllArticles(): Promise<ArticleData[]> {
+  const dir = path.join(process.cwd(), "src", "articles");
+  const fileNames = fs.readdirSync(dir).filter((f) => f.endsWith(".md"));
+
+  return fileNames.map((fileName) => {
+    const id = fileName.replace(/\.md$/, "");
+    const fullPath = path.join(dir, fileName);
+    const fileContents = fs.readFileSync(fullPath, "utf8");
+    const matterResult = matter(fileContents);
+    const { title, date, description, thumbnail } = matterResult.data as {
+      title: string;
+      date: string;
+      description?: string;
+      thumbnail?: string;
+    };
+
+    return { id, title, date, description, thumbnail, contentHtml: "" };
+  });
 }
 
 // ===== 静的生成するパス =====
@@ -107,6 +130,13 @@ export default async function ArticleDetailPage({
   const { id } = await params;
   const articleData = await getArticleData(id);
 
+  // 👇 関連記事を取得（自分以外の新しい記事上位4件）
+  const allArticles = await getAllArticles();
+  const relatedArticles = allArticles
+    .filter((a) => a.id !== id)
+    .sort(() => Math.random() - 0.5)
+    .slice(0, 4);
+
   return (
     <article className="max-w-5xl mx-auto p-8 md:p-12 bg-white shadow-lg rounded-xl">
       {/* タイトル */}
@@ -129,6 +159,47 @@ export default async function ArticleDetailPage({
         className="prose prose-lg md:prose-xl max-w-none mx-auto text-gray-700"
         dangerouslySetInnerHTML={{ __html: articleData.contentHtml }}
       />
+
+      {/* 👇 関連記事セクション */}
+      {relatedArticles.length > 0 && (
+        <section className="mt-16">
+          <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">
+            こちらの記事もおすすめ
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {relatedArticles.map((article) => (
+              <Link
+                key={article.id}
+                href={`/article/${article.id}`}
+                className="block bg-gray-50 rounded-lg shadow hover:shadow-lg transition-all duration-300 overflow-hidden"
+              >
+                {article.thumbnail && (
+                  <div className="relative w-full h-40">
+                    <Image
+                      src={article.thumbnail}
+                      alt={article.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                )}
+                <div className="p-4">
+                  <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 mb-2">
+                    {article.title}
+                  </h3>
+                  {article.description && (
+                    <p className="text-gray-600 text-sm line-clamp-2">{article.description}</p>
+                  )}
+                  <p className="text-gray-400 text-xs mt-2">
+                    {new Date(article.date).toLocaleDateString("ja-JP")}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
     </article>
   );
 }

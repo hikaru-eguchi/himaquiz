@@ -45,9 +45,9 @@ export default async function HomePage() {
   const featuredArticles = await getSortedArticlesData();
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="container mx-auto px-4 py-2 sm:py-8">
       <section>
-        <h2 className="text-4xl font-bold text-center mb-12 text-gray-900">話題の記事</h2>
+        <h2 className="text-3xl sm:text-4xl font-bold text-center mb-6 sm:mb-12 text-gray-900">話題の記事</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           {featuredArticles.map((article) => (
             <Link
@@ -61,22 +61,14 @@ export default async function HomePage() {
                   alt={article.title}
                   width={600}
                   height={400}
-                  className="w-full h-48 object-cover"
+                  className="w-full h-42 sm:h-48 object-cover"
                 />
               )}
-              <div className="p-8">
+              <div className="p-5 sm:p-8">
                 <h3 className="font-bold text-2xl mb-3 text-gray-900 group-hover:text-brand-dark transition-colors">{article.title}</h3>
-                <p className="text-gray-800 text-base mb-4">
+                <p className="text-gray-600 text-sm">
                   <time dateTime={new Date(article.date).toISOString()}>{new Date(article.date).toLocaleDateString('ja-JP')}</time>
                 </p>
-              </div>
-              <div className="px-8 pb-6">
-                <span className="inline-block bg-gray-100 rounded-full px-4 py-2 text-sm font-semibold text-gray-800 mr-2 mb-2">
-                  #トレンド
-                </span>
-                <span className="inline-block bg-gray-100 rounded-full px-4 py-2 text-sm font-semibold text-gray-800 mr-2 mb-2">
-                  #役立ち情報
-                </span>
               </div>
             </Link>
           ))}

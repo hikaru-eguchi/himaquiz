@@ -61,21 +61,27 @@ export default function RootLayout({
       <body className={`${inter.variable} font-sans bg-stone-100 text-gray-800`}>
         <div className="flex flex-col min-h-screen">
           {/* ヘッダー */}
-          <header className="bg-white shadow-sm py-12 text-center">
+          <header className="bg-white shadow-sm py-6 md:py-12 text-center">
             {/* タイトル（リンク化） */}
             <Link href="/" className="no-underline">
-              <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-6 hover:text-gray-700 transition-colors">
+              <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-6 md:mb-8 hover:text-gray-700 transition-colors">
                 トレンドラボ
               </h1>
             </Link>
 
             {/* ナビゲーションリンク */}
-            <nav className="flex justify-center flex-wrap gap-8 text-lg font-medium">
+            <nav className="flex justify-center flex-wrap gap-6 md:gap-8 text-lg font-medium">
               <Link
                 href="/"
                 className="text-gray-700 hover:text-gray-900 no-underline transition-colors"
               >
                 話題の記事
+              </Link>
+              <Link
+                href="/articles"
+                className="text-gray-700 hover:text-gray-900 no-underline transition-colors"
+              >
+                記事一覧
               </Link>
               <Link
                 href="/profile"
