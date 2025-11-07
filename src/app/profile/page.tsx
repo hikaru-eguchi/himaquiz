@@ -17,8 +17,8 @@ const sections = [
   const [isOpen, setIsOpen] = useState(true);
 
   return (
-    <div className="bg-white shadow-lg rounded-xl p-12">
-      <h1 className="text-5xl font-extrabold text-gray-900 mb-8 text-center">サイト紹介</h1>
+    <div className="bg-white shadow-lg rounded-xl p-8 sm:p-12">
+      <h1 className="text-3xl sm:text-5xl font-extrabold text-gray-900 mb-8 text-center">サイト紹介</h1>
       
       {/* 目次 */}
       <div className="mx-auto border rounded-lg p-4 w-full max-w-md">
