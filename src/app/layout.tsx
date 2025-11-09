@@ -44,6 +44,7 @@ export default function RootLayout({
       <head>
         {/* 所有権確認用（AdSense用metaタグ） */}
         <meta name="google-adsense-account" content="ca-pub-9009696291438240" />
+        
 
         {/* Googleタグ（gtag.js）を読み込み */}
         <Script
