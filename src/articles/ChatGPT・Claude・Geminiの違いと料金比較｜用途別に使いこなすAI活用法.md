@@ -1,5 +1,5 @@
 ---
-title: 【ガイド】ChatGPT・Claude・Geminiの違いと料金比較｜用途別に使いこなすAI活用法  
+title: ChatGPT・Claude・Geminiの違いと料金比較｜用途別に使いこなすAI活用法  
 date: 2025-11-08  
 thumbnail: "/images/ai-chatbots-comparison.jpg"  
 description: ChatGPT・Claude・Geminiはそれぞれ特徴・料金体系が異なります。この記事では、用途別にどちらを選べば良いか、料金プランや使い方をわかりやすく解説いたします。  
