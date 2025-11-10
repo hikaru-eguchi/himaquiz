@@ -73,7 +73,7 @@ export default function RootLayout({
             </Link>
 
             {/* ナビゲーションリンク */}
-            <nav className="flex justify-center flex-wrap gap-6 md:gap-8 text-lg font-medium">
+            <nav className="flex justify-center md:pl-27 flex-wrap gap-6 md:gap-20 text-lg md:text-2xl font-medium">
               <Link
                 href="/"
                 className="text-gray-700 hover:text-gray-900 no-underline transition-colors"
