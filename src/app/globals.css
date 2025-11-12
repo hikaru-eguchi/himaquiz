@@ -4,13 +4,16 @@
   @apply text-2xl font-semibold bg-gray-100 px-2 py-5 rounded;
 }
 .prose h3 {
-  @apply text-xl font-medium px-2 py-1 rounded my-3;
+  @apply text-xl font-medium px-2 py-1 rounded mt-3 mb-1;
 }
 .prose {
   @apply text-lg; /* もともと text-base の場合は少し大きくなる */
 }
 .prose p {
-  @apply my-6; /* 上下マージンを増やす */
+  @apply mt-2 mb-6; /* 上下マージンを増やす */
+}
+.prose ul {
+  @apply mb-5;
 }
 .prose img {
   @apply w-full max-w-4xl mx-auto rounded-lg;
@@ -39,7 +42,7 @@ html {
 
 
 .prose table {
-  @apply border-collapse w-full;
+  @apply border-collapse w-full my-8;
 }
 .prose table th,
 .prose table td {
