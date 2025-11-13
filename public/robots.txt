@@ -3,7 +3,7 @@ User-agent: *
 Allow: /
 
 # Host
-Host: https://www.trendlab.jp
+Host: https://www.hima-quiz.com
 
 # Sitemaps
-Sitemap: https://www.trendlab.jp/sitemap.xml
+Sitemap: https://www.hima-quiz.com/sitemap.xml

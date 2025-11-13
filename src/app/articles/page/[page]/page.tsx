@@ -15,7 +15,7 @@ interface ArticleMeta {
 
 const ARTICLES_PER_PAGE = 10;
 
-// --- 記事データを取得 ---
+// --- クイズデータを取得 ---
 function getAllArticlesData(): ArticleMeta[] {
   const articlesDirectory = path.join(process.cwd(), "src", "articles");
   const fileNames = fs.readdirSync(articlesDirectory).filter((f) => f.endsWith(".md"));
@@ -57,11 +57,11 @@ export default async function ArticlesPage({ params }: { params: Promise<{ page:
   return (
     <div className="container mx-auto px-4 py-2 sm:py-8">
       <h1 className="text-3xl sm:text-4xl font-bold text-center mb-6 sm:mb-12 text-gray-900">
-        記事一覧
+        クイズ一覧
       </h1>
 
       {currentArticles.length === 0 ? (
-        <p className="text-center text-gray-600">記事がまだありません。</p>
+        <p className="text-center text-gray-600">クイズがまだありません。</p>
       ) : (
         <div className="flex flex-col gap-6 mb-10">
           {currentArticles.map((article) => (

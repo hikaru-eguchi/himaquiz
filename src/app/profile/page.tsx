@@ -60,22 +60,22 @@ const sections = [
           ひかる：20代独身男性。大のスイーツ好き。夏にはアイスを1日に5つ食べることもある。元バスケ部。
         </p>
         <p>
-          当サイトでは、話題の役立つ情報をわかりやすく、気軽に読める形でお届けしていきます。
+          当サイトは、暇つぶしにできる面白くて楽しいクイズを載せていきます。ぜひ楽しんでいってください。
         </p>
         <h2 id="sitename" className="text-3xl font-bold text-gray-800 mt-5 mb-4">サイト名</h2>
         <p>
-          サイト名は「トレンドラボ」（
+          サイト名は「ひまQ」（
           <a 
-            href="https://www.trendlab.jp/" 
+            href="https://www.hima-quiz.com/" 
             target="_blank" 
             rel="noopener noreferrer" 
             className="text-blue-600 hover:underline"
           >
-            https://www.trendlab.jp/
+            https://www.hima-quiz.com/
           </a>
           ）と言います。
         </p>
-        <p>このサイトは、最新のトレンドや役立つ情報を、どこよりも分かりやすく解説することを目的としたウェブサイトです。</p>
+        <p>このサイトは、暇つぶしにできる面白くて楽しいクイズを載せたウェブサイトです。</p>
         <h2 id="otoiawase" className="text-3xl font-bold text-gray-800 mt-5 mb-4">お問い合わせ</h2>
         <p>
           ご意見・ご感想・ご質問などがありましたら、以下👇のお問い合わせフォームよりご連絡ください。
@@ -88,7 +88,7 @@ const sections = [
         </Link>
         <h2 id="okukoku" className="text-3xl font-bold text-gray-800 mt-5 mb-4">広告について</h2>
         <p>
-          「当サイトでは、一部の記事にてアフィリエイト広告（成果報酬型広告）を利用しています。購入等に関しては、リンク先の公式サイトの情報をご確認の上、ご判断をお願いいたします。
+          「当サイトでは、一部のクイズにてアフィリエイト広告（成果報酬型広告）を利用しています。購入等に関しては、リンク先の公式サイトの情報をご確認の上、ご判断をお願いいたします。
         </p>
         <h2 id="menseki" className="text-3xl font-bold text-gray-800 mt-5 mb-4">免責事項</h2>
         <p>

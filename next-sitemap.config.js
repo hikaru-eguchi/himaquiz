@@ -1,6 +1,6 @@
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
-  siteUrl: 'https://www.trendlab.jp', // ←あなたのサイトURL
+  siteUrl: 'https://www.hima-quiz.com', // ←あなたのサイトURL
   generateRobotsTxt: true,            // robots.txt も自動生成
   sitemapSize: 7000,                  // 1つのsitemapに含めるURL上限
   generateIndexSitemap: true,         // 複数sitemapに分割される場合はtrue推奨

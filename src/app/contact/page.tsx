@@ -51,7 +51,7 @@ export default function ContactPage() {
     <div className="bg-white shadow-lg rounded-xl p-8 sm:p-12">
       <h1 className="text-3xl sm:text-5xl font-extrabold text-gray-900 mb-6 text-center">お問い合わせ</h1>
       <p className="text-lg sm:text-xl text-center mb-5">
-        サイト、記事に関するご意見などありましたらご記入ください。
+        サイト、クイズに関するご意見などありましたらご記入ください。
       </p>
 
       <form className="max-w-2xl mx-auto" onSubmit={handleSubmit}>

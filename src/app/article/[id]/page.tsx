@@ -104,8 +104,8 @@ export async function generateMetadata({
     openGraph: {
       title: articleData.title,
       description,
-      url: `https://www.trendlab.jp/article/${id}`,
-      siteName: "トレンドラボ",
+      url: `https://www.hima-quiz.com/article/${id}`,
+      siteName: "ひまQ",
       images: [
         {
           url: articleData.thumbnail || "/images/ogp-default.jpg",

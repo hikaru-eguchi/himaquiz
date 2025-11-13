@@ -47,7 +47,7 @@ export default async function HomePage() {
   return (
     <div className="container mx-auto px-4 py-2 sm:py-8">
       <section>
-        <h2 className="text-3xl sm:text-4xl font-bold text-center mb-6 sm:mb-12 text-gray-900">話題の記事</h2>
+        <h2 className="text-3xl sm:text-4xl font-bold text-center mb-6 sm:mb-12 text-gray-900">最新クイズ</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           {featuredArticles.map((article) => (
             <Link
@@ -75,13 +75,13 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 追加部分：記事一覧リンク */}
+      {/* 追加部分：クイズ一覧リンク */}
       <section className="text-center mt-10 md:mt-16">
         <Link
           href="/articles/page/1"
           className="inline-block text-brand-dark font-semibold hover:underline text-xl md:text-3xl"
         >
-          さらに他の記事を見る
+          さらに他のクイズを見る
         </Link>
       </section>
     </div>
