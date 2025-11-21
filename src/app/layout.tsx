@@ -8,8 +8,8 @@ const yomogi = Yomogi({ weight: "400", subsets: ["latin"], variable: "--font-yom
 
 export const metadata: Metadata = {
   title: {
-    default: "暇つぶしクイズのひまQ",
-    template: "%s | 暇つぶしクイズのひまQ",
+    default: "暇つぶしクイズの「ひまQ」 - 暇つぶしに最適な脳トレクイズ",
+    template: "%s | 暇つぶしクイズの「ひまQ」 - 暇つぶしに最適な脳トレクイズ",
   },
   description: "暇つぶしに最適！簡単な脳トレクイズや面白クイズで、ちょっとした空き時間を楽しく過ごそう。",
   metadataBase: new URL("https://www.hima-quiz.com"),
@@ -23,6 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ja">
       <head>
         <link rel="icon" href="/favicon.ico?v=3" />
+        <meta name="google-adsense-account" content="ca-pub-9009696291438240"></meta>
       </head>
 
       <body className={`${inter.variable} ${yomogi.variable} font-sans bg-[#f8f5cd]`}>
