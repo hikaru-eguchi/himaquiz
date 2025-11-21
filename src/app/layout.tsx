@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Yomogi } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
+import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const yomogi = Yomogi({ weight: "400", subsets: ["latin"], variable: "--font-yomogi" });
