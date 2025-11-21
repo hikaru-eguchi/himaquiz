@@ -23,7 +23,24 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ja">
       <head>
         <link rel="icon" href="/favicon.ico?v=3" />
+        {/* 所有権確認用（AdSense用metaタグ） */}
         <meta name="google-adsense-account" content="ca-pub-9009696291438240"></meta>
+
+        {/* Googleタグ（gtag.js）を読み込み */}
+        <Script
+          strategy="afterInteractive"
+          src="https://www.googletagmanager.com/gtag/js?id=G-4PX63CW1YV"
+        />
+
+        {/* 設定スクリプトを挿入 */}
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-4PX63CW1YV');
+          `}
+        </Script>
       </head>
 
       <body className={`${inter.variable} ${yomogi.variable} font-sans bg-[#f8f5cd]`}>
