@@ -1,103 +1,113 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Yomogi } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
-import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const yomogi = Yomogi({ weight: "400", subsets: ["latin"], variable: "--font-yomogi" });
 
-export const metadata = {
+export const metadata: Metadata = {
   title: {
-    default: 'ひまQ',
-    template: '%s | ひまQ'
+    default: "暇つぶしクイズのひまQ",
+    template: "%s | 暇つぶしクイズのひまQ",
   },
-  description: '暇つぶしにできる面白いクイズサイト。',
-  metadataBase: new URL('https://www.hima-quiz.com'),
-  openGraph: {
-    title: 'ひまQ',
-    description: '暇つぶしにできる面白いクイズサイト。',
-    url: 'https://www.hima-quiz.com',
-    siteName: 'ひまQ',
-    images: [
-      {
-        url: '/images/ogp-default.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'ひまQ'
-      }
-    ],
-    locale: 'ja_JP',
-    type: 'website',
-  },
+  description: "暇つぶしに最適！簡単な脳トレクイズや面白クイズで、ちょっとした空き時間を楽しく過ごそう。",
+  metadataBase: new URL("https://www.hima-quiz.com"),
   icons: {
-    icon: '/favicon.ico',
+    icon: "/favicon.ico",
   },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ja">
       <head>
+        <link rel="icon" href="/favicon.ico?v=3" />
       </head>
-      <body className={`${inter.variable} font-sans bg-stone-100 text-gray-800`}>
-        <div className="flex flex-col min-h-screen">
-          {/* ヘッダー */}
-          <header className="bg-white shadow-sm py-6 md:py-12 text-center">
-            {/* タイトル（リンク化） */}
-            <Link href="/" className="no-underline">
-              <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-6 md:mb-8 hover:text-gray-700 transition-colors">
-                ひまQ
-              </h1>
-            </Link>
 
-            {/* ナビゲーションリンク */}
-            <nav className="flex justify-center md:pl-27 flex-wrap gap-6 md:gap-20 text-lg md:text-2xl font-medium">
-              <Link
-                href="/"
-                className="text-gray-700 hover:text-gray-900 no-underline transition-colors"
-              >
-                最新クイズ
-              </Link>
-              <Link
-                href="/articles"
-                className="text-gray-700 hover:text-gray-900 no-underline transition-colors"
-              >
-                クイズ一覧
-              </Link>
-              <Link
-                href="/profile"
-                className="text-gray-700 hover:text-gray-900 no-underline transition-colors"
-              >
-                サイト紹介
-              </Link>
-              <Link
-                href="/privacy"
-                className="text-gray-700 hover:text-gray-900 no-underline transition-colors"
-              >
-                プライバシーポリシー
-              </Link>
-              <Link
-                href="/contact"
-                className="text-gray-700 hover:text-gray-900 no-underline transition-colors"
-              >
-                お問い合わせ
-              </Link>
-            </nav>
+      <body className={`${inter.variable} ${yomogi.variable} font-sans bg-[#f8f5cd]`}>
+        <div className="flex flex-col min-h-screen">
+
+          {/* ===== HEADER ===== */}
+          <header className="py-3 text-center shadow-md bg-yellow-300">
+            <div className="flex items-center justify-center gap-4 md:mr-20">
+              {/* 画像 */}
+              <img 
+                src="/images/quiz.png" 
+                alt="脳トレクイズで暇つぶし" 
+                className="w-0 md:w-20 h-auto"
+              />
+
+              {/* タイトル・サブタイトル */}
+              <div>
+                <Link href="/" className="no-underline group inline-block">
+                  <h1
+                    className="text-xl md:text-2xl font-extrabold text-white
+                              transition-transform group-hover:scale-110"
+                    style={{
+                      fontFamily: "Bangers, sans-serif",
+                      textShadow: `
+                        -2px -2px 0 #000,
+                        0   -2px 0 #000,
+                        2px -2px 0 #000,
+                        -2px  0   0 #000,
+                        2px  0   0 #000,
+                        -2px  2px 0 #000,
+                        0    2px 0 #000,
+                        2px  2px 0 #000,
+                        -1px -3px 0 #000,
+                        1px -3px 0 #000,
+                        -3px -1px 0 #000,
+                        3px -1px 0 #000,
+                        -3px  1px 0 #000,
+                        3px  1px 0 #000,
+                        -1px  3px 0 #000,
+                        1px  3px 0 #000
+                      `
+                    }}
+                  >
+                    暇つぶしクイズで遊ぶなら
+                    <span className="block text-5xl md:text-7xl mt-2">ひまQ</span>
+                  </h1>
+                  <p className="text-black/90 mt-4 md:text-xl tracking-wide font-bold">
+                    暇つぶしに最適！クイズで頭を鍛えよう
+                  </p>
+                </Link>
+              </div>
+            </div>
           </header>
 
-          {/* メイン */}
-          <main className="flex-grow container mx-auto px-6 py-4">{children}</main>
+          {/* ===== MAIN ===== */}
+          <main
+            className="flex-grow container mx-auto px-6 py-10 mt-6 
+                      bg-white rounded-3xl shadow-xl overflow-auto"
+          >
+            <p className="text-center text-xl md:text-2xl font-extrabold text-gray-800 leading-relaxed mb-6">
+              ひまな時間にぴったり！「ひまQ」は簡単に遊べる脳トレクイズや暇つぶしクイズが満載です。クイズで頭の体操をしよう！
+            </p>
+            {children}
+          </main>
 
-          {/* フッター */}
-          <footer className="bg-gray-100 mt-auto">
-            <div className="container mx-auto px-6 py-5 text-center text-gray-500">
-              <p>&copy; 2025 ひまQ. All Rights Reserved.</p>
+          {/* ===== FOOTER ===== */}
+          <footer className="mt-12 py-10 bg-pink-300 shadow-inner">
+            <div className="container mx-auto px-6 text-center text-gray-700">
+              <div className="flex justify-center flex-wrap gap-8 mb-8 text-base font-medium">
+                <Link href="/profile" className="hover:scale-110 transition-transform">
+                  サイト紹介
+                </Link>
+                <Link href="/privacy" className="hover:scale-110 transition-transform">
+                  プライバシー
+                </Link>
+                <Link href="/contact" className="hover:scale-110 transition-transform">
+                  お問い合わせ
+                </Link>
+              </div>
+              <p className="text-xs text-gray-600">
+                &copy; 2025 ひまQ. All Rights Reserved.
+              </p>
             </div>
           </footer>
+
         </div>
       </body>
     </html>
