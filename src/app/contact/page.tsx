@@ -49,14 +49,14 @@ export default function ContactPage() {
 
   return (
     <div className="bg-white shadow-lg rounded-xl p-8 sm:p-12">
-      <h1 className="text-3xl sm:text-5xl font-extrabold text-gray-900 mb-6 text-center">お問い合わせ</h1>
+      <h1 className="text-3xl sm:text-5xl text-gray-900 mb-6 text-center">お問い合わせ</h1>
       <p className="text-lg sm:text-xl text-center mb-5">
         サイト、クイズに関するご意見などありましたらご記入ください。
       </p>
 
       <form className="max-w-2xl mx-auto" onSubmit={handleSubmit}>
         <div className="mb-6">
-          <label htmlFor="name" className="block text-gray-700 font-bold mb-2 text-lg">お名前</label>
+          <label htmlFor="name" className="block text-gray-700 mb-2 text-lg">お名前</label>
           <input
             type="text"
             id="name"
@@ -68,7 +68,7 @@ export default function ContactPage() {
         </div>
 
         <div className="mb-6">
-          <label htmlFor="email" className="block text-gray-700 font-bold mb-2 text-lg">メールアドレス</label>
+          <label htmlFor="email" className="block text-gray-700 mb-2 text-lg">メールアドレス</label>
           <input
             type="email"
             id="email"
@@ -80,7 +80,7 @@ export default function ContactPage() {
         </div>
 
         <div className="mb-8">
-          <label htmlFor="message" className="block text-gray-700 font-bold mb-2 text-lg">メッセージ</label>
+          <label htmlFor="message" className="block text-gray-700 mb-2 text-lg">メッセージ</label>
           <textarea
             id="message"
             name="message"
@@ -91,12 +91,12 @@ export default function ContactPage() {
           />
         </div>
 
-        {error && <p className="text-center text-red-600 font-bold mb-4">{error}</p>}
+        {error && <p className="text-center text-red-600 mb-4">{error}</p>}
 
         <div className="text-center">
           <button
             type="submit"
-            className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 px-6 rounded-lg transform hover:scale-105 transition-transform"
+            className="bg-gray-400 hover:bg-gray-500 text-white py-3 px-6 rounded-lg transform hover:scale-105 transition-transform"
           >
             送信
           </button>
@@ -104,7 +104,7 @@ export default function ContactPage() {
       </form>
 
       {submitted && (
-        <p className="text-center mt-8 font-bold text-xl">
+        <p className="text-center mt-8 text-xl">
           送信しました！
         </p>
       )}

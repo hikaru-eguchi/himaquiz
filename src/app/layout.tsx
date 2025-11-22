@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
-import { Inter, Yomogi } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
 import Script from "next/script";
+import { Mochiy_Pop_One } from "next/font/google";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const yomogi = Yomogi({ weight: "400", subsets: ["latin"], variable: "--font-yomogi" });
+const pop = Mochiy_Pop_One({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-pop",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -44,7 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </Script>
       </head>
 
-      <body className={`${inter.variable} ${yomogi.variable} font-sans bg-[#f8f5cd]`}>
+      <body className={`${pop.variable} font-pop bg-gradient-to-r from-[#fabebe] to-[#ffdede]`}>
         <div className="flex flex-col min-h-screen">
 
           {/* ===== HEADER ===== */}
@@ -61,10 +64,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <div>
                 <Link href="/" className="no-underline group inline-block">
                   <h1
-                    className="text-xl md:text-2xl font-extrabold text-white
+                    className="text-xl md:text-2xl text-white font-pop
                               transition-transform group-hover:scale-110"
                     style={{
-                      fontFamily: "Bangers, sans-serif",
                       textShadow: `
                         -2px -2px 0 #000,
                         0   -2px 0 #000,
@@ -88,7 +90,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     暇つぶしクイズで遊ぶなら
                     <span className="block text-5xl md:text-7xl mt-2">ひまQ</span>
                   </h1>
-                  <p className="text-black/90 mt-4 md:text-xl tracking-wide font-bold">
+                  <p className="text-black/90 mt-4 md:text-xl tracking-wide">
                     暇つぶしに最適！クイズで頭を鍛えよう
                   </p>
                 </Link>
@@ -101,7 +103,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             className="flex-grow container mx-auto px-6 py-10 mt-6 
                       bg-white rounded-3xl shadow-xl overflow-auto"
           >
-            <p className="text-center text-xl md:text-2xl font-extrabold text-gray-800 leading-relaxed mb-6">
+            <p className="text-center text-lg md:text-2xl text-gray-800 leading-relaxed mb-6">
               ひまな時間にぴったり！「ひまQ」は簡単に遊べる脳トレクイズや暇つぶしクイズが満載です。クイズで頭の体操をしよう！
             </p>
             {children}

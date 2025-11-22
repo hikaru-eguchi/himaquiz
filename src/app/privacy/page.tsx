@@ -16,15 +16,15 @@ const sections = [
 
   return (
     <div className="bg-white shadow-lg rounded-xl p-8 sm:p-12">
-      <h1 className="text-3xl sm:text-5xl font-extrabold text-gray-900 mb-8 text-center">プライバシーポリシー</h1>
+      <h1 className="text-3xl sm:text-5xl text-gray-900 mb-8 text-center">プライバシーポリシー</h1>
       
       {/* 目次 */}
       <div className="mx-auto border rounded-lg p-4 w-full max-w-md">
         <div className="flex justify-center items-center mb-2 space-x-4">
-          <div className="text-2xl font-bold text-center mb-2">目次</div>
+          <div className="text-2xl text-center mb-2">目次</div>
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="text-gray-600 hover:text-gray-900 font-bold"
+            className="text-gray-600 hover:text-gray-900"
           >
             {isOpen ? '[閉じる]' : '[開く]'}
           </button>
@@ -45,7 +45,7 @@ const sections = [
       </div>
       
       <div className="prose prose-lg max-w-3xl mx-auto text-gray-600">
-        <h2 className="text-3xl font-bold text-gray-800 mt-5 mb-4">プライバシーポリシー</h2>
+        <h2 className="text-3xl text-gray-800 mt-5 mb-4">プライバシーポリシー</h2>
         <p>
           「ひまQ」（以下、当サイト）では、訪問者のプライバシー情報を適切に保護し、取り扱うことを大切にしています。当サイトのプライバシーポリシーを以下の通り定めます。
         </p>

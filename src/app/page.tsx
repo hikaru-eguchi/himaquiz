@@ -52,7 +52,7 @@ export default async function HomePage() {
             <Link
               key={article.id}
               href={`/article/${article.id}`}
-              className="block bg-white rounded-xl shadow-md hover:shadow-2xl transition-shadow duration-300 ease-in-out overflow-hidden group"
+              className="block bg-white rounded-xl shadow-md hover:shadow-2xl transition-shadow duration-300 ease-in-out overflow-hidden group border-3 border-gray-700"
             >
               {article.thumbnail && (
                 <Image
@@ -60,11 +60,11 @@ export default async function HomePage() {
                   alt={article.title}
                   width={600}
                   height={400}
-                  className="w-full h-42 sm:h-48 object-cover"
+                  className="w-full h-42 sm:h-55 object-cover"
                 />
               )}
-              <div className="p-5 sm:p-8">
-                <h3 className="font-bold text-2xl mb-3 text-gray-900 group-hover:text-brand-dark transition-colors">{article.title}</h3>
+              <div className="p-2 sm:p-4">
+                <h3 className="text-2xl mb-3 text-gray-900 group-hover:text-brand-dark transition-colors">{article.title}</h3>
                 <p className="text-gray-600 text-sm">
                   <time dateTime={new Date(article.date).toISOString()}>{new Date(article.date).toLocaleDateString('ja-JP')}</time>
                 </p>

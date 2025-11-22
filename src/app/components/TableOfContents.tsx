@@ -44,7 +44,7 @@ export default function TableOfContents({ content }: Props) {
   return (
     <nav className="border border-black rounded-lg p-4 my-6 bg-white w-full sm:w-1/2 mx-auto">
       {/* タイトル部分 */}
-      <p className="font-bold text-center text-xl mb-3 border-b border-gray-400 pb-1">
+      <p className="text-center text-xl mb-3 border-b border-gray-400 pb-1">
         目次
       </p>
 

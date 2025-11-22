@@ -11,9 +11,9 @@
 
 /* --- タイトル（太字・ポップ・黒い縁取り） --- */
 .prose h1 {
-  @apply text-5xl md:text-6xl font-extrabold text-center mt-6 mb-8;
-  font-family: 'Bangers', sans-serif;
-  color: #fff100; /* 文字色は明るい黄色 */
+  @apply text-2xl md:text-5xl md:text-6xl text-center mt-6 mb-8;
+  font-family: var(--font-pop), sans-serif;
+  color: #9edaff; /* 明るい黄色 */
   text-shadow: 
     -2px -2px 0 #000, 
      2px -2px 0 #000,
@@ -24,20 +24,20 @@
 
 /* --- セクション見出し --- */
 .prose h2 {
-  @apply text-3xl font-bold px-4 py-2 rounded-lg mt-10 mb-4;
-  background-color: #FFCE54; /* 単色で楽しげ */
+  @apply text-xl md:text-3xl px-4 py-2 rounded-lg mt-10 mb-4;
+  background-color: #9edaff; /* 単色で楽しげ */
   color: #000;               /* 文字は黒 */
   border-bottom: 5px solid #FF6B6B;
-  font-family: 'Bangers', sans-serif;
+  font-family: var(--font-pop), sans-serif;
   letter-spacing: 1px;
 }
 
 .prose h3 {
-  @apply text-2xl font-semibold px-3 py-1 rounded-md mt-8 mb-3;
-  background-color: #FFCE54; /* 単色 */
-  color: #000;               /* 文字黒 */
+  @apply text-xl md:text-2xl px-3 py-1 rounded-md mt-8 mb-3;
+  background-color: #9edaff;
+  color: #000;
   border-left: 6px solid #FF6B6B;
-  font-family: 'Potta One', sans-serif;
+  font-family: var(--font-pop), sans-serif;
 }
 
 /* --- 本文 --- */
@@ -50,12 +50,6 @@
 /* --- pタグ --- */
 .prose p {
   @apply mt-3 mb-6;
-}
-
-/* --- 画像 --- */
-.prose img {
-  @apply w-full max-w-3xl mx-auto rounded-xl shadow-xl;
-  border: 4px solid #FFCE54;
 }
 
 .prose img.profile-img {
@@ -95,13 +89,13 @@
   color: #000; /* 黒文字 */
 }
 .prose table thead th {
-  background-color: #FFCE54;
+  background-color: #9edaff;
   color: #000; /* 見出しも黒文字 */
 }
 
 /* --- ボタン（ポップ） --- */
 .button-send {
-  @apply text-xl font-bold px-6 py-3 rounded-xl shadow-lg;
+  @apply text-xl px-6 py-3 rounded-xl shadow-lg;
   background-color: #FF6B6B;
   color: white;
   font-family: 'Bangers', sans-serif;
@@ -115,9 +109,13 @@
 
 /* --- ヘッダー & フッターの単色 --- */
 header {
-  background-color: #ffe386; /* 楽しい黄色 */
+  background: linear-gradient(to right, #9edaff, #d0f0ff);
 }
 
 footer {
-  background-color: #ffe386; /* 楽しい黄色 */
+  background: linear-gradient(to right, #9edaff, #d0f0ff);
+}
+
+.font-pop {
+  font-family: var(--font-pop), sans-serif;
 }
