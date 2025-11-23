@@ -15,6 +15,14 @@ import TableOfContents from "@/app/components//TableOfContents";
 import QuizMDXWrapper from "@/app/components/QuizMDXWrapper";
 
 // ===== 型定義 =====
+interface QuizData {
+  title: string;
+  question: string;
+  choices: string[];
+  answer: number;
+  hint: string;
+}
+
 interface ArticleData {
   id: string;
   title: string;
@@ -22,7 +30,7 @@ interface ArticleData {
   contentHtml: string;
   description?: string;
   thumbnail?: string;
-  quiz?: any;
+  quiz?: QuizData;
 }
 
 // ===== 記事一覧を取得（関連記事用にも再利用） =====
@@ -65,7 +73,7 @@ async function getArticleData(id: string): Promise<ArticleData> {
   const { description, thumbnail, quiz } = matterResult.data as {
     description?: string;
     thumbnail?: string;
-    quiz?: any;
+    quiz?: QuizData;
   };
 
   // remarkプラグインでslugと自動リンクを追加
