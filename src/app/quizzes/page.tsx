@@ -1,3 +1,4 @@
+import Link from "next/link";
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
@@ -47,9 +48,10 @@ export default async function QuizzesPage() {
       {/* ===== すべてのクイズ一覧 ===== */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
         {allArticles.map((article) => (
-          <div
+          <Link
             key={article.id}
-            className="block bg-white rounded-xl shadow-md hover:shadow-2xl transition-shadow duration-300 ease-in-out overflow-hidden"
+            href={`/article/${article.id}`}
+            className="block bg-white rounded-xl shadow-md hover:shadow-2xl transition-shadow duration-300 ease-in-out overflow-hidden group"
           >
             {article.thumbnail && (
               <Image
@@ -60,18 +62,29 @@ export default async function QuizzesPage() {
                 className="w-full h-42 sm:h-48 object-cover"
               />
             )}
+
             <div className="p-5 sm:p-8">
-              <h3 className="font-bold text-2xl mb-3 text-gray-900">
+              <h3 className="font-bold text-2xl mb-3 text-gray-900 group-hover:text-brand-dark transition-colors">
                 {article.title}
               </h3>
-              {article.genre && (
-                <p className="text-sm text-gray-500 mt-2">ジャンル: {article.genre}</p>
+
+              {article.description && (
+                <p className="text-gray-600">{article.description}</p>
               )}
+
+              {article.genre && (
+                <p className="text-sm text-gray-500 mt-2">
+                  ジャンル: {article.genre}
+                </p>
+              )}
+
               {article.level && (
-                <p className="text-sm text-gray-500">難易度: {article.level}</p>
+                <p className="text-sm text-gray-500">
+                  難易度: {article.level}
+                </p>
               )}
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>
