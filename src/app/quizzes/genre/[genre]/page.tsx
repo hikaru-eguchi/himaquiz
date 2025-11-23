@@ -40,15 +40,15 @@ async function getSortedArticlesData(): Promise<ArticleMeta[]> {
   return allArticlesData.sort((a, b) => (a.date < b.date ? 1 : -1));
 }
 
-interface PageProps {
-  params: { genre: string };
-}
+type PageProps = {
+  params: {
+    genre: string;
+  };
+};
 
 export default async function GenrePage({ params }: PageProps) {
-  const allArticles = await getSortedArticlesData();
-
-  // URLデコードして日本語ジャンルと比較
   const genreParam = decodeURIComponent(params.genre);
+  const allArticles = await getSortedArticlesData();
 
   const filteredArticles = allArticles.filter(
     (article) => article.genre === genreParam
@@ -82,7 +82,6 @@ export default async function GenrePage({ params }: PageProps) {
               <h3 className="font-bold text-2xl mb-3 text-gray-900 group-hover:text-brand-dark transition-colors">
                 {article.title}
               </h3>
-              {article.description && <p className="text-gray-600">{article.description}</p>}
               {article.level && (
                 <p className="text-sm text-gray-500 mt-2">難易度: {article.level}</p>
               )}

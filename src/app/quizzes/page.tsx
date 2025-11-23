@@ -68,10 +68,6 @@ export default async function QuizzesPage() {
                 {article.title}
               </h3>
 
-              {article.description && (
-                <p className="text-gray-600">{article.description}</p>
-              )}
-
               {article.genre && (
                 <p className="text-sm text-gray-500 mt-2">
                   ジャンル: {article.genre}

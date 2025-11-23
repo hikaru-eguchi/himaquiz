@@ -39,15 +39,14 @@ async function getSortedArticlesData(): Promise<ArticleMeta[]> {
   return allArticlesData.sort((a, b) => (a.date < b.date ? 1 : -1));
 }
 
-interface PageProps {
-  params: { level: string };
-}
-
+type PageProps = {
+  params: {
+    level: string;
+  };
+};
 export default async function LevelPage({ params }: PageProps) {
-  const allArticles = await getSortedArticlesData();
-
-  // URLデコードして日本語レベルと比較
   const levelParam = decodeURIComponent(params.level);
+  const allArticles = await getSortedArticlesData();
 
   const filteredArticles = allArticles.filter(
     (article) => article.level === levelParam
@@ -81,7 +80,6 @@ export default async function LevelPage({ params }: PageProps) {
               <h3 className="font-bold text-2xl mb-3 text-gray-900 group-hover:text-brand-dark transition-colors">
                 {article.title}
               </h3>
-              {article.description && <p className="text-gray-600">{article.description}</p>}
               {article.genre && (
                 <p className="text-sm text-gray-500 mt-2">ジャンル: {article.genre}</p>
               )}
