@@ -97,6 +97,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   </button>
                 </Link>
               ))}
+
+              <Link href="/quiz-master">
+                <button className="px-2 md:px-5 py-1 md:py-2 border-2 border-black rounded-full bg-yellow-400 text-black font-bold shadow-sm hover:scale-105 transition-all cursor-pointer">
+                  クイズマスターへの道
+                </button>
+              </Link>
             </div>
           </header>
 
