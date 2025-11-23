@@ -38,7 +38,7 @@ async function getSortedArticlesData(): Promise<ArticleMeta[]> {
   });
 
   // Return the top 6 articles
-  return sortedArticles.slice(0, 6);
+  return sortedArticles;
 }
 
 export default async function HomePage() {
@@ -47,7 +47,7 @@ export default async function HomePage() {
   return (
     <div className="container mx-auto px-4 py-2 sm:py-8">
       <section>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           {featuredArticles.map((article) => (
             <Link
               key={article.id}
@@ -65,9 +65,6 @@ export default async function HomePage() {
               )}
               <div className="p-5 sm:p-8">
                 <h3 className="font-bold text-2xl mb-3 text-gray-900 group-hover:text-brand-dark transition-colors">{article.title}</h3>
-                <p className="text-gray-600 text-sm">
-                  <time dateTime={new Date(article.date).toISOString()}>{new Date(article.date).toLocaleDateString('ja-JP')}</time>
-                </p>
               </div>
             </Link>
           ))}

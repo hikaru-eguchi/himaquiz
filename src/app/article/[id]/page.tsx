@@ -12,6 +12,7 @@ import Link from "next/link";
 
 // 👇 追加：TableOfContentsコンポーネントを読み込む
 import TableOfContents from "@/app/components//TableOfContents";
+import QuizMDXWrapper from "@/app/components/QuizMDXWrapper";
 
 // ===== 型定義 =====
 interface ArticleData {
@@ -21,6 +22,7 @@ interface ArticleData {
   contentHtml: string;
   description?: string;
   thumbnail?: string;
+  quiz?: any;
 }
 
 // ===== 記事一覧を取得（関連記事用にも再利用） =====
@@ -60,9 +62,10 @@ async function getArticleData(id: string): Promise<ArticleData> {
   const fileContents = fs.readFileSync(fullPath, "utf8");
   const matterResult = matter(fileContents);
 
-  const { description, thumbnail } = matterResult.data as {
+  const { description, thumbnail, quiz } = matterResult.data as {
     description?: string;
     thumbnail?: string;
+    quiz?: any;
   };
 
   // remarkプラグインでslugと自動リンクを追加
@@ -82,6 +85,7 @@ async function getArticleData(id: string): Promise<ArticleData> {
     ...(matterResult.data as { title: string; date: string }),
     description,
     thumbnail,
+    quiz,
   };
 }
 
@@ -144,21 +148,23 @@ export default async function ArticleDetailPage({
         {articleData.title}
       </h1>
 
-      {/* 投稿日時 */}
-      <p className="text-gray-500 text-center mb-8 text-sm md:text-base">
-        <time dateTime={new Date(articleData.date).toISOString()}>
-          {new Date(articleData.date).toLocaleDateString("ja-JP")}
-        </time>
-      </p>
-
       {/* 👇 ここにTableOfContentsを追加 */}
       <TableOfContents content={articleData.contentHtml} />
 
-      {/* 記事本文 */}
-      <div
-        className="prose prose-lg md:prose-xl max-w-none mx-auto text-gray-700"
-        dangerouslySetInnerHTML={{ __html: articleData.contentHtml }}
-      />
+      {/* 👇 QuizMDXWrapper で本文とクイズを表示 */}
+      {articleData.quiz ? (
+        <QuizMDXWrapper quiz={articleData.quiz}>
+          <div
+            className="prose prose-lg md:prose-xl max-w-none mx-auto text-gray-700 mt-6"
+            dangerouslySetInnerHTML={{ __html: articleData.contentHtml }}
+          />
+        </QuizMDXWrapper>
+      ) : (
+        <div
+          className="prose prose-lg md:prose-xl max-w-none mx-auto text-gray-700 mt-6"
+          dangerouslySetInnerHTML={{ __html: articleData.contentHtml }}
+        />
+      )}
 
       {/* 👇 関連記事セクション */}
       {relatedArticles.length > 0 && (
