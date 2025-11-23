@@ -10,7 +10,7 @@ interface QuizProps {
     answer: number;
     hint: string;
   };
-  children?: ReactNode; // MDX本文も表示したい場合
+  children?: ReactNode;
 }
 
 export default function QuizMDXWrapper({ quiz, children }: QuizProps) {
@@ -28,23 +28,33 @@ export default function QuizMDXWrapper({ quiz, children }: QuizProps) {
       <h1 className="text-2xl font-bold mb-2">{quiz.title}</h1>
       <p className="mb-4">{quiz.question}</p>
 
-      {quiz.choices.map((choice, i) => (
-        <button
-          key={i}
-          onClick={() => handleSelect(i)}
-          className={`block my-2 p-2 border rounded w-full text-left
-            ${selected !== null
-              ? i === quiz.answer
-                ? "border-green-500 bg-green-100"
-                : i === selected
-                ? "border-red-500 bg-red-100"
-                : ""
-              : "border-gray-300 hover:bg-gray-100"}
-          `}
-        >
-          {choice}
-        </button>
-      ))}
+      {quiz.choices.map((choice, i) => {
+        // 選択済みの場合のマーク
+        let mark = "";
+        if (selected !== null) {
+          if (i === quiz.answer) mark = "〇";
+          else if (i === selected && i !== quiz.answer) mark = "×";
+        }
+
+        return (
+          <button
+            key={i}
+            onClick={() => handleSelect(i)}
+            className={`flex justify-between items-center my-2 p-2 border rounded w-full text-left
+              ${selected !== null
+                ? i === quiz.answer
+                  ? "border-green-500 bg-green-100"
+                  : i === selected
+                  ? "border-red-500 bg-red-100"
+                  : ""
+                : "border-gray-300 hover:bg-gray-100"}
+            `}
+          >
+            <span>{choice}</span>
+            {mark && <span className="ml-2 font-bold">{mark}</span>}
+          </button>
+        );
+      })}
 
       <button
         className="mt-4 text-blue-500 underline"
@@ -55,7 +65,7 @@ export default function QuizMDXWrapper({ quiz, children }: QuizProps) {
 
       {showHint && <p className="my-2 text-gray-700">{quiz.hint}</p>}
 
-      {showAnswer && (
+      {showAnswer && selected !== null && (
         <p className="mt-4 font-bold">
           {selected === quiz.answer
             ? "正解！🎉"
