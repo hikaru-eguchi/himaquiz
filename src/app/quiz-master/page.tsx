@@ -52,7 +52,7 @@ export default function QuizMasterPage() {
             <img src="/images/dragon2.png" alt="ドラゴン2" className="w-15 h-15 md:w-40 md:h-40 object-cover rounded-lg" />
           </div>
           
-          <div className="flex justify-center gap-4">
+          <div className="flex justify-center gap-1 md:gap-4">
             <Link href="/quiz-master/random">
                 <button
                     className="px-2 py-1 md:px-8 md:py-4 bg-blue-500 text-white rounded-full hover:bg-blue-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105"

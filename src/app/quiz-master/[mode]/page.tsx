@@ -14,6 +14,8 @@ interface ArticleData {
     question: string;
     answer: string | number;
     choices?: (string | number)[];
+    genre: string;
+    level: string;
   };
 }
 
@@ -72,6 +74,7 @@ export default function QuizModePage() {
   const [userAnswer, setUserAnswer] = useState<number | null>(null);
   const [correctCount, setCorrectCount] = useState(0);
   const [finished, setFinished] = useState(false);
+  const [showCorrectMessage, setShowCorrectMessage] = useState(false);
 
   // ★ タイマー（30秒）
   const [timeLeft, setTimeLeft] = useState(30);
@@ -106,7 +109,7 @@ export default function QuizModePage() {
         let all: ArticleData[] = data;
 
         if (mode === "genre" && genre) {
-          all = all.filter((a) => a.genre === genre);
+          all = all.filter((a) => a.quiz?.genre === genre);
         }
 
         // QuizData 型に変換
@@ -130,6 +133,8 @@ export default function QuizModePage() {
               question: a.quiz!.question,
               answer: Number(a.quiz!.answer),             // number に統一
               choices: a.quiz!.choices ? a.quiz!.choices.map(String) : [], // string[] に統一
+              genre: a.quiz!.genre,
+              level: a.quiz!.level,
             }
           }));
 
@@ -166,6 +171,9 @@ export default function QuizModePage() {
   const checkAnswer = () => {
     if (userAnswer === questions[currentIndex].quiz?.answer) {
       setCorrectCount(c => c + 1);
+      // ★ 正解メッセージを表示
+      setShowCorrectMessage(true);
+      setTimeout(() => setShowCorrectMessage(false), 1000); // 1秒で非表示
       nextQuestion();
     } else {
       setFinished(true);
@@ -206,11 +214,18 @@ export default function QuizModePage() {
           </p>
 
           {questions[currentIndex].quiz && (
-            <QuizQuestion
-              quiz={questions[currentIndex].quiz}
-              userAnswer={userAnswer}
-              setUserAnswer={setUserAnswer}
-            />
+            <>
+              {showCorrectMessage && (
+                <p className="text-green-500 text-2xl font-bold mb-2 animate-pulse">
+                  正解！
+                </p>
+              )}
+              <QuizQuestion
+                quiz={questions[currentIndex].quiz}
+                userAnswer={userAnswer}
+                setUserAnswer={setUserAnswer}
+              />
+            </>
           )}
           <button
             className="px-4 py-2 bg-blue-500 text-white rounded mt-4 hover:bg-blue-600"
