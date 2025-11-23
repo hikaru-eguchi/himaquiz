@@ -40,7 +40,7 @@ export default function QuizMasterPage() {
         クイズマスターへの道
       </h1>
       {<>
-          <p className="text-lg md:text-3xl font-semibold text-gray-800 mb-8">間違えたら即終了！連続でクイズに正解してすごい称号を目指そう！</p>
+          <p className="text-lg md:text-3xl font-semibold text-gray-800 mb-8">間違えたら即終了！連続正解で称号をゲットしよう！（何度でもプレイ可能）</p>
           
           {/* 画像を横並びで表示 */}
           <div className="flex justify-center gap-4 mb-8">
@@ -57,7 +57,7 @@ export default function QuizMasterPage() {
                 <button
                     className="px-2 py-1 md:px-8 md:py-4 bg-blue-500 text-white rounded-full hover:bg-blue-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105"
                 >
-                    ランダムで始める
+                    ランダムで挑む
                     <span className="text-sm md:text-lg text-gray-200 block">
                         （全知の覇者オールラウンドマスター）
                     </span>
