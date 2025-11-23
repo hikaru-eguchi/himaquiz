@@ -40,7 +40,7 @@ export default function QuizMDXWrapper({ quiz, children }: QuizProps) {
           <button
             key={i}
             onClick={() => handleSelect(i)}
-            className={`flex justify-between items-center my-2 p-2 border rounded w-full text-left
+            className={`flex justify-between items-center my-2 p-2 border rounded w-full text-left cursor-pointer hover:text-blue-700
               ${selected !== null
                 ? i === quiz.answer
                   ? "border-green-500 bg-green-100"
@@ -57,7 +57,7 @@ export default function QuizMDXWrapper({ quiz, children }: QuizProps) {
       })}
 
       <button
-        className="mt-4 text-blue-500 underline"
+        className="mt-4 text-blue-500 underline cursor-pointer hover:text-blue-700"
         onClick={() => setShowHint(!showHint)}
       >
         {showHint ? "ヒントを隠す" : "ヒントを見る"}
@@ -66,7 +66,11 @@ export default function QuizMDXWrapper({ quiz, children }: QuizProps) {
       {showHint && <p className="my-2 text-gray-700">{quiz.hint}</p>}
 
       {showAnswer && selected !== null && (
-        <p className="mt-4 font-bold">
+        <p
+          className={`mt-4 text-3xl font-extrabold text-center ${
+            selected === quiz.answer ? "text-green-600 animate-pulse" : "text-red-600"
+          }`}
+        >
           {selected === quiz.answer
             ? "正解！🎉"
             : `不正解…正解は ${quiz.choices[quiz.answer]} です`}
