@@ -115,9 +115,17 @@
 
 /* --- ヘッダー & フッターの単色 --- */
 header {
-  background-color: #ffe386; /* 楽しい黄色 */
+  background: linear-gradient(90deg,
+    #ffd36b,
+    #fff87d,
+    #a0e8ff
+  );
 }
 
 footer {
-  background-color: #ffe386; /* 楽しい黄色 */
+  background: linear-gradient(90deg,
+    #ffd36b,
+    #fff87d,
+    #a0e8ff
+  );
 }

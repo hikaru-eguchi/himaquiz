@@ -26,7 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="google-adsense-account" content="ca-pub-9009696291438240"></meta>
       </head>
 
-      <body className={`${inter.variable} ${yomogi.variable} font-sans bg-[#f8f5cd]`}>
+      <body className={`${inter.variable} ${yomogi.variable} font-sans bg-[#abe4fb]`}>
         <div className="flex flex-col min-h-screen">
 
           {/* ===== HEADER ===== */}
