@@ -156,6 +156,20 @@ export default async function ArticleDetailPage({
         {articleData.title}
       </h1>
 
+      {/* サムネイル表示 */}
+      {articleData.thumbnail && (
+        <div className="w-full flex justify-center mb-2">
+          <div className="w-[255px] h-[160px] md:w-[540px] md:h-[300px] relative rounded-lg overflow-hidden shadow-md border">
+            <Image
+              src={articleData.thumbnail}
+              alt={articleData.title}
+              fill
+              className="object-cover"
+            />
+          </div>
+        </div>
+      )}
+
       {/* 👇 ここにTableOfContentsを追加 */}
       <TableOfContents content={articleData.contentHtml} />
 

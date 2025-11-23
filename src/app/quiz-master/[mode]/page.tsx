@@ -37,16 +37,16 @@ const QuizResult = ({ correctCount, getTitle }: { correctCount: number, getTitle
 
   return (
     <div className="text-center mt-6">
-      {showTitle && <h2 className="text-6xl font-extrabold mb-8">クイズ終了！</h2>}
-      {showScore && <p className="text-4xl mb-12">正解数: {correctCount}</p>}
-      {showText && <p className="text-2xl text-gray-600 mb-8">君は…</p>}
+      {showTitle && <h2 className="text-5xl md:text-6xl font-extrabold mb-8">クイズ終了！</h2>}
+      {showScore && <p className="text-3xl md:text-4xl mb-12">正解数: {correctCount}</p>}
+      {showText && <p className="text-2xl md:text-2xl text-gray-600 mb-8">君は…</p>}
       {showRank && (
         <div className="flex items-center justify-center mb-10">
           {/* 左の画像 */}
-          <img src="/images/yuusya.png" alt="勇者" className="w-50 h-60 mr-10 -mt-35" />
-          <p className="text-5xl font-bold text-blue-600 mb-10 drop-shadow-lg animate-bounce">称号：{getTitle()}</p>
+          <img src="/images/yuusya.png" alt="勇者" className="w-0 h-0 md:w-50 md:h-60 mr-10 -mt-35" />
+          <p className="text-2xl md:text-5xl font-bold text-blue-600 mb-10 drop-shadow-lg animate-bounce">称号：{getTitle()}</p>
           {/* 右の画像 */}
-          <img src="/images/dragon.png" alt="ドラゴン" className="w-50 h-45 ml-10 -mt-30" />
+          <img src="/images/dragon.png" alt="ドラゴン" className="w-0 h-0 md:w-50 md:h-45 ml-10 -mt-30" />
         </div>
       )}
       {showButton && (

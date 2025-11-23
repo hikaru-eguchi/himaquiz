@@ -10,6 +10,8 @@ interface ArticleMeta {
   date: string;
   thumbnail?: string;
   description?: string;
+  genre?: string;
+  level?: string;
 }
 
 async function getSortedArticlesData(): Promise<ArticleMeta[]> {
@@ -24,7 +26,12 @@ async function getSortedArticlesData(): Promise<ArticleMeta[]> {
 
     return {
       id,
-      ...(matterResult.data as { title: string; date: string; thumbnail?: string }),
+      title: matterResult.data.title,
+      date: matterResult.data.date,
+      thumbnail: matterResult.data.thumbnail,
+      description: matterResult.data.description,
+      genre: matterResult.data.quiz?.genre,
+      level: matterResult.data.quiz?.level,
     };
   });
 
@@ -65,6 +72,12 @@ export default async function HomePage() {
               )}
               <div className="p-5 sm:p-8">
                 <h3 className="font-bold text-2xl mb-3 text-gray-900 group-hover:text-brand-dark transition-colors">{article.title}</h3>
+                <p className="text-sm text-gray-500 mt-2">
+                  ジャンル: {article.genre}
+                </p>
+                <p className="text-sm text-gray-500">
+                  難易度: {article.level}
+                </p>
               </div>
             </Link>
           ))}
