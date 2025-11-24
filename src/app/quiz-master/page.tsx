@@ -43,19 +43,19 @@ export default function QuizMasterPage() {
           <p className="text-lg md:text-3xl font-semibold text-gray-800 mb-8">間違えたら即終了！連続正解で称号をゲットしよう！（何度でもプレイ可能）</p>
           
           {/* 画像を横並びで表示 */}
-          <div className="flex justify-center gap-4 mb-8">
-            <img src="/images/dragon.png" alt="ドラゴン" className="w-15 h-15 md:w-40 md:h-40 object-cover rounded-lg" />
-            <img src="/images/yuusya.png" alt="クイズの勇者" className="w-15 h-15 md:w-40 md:h-40 object-cover rounded-lg" />
+          <div className="flex justify-center gap-2 md:gap-4 mb-8">
+            <img src="/images/dragon.png" alt="ドラゴン" className="w-30 h-25 md:w-40 md:h-40 object-cover rounded-lg" />
+            <img src="/images/yuusya.png" alt="クイズの勇者" className="w-20 h-35 md:w-40 md:h-40 object-cover rounded-lg" />
             <img src="/images/ryuukishi.png" alt="クイズの竜騎士" className="w-0 h-0 md:w-40 md:h-40 object-cover rounded-lg" />
-            <img src="/images/tabibito.png" alt="クイズの旅人" className="w-15 h-15 md:w-40 md:h-40 object-cover rounded-lg" />
-            <img src="/images/yuusya2.png" alt="クイズの勇者2" className="w-15 h-15 md:w-40 md:h-40 object-cover rounded-lg" />
-            <img src="/images/dragon2.png" alt="ドラゴン2" className="w-15 h-15 md:w-40 md:h-40 object-cover rounded-lg" />
+            <img src="/images/tabibito.png" alt="クイズの旅人" className="w-0 h-0 md:w-40 md:h-40 object-cover rounded-lg" />
+            <img src="/images/yuusya2.png" alt="クイズの勇者2" className="w-0 h-0 md:w-40 md:h-40 object-cover rounded-lg" />
+            <img src="/images/dragon2.png" alt="ドラゴン2" className="w-0 h-0 md:w-40 md:h-40 object-cover rounded-lg" />
           </div>
           
-          <div className="flex justify-center gap-1 md:gap-4">
+          <div className="flex flex-col md:flex-row justify-center gap-3 md:gap-4">
             <Link href="/quiz-master/random">
                 <button
-                    className="px-2 py-1 md:px-8 md:py-4 bg-blue-500 text-white rounded-full hover:bg-blue-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105"
+                    className="min-w-80 md:min-w-95 px-6 py-2 md:px-8 md:py-4 bg-blue-500 text-white rounded-full hover:bg-blue-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105"
                 >
                     ランダムで挑む
                     <span className="text-sm md:text-lg text-gray-200 block">
@@ -64,7 +64,7 @@ export default function QuizMasterPage() {
                 </button>
             </Link>
             <button
-                className="px-1 py-1 md:px-8 md:py-4 bg-green-500 text-white rounded-full hover:bg-green-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105"
+                className="min-w-80 md:min-w-95 px-6 py-2 md:px-8 md:py-4 bg-green-500 text-white rounded-full hover:bg-green-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105"
                 onClick={handleGenreClick}
             >
                 ジャンルを選ぶ

@@ -20,19 +20,59 @@ interface ArticleData {
   };
 }
 
+// 正解数に応じて出すコメント
+const rankComments = [
+  { threshold: 0, comment: "ここからが始まり！まずは肩慣らしだね！" },
+  { threshold: 5, comment: "ルーキー入り！君、才能を感じるよ！" },
+  { threshold: 10, comment: "ベテランの域に到達！良い調子、頭が冴えてきたね！" },
+  { threshold: 15, comment: "エキスパート級！すごい、普通の人より確実に強いぞ！" },
+  { threshold: 20, comment: "トップランカーにふさわしい実力！完全にセンスあるね、これは本物だ！" },
+  { threshold: 25, comment: "クイズ名人の風格が出てきた！もう上級者と呼べるレベル！" },
+  { threshold: 30, comment: "クイズ達人級の頭脳！天才の気配を感じる…君はどこまで行くんだ？" },
+  { threshold: 35, comment: "仙人レベルの知識量！もはや悟りの境地だ…！" },
+  { threshold: 40, comment: "クイズ星人クラス！地球人とは思えない閃きだ！" },
+  { threshold: 45, comment: "ひらめきの妖精！そのひらめきは誰も追いつけない才能だ…！" },
+  { threshold: 50, comment: "孤高の天才！クイズ界の怪物が誕生した瞬間だ！" },
+  { threshold: 55, comment: "思考の魔術師！頭の中で何か魔法を使ってるだろ！？" },
+  { threshold: 60, comment: "答えの支配者！問題の方が君を怖がってる…？" },
+  { threshold: 65, comment: "知恵の勇者！挑戦を恐れずに立ち向かう姿勢がカッコいい！" },
+  { threshold: 70, comment: "ビギナーマスター！バケモン級！これはもう人間技じゃない！" },
+  { threshold: 80, comment: "フロアマスターの領域へ！知識量が桁違いすぎる！" },
+  { threshold: 90, comment: "グランドマスター級！歴戦のクイズ戦士だ…恐れ入った！" },
+  { threshold: 100, comment: "クイズマスター！最強クラス！歴史に名を刻むレベルだ！" },
+  { threshold: 150, comment: "レジェンドクイズマスター！伝説級の存在…もう別次元！" },
+  { threshold: 200, comment: "神（ゴッド）、、！ここまでくるとは！君はもう人間の姿をした神様だ…！" },
+];
+
 const QuizResult = ({ correctCount, getTitle, titles }: { correctCount: number, getTitle: () => string, titles: { threshold: number, title: string }[] }) => {
-  const [showTitle, setShowTitle] = useState(false);
+  
+  // ★ クイズ終了時にでかく出すフラッシュ表示
+  const [flashEnd, setFlashEnd] = useState(true);
+
   const [showScore, setShowScore] = useState(false);
   const [showText, setShowText] = useState(false);
   const [showRank, setShowRank] = useState(false);
   const [showButton, setShowButton] = useState(false);
 
+  const getRankComment = () => {
+    let comment = "";
+    rankComments.forEach((r) => {
+      if (correctCount >= r.threshold) comment = r.comment;
+    });
+    return comment;
+  };
+
+  // ★1秒で "クイズ終了！" を消す
+  useEffect(() => {
+    const timer = setTimeout(() => setFlashEnd(false), 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
   useEffect(() => {
     const timers: NodeJS.Timeout[] = [];
-    timers.push(setTimeout(() => setShowTitle(true), 50));
-    timers.push(setTimeout(() => setShowScore(true), 1000));
-    timers.push(setTimeout(() => setShowText(true), 2000));
-    timers.push(setTimeout(() => setShowRank(true), 3000));
+    timers.push(setTimeout(() => setShowScore(true), 2000));
+    timers.push(setTimeout(() => setShowText(true), 3000));
+    timers.push(setTimeout(() => setShowRank(true), 4000));
     timers.push(setTimeout(() => setShowButton(true), 4000));
 
     return () => timers.forEach(clearTimeout);
@@ -42,33 +82,52 @@ const QuizResult = ({ correctCount, getTitle, titles }: { correctCount: number, 
     const next = titles.find(t => t.threshold > correctCount);
     if (!next) return null;
 
-    const remaining = next.threshold - correctCount;
+    const remaining = next.threshold;
     const hint = next.title[0] + "〇".repeat(Math.max(next.title.length - 1, 0));
-    return `あと${remaining}問正解で" ${hint} "にランクアップ！`;
+    return `次の目標：正解数 ${remaining} 問で\n" ${hint} "に昇格！`;
   };
 
   return (
     <div className="text-center mt-6">
-      {showTitle && <h2 className="text-4xl md:text-6xl font-extrabold mb-8">クイズ終了！</h2>}
-      {showScore && <p className="text-3xl md:text-4xl mb-4">正解数: {correctCount}</p>}
-      {showText && <p className="text-2xl md:text-2xl text-gray-600 mb-2">君は…</p>}
+
+      {/* ★ 中央に1秒だけ出る「クイズ終了！」 */}
+      {flashEnd && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 
+                        text-white text-5xl md:text-7xl font-extrabold">
+          クイズ終了！
+        </div>
+      )}
+
+      {showScore && <p className="text-3xl md:text-5xl mb-4 md:mb-6">正解数: {correctCount}問</p>}
+      {showText && <p className="text-xl md:text-2xl text-gray-600 mb-2">君の称号は…</p>}
+
       {showRank && (
         <>
           <div className="flex flex-col md:flex-row items-center justify-center mb-10 gap-4 md:gap-10">
             <img src="/images/yuusya.png" alt="勇者" className="w-0 h-0 md:w-50 md:h-60" />
-            <p className="text-xl md:text-5xl font-bold text-blue-600 drop-shadow-lg animate-bounce text-center">
-              称号：{getTitle()}
+            <p className="text-4xl md:text-6xl font-bold text-blue-600 drop-shadow-lg text-center animate-pulse">
+              {getTitle()}
             </p>
             <div className="flex flex-row md:flex-row items-center justify-center gap-8">
               <img src="/images/yuusya.png" alt="勇者" className="w-20 h-25 md:w-0 md:h-0" />
               <img src="/images/dragon.png" alt="ドラゴン" className="w-20 h-18 md:w-50 md:h-45" />
             </div>
           </div>
+
+          {/* ★ 正解数に応じたコメント */}
+          {getRankComment() && (
+            <p className="text-lg md:text-2xl text-gray-800 mb-4 font-bold whitespace-pre-line">
+              {getRankComment()}
+            </p>
+          )}
+
+          {/* ★ 次の目標 */}
           {getNextTitleHint() && (
-            <p className="text-xl md:text-2xl text-gray-700 mb-8 font-semibold animate-pulse ">{getNextTitleHint()}</p>
+            <p className="text-xl md:text-3xl text-yellow-400 mb-8 font-semibold whitespace-pre-line">{getNextTitleHint()}</p>
           )}
         </>
       )}
+
       {showButton && (
         <button
           className="px-6 py-3 bg-green-500 text-white rounded-lg font-bold text-xl hover:bg-green-600 cursor-pointer"
@@ -104,10 +163,10 @@ export default function QuizModePage() {
     { threshold: 10, title: "ベテラン" },
     { threshold: 15, title: "エキスパート" },
     { threshold: 20, title: "トップランカー" },
-    { threshold: 25, title: "名人" },
-    { threshold: 30, title: "達人" },
-    { threshold: 35, title: "仙人" },
-    { threshold: 40, title: "星人" },
+    { threshold: 25, title: "クイズ名人" },
+    { threshold: 30, title: "クイズ達人" },
+    { threshold: 35, title: "クイズ仙人" },
+    { threshold: 40, title: "クイズ星人" },
     { threshold: 45, title: "ひらめきの妖精" },
     { threshold: 50, title: "孤高の天才" },
     { threshold: 55, title: "思考の魔術師" },
@@ -116,9 +175,9 @@ export default function QuizModePage() {
     { threshold: 70, title: "ビギナーマスター 🏆" },
     { threshold: 80, title: "フロアマスター 🏆" },
     { threshold: 90, title: "グランドマスター 🏆" },
-    { threshold: 100, title: "🏆 クイズマスター 🏆" },
+    { threshold: 100, title: "クイズマスター 🏆" },
     { threshold: 150, title: "レジェンドクイズマスター 🌟" },
-    { threshold: 200, title: "🌟 神（ゴッド） 🌟" },
+    { threshold: 200, title: "神（ゴッド） 🌟" },
   ];
 
   useEffect(() => {
@@ -185,6 +244,7 @@ export default function QuizModePage() {
   const checkAnswer = () => {
     const correctAnswer = questions[currentIndex].quiz?.answer;
     const displayAnswer = questions[currentIndex].quiz?.displayAnswer;
+
     if (userAnswer === correctAnswer) {
       setCorrectCount(c => c + 1);
       setShowCorrectMessage(true);
@@ -192,7 +252,7 @@ export default function QuizModePage() {
       setTimeout(() => {
         setShowCorrectMessage(false);
         nextQuestion();
-      }, 2000);
+      }, 1500);
 
     } else {
       setIncorrectMessage(`残念！不正解…\n答えは" ${displayAnswer} "でした！`);
@@ -200,6 +260,7 @@ export default function QuizModePage() {
         setFinished(true);
       }, 2500);
     }
+
     setUserAnswer(null);
   };
 
@@ -207,7 +268,7 @@ export default function QuizModePage() {
     if (currentIndex + 1 >= questions.length) {
       setFinished(true);
     } else {
-      setCurrentIndex((i) => i + 1);
+      setCurrentIndex(i => i + 1);
       setTimeLeft(30);
     }
   };
@@ -227,12 +288,14 @@ export default function QuizModePage() {
       {!finished ? (
         <>
           <h2 className="text-5xl md:text-6xl font-extrabold mb-6 text-yellow-400 drop-shadow-lg">
-            STAGE {currentIndex + 1} 
+            STAGE {currentIndex + 1}
           </h2>
 
-          <p className="text-lg font-bold mb-4 text-red-500">
-            残り時間: {timeLeft} 秒
-          </p>
+          {!incorrectMessage && (
+            <p className="text-lg font-bold mb-4 text-red-500">
+              残り時間: {timeLeft} 秒
+            </p>
+          )}
 
           {questions[currentIndex].quiz && (
             <>
@@ -255,7 +318,7 @@ export default function QuizModePage() {
                 </p>
               )}
 
-              {/* 選択肢表示は正解・不正解メッセージがないときだけ */}
+              {/* 選択肢表示 */}
               {!showCorrectMessage && !incorrectMessage && (
                 <QuizQuestion
                   quiz={questions[currentIndex].quiz}
@@ -264,7 +327,7 @@ export default function QuizModePage() {
                 />
               )}
 
-              {/* 回答ボタンも同じ条件で非表示 */}
+              {/* 回答ボタン */}
               {!showCorrectMessage && !incorrectMessage && (
                 <button
                   className="px-4 py-2 bg-blue-500 text-white rounded mt-4 hover:bg-blue-600 cursor-pointer"
