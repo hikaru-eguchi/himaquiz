@@ -72,6 +72,7 @@ export default async function HomePage({
 
   return (
     <div className="container mx-auto px-4 py-2 sm:py-8">
+      <p className="text-center text-xl md:text-2xl font-extrabold text-gray-800 leading-relaxed -mt-2 mb-6"> ひまな時間にぴったり！「ひまQ」は簡単に遊べる脳トレクイズや暇つぶしクイズが満載です。クイズで頭の体操をしよう！ </p>
       <section>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           {paginatedArticles.map((article) => (
