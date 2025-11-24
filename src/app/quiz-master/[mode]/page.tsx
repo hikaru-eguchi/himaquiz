@@ -9,6 +9,7 @@ interface ArticleData {
   id: string;
   title: string;
   genre: string;
+  thumbnail: string;
   quiz?: {
     title: string;
     question: string;
@@ -211,6 +212,7 @@ export default function QuizModePage() {
               choices: a.quiz!.choices ? a.quiz!.choices.map(String) : [],
               genre: a.quiz!.genre,
               level: a.quiz!.level,
+              image: a.thumbnail,
             }
           }));
 
@@ -292,7 +294,7 @@ export default function QuizModePage() {
           </h2>
 
           {!incorrectMessage && (
-            <p className="text-lg font-bold mb-4 text-red-500">
+            <p className="text-xl font-bold mb-4 text-red-500">
               残り時間: {timeLeft} 秒
             </p>
           )}
@@ -330,7 +332,7 @@ export default function QuizModePage() {
               {/* 回答ボタン */}
               {!showCorrectMessage && !incorrectMessage && (
                 <button
-                  className="px-4 py-2 bg-blue-500 text-white rounded mt-4 hover:bg-blue-600 cursor-pointer"
+                  className="px-4 py-2 md:px-6 md:py-3 bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-4 hover:bg-blue-600 cursor-pointer"
                   onClick={checkAnswer}
                   disabled={userAnswer === null}
                 >

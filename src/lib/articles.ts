@@ -10,6 +10,7 @@ export interface QuizData {
   displayAnswer?: string;
   hint?: string;
   genre?: string;
+  image?: string;
 }
 
 export interface ArticleData {

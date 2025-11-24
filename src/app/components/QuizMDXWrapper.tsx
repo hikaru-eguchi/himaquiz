@@ -25,7 +25,7 @@ export default function QuizMDXWrapper({ quiz, children }: QuizProps) {
 
   return (
     <div className="p-4 max-w-xl mx-auto">
-      <p className="mb-4">{quiz.question}</p>
+      <p className="mb-4 text-xl md:text-2xl">{quiz.question}</p>
 
       {quiz.choices.map((choice, i) => {
         // 選択済みの場合のマーク
@@ -49,20 +49,20 @@ export default function QuizMDXWrapper({ quiz, children }: QuizProps) {
                 : "border-gray-300 hover:bg-gray-100"}
             `}
           >
-            <span>{choice}</span>
+            <span className="text-lg md:text-xl">{choice}</span>
             {mark && <span className="ml-2 font-bold">{mark}</span>}
           </button>
         );
       })}
 
       <button
-        className="mt-4 text-blue-500 underline cursor-pointer hover:text-blue-700"
+        className="mt-4 text-xl md:text-2xl text-blue-500 underline cursor-pointer hover:text-blue-700"
         onClick={() => setShowHint(!showHint)}
       >
         {showHint ? "ヒントを隠す" : "ヒントを見る"}
       </button>
 
-      {showHint && <p className="my-2 text-gray-700">{quiz.hint}</p>}
+      {showHint && <p className="my-2 text-xl md:text-2xl text-gray-700">{quiz.hint}</p>}
 
       {showAnswer && selected !== null && (
         <p
