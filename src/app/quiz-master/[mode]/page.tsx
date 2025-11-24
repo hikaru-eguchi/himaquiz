@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams, usePathname } from "next/navigation";
 import QuizQuestion from "../../components/QuizQuestion";
 import { QuizData } from "@/lib/articles";
@@ -13,6 +13,7 @@ interface ArticleData {
     title: string;
     question: string;
     answer: string | number;
+    displayAnswer?: string;
     choices?: (string | number)[];
     genre: string;
     level: string;
@@ -43,17 +44,20 @@ const QuizResult = ({ correctCount, getTitle }: { correctCount: number, getTitle
       {showScore && <p className="text-3xl md:text-4xl mb-12">正解数: {correctCount}</p>}
       {showText && <p className="text-2xl md:text-2xl text-gray-600 mb-8">君は…</p>}
       {showRank && (
-        <div className="flex items-center justify-center mb-10">
-          {/* 左の画像 */}
-          <img src="/images/yuusya.png" alt="勇者" className="w-0 h-0 md:w-50 md:h-60 mr-10 -mt-35" />
-          <p className="text-xl md:text-5xl font-bold text-blue-600 mb-10 drop-shadow-lg animate-bounce">称号：{getTitle()}</p>
-          {/* 右の画像 */}
-          <img src="/images/dragon.png" alt="ドラゴン" className="w-0 h-0 md:w-50 md:h-45 ml-10 -mt-30" />
+        <div className="flex flex-col md:flex-row items-center justify-center mb-10 gap-4 md:gap-10">
+          <img src="/images/yuusya.png" alt="勇者" className="w-0 h-0 md:w-50 md:h-60" />
+          <p className="text-xl md:text-5xl font-bold text-blue-600 drop-shadow-lg animate-bounce text-center">
+            称号：{getTitle()}
+          </p>
+          <div className="flex flex-row md:flex-row items-center justify-center gap-8">
+            <img src="/images/yuusya.png" alt="勇者" className="w-20 h-25 md:w-0 md:h-0" />
+            <img src="/images/dragon.png" alt="ドラゴン" className="w-20 h-18 md:w-50 md:h-45" />
+          </div>
         </div>
       )}
       {showButton && (
         <button
-          className="px-6 py-3 bg-green-500 text-white rounded-lg font-bold text-xl hover:bg-green-600"
+          className="px-6 py-3 bg-green-500 text-white rounded-lg font-bold text-xl hover:bg-green-600 cursor-pointer"
           onClick={() => window.location.reload()}
         >
           もう一回挑戦する
@@ -64,8 +68,8 @@ const QuizResult = ({ correctCount, getTitle }: { correctCount: number, getTitle
 };
 
 export default function QuizModePage() {
-  const pathname = usePathname(); // URLのパスを取得
-  const mode = pathname.split("/").pop() || "random"; // /quiz-master/random なら "random"
+  const pathname = usePathname();
+  const mode = pathname.split("/").pop() || "random";
   const searchParams = useSearchParams();
   const genre = searchParams?.get("genre") || "";
 
@@ -75,9 +79,11 @@ export default function QuizModePage() {
   const [correctCount, setCorrectCount] = useState(0);
   const [finished, setFinished] = useState(false);
   const [showCorrectMessage, setShowCorrectMessage] = useState(false);
-
-  // ★ タイマー（30秒）
   const [timeLeft, setTimeLeft] = useState(30);
+  const [incorrectMessage, setIncorrectMessage] = useState<string | null>(null);
+
+  const finishedRef = useRef(finished);
+  const showCorrectRef = useRef(showCorrectMessage);
 
   const titles = [
     { threshold: 5, title: "ルーキー" },
@@ -102,6 +108,14 @@ export default function QuizModePage() {
   ];
 
   useEffect(() => {
+    finishedRef.current = finished;
+  }, [finished]);
+
+  useEffect(() => {
+    showCorrectRef.current = showCorrectMessage;
+  }, [showCorrectMessage]);
+
+  useEffect(() => {
     const fetchArticles = async () => {
       try {
         const res = await fetch("/api/articles");
@@ -112,27 +126,16 @@ export default function QuizModePage() {
           all = all.filter((a) => a.quiz?.genre === genre);
         }
 
-        // QuizData 型に変換
-        const quizData: QuizData[] = all
-          .filter(a => a.quiz) // quiz が存在するものだけ
-          .map(a => ({
-            title: a.title,
-            question: a.quiz!.question,
-            answer: Number(a.quiz!.answer),         // 必ず number
-            choices: a.quiz!.choices
-              ? a.quiz!.choices.map(String)        // string[] に統一
-              : [],                                // undefined の場合は空配列
-          }));
-
         const quizQuestions: { id: string; quiz: QuizData }[] = all
-          .filter(a => a.quiz) // quiz があるものだけ
+          .filter(a => a.quiz)
           .map(a => ({
             id: a.id,
             quiz: {
               title: a.title,
               question: a.quiz!.question,
-              answer: Number(a.quiz!.answer),             // number に統一
-              choices: a.quiz!.choices ? a.quiz!.choices.map(String) : [], // string[] に統一
+              answer: Number(a.quiz!.answer),
+              displayAnswer: a.quiz!.displayAnswer,
+              choices: a.quiz!.choices ? a.quiz!.choices.map(String) : [],
               genre: a.quiz!.genre,
               level: a.quiz!.level,
             }
@@ -149,34 +152,40 @@ export default function QuizModePage() {
 
   const shuffleArray = <T,>(arr: T[]) => [...arr].sort(() => Math.random() - 0.5);
 
-  // ★ タイマー制御：1秒ごとに減る
+  // useRef 安全版タイマー
   useEffect(() => {
-    if (finished) return; // 終わったら止める
-
     const timer = setInterval(() => {
+      if (finishedRef.current || showCorrectRef.current) return;
       setTimeLeft((t) => {
         if (t <= 1) {
           clearInterval(timer);
-
-          // ★ 時間切れ → 不正解扱いで終了
           setFinished(true);
           return 0;
         }
         return t - 1;
       });
     }, 1000);
-      return () => clearInterval(timer);
-  }, [currentIndex, finished]);
+
+    return () => clearInterval(timer);
+  }, []);
 
   const checkAnswer = () => {
-    if (userAnswer === questions[currentIndex].quiz?.answer) {
+    const correctAnswer = questions[currentIndex].quiz?.answer;
+    const displayAnswer = questions[currentIndex].quiz?.displayAnswer;
+    if (userAnswer === correctAnswer) {
       setCorrectCount(c => c + 1);
-      // ★ 正解メッセージを表示
       setShowCorrectMessage(true);
-      setTimeout(() => setShowCorrectMessage(false), 1000); // 1秒で非表示
-      nextQuestion();
+
+      setTimeout(() => {
+        setShowCorrectMessage(false);
+        nextQuestion();
+      }, 2000);
+
     } else {
-      setFinished(true);
+      setIncorrectMessage(`残念！不正解…\n答えは" ${displayAnswer} "でした！`);
+      setTimeout(() => {
+        setFinished(true);
+      }, 3000);
     }
     setUserAnswer(null);
   };
@@ -204,11 +213,10 @@ export default function QuizModePage() {
     <div className="container mx-auto p-8 text-center">
       {!finished ? (
         <>
-          <h2 className="text-2xl font-bold mb-4">
-            ステージ {currentIndex + 1} 
+          <h2 className="text-5xl md:text-6xl font-extrabold mb-6 text-yellow-400 drop-shadow-lg">
+            STAGE {currentIndex + 1} 
           </h2>
 
-          {/* ★ タイマー表示 */}
           <p className="text-lg font-bold mb-4 text-red-500">
             残り時間: {timeLeft} 秒
           </p>
@@ -216,10 +224,17 @@ export default function QuizModePage() {
           {questions[currentIndex].quiz && (
             <>
               {showCorrectMessage && (
-                <p className="text-green-500 text-2xl font-bold mb-2 animate-pulse">
+                <p className="text-4xl md:text-6xl font-extrabold mb-4 text-green-500 drop-shadow-lg animate-bounce animate-pulse">
                   正解！
                 </p>
               )}
+
+              {incorrectMessage && (
+                <p className="text-3xl md:text-4xl font-extrabold mb-4 text-red-500 drop-shadow-lg animate-shake whitespace-pre-line">
+                  {incorrectMessage}
+                </p>
+              )}
+
               <QuizQuestion
                 quiz={questions[currentIndex].quiz}
                 userAnswer={userAnswer}
@@ -227,8 +242,9 @@ export default function QuizModePage() {
               />
             </>
           )}
+
           <button
-            className="px-4 py-2 bg-blue-500 text-white rounded mt-4 hover:bg-blue-600"
+            className="px-4 py-2 bg-blue-500 text-white rounded mt-4 hover:bg-blue-600 cursor-pointer"
             onClick={checkAnswer}
             disabled={userAnswer === null}
           >

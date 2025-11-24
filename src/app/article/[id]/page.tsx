@@ -20,6 +20,7 @@ interface QuizData {
   question: string;
   choices: string[];
   answer: number;
+  displayAnswer?: string;
   hint: string;
 }
 

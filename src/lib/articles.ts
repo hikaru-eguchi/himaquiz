@@ -7,6 +7,7 @@ export interface QuizData {
   question: string;
   choices: string[];
   answer: number; // choices のインデックス
+  displayAnswer?: string;
   hint?: string;
   genre?: string;
 }

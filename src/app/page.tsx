@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 import Image from "next/image";
+import Pagination from "./components/Pagination";
 
 interface ArticleMeta {
   id: string;
@@ -44,18 +45,36 @@ async function getSortedArticlesData(): Promise<ArticleMeta[]> {
     }
   });
 
-  // Return the top 6 articles
   return sortedArticles;
 }
 
-export default async function HomePage() {
-  const featuredArticles = await getSortedArticlesData();
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams?: { page?: string };
+}) {
+  const currentPage = Number(searchParams?.page) || 1;
+
+  const allArticles = await getSortedArticlesData();
+
+  // 1ページあたりの記事数
+  const ARTICLES_PER_PAGE = 12;
+
+  // 総ページ数
+  const totalPages = Math.ceil(allArticles.length / ARTICLES_PER_PAGE);
+
+  // 現在のページに表示する記事を切り出し
+  const startIndex = (currentPage - 1) * ARTICLES_PER_PAGE;
+  const paginatedArticles = allArticles.slice(
+    startIndex,
+    startIndex + ARTICLES_PER_PAGE
+  );
 
   return (
     <div className="container mx-auto px-4 py-2 sm:py-8">
       <section>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-          {featuredArticles.map((article) => (
+          {paginatedArticles.map((article) => (
             <Link
               key={article.id}
               href={`/article/${article.id}`}
@@ -71,7 +90,9 @@ export default async function HomePage() {
                 />
               )}
               <div className="p-5 sm:p-8">
-                <h3 className="font-bold text-2xl mb-3 text-gray-900 group-hover:text-brand-dark transition-colors">{article.title}</h3>
+                <h3 className="font-bold text-2xl mb-3 text-gray-900 group-hover:text-brand-dark transition-colors">
+                  {article.title}
+                </h3>
                 <p className="text-sm text-gray-500 mt-2">
                   ジャンル: {article.genre}
                 </p>
@@ -83,6 +104,15 @@ export default async function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* ▼▼ ページネーション ▼▼ */}
+      <div className="mt-10">
+        <Pagination 
+          currentPage={currentPage} 
+          totalPages={totalPages} 
+          basePath="/" 
+        />
+      </div>
     </div>
   );
 }

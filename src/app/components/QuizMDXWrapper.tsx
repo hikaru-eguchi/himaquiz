@@ -66,13 +66,13 @@ export default function QuizMDXWrapper({ quiz, children }: QuizProps) {
 
       {showAnswer && selected !== null && (
         <p
-          className={`mt-4 text-3xl font-extrabold text-center ${
+          className={`mt-4 text-3xl md:text-4xl font-extrabold text-center whitespace-pre-line ${
             selected === quiz.answer ? "text-green-600 animate-pulse" : "text-red-600"
           }`}
         >
           {selected === quiz.answer
             ? "正解！🎉"
-            : `不正解…正解は ${quiz.choices[quiz.answer]} です`}
+            : `残念！不正解…\n正解は" ${quiz.choices[quiz.answer]} "でした！`}
         </p>
       )}
 

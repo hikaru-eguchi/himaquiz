@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 import Image from "next/image";
+import Pagination from "../../../components/Pagination";
 
 interface ArticleMeta {
   id: string;
@@ -44,14 +45,30 @@ type PageProps = {
   params: {
     genre: string;
   };
+  searchParams?: {
+    page?: string;
+  };
 };
 
-export default async function GenrePage({ params }: PageProps) {
+export default async function GenrePage({ params, searchParams }: PageProps) {
   const genreParam = decodeURIComponent(params.genre);
+  const currentPage = Number(searchParams?.page) || 1;
+
   const allArticles = await getSortedArticlesData();
 
+  // 指定ジャンルのみに絞る
   const filteredArticles = allArticles.filter(
     (article) => article.genre === genreParam
+  );
+
+  // ページネーション設定
+  const ARTICLES_PER_PAGE = 12;
+  const totalPages = Math.ceil(filteredArticles.length / ARTICLES_PER_PAGE);
+
+  const startIndex = (currentPage - 1) * ARTICLES_PER_PAGE;
+  const paginatedArticles = filteredArticles.slice(
+    startIndex,
+    startIndex + ARTICLES_PER_PAGE
   );
 
   return (
@@ -59,11 +76,13 @@ export default async function GenrePage({ params }: PageProps) {
       <h2 className="text-3xl font-bold mb-6 text-center">{genreParam} クイズ</h2>
 
       {filteredArticles.length === 0 && (
-        <p className="text-center text-gray-500">このジャンルのクイズはまだありません。</p>
+        <p className="text-center text-gray-500">
+          このジャンルのクイズはまだありません。
+        </p>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-        {filteredArticles.map((article) => (
+        {paginatedArticles.map((article) => (
           <Link
             key={article.id}
             href={`/article/${article.id}`}
@@ -88,6 +107,15 @@ export default async function GenrePage({ params }: PageProps) {
             </div>
           </Link>
         ))}
+      </div>
+
+      {/* ▼▼ ページネーション ▼▼ */}
+      <div className="mt-10">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          basePath={`/quizzes/genre/${encodeURIComponent(genreParam)}`}
+        />
       </div>
     </div>
   );

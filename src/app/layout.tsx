@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Yomogi } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
+import NavButtons from "./components/NavButtons";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const yomogi = Yomogi({ weight: "400", subsets: ["latin"], variable: "--font-yomogi" });
@@ -72,38 +73,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
 
             {/* ===== ジャンル＆難易度ボタン（ページ遷移型） ===== */}
-            <div className="flex flex-wrap justify-center gap-2 md:gap-4 md:mt-6 md:mb-3">
-              {/* 全て */}
-              <Link href="/quizzes">
-                <button className="px-2 md:px-5 py-1 md:py-2 border-2 border-black rounded-full bg-white text-black font-bold shadow-sm hover:scale-105 transition-all cursor-pointer">
-                  全て
-                </button>
-              </Link>
-
-              {/* ジャンル */}
-              {genres.map((genre) => (
-                <Link key={genre} href={`/quizzes/genre/${encodeURIComponent(genre)}`}>
-                  <button className="px-2 md:px-5 py-1 md:py-2 border-2 border-black rounded-full bg-blue-500 text-white font-bold shadow-sm hover:scale-105 transition-all cursor-pointer">
-                    {genre} ▼
-                  </button>
-                </Link>
-              ))}
-
-              {/* 難易度 */}
-              {levels.map((level) => (
-                <Link key={level} href={`/quizzes/level/${encodeURIComponent(level)}`}>
-                  <button className="px-2 md:px-5 py-1 md:py-2 border-2 border-black rounded-full bg-white text-black font-bold shadow-sm hover:scale-105 transition-all cursor-pointer">
-                    {level} ▼
-                  </button>
-                </Link>
-              ))}
-
-              <Link href="/quiz-master">
-                <button className="px-2 md:px-5 py-1 md:py-2 border-2 border-black rounded-full bg-yellow-400 text-black font-bold shadow-sm hover:scale-105 transition-all cursor-pointer">
-                  クイズマスターへの道
-                </button>
-              </Link>
-            </div>
+            <NavButtons />
           </header>
 
           {/* ===== MAIN ===== */}
