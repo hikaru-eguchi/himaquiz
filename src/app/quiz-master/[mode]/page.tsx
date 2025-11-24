@@ -20,7 +20,7 @@ interface ArticleData {
   };
 }
 
-const QuizResult = ({ correctCount, getTitle }: { correctCount: number, getTitle: () => string }) => {
+const QuizResult = ({ correctCount, getTitle, titles }: { correctCount: number, getTitle: () => string, titles: { threshold: number, title: string }[] }) => {
   const [showTitle, setShowTitle] = useState(false);
   const [showScore, setShowScore] = useState(false);
   const [showText, setShowText] = useState(false);
@@ -38,22 +38,36 @@ const QuizResult = ({ correctCount, getTitle }: { correctCount: number, getTitle
     return () => timers.forEach(clearTimeout);
   }, []);
 
+  const getNextTitleHint = () => {
+    const next = titles.find(t => t.threshold > correctCount);
+    if (!next) return null;
+
+    const remaining = next.threshold - correctCount;
+    const hint = next.title[0] + "〇".repeat(Math.max(next.title.length - 1, 0));
+    return `あと${remaining}問正解で" ${hint} "にランクアップ！`;
+  };
+
   return (
     <div className="text-center mt-6">
       {showTitle && <h2 className="text-4xl md:text-6xl font-extrabold mb-8">クイズ終了！</h2>}
-      {showScore && <p className="text-3xl md:text-4xl mb-12">正解数: {correctCount}</p>}
-      {showText && <p className="text-2xl md:text-2xl text-gray-600 mb-8">君は…</p>}
+      {showScore && <p className="text-3xl md:text-4xl mb-4">正解数: {correctCount}</p>}
+      {showText && <p className="text-2xl md:text-2xl text-gray-600 mb-2">君は…</p>}
       {showRank && (
-        <div className="flex flex-col md:flex-row items-center justify-center mb-10 gap-4 md:gap-10">
-          <img src="/images/yuusya.png" alt="勇者" className="w-0 h-0 md:w-50 md:h-60" />
-          <p className="text-xl md:text-5xl font-bold text-blue-600 drop-shadow-lg animate-bounce text-center">
-            称号：{getTitle()}
-          </p>
-          <div className="flex flex-row md:flex-row items-center justify-center gap-8">
-            <img src="/images/yuusya.png" alt="勇者" className="w-20 h-25 md:w-0 md:h-0" />
-            <img src="/images/dragon.png" alt="ドラゴン" className="w-20 h-18 md:w-50 md:h-45" />
+        <>
+          <div className="flex flex-col md:flex-row items-center justify-center mb-10 gap-4 md:gap-10">
+            <img src="/images/yuusya.png" alt="勇者" className="w-0 h-0 md:w-50 md:h-60" />
+            <p className="text-xl md:text-5xl font-bold text-blue-600 drop-shadow-lg animate-bounce text-center">
+              称号：{getTitle()}
+            </p>
+            <div className="flex flex-row md:flex-row items-center justify-center gap-8">
+              <img src="/images/yuusya.png" alt="勇者" className="w-20 h-25 md:w-0 md:h-0" />
+              <img src="/images/dragon.png" alt="ドラゴン" className="w-20 h-18 md:w-50 md:h-45" />
+            </div>
           </div>
-        </div>
+          {getNextTitleHint() && (
+            <p className="text-xl md:text-2xl text-gray-700 mb-8 font-semibold animate-pulse ">{getNextTitleHint()}</p>
+          )}
+        </>
       )}
       {showButton && (
         <button
@@ -152,7 +166,6 @@ export default function QuizModePage() {
 
   const shuffleArray = <T,>(arr: T[]) => [...arr].sort(() => Math.random() - 0.5);
 
-  // useRef 安全版タイマー
   useEffect(() => {
     const timer = setInterval(() => {
       if (finishedRef.current || showCorrectRef.current) return;
@@ -185,7 +198,7 @@ export default function QuizModePage() {
       setIncorrectMessage(`残念！不正解…\n答えは" ${displayAnswer} "でした！`);
       setTimeout(() => {
         setFinished(true);
-      }, 3000);
+      }, 2500);
     }
     setUserAnswer(null);
   };
@@ -223,36 +236,49 @@ export default function QuizModePage() {
 
           {questions[currentIndex].quiz && (
             <>
+              {/* 正解メッセージ */}
               {showCorrectMessage && (
-                <p className="text-4xl md:text-6xl font-extrabold mb-4 text-green-500 drop-shadow-lg animate-bounce animate-pulse">
-                  正解！
-                </p>
+                <>
+                  <p className="text-4xl md:text-6xl font-extrabold mb-2 text-green-500 drop-shadow-lg animate-bounce animate-pulse">
+                    　正解！
+                  </p>
+                  <p className="text-2xl md:text-3xl text-black font-bold mt-10">
+                    　次は STAGE {currentIndex + 2}！
+                  </p>
+                </>
               )}
 
+              {/* 不正解メッセージ */}
               {incorrectMessage && (
                 <p className="text-3xl md:text-4xl font-extrabold mb-4 text-red-500 drop-shadow-lg animate-shake whitespace-pre-line">
                   {incorrectMessage}
                 </p>
               )}
 
-              <QuizQuestion
-                quiz={questions[currentIndex].quiz}
-                userAnswer={userAnswer}
-                setUserAnswer={setUserAnswer}
-              />
+              {/* 選択肢表示は正解・不正解メッセージがないときだけ */}
+              {!showCorrectMessage && !incorrectMessage && (
+                <QuizQuestion
+                  quiz={questions[currentIndex].quiz}
+                  userAnswer={userAnswer}
+                  setUserAnswer={setUserAnswer}
+                />
+              )}
+
+              {/* 回答ボタンも同じ条件で非表示 */}
+              {!showCorrectMessage && !incorrectMessage && (
+                <button
+                  className="px-4 py-2 bg-blue-500 text-white rounded mt-4 hover:bg-blue-600 cursor-pointer"
+                  onClick={checkAnswer}
+                  disabled={userAnswer === null}
+                >
+                  回答
+                </button>
+              )}
             </>
           )}
-
-          <button
-            className="px-4 py-2 bg-blue-500 text-white rounded mt-4 hover:bg-blue-600 cursor-pointer"
-            onClick={checkAnswer}
-            disabled={userAnswer === null}
-          >
-            回答
-          </button>
         </>
       ) : (
-        <QuizResult correctCount={correctCount} getTitle={getTitle} />
+        <QuizResult correctCount={correctCount} getTitle={getTitle} titles={titles} />
       )}
     </div>
   );
