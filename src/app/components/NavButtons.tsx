@@ -60,10 +60,20 @@ export default function NavButtons() {
         );
       })}
 
+      {/* 連続正解チャレンジ */}
+      <Link href="/streak-challenge">
+        <button
+          className={`${baseStyle} bg-gradient-to-r from-red-500 to-orange-400 text-white shadow-xl ring-2 ring-orange-300 hover:scale-110
+            ${pathname.startsWith("/streak-challenge") ? activeStyle : ""}`}
+        >
+          連続正解チャレンジ
+        </button>
+      </Link>
+      
       {/* クイズマスター */}
       <Link href="/quiz-master">
         <button
-          className={`${baseStyle} bg-yellow-400 text-black hover:scale-105
+          className={`${baseStyle} bg-gradient-to-r from-purple-500 to-indigo-400 text-white shadow-xl ring-2 ring-purple-400 hover:scale-110
             ${pathname.startsWith("/quiz-master") ? activeStyle : ""}`}
         >
           クイズマスターへの道

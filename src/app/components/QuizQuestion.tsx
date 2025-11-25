@@ -11,7 +11,7 @@ interface Props {
 
 export default function QuizQuestion({ quiz, userAnswer, setUserAnswer }: Props) {
   return (
-    <div className="my-6 text-center border border-black rounded-lg p-6 max-w-md mx-auto">
+    <div className="my-6 text-center bg-white border border-black rounded-lg p-6 max-w-md mx-auto">
       {quiz.image && (
         <div className="w-full h-40 md:h-64 relative mb-4">
           <Image
