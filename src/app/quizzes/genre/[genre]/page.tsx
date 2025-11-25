@@ -74,7 +74,14 @@ export default async function GenrePage({ params, searchParams }: PageProps) {
   return (
     <div className="container mx-auto px-4 py-8">
       <p className="text-center text-xl md:text-2xl font-extrabold text-gray-800 leading-relaxed -mt-2 mb-6"> ひまな時間にぴったり！「ひまQ」は簡単に遊べる脳トレクイズや暇つぶしクイズが満載です。クイズで頭の体操をしよう！ </p>
-      <h2 className="text-3xl font-bold mb-6 text-center">{genreParam} クイズ</h2>
+      <h2 className="text-3xl font-bold mb-2 text-center">{genreParam} クイズ</h2>
+      
+      {/* ★ クイズ数表示（中央） */}
+      <p
+        className="text-center text-xl md:text-2xl font-extrabold mb-6 bg-gradient-to-r from-blue-500 via-sky-400 to-blue-300 bg-clip-text text-transparent"
+      >
+        ＜クイズ数：{filteredArticles.length} 個＞
+      </p>
 
       {filteredArticles.length === 0 && (
         <p className="text-center text-gray-500">

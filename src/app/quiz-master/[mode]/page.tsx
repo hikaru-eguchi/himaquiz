@@ -153,7 +153,7 @@ export default function QuizModePage() {
   const [correctCount, setCorrectCount] = useState(0);
   const [finished, setFinished] = useState(false);
   const [showCorrectMessage, setShowCorrectMessage] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(30);
+  const [timeLeft, setTimeLeft] = useState(60);
   const [incorrectMessage, setIncorrectMessage] = useState<string | null>(null);
 
   const finishedRef = useRef(finished);
@@ -271,7 +271,7 @@ export default function QuizModePage() {
       setFinished(true);
     } else {
       setCurrentIndex(i => i + 1);
-      setTimeLeft(30);
+      setTimeLeft(60);
     }
   };
 
@@ -310,6 +310,9 @@ export default function QuizModePage() {
                   <p className="text-2xl md:text-3xl text-black font-bold mt-10">
                     　次は STAGE {currentIndex + 2}！
                   </p>
+                  <p className="text-sm md:text-lg text-black mt-5">
+                    　（数秒後、自動で次のステージへ移動します）
+                  </p>
                 </>
               )}
 
@@ -332,7 +335,7 @@ export default function QuizModePage() {
               {/* 回答ボタン */}
               {!showCorrectMessage && !incorrectMessage && (
                 <button
-                  className="px-4 py-2 md:px-6 md:py-3 bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-4 hover:bg-blue-600 cursor-pointer"
+                  className="px-5 py-3 md:px-6 md:py-3 bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-4 hover:bg-blue-600 cursor-pointer"
                   onClick={checkAnswer}
                   disabled={userAnswer === null}
                 >
