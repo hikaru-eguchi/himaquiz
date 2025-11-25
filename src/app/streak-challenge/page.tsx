@@ -88,26 +88,28 @@ export default function QuizMasterPage() {
               alt={`キャラ${index}`}
               className={`
                 ${visibleCount > index ? "character-animate" : "opacity-0"}
-                w-30 h-30 md:w-45 md:h-45 object-cover rounded-lg
+                w-30 h-32 md:w-50 md:h-52 object-cover rounded-lg
               `}
               style={{ animationDelay: `${index * 0.1}s` }}
             />
           ))}
         </div>
 
-        <div className="flex flex-col md:flex-row justify-center gap-3 md:gap-4">
-          <Link href="/streak-challenge/random">
-            <button className="min-w-80 md:min-w-95 px-6 py-2 md:px-8 md:py-4 bg-blue-500 text-white rounded-full hover:bg-blue-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black">
+        <div className="flex flex-col md:flex-row justify-center gap-3 md:gap-4 max-w-2xl mx-auto">
+          <Link href="/streak-challenge/random" className="flex-1">
+            <button className="w-full px-6 py-2 md:px-8 md:py-4 bg-blue-500 text-white rounded-full hover:bg-blue-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black">
               全ジャンルで挑む
             </button>
           </Link>
 
-          <button
-            className="min-w-80 md:min-w-95 px-6 py-2 md:px-8 md:py-4 bg-green-500 text-white rounded-full hover:bg-green-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
-            onClick={handleGenreClick}
-          >
-            ジャンルを選ぶ
-          </button>
+          <Link href="#" className="flex-1">
+            <button
+              className="flex-1 w-full px-6 py-2 md:px-8 md:py-4 bg-green-500 text-white rounded-full hover:bg-green-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
+              onClick={handleGenreClick}
+            >
+              ジャンルを選ぶ
+            </button>
+          </Link>
         </div>
 
         {showGenreButtons && (
