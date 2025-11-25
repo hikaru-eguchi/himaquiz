@@ -100,7 +100,7 @@ export default function QuizMasterPage() {
           <Link href="/quiz-master/random" className="flex-1">
             <button className="w-full px-6 py-2 md:px-8 md:py-4 bg-blue-500 text-white rounded-full hover:bg-blue-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black">
               全ジャンルで挑む
-              <span className="text-sm md:text-lg text-gray-200 block">
+              <span className="text-sm md:text-lg text-gray-100 block">
                 （全知の覇者オールラウンドマスター）
               </span>
             </button>
@@ -112,7 +112,7 @@ export default function QuizMasterPage() {
               onClick={handleGenreClick}
             >
               ジャンルを選ぶ
-              <span className="text-sm md:text-lg text-gray-200 block">
+              <span className="text-sm md:text-lg text-gray-100 block">
                 （専門領域の覇者スペシャリストマスター）
               </span>
             </button>
