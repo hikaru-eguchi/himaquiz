@@ -16,14 +16,14 @@ export default function QuizMasterPage() {
   // ★ PC用キャラ（全6枚）
   const allCharacters = [
     "/images/dragon.png",
-    "/images/yuusya.png",
-    "/images/mahoutsukai_wind.png",
+    "/images/yuusya_game.png",
+    "/images/character_game_mimic.png",
   ];
 
   // ★ スマホ専用キャラ（2枚だけ）
   const mobileCharacters = [
     "/images/dragon.png",
-    "/images/yuusya.png",
+    "/images/yuusya_game.png",
   ];
 
   // ★ 画面サイズで表示画像を切り替え
@@ -69,7 +69,7 @@ export default function QuizMasterPage() {
           fontFamily: anton.style.fontFamily,
         }}
       >
-        クイズマスターへの道
+        クイズダンジョン
       </h1>
 
       <>

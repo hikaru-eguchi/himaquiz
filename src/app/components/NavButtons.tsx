@@ -76,7 +76,7 @@ export default function NavButtons() {
           className={`${baseStyle} bg-gradient-to-r from-purple-500 to-indigo-400 text-white shadow-xl ring-2 ring-purple-400 hover:scale-110
             ${pathname.startsWith("/quiz-master") ? activeStyle : ""}`}
         >
-          クイズマスターへの道
+          クイズダンジョン
         </button>
       </Link>
     </div>

@@ -21,6 +21,8 @@ interface QuizData {
   answer: number;
   displayAnswer?: string;
   hint: string;
+  genre?: string;
+  level?: string;
 }
 
 interface ArticleData {
@@ -30,6 +32,20 @@ interface ArticleData {
   contentHtml: string;
   description?: string;
   quiz?: QuizData;
+}
+
+// ★ ジャンルごとに背景色を変える関数（ポップで薄め）
+function getGenreBg(genre?: string) {
+  switch (genre) {
+    case "心理系":
+      return "bg-gradient-to-br from-pink-100 via-pink-300 to-purple-100";
+    case "知識系":
+      return "bg-gradient-to-br from-sky-100 via-sky-300 to-teal-100";
+    case "雑学系":
+      return "bg-gradient-to-br from-yellow-100 via-green-300 to-green-100";
+    default:
+      return "bg-gray-100";
+  }
 }
 
 // ===== 記事一覧を取得（関連記事用にも再利用） =====
@@ -42,13 +58,14 @@ async function getAllArticles(): Promise<ArticleData[]> {
     const fullPath = path.join(dir, fileName);
     const fileContents = fs.readFileSync(fullPath, "utf8");
     const matterResult = matter(fileContents);
-    const { title, date, description } = matterResult.data as {
+    const { title, date, description, quiz } = matterResult.data as {
       title: string;
       date: string;
       description?: string;
+      quiz?: QuizData;
     };
 
-    return { id, title, date, description, contentHtml: "" };
+    return { id, title, date, description, quiz, contentHtml: "" };
   });
 }
 
@@ -73,11 +90,9 @@ async function getArticleData(id: string): Promise<ArticleData> {
     quiz?: QuizData;
   };
 
-  // remarkプラグインでslugと自動リンクを追加
   const processedContent = await remark()
     .use(remarkGfm)
     .use(remarkSlug)
-    // 👇 remark-toc は削除（自動で目次を挿入すると干渉するため）
     .use(remarkAutolinkHeadings, { behavior: "append" })
     .use(html)
     .process(matterResult.content);
@@ -130,11 +145,11 @@ export default async function ArticleDetailPage({
   const { id } = await params;
   const articleData = await getArticleData(id);
 
-  // 👇 関連記事を取得（自分以外の新しい記事上位4件）
+  // 👇 関連記事を取得（自分以外・同じ難易度の記事のみ・上位4件）
   const allArticles = await getAllArticles();
   const relatedArticles = allArticles
     .filter((a) => a.id !== id)
-    .sort(() => Math.random() - 0.5)
+    .filter((a) => a.quiz?.level === articleData.quiz?.level)
     .slice(0, 4);
 
   return (
@@ -144,10 +159,10 @@ export default async function ArticleDetailPage({
         {articleData.title}
       </h1>
 
-      {/* 👇 ここにTableOfContentsを追加 */}
+      {/* TableOfContents */}
       <TableOfContents content={articleData.contentHtml} />
 
-      {/* 👇 QuizMDXWrapper で本文とクイズを表示 */}
+      {/* 本文とクイズ */}
       {articleData.quiz ? (
         <QuizMDXWrapper quiz={articleData.quiz}>
           <div
@@ -162,9 +177,14 @@ export default async function ArticleDetailPage({
         />
       )}
 
-      {/* 👇 関連記事セクション */}
+      {/* おすすめクイズ */}
       {relatedArticles.length > 0 && (
-        <section className="mt-16">
+        <section
+          className="mt-16 p-3 rounded-lg"
+          style={{
+            background: "linear-gradient(90deg, #ffd36b, #fff87d, #a0e8ff)"
+          }}
+        >
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8 text-center">
             おすすめクイズ
           </h2>
@@ -174,18 +194,24 @@ export default async function ArticleDetailPage({
               <Link
                 key={article.id}
                 href={`/article/${article.id}`}
-                className="block bg-gray-50 rounded-lg shadow hover:shadow-lg transition-all duration-300 overflow-hidden"
+                className={`block rounded-lg shadow hover:shadow-lg transition-all duration-300 overflow-hidden ${getGenreBg(article.quiz?.genre)}`}
               >
                 <div className="p-4">
-                  <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 mb-2">
+                  <h3 className="text-xl font-semibold text-gray-900 line-clamp-2 mb-2">
                     {article.title}
                   </h3>
+
                   {article.description && (
-                    <p className="text-gray-600 text-sm line-clamp-2">{article.description}</p>
+                    <p className="text-gray-700 text-sm line-clamp-2">{article.description}</p>
                   )}
-                  <p className="text-gray-400 text-xs mt-2">
-                    {new Date(article.date).toLocaleDateString("ja-JP")}
-                  </p>
+
+                  {article.quiz?.genre && (
+                    <p className="text-sm text-gray-800 mt-3">ジャンル：{article.quiz.genre}</p>
+                  )}
+
+                  {article.quiz?.level && (
+                    <p className="text-sm text-gray-800">難易度：{article.quiz.level}</p>
+                  )}
                 </div>
               </Link>
             ))}

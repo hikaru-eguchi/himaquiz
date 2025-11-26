@@ -81,11 +81,11 @@ const QuizResult = ({ correctCount, getTitle, titles }: { correctCount: number, 
   return (
     <div className="text-center mt-6">
 
-      {/* ★ 中央に1秒だけ出る「クイズ終了！」 */}
+      {/* ★ 中央に1秒だけ出る「ダンジョン終了！」 */}
       {flashEnd && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 
                         text-white text-5xl md:text-7xl font-extrabold">
-          クイズ終了！
+          ダンジョン終了！
         </div>
       )}
 
@@ -95,12 +95,12 @@ const QuizResult = ({ correctCount, getTitle, titles }: { correctCount: number, 
       {showRank && (
         <>
           <div className="flex flex-col md:flex-row items-center justify-center mb-10 gap-4 md:gap-10">
-            <img src="/images/yuusya.png" alt="勇者" className="w-0 h-0 md:w-50 md:h-60" />
+            <img src="/images/yuusya_game.png" alt="勇者" className="w-0 h-0 md:w-50 md:h-60" />
             <p className="text-4xl md:text-6xl font-bold text-blue-600 drop-shadow-lg text-center animate-pulse">
               {getTitle()}
             </p>
             <div className="flex flex-row md:flex-row items-center justify-center gap-8">
-              <img src="/images/yuusya.png" alt="勇者" className="w-20 h-25 md:w-0 md:h-0" />
+              <img src="/images/yuusya_game.png" alt="勇者" className="w-20 h-25 md:w-0 md:h-0" />
               <img src="/images/dragon.png" alt="ドラゴン" className="w-20 h-18 md:w-50 md:h-45" />
             </div>
           </div>
@@ -138,7 +138,6 @@ export default function QuizModePage() {
   const [correctCount, setCorrectCount] = useState(0);
   const [finished, setFinished] = useState(false);
   const [showCorrectMessage, setShowCorrectMessage] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(60);
   const [incorrectMessage, setIncorrectMessage] = useState<string | null>(null);
 
   const finishedRef = useRef(finished);
@@ -211,22 +210,6 @@ export default function QuizModePage() {
 
   const shuffleArray = <T,>(arr: T[]) => [...arr].sort(() => Math.random() - 0.5);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      if (finishedRef.current || showCorrectRef.current) return;
-      setTimeLeft((t) => {
-        if (t <= 1) {
-          clearInterval(timer);
-          setFinished(true);
-          return 0;
-        }
-        return t - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
-
   const checkAnswer = () => {
     const correctAnswer = questions[currentIndex].quiz?.answer;
     const displayAnswer = questions[currentIndex].quiz?.displayAnswer;
@@ -255,7 +238,6 @@ export default function QuizModePage() {
       setFinished(true);
     } else {
       setCurrentIndex(i => i + 1);
-      setTimeLeft(60);
     }
   };
 
@@ -276,12 +258,6 @@ export default function QuizModePage() {
           <h2 className="text-5xl md:text-6xl font-extrabold mb-6 text-purple-500 drop-shadow-lg">
             STAGE {currentIndex + 1}
           </h2>
-
-          {!incorrectMessage && (
-            <p className="text-xl font-bold mb-4 text-red-500">
-              残り時間: {timeLeft} 秒
-            </p>
-          )}
 
           {questions[currentIndex].quiz && (
             <>
