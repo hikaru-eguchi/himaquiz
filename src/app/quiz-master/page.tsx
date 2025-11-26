@@ -15,12 +15,9 @@ export default function QuizMasterPage() {
 
   // ★ PC用キャラ（全6枚）
   const allCharacters = [
-    "/images/ryuukishi.png",
-    "/images/tabibito.png",
     "/images/dragon.png",
     "/images/yuusya.png",
-    "/images/yuusya2.png",
-    "/images/dragon2.png",
+    "/images/mahoutsukai_wind.png",
   ];
 
   // ★ スマホ専用キャラ（2枚だけ）
@@ -89,7 +86,7 @@ export default function QuizMasterPage() {
               alt={`キャラ${index}`}
               className={`
                 ${visibleCount > index ? "character-animate" : "opacity-0"}
-                w-30 h-30 md:w-40 md:h-40 object-cover rounded-lg
+                w-30 h-30 md:w-50 md:h-52 object-cover rounded-lg
               `}
               style={{ animationDelay: `${index * 0.1}s` }}
             />
@@ -111,7 +108,7 @@ export default function QuizMasterPage() {
               className="flex-1 w-full px-6 py-2 md:px-8 md:py-4 bg-green-500 text-white rounded-full hover:bg-green-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
               onClick={handleGenreClick}
             >
-              ジャンルを選ぶ
+              ジャンルを選んで挑む
               <span className="text-sm md:text-lg text-gray-100 block">
                 （専門領域の覇者スペシャリストマスター）
               </span>

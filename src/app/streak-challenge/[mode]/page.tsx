@@ -9,7 +9,6 @@ interface ArticleData {
   id: string;
   title: string;
   genre: string;
-  thumbnail: string;
   quiz?: {
     title: string;
     question: string;
@@ -103,13 +102,13 @@ const QuizResult = ({ correctCount, getTitle, titles }: { correctCount: number, 
       {showRank && (
         <>
           <div className="flex flex-col md:flex-row items-center justify-center mb-10 gap-4 md:gap-10">
-            <img src="/images/quiz_man_hatena1.png" alt="クイズ" className="w-0 h-0 md:w-36 md:h-55 ml-15" />
+            <img src="/images/quiz.png" alt="クイズ" className="w-0 h-0 md:w-36 md:h-55 ml-15" />
             <p className="text-4xl md:text-6xl font-bold text-blue-600 drop-shadow-lg text-center animate-pulse">
               {getTitle()}
             </p>
             <div className="flex flex-row md:flex-row items-center justify-center gap-8">
-              <img src="/images/quiz_man_hatena1.png" alt="クイズ" className="w-20 h-30 md:w-0 md:h-0" />
-              <img src="/images/quiz_kuma.png" alt="くま" className="w-22 h-25 md:w-38 md:h-40" />
+              <img src="/images/quiz.png" alt="クイズ" className="w-20 h-30 md:w-0 md:h-0" />
+              <img src="/images/quiz_woman.png" alt="クイズ" className="w-22 h-25 md:w-38 md:h-40" />
             </div>
           </div>
 
@@ -213,7 +212,6 @@ export default function QuizModePage() {
               choices: a.quiz!.choices ? a.quiz!.choices.map(String) : [],
               genre: a.quiz!.genre,
               level: a.quiz!.level,
-              image: a.thumbnail,
             }
           }));
 

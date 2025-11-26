@@ -9,7 +9,6 @@ interface ArticleData {
   id: string;
   title: string;
   genre: string;
-  thumbnail: string;
   quiz?: {
     title: string;
     question: string;
@@ -198,7 +197,6 @@ export default function QuizModePage() {
               choices: a.quiz!.choices ? a.quiz!.choices.map(String) : [],
               genre: a.quiz!.genre,
               level: a.quiz!.level,
-              image: a.thumbnail,
             }
           }));
 

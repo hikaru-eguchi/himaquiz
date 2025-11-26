@@ -15,17 +15,15 @@ export default function QuizMasterPage() {
 
   // ★ PC用キャラ（全6枚）
   const allCharacters = [
-    "/images/quiz_usag.png",
     "/images/quiz_man.png",
-    "/images/quiz_man_hatena1.png",
+    "/images/quiz.png",
     "/images/quiz_woman.png",
-    "/images/quiz_kuma.png",
   ];
 
   // ★ スマホ専用キャラ（2枚だけ）
   const mobileCharacters = [
-    "/images/quiz_man_hatena1.png",
-    "/images/quiz_kuma.png",
+    "/images/quiz.png",
+    "/images/quiz_woman.png",
   ];
 
   // ★ 画面サイズで表示画像を切り替え
@@ -98,7 +96,7 @@ export default function QuizMasterPage() {
         <div className="flex flex-col md:flex-row justify-center gap-3 md:gap-4 max-w-2xl mx-auto">
           <Link href="/streak-challenge/random" className="flex-1">
             <button className="w-full px-6 py-2 md:px-8 md:py-4 bg-blue-500 text-white rounded-full hover:bg-blue-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black">
-              全ジャンルで挑む
+              全ジャンルから出題
             </button>
           </Link>
 
@@ -107,7 +105,7 @@ export default function QuizMasterPage() {
               className="flex-1 w-full px-6 py-2 md:px-8 md:py-4 bg-green-500 text-white rounded-full hover:bg-green-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
               onClick={handleGenreClick}
             >
-              ジャンルを選ぶ
+              ジャンルを選んで出題
             </button>
           </Link>
         </div>

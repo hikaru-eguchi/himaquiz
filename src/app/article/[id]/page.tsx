@@ -7,7 +7,6 @@ import remarkGfm from "remark-gfm";
 import remarkSlug from "remark-slug";
 import remarkAutolinkHeadings from "remark-autolink-headings";
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 
 // 👇 追加：TableOfContentsコンポーネントを読み込む
@@ -30,7 +29,6 @@ interface ArticleData {
   date: string;
   contentHtml: string;
   description?: string;
-  thumbnail?: string;
   quiz?: QuizData;
 }
 
@@ -44,14 +42,13 @@ async function getAllArticles(): Promise<ArticleData[]> {
     const fullPath = path.join(dir, fileName);
     const fileContents = fs.readFileSync(fullPath, "utf8");
     const matterResult = matter(fileContents);
-    const { title, date, description, thumbnail } = matterResult.data as {
+    const { title, date, description } = matterResult.data as {
       title: string;
       date: string;
       description?: string;
-      thumbnail?: string;
     };
 
-    return { id, title, date, description, thumbnail, contentHtml: "" };
+    return { id, title, date, description, contentHtml: "" };
   });
 }
 
@@ -71,9 +68,8 @@ async function getArticleData(id: string): Promise<ArticleData> {
   const fileContents = fs.readFileSync(fullPath, "utf8");
   const matterResult = matter(fileContents);
 
-  const { description, thumbnail, quiz } = matterResult.data as {
+  const { description, quiz } = matterResult.data as {
     description?: string;
-    thumbnail?: string;
     quiz?: QuizData;
   };
 
@@ -93,7 +89,6 @@ async function getArticleData(id: string): Promise<ArticleData> {
     contentHtml,
     ...(matterResult.data as { title: string; date: string }),
     description,
-    thumbnail,
     quiz,
   };
 }
@@ -119,14 +114,6 @@ export async function generateMetadata({
       description,
       url: `https://www.hima-quiz.com/article/${id}`,
       siteName: "ひまQ",
-      images: [
-        {
-          url: articleData.thumbnail || "/images/ogp-default.jpg",
-          width: 1200,
-          height: 630,
-          alt: articleData.title,
-        },
-      ],
       type: "article",
       publishedTime: new Date(articleData.date).toISOString(),
       locale: "ja_JP",
@@ -156,20 +143,6 @@ export default async function ArticleDetailPage({
       <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-6 text-center">
         {articleData.title}
       </h1>
-
-      {/* サムネイル表示 */}
-      {articleData.thumbnail && (
-        <div className="w-full flex justify-center mb-2">
-          <div className="w-[255px] h-[160px] md:w-[540px] md:h-[300px] relative rounded-lg overflow-hidden shadow-md border">
-            <Image
-              src={articleData.thumbnail}
-              alt={articleData.title}
-              fill
-              className="object-cover"
-            />
-          </div>
-        </div>
-      )}
 
       {/* 👇 ここにTableOfContentsを追加 */}
       <TableOfContents content={articleData.contentHtml} />
@@ -203,16 +176,6 @@ export default async function ArticleDetailPage({
                 href={`/article/${article.id}`}
                 className="block bg-gray-50 rounded-lg shadow hover:shadow-lg transition-all duration-300 overflow-hidden"
               >
-                {article.thumbnail && (
-                  <div className="relative w-full h-40">
-                    <Image
-                      src={article.thumbnail}
-                      alt={article.title}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                )}
                 <div className="p-4">
                   <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 mb-2">
                     {article.title}

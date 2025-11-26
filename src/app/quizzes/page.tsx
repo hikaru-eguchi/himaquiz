@@ -2,14 +2,12 @@ import Link from "next/link";
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
-import Image from "next/image";
 import Pagination from "../components/Pagination";
 
 interface ArticleMeta {
   id: string;
   title: string;
   date: string;
-  thumbnail?: string;
   description?: string;
   genre?: string;
   level?: string;
@@ -30,7 +28,6 @@ async function getSortedArticlesData(): Promise<ArticleMeta[]> {
       id,
       title: matterResult.data.title,
       date: matterResult.data.date,
-      thumbnail: matterResult.data.thumbnail,
       description: matterResult.data.description,
       genre: matterResult.data.quiz?.genre,
       level: matterResult.data.quiz?.level,
@@ -80,16 +77,6 @@ export default async function QuizzesPage({ searchParams }: PageProps) {
             href={`/article/${article.id}`}
             className="block bg-white rounded-xl shadow-md hover:shadow-2xl transition-shadow duration-300 ease-in-out overflow-hidden group"
           >
-            {article.thumbnail && (
-              <Image
-                src={article.thumbnail}
-                alt={article.title}
-                width={600}
-                height={400}
-                className="w-full h-42 sm:h-48 object-cover"
-              />
-            )}
-
             <div className="p-5 sm:p-8">
               <h3 className="font-bold text-2xl mb-3 text-gray-900 group-hover:text-brand-dark transition-colors">
                 {article.title}

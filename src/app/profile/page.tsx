@@ -49,7 +49,7 @@ const sections = [
       <div className="prose prose-lg max-w-3xl mx-auto text-gray-600">
         <h2 id="name" className="text-3xl font-bold text-gray-800 mt-5 mb-4">運営者プロフィール</h2>
         <Image
-          src="/images/man.png"
+          src="/images/quiz.png"
           alt="男性の写真"
           width={160}       // 横幅
           height={160}      // 高さ
