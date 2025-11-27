@@ -3,6 +3,13 @@ import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 import Pagination from "./components/Pagination";
+import LevelFilterButtons from "@/app/components/LevelFilterButtons";
+
+export const metadata = {
+  title: "全てのクイズ｜ひまQ",
+  description:
+    "ひまQでは、簡単に遊べるクイズを多数掲載。クイズを楽しんで脳トレしよう！",
+};
 
 interface ArticleMeta {
   id: string;
@@ -87,12 +94,21 @@ export default async function HomePage({
   return (
     <div className="container mx-auto px-4 py-2 sm:py-8">
 
-      <p className="text-center text-lg md:text-xl font-extrabold text-gray-800 leading-relaxed -mt-2 mb-3">
+      <p className="text-center text-lg md:text-xl font-extrabold text-gray-800 leading-relaxed -mt-2 mb-6">
         ひまな時間にぴったり！「ひまQ」は簡単に遊べる脳トレクイズや暇つぶしクイズが満載です。クイズで頭の体操をしよう！
       </p>
 
+      <h1 className="text-3xl font-bold mb-2 text-center leading-tight">
+        全て の クイズ
+      </h1>
+
+      {/* 難易度ボタン */}
+      <div className="m-6">
+        <LevelFilterButtons/>
+      </div>
+
       {/* ★ クイズ数表示 */}
-      <p className="text-center text-xl md:text-2xl font-extrabold mb-6 bg-gradient-to-r from-blue-500 via-sky-400 to-blue-300 bg-clip-text text-transparent">
+      <p className="text-center text-xl md:text-2xl font-extrabold mb-6">
         ＜クイズ数：{allArticles.length} 個＞
       </p>
 
@@ -102,7 +118,7 @@ export default async function HomePage({
             <Link
               key={article.id}
               href={`/article/${article.id}`}
-              className={`block rounded-xl shadow-md hover:shadow-2xl transition-shadow duration-300 ease-in-out overflow-hidden group ${getGenreBg(article.genre)}`}
+              className={`block rounded-xl shadow-md hover:shadow-2xl border border-black transition-shadow duration-300 ease-in-out overflow-hidden group ${getGenreBg(article.genre)}`}
             >
               <div className="p-5 sm:p-6">
                 <h3 className="font-bold text-2xl mb-2 text-gray-900 group-hover:text-brand-dark transition-colors">

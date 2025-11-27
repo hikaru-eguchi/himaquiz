@@ -1,8 +1,16 @@
+// src/app/quizzes/genre/知識系/level/かんたん/page.tsx
 import Link from "next/link";
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
-import Pagination from "../../../components/Pagination";
+import Pagination from "@/app/components/Pagination";
+import LevelFilterButtons from "@/app/components/LevelFilterButtons";
+
+export const metadata = {
+  title: "難しいレベルの心理系クイズ｜ひまQ",
+  description:
+    "ひまQでは、簡単に遊べる心理系クイズを多数掲載。難しいレベルの心理系クイズを楽しんで脳トレしよう！",
+};
 
 interface ArticleMeta {
   id: string;
@@ -17,13 +25,10 @@ interface ArticleMeta {
 function getGenreBg(genre?: string) {
   switch (genre) {
     case "心理系":
-      // パステルピンク × ラベンダー
       return "bg-gradient-to-br from-pink-100 via-pink-300 to-purple-100";
     case "知識系":
-      // パステルブルー × ミント
       return "bg-gradient-to-br from-sky-100 via-sky-300 to-teal-100";
     case "雑学系":
-      // クリーム × パステルグリーン
       return "bg-gradient-to-br from-yellow-100 via-green-300 to-green-100";
     default:
       return "bg-gray-100";
@@ -51,28 +56,24 @@ async function getSortedArticlesData(): Promise<ArticleMeta[]> {
     };
   });
 
-  // 日付降順
   return allArticlesData.sort((a, b) => (a.date < b.date ? 1 : -1));
 }
 
-type PageProps = {
-  params: {
-    genre: string;
-  };
-  searchParams?: {
-    page?: string;
-  };
-};
-
-export default async function GenrePage({ params, searchParams }: PageProps) {
-  const genreParam = decodeURIComponent(params.genre);
+export default async function KnowledgeEasyPage({
+  searchParams,
+}: {
+  searchParams?: { page?: string };
+}) {
+  const genreParam = "psychology"; // URL 用（英語）
+  const displayGenre = "心理系"; // 表示用（日本語）
+  const levelParam = "難しい";
   const currentPage = Number(searchParams?.page) || 1;
 
   const allArticles = await getSortedArticlesData();
 
-  // 指定ジャンルのみに絞る
+  // ジャンル「心理系」かつレベル「難しい」のクイズだけ
   const filteredArticles = allArticles.filter(
-    (article) => article.genre === genreParam
+    (article) => article.genre === displayGenre && article.level === levelParam
   );
 
   // ページネーション設定
@@ -91,20 +92,25 @@ export default async function GenrePage({ params, searchParams }: PageProps) {
         ひまな時間にぴったり！「ひまQ」は簡単に遊べる脳トレクイズや暇つぶしクイズが満載です。クイズで頭の体操をしよう！
       </p>
 
-      <h2 className="text-3xl font-bold mb-2 text-center">
-        {genreParam} クイズ
-      </h2>
+      <h1 className="text-3xl font-bold mb-2 text-center text-pink-600 leading-tight">
+        難しいレベル<span className="block sm:inline"> の 心理系 クイズ</span>
+      </h1>
+
+      {/* 難易度ボタン */}
+      <div className="m-6">
+        <LevelFilterButtons genre={genreParam} />
+      </div>
 
       {/* ★ クイズ数表示（中央） */}
       <p
-        className="text-center text-xl md:text-2xl font-extrabold mb-6 bg-gradient-to-r from-blue-500 via-sky-400 to-blue-300 bg-clip-text text-transparent"
+        className="text-center text-xl md:text-2xl font-extrabold mb-6"
       >
         ＜クイズ数：{filteredArticles.length} 個＞
       </p>
 
       {filteredArticles.length === 0 && (
         <p className="text-center text-gray-500">
-          このジャンルのクイズはまだありません。
+          このジャンル・レベルのクイズはまだありません。
         </p>
       )}
 
@@ -113,7 +119,7 @@ export default async function GenrePage({ params, searchParams }: PageProps) {
           <Link
             key={article.id}
             href={`/article/${article.id}`}
-            className={`block rounded-xl shadow-md hover:shadow-2xl transition-shadow duration-300 ease-in-out overflow-hidden group ${getGenreBg(article.genre)}`}
+            className={`block rounded-xl shadow-md hover:shadow-2xl border border-black transition-shadow duration-300 ease-in-out overflow-hidden group ${getGenreBg(article.genre)}`}
           >
             <div className="p-5 sm:p-6">
               <h3 className="font-bold text-2xl mb-2 text-gray-900 group-hover:text-brand-dark transition-colors">
@@ -137,7 +143,9 @@ export default async function GenrePage({ params, searchParams }: PageProps) {
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
-          basePath={`/quizzes/genre/${encodeURIComponent(genreParam)}`}
+          basePath={`/quizzes/genre/${encodeURIComponent(
+            genreParam
+          )}/level/${encodeURIComponent(levelParam)}`}
         />
       </div>
     </div>

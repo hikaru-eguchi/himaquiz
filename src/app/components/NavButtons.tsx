@@ -1,15 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 export default function NavButtons() {
-  const pathname = usePathname();
+  // 選択中のURLを保持（初期：全て）
+  const [activeUrl, setActiveUrl] = useState("/quizzes");
 
-  const genres = ["知識系", "心理系", "雑学系"];
-  const levels = ["かんたん", "ふつう", "難しい"];
+  // 日本語 → 英語パスのマッピング
+  const genreMap: Record<string, string> = {
+    "知識系": "/quizzes/genre/knowledge",
+    "心理系": "/quizzes/genre/psychology",
+    "雑学系": "/quizzes/genre/trivia",
+  };
 
-  // 白文字にせず、リング＋拡大のみ
+  const genres = Object.keys(genreMap);
+
+  // 選択中ボタンの装飾
   const activeStyle = "scale-110 ring-4 ring-blue-300";
 
   const baseStyle =
@@ -19,62 +26,61 @@ export default function NavButtons() {
     <div className="flex flex-wrap justify-center gap-2 md:gap-4 md:mt-6 md:mb-3">
 
       {/* 全て */}
-      <Link href="/quizzes">
+      <Link href="/quizzes" onClick={() => setActiveUrl("/quizzes")}>
         <button
-          className={`${baseStyle} bg-white text-black hover:scale-105
-            ${pathname === "/quizzes" ? activeStyle : ""}`}
+          className={`${baseStyle} bg-white text-black hover:scale-105 ${
+            activeUrl === "/quizzes" ? activeStyle : ""
+          }`}
         >
           全て
         </button>
       </Link>
 
-      {/* ジャンル */}
+      {/* ジャンルボタン */}
       {genres.map((genre) => {
-        const url = `/quizzes/genre/${encodeURIComponent(genre)}`;
-        const isActive = pathname.startsWith(url);
-        return (
-          <Link key={genre} href={url}>
-            <button
-              className={`${baseStyle} bg-blue-500 text-white hover:scale-105
-                ${isActive ? activeStyle : ""}`}
-            >
-              {genre} ▼
-            </button>
-          </Link>
-        );
-      })}
+        const url = genreMap[genre];
+        const isActive = activeUrl === url;
 
-      {/* 難易度 */}
-      {levels.map((level) => {
-        const url = `/quizzes/level/${encodeURIComponent(level)}`;
-        const isActive = pathname.startsWith(url);
         return (
-          <Link key={level} href={url}>
+          <Link
+            key={genre}
+            href={url}
+            onClick={() => setActiveUrl(url)}
+          >
             <button
-              className={`${baseStyle} bg-white text-black hover:scale-105
-                ${isActive ? activeStyle : ""}`}
+              className={`${baseStyle} bg-blue-500 text-white hover:scale-105 ${
+                isActive ? activeStyle : ""
+              }`}
             >
-              {level} ▼
+              {genre}
             </button>
           </Link>
         );
       })}
 
       {/* 連続正解チャレンジ */}
-      <Link href="/streak-challenge">
+      <Link
+        href="/streak-challenge"
+        onClick={() => setActiveUrl("/streak-challenge")}
+      >
         <button
-          className={`${baseStyle} bg-gradient-to-r from-red-500 to-orange-400 text-white shadow-xl ring-2 ring-orange-300 hover:scale-110
-            ${pathname.startsWith("/streak-challenge") ? activeStyle : ""}`}
+          className={`${baseStyle} bg-gradient-to-r from-red-500 to-orange-400 text-white shadow-xl ring-2 ring-orange-300 hover:scale-110 ${
+            activeUrl === "/streak-challenge" ? activeStyle : ""
+          }`}
         >
           連続正解チャレンジ
         </button>
       </Link>
-      
-      {/* クイズマスター */}
-      <Link href="/quiz-master">
+
+      {/* クイズダンジョン */}
+      <Link
+        href="/quiz-master"
+        onClick={() => setActiveUrl("/quiz-master")}
+      >
         <button
-          className={`${baseStyle} bg-gradient-to-r from-purple-500 to-indigo-400 text-white shadow-xl ring-2 ring-purple-400 hover:scale-110
-            ${pathname.startsWith("/quiz-master") ? activeStyle : ""}`}
+          className={`${baseStyle} bg-gradient-to-r from-purple-500 to-indigo-400 text-white shadow-xl ring-2 ring-purple-400 hover:scale-110 ${
+            activeUrl === "/quiz-master" ? activeStyle : ""
+          }`}
         >
           クイズダンジョン
         </button>

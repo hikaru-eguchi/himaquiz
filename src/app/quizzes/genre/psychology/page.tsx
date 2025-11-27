@@ -1,14 +1,15 @@
+// src/app/quizzes/genre/雑学系/page.tsx
 import Link from "next/link";
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
-import Pagination from "../components/Pagination";
+import Pagination from "@/app/components/Pagination";
 import LevelFilterButtons from "@/app/components/LevelFilterButtons";
 
 export const metadata = {
-  title: "全てのクイズ｜ひまQ",
+  title: "心理系クイズ｜ひまQ",
   description:
-    "ひまQでは、簡単に遊べるクイズを多数掲載。クイズを楽しんで脳トレしよう！",
+    "ひまQでは、簡単に遊べる心理系クイズを多数掲載。心理系クイズを楽しんで脳トレしよう！",
 };
 
 interface ArticleMeta {
@@ -20,24 +21,19 @@ interface ArticleMeta {
   level?: string;
 }
 
-// ★ ジャンルごとに背景色を変える関数（ポップで薄め）
 function getGenreBg(genre?: string) {
   switch (genre) {
     case "心理系":
-      // パステルピンク × ラベンダー
       return "bg-gradient-to-br from-pink-100 via-pink-300 to-purple-100";
     case "知識系":
-      // パステルブルー × ミント
       return "bg-gradient-to-br from-sky-100 via-sky-300 to-teal-100";
     case "雑学系":
-      // クリーム × パステルグリーン
       return "bg-gradient-to-br from-yellow-100 via-green-300 to-green-100";
     default:
       return "bg-gray-100";
   }
 }
 
-// すべてのMarkdown記事を取得
 async function getSortedArticlesData(): Promise<ArticleMeta[]> {
   const articlesDirectory = path.join(process.cwd(), "src", "articles");
   const fileNames = fs.readdirSync(articlesDirectory);
@@ -58,27 +54,29 @@ async function getSortedArticlesData(): Promise<ArticleMeta[]> {
     };
   });
 
-  // 日付降順
   return allArticlesData.sort((a, b) => (a.date < b.date ? 1 : -1));
 }
 
-type PageProps = {
-  searchParams?: {
-    page?: string;
-  };
-};
-
-export default async function QuizzesPage({ searchParams }: PageProps) {
+export default async function TriviaAllPage({
+  searchParams,
+}: {
+  searchParams?: { page?: string };
+}) {
+  const genreParam = "psychology"; // ★ 英語表記に変更
   const currentPage = Number(searchParams?.page) || 1;
 
   const allArticles = await getSortedArticlesData();
 
-  // ページネーション設定
+  // ジャンル「心理系」のクイズだけ（難易度は問わない）
+  const filteredArticles = allArticles.filter(
+    (article) => article.genre === "心理系" // 表示は日本語で判定
+  );
+
   const ARTICLES_PER_PAGE = 12;
-  const totalPages = Math.ceil(allArticles.length / ARTICLES_PER_PAGE);
+  const totalPages = Math.ceil(filteredArticles.length / ARTICLES_PER_PAGE);
 
   const startIndex = (currentPage - 1) * ARTICLES_PER_PAGE;
-  const paginatedArticles = allArticles.slice(
+  const paginatedArticles = filteredArticles.slice(
     startIndex,
     startIndex + ARTICLES_PER_PAGE
   );
@@ -89,23 +87,25 @@ export default async function QuizzesPage({ searchParams }: PageProps) {
         ひまな時間にぴったり！「ひまQ」は簡単に遊べる脳トレクイズや暇つぶしクイズが満載です。クイズで頭の体操をしよう！
       </p>
 
-      <h1 className="text-3xl font-bold mb-2 text-center leading-tight">
-        全て の クイズ
+      <h1 className="text-3xl font-bold mb-2 text-center text-pink-600 leading-tight">
+        全て<span className="block sm:inline"> の 心理系 クイズ</span>
       </h1>
 
       {/* 難易度ボタン */}
       <div className="m-6">
-        <LevelFilterButtons/>
+        <LevelFilterButtons genre={genreParam} /> {/* 英語の genre を渡す */}
       </div>
 
-      {/* ★ クイズ数表示（中央） */}
-      <p
-        className="text-center text-xl md:text-2xl font-extrabold mb-6"
-      >
-        ＜クイズ数：{allArticles.length} 個＞
+      <p className="text-center text-xl md:text-2xl font-extrabold mb-6">
+        ＜クイズ数：{filteredArticles.length} 個＞
       </p>
 
-      {/* ===== すべてのクイズ一覧 ===== */}
+      {filteredArticles.length === 0 && (
+        <p className="text-center text-gray-500">
+          このジャンルのクイズはまだありません。
+        </p>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
         {paginatedArticles.map((article) => (
           <Link
@@ -118,18 +118,10 @@ export default async function QuizzesPage({ searchParams }: PageProps) {
                 {article.title}
               </h3>
 
-              <p className="text-sm text-gray-700">
-                {article.description}
-              </p>
-
-              {article.genre && (
-                <p className="text-sm text-gray-700 mt-5">
-                  ジャンル: {article.genre}
-                </p>
-              )}
+              <p className="text-sm text-gray-700">{article.description}</p>
 
               {article.level && (
-                <p className="text-sm text-gray-700">
+                <p className="text-sm text-gray-700 mt-5">
                   難易度: {article.level}
                 </p>
               )}
@@ -138,12 +130,11 @@ export default async function QuizzesPage({ searchParams }: PageProps) {
         ))}
       </div>
 
-      {/* ▼▼ ページネーション ▼▼ */}
       <div className="mt-10">
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
-          basePath="/quizzes"
+          basePath={`/quizzes/genre/${encodeURIComponent(genreParam)}`}
         />
       </div>
     </div>
