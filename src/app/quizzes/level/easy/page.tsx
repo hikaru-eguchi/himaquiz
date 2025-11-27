@@ -90,7 +90,7 @@ export default async function EasyLevelPage({ searchParams }: PageProps) {
       </p>
 
       <h1 className="text-3xl font-bold mb-2 text-center">
-        かんたんレベル の クイズ
+        かんたんレベル<span className="block sm:inline"> の クイズ</span>
       </h1>
 
       {/* 難易度ボタン */}

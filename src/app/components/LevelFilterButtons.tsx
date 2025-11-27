@@ -48,7 +48,7 @@ export default function LevelFilterButtons({ genre }: LevelFilterButtonsProps) {
   };
 
   return (
-    <div className="flex justify-center gap-2 md:gap-4 mb-6 flex-wrap">
+    <div className="flex justify-center gap-1 md:gap-2 md:gap-4 mb-6 flex-wrap">
       {levels.map((levelJp) => {
         // ▼ URL 判定
         const url =
