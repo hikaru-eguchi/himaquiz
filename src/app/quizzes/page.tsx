@@ -89,14 +89,14 @@ export default async function QuizzesPage({ searchParams }: PageProps) {
         ひまな時間にぴったり！「ひまQ」は簡単に遊べる脳トレクイズや暇つぶしクイズが満載です。クイズで頭の体操をしよう！
       </p>
 
-      <h1 className="text-3xl font-bold mb-2 text-center leading-tight">
-        全て の クイズ
-      </h1>
-
       {/* 難易度ボタン */}
       <div className="m-6">
         <LevelFilterButtons/>
       </div>
+
+      <h1 className="text-3xl font-bold mb-2 text-center leading-tight">
+        全て の クイズ
+      </h1>
 
       {/* ★ クイズ数表示（中央） */}
       <p

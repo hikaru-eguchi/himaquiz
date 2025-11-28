@@ -20,7 +20,7 @@ export default function NavButtons() {
   const activeStyle = "scale-110 ring-4 ring-blue-300";
 
   const baseStyle =
-    "px-2 md:px-5 py-1 md:py-2 border-2 border-black rounded-full font-bold shadow-sm transition-all cursor-pointer";
+    "px-3 md:px-5 py-1 md:py-2 border-2 border-black rounded-full font-bold shadow-sm transition-all cursor-pointer";
 
   return (
     <div className="flex flex-wrap justify-center gap-2 md:gap-4 md:mt-6 md:mb-3">
@@ -58,33 +58,35 @@ export default function NavButtons() {
         );
       })}
 
-      {/* 連続正解チャレンジ */}
-      <Link
-        href="/streak-challenge"
-        onClick={() => setActiveUrl("/streak-challenge")}
-      >
-        <button
-          className={`${baseStyle} bg-gradient-to-r from-red-500 to-orange-400 text-white shadow-xl ring-2 ring-orange-300 hover:scale-110 ${
-            activeUrl === "/streak-challenge" ? activeStyle : ""
-          }`}
+      <div className="w-full flex justify-center gap-4 sm:gap-2 md:gap-4 sm:w-auto sm:flex-row">
+        {/* 連続正解チャレンジ */}
+        <Link
+          href="/streak-challenge"
+          onClick={() => setActiveUrl("/streak-challenge")}
         >
-          連続正解チャレンジ
-        </button>
-      </Link>
+          <button
+            className={`${baseStyle} bg-gradient-to-r from-red-500 to-orange-400 text-white shadow-xl ring-2 ring-orange-300 hover:scale-110 ${
+              activeUrl === "/streak-challenge" ? activeStyle : ""
+            }`}
+          >
+            連続正解チャレンジ
+          </button>
+        </Link>
 
-      {/* クイズダンジョン */}
-      <Link
-        href="/quiz-master"
-        onClick={() => setActiveUrl("/quiz-master")}
-      >
-        <button
-          className={`${baseStyle} bg-gradient-to-r from-purple-500 to-indigo-400 text-white shadow-xl ring-2 ring-purple-400 hover:scale-110 ${
-            activeUrl === "/quiz-master" ? activeStyle : ""
-          }`}
+        {/* クイズダンジョン */}
+        <Link
+          href="/quiz-master"
+          onClick={() => setActiveUrl("/quiz-master")}
         >
-          クイズダンジョン
-        </button>
-      </Link>
+          <button
+            className={`${baseStyle} bg-gradient-to-r from-purple-500 to-indigo-400 text-white shadow-xl ring-2 ring-purple-400 hover:scale-110 ${
+              activeUrl === "/quiz-master" ? activeStyle : ""
+            }`}
+          >
+            クイズダンジョン
+          </button>
+        </Link>
+      </div>
     </div>
   );
 }

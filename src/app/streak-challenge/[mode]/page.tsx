@@ -267,7 +267,7 @@ export default function QuizModePage() {
       }, 1500);
 
     } else {
-      setIncorrectMessage(`残念！不正解…\n答えは" ${displayAnswer} "でした！`);
+      setIncorrectMessage(`ざんねん！ハズレ！\n答えは" ${displayAnswer} "でした！`);
       setTimeout(() => {
         setFinished(true);
       }, 2500);
@@ -313,8 +313,8 @@ export default function QuizModePage() {
             <>
               {showCorrectMessage && (
                 <>
-                  <p className="text-4xl md:text-6xl font-extrabold mb-2 text-green-500 drop-shadow-lg animate-bounce animate-pulse">
-                    　正解！
+                  <p className="text-4xl md:text-6xl font-extrabold mb-2 text-green-600 drop-shadow-lg animate-bounce animate-pulse">
+                    　◎正解！🎉
                   </p>
                   <p className="text-sm md:text-lg text-black mt-5">
                     　（数秒後、自動で次の問題へ移動します）

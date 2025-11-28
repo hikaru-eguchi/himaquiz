@@ -71,8 +71,8 @@ export default function QuizMDXWrapper({ quiz, children }: QuizProps) {
           }`}
         >
           {selected === quiz.answer
-            ? "正解！🎉"
-            : `残念！不正解…\n正解は" ${quiz.choices[quiz.answer]} "でした！`}
+            ? "◎正解！🎉"
+            : `ざんねん！ハズレ！\n正解は" ${quiz.choices[quiz.answer]} "でした！`}
         </p>
       )}
 

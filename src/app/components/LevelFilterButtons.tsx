@@ -22,7 +22,7 @@ export default function LevelFilterButtons({ genre }: LevelFilterButtonsProps) {
   const router = useRouter();
 
   const baseStyle =
-    "px-2 md:px-5 py-1 md:py-2 border-2 border-black rounded-full font-bold shadow-sm transition-all cursor-pointer";
+    "px-3 md:px-5 py-1 md:py-2 border-2 border-black rounded-full font-bold shadow-sm transition-all cursor-pointer";
   const activeStyle = "scale-110 ring-4 ring-blue-300";
 
   const handleClick = (levelJp: string) => {
@@ -48,32 +48,36 @@ export default function LevelFilterButtons({ genre }: LevelFilterButtonsProps) {
   };
 
   return (
-    <div className="flex justify-center gap-1 md:gap-2 md:gap-4 mb-6 flex-wrap">
-      {levels.map((levelJp) => {
-        // ▼ URL 判定
-        const url =
-          levelJp === "全て"
-            ? genre
-              ? `/quizzes/genre/${genre}`
-              : `/quizzes`
-            : genre
-            ? `/quizzes/genre/${genre}/level/${levelMap[levelJp]}`
-            : `/quizzes/level/${levelMap[levelJp]}`;
+    <div className="flex justify-center mb-6 flex-wrap bg-gradient-to-b from-yellow-50 to-yellow-100 border-2 border-black p-2 md:p-3 rounded-3xl max-w-[360px] md:max-w-[460px] mx-auto">
+      {/* タイトル */}
+      <p className="text-lg md:text-xl font-bold mb-2 md:mb-2">問題レベル</p>
+      <div className="flex justify-center gap-2 md:gap-4 mb-1 flex-wrap">
+        {levels.map((levelJp) => {
+          // ▼ URL 判定
+          const url =
+            levelJp === "全て"
+              ? genre
+                ? `/quizzes/genre/${genre}`
+                : `/quizzes`
+              : genre
+              ? `/quizzes/genre/${genre}/level/${levelMap[levelJp]}`
+              : `/quizzes/level/${levelMap[levelJp]}`;
 
-        const isActive = pathname === url;
+          const isActive = pathname === url;
 
-        return (
-          <button
-            key={levelJp}
-            onClick={() => handleClick(levelJp)}
-            className={`${baseStyle} bg-white text-black hover:scale-105 ${
-              isActive ? activeStyle : ""
-            }`}
-          >
-            {levelJp}
-          </button>
-        );
-      })}
+          return (
+            <button
+              key={levelJp}
+              onClick={() => handleClick(levelJp)}
+              className={`${baseStyle} bg-white text-black hover:scale-105 ${
+                isActive ? activeStyle : ""
+              }`}
+            >
+              {levelJp}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

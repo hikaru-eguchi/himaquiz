@@ -89,14 +89,14 @@ export default async function EasyLevelPage({ searchParams }: PageProps) {
         ひまな時間にぴったり！「ひまQ」は簡単に遊べる脳トレクイズや暇つぶしクイズが満載です。クイズで頭の体操をしよう！
       </p>
 
-      <h1 className="text-3xl font-bold mb-2 text-center">
-        かんたんレベル<span className="block sm:inline"> の クイズ</span>
-      </h1>
-
       {/* 難易度ボタン */}
       <div className="m-6">
         <LevelFilterButtons />
       </div>
+
+      <h1 className="text-3xl font-bold mb-2 text-center">
+        かんたんレベル<span className="block sm:inline"> の クイズ</span>
+      </h1>
 
       {/* クイズ数 */}
       <p className="text-center text-xl md:text-2xl font-extrabold mb-6">
