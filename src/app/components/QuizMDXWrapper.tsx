@@ -9,6 +9,8 @@ interface QuizProps {
     choices: string[];
     answer: number;
     hint: string;
+    answerExplanation?: string;
+    trivia?: string;
   };
   children?: ReactNode;
 }
@@ -65,18 +67,32 @@ export default function QuizMDXWrapper({ quiz, children }: QuizProps) {
       {showHint && <p className="my-2 text-xl md:text-2xl text-gray-700">{quiz.hint}</p>}
 
       {showAnswer && selected !== null && (
-        <p
-          className={`mt-4 text-3xl md:text-4xl font-extrabold text-center whitespace-pre-line ${
-            selected === quiz.answer ? "text-green-600 animate-pulse" : "text-red-600"
-          }`}
-        >
-          {selected === quiz.answer
-            ? "◎正解！🎉"
-            : `ざんねん！\n正解は" ${quiz.choices[quiz.answer]} "でした！`}
-        </p>
-      )}
+        <div className="mt-4">
+          <p
+            className={`mt-4 text-3xl md:text-4xl font-extrabold text-center whitespace-pre-line ${
+              selected === quiz.answer ? "text-green-600 animate-pulse" : "text-red-600"
+            }`}
+          >
+            {selected === quiz.answer
+              ? "◎正解！🎉"
+              : `ざんねん！\n正解は" ${quiz.choices[quiz.answer]} "でした！`}
+          </p>
 
-      {children && <div className="mt-4">{children}</div>}
+          {quiz.answerExplanation && (
+            <div className="mt-10 text-center">
+              <p className="text-xl md:text-2xl font-bold text-blue-600">解説📖</p>
+              <p className="mt-2 text-lg md:text-xl text-gray-700">{quiz.answerExplanation}</p>
+            </div>
+          )}
+
+          {quiz.trivia && (
+            <div className="mt-10 text-center">
+              <p className="text-xl md:text-2xl font-bold text-yellow-600">知って得する豆知識💡</p>
+              <p className="mt-2 text-lg md:text-xl text-gray-700">{quiz.trivia}</p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

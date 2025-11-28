@@ -17,6 +17,8 @@ interface ArticleData {
     choices?: (string | number)[];
     genre: string;
     level: string;
+    answerExplanation?: string;
+    trivia?: string;
   };
 }
 
@@ -58,7 +60,6 @@ const rankComments = [
 ];
 
 const QuizResult = ({ correctCount, getTitle, titles }: { correctCount: number, getTitle: () => string, titles: { threshold: number, title: string }[] }) => {
-  const [flashEnd, setFlashEnd] = useState(true);
   const [showScore, setShowScore] = useState(false);
   const [showText, setShowText] = useState(false);
   const [showRank, setShowRank] = useState(false);
@@ -73,29 +74,17 @@ const QuizResult = ({ correctCount, getTitle, titles }: { correctCount: number, 
   };
 
   useEffect(() => {
-    const timer = setTimeout(() => setFlashEnd(false), 2000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
     const timers: NodeJS.Timeout[] = [];
-    timers.push(setTimeout(() => setShowScore(true), 2000));
-    timers.push(setTimeout(() => setShowText(true), 3000));
-    timers.push(setTimeout(() => setShowRank(true), 4000));
-    timers.push(setTimeout(() => setShowButton(true), 4000));
+    timers.push(setTimeout(() => setShowScore(true), 500));
+    timers.push(setTimeout(() => setShowText(true), 1000));
+    timers.push(setTimeout(() => setShowRank(true), 2000));
+    timers.push(setTimeout(() => setShowButton(true), 2000));
 
     return () => timers.forEach(clearTimeout);
   }, []);
 
   return (
     <div className="text-center mt-6">
-      {flashEnd && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 
-                        text-white text-5xl md:text-7xl font-extrabold">
-          クイズ終了！
-        </div>
-      )}
-
       {showScore && <p className="text-3xl md:text-5xl mb-4 md:mb-6">連続正解数: {correctCount}問</p>}
       {showText && <p className="text-xl md:text-2xl text-gray-600 mb-2">君の称号は…</p>}
 
@@ -212,6 +201,8 @@ export default function QuizModePage() {
               choices: a.quiz!.choices ? a.quiz!.choices.map(String) : [],
               genre: a.quiz!.genre,
               level: a.quiz!.level,
+              answerExplanation: a.quiz!.answerExplanation,
+              trivia: a.quiz!.trivia,
             }
           }));
 
@@ -250,7 +241,6 @@ export default function QuizModePage() {
       setCorrectCount(c => {
         const newCount = c + 1;
 
-        // 10の位チェック
         if (newCount % 10 === 0) {
           setFlashMilestone(`${newCount}問突破！`);
           setTimeout(() => setFlashMilestone(null), 1000);
@@ -261,28 +251,26 @@ export default function QuizModePage() {
 
       setShowCorrectMessage(true);
 
-      setTimeout(() => {
-        setShowCorrectMessage(false);
-        nextQuestion();
-      }, 1500);
-
     } else {
       setIncorrectMessage(`ざんねん！\n答えは" ${displayAnswer} "でした！`);
-      setTimeout(() => {
-        setFinished(true);
-      }, 2500);
     }
 
     setUserAnswer(null);
   };
 
   const nextQuestion = () => {
+    setShowCorrectMessage(false);
+
     if (currentIndex + 1 >= questions.length) {
       setFinished(true);
     } else {
       setCurrentIndex(i => i + 1);
       setTimeLeft(60);
     }
+  };
+
+  const finishQuiz = () => {
+    setFinished(true);
   };
 
   const getTitle = () => {
@@ -311,44 +299,82 @@ export default function QuizModePage() {
 
           {questions[currentIndex].quiz && (
             <>
-              {showCorrectMessage && (
+              {(showCorrectMessage || incorrectMessage) && (
                 <>
-                  <p className="text-4xl md:text-6xl font-extrabold mb-2 text-green-600 drop-shadow-lg animate-bounce animate-pulse">
-                    　◎正解！🎉
-                  </p>
-                  <p className="text-sm md:text-lg text-black mt-5">
-                    　（数秒後、自動で次の問題へ移動します）
-                  </p>
+                  {showCorrectMessage && (
+                    <p className="text-4xl md:text-6xl font-extrabold mb-2 text-green-600 drop-shadow-lg animate-bounce animate-pulse">
+                      ◎正解！🎉
+                    </p>
+                  )}
+                  {incorrectMessage && (
+                    <p className="text-3xl md:text-4xl font-extrabold mb-2 text-red-500 drop-shadow-lg animate-shake whitespace-pre-line">
+                      {incorrectMessage}
+                    </p>
+                  )}
+                  {(() => {
+                    const currentQuiz = questions[currentIndex].quiz;
+                    const answerExplanation = currentQuiz?.answerExplanation;
+                    const trivia = currentQuiz?.trivia;
+
+                    return (
+                      <>
+                        {answerExplanation && (
+                          <div className="mt-5 md:mt-15 text-center">
+                            <p className="text-xl md:text-2xl font-bold text-blue-600">解説📖</p>
+                            <p className="mt-1 md:mt-2 text-lg md:text-xl text-gray-700">{answerExplanation}</p>
+                          </div>
+                        )}
+
+                        {trivia && (
+                          <div className="mt-5 md:mt-10 text-center">
+                            <p className="text-xl md:text-2xl font-bold text-yellow-600">知って得する豆知識💡</p>
+                            <p className="mt-1 md:mt-2 text-lg md:text-xl text-gray-700">{trivia}</p>
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
+
+                  <div className="mt-10">
+                    {showCorrectMessage && (
+                      <button
+                        className="px-5 py-3 md:px-6 md:py-3 bg-blue-500 text-white text-lg md:text-xl font-medium rounded hover:bg-blue-600 cursor-pointer"
+                        onClick={nextQuestion}
+                      >
+                        次の問題へ
+                      </button>
+                    )}
+                    {incorrectMessage && (
+                      <button
+                        className="px-5 py-3 md:px-6 md:py-3 bg-blue-500 text-white text-lg md:text-xl font-medium rounded hover:bg-blue-600 cursor-pointer"
+                        onClick={finishQuiz}
+                      >
+                        終了する
+                      </button>
+                    )}
+                  </div>
                 </>
               )}
 
-              {incorrectMessage && (
-                <p className="text-3xl md:text-4xl font-extrabold mb-4 text-red-500 drop-shadow-lg animate-shake whitespace-pre-line">
-                  {incorrectMessage}
-                </p>
-              )}
-
               {!showCorrectMessage && !incorrectMessage && (
-                <QuizQuestion
-                  quiz={questions[currentIndex].quiz}
-                  userAnswer={userAnswer}
-                  setUserAnswer={setUserAnswer}
-                />
-              )}
-
-              {!showCorrectMessage && !incorrectMessage && (
-                <button
-                  className="px-5 py-3 md:px-6 md:py-3 bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-4 hover:bg-blue-600 cursor-pointer"
-                  onClick={checkAnswer}
-                  disabled={userAnswer === null}
-                >
-                  回答
-                </button>
+                <>
+                  <QuizQuestion
+                    quiz={questions[currentIndex].quiz}
+                    userAnswer={userAnswer}
+                    setUserAnswer={setUserAnswer}
+                  />
+                  <button
+                    className="px-5 py-3 md:px-6 md:py-3 bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-4 hover:bg-blue-600 cursor-pointer"
+                    onClick={checkAnswer}
+                    disabled={userAnswer === null}
+                  >
+                    回答
+                  </button>
+                </>
               )}
             </>
           )}
 
-          {/* 10問ごとの突破フラッシュ */}
           {flashMilestone && (
             <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50
                             text-yellow-400 text-5xl md:text-7xl font-extrabold animate-pulse">

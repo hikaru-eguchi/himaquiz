@@ -17,6 +17,8 @@ interface ArticleData {
     choices?: (string | number)[];
     genre: string;
     level: string;
+    answerExplanation?: string;
+    trivia?: string;
   };
 }
 
@@ -45,9 +47,6 @@ const rankComments = [
 ];
 
 const QuizResult = ({ correctCount, getTitle, titles }: { correctCount: number, getTitle: () => string, titles: { threshold: number, title: string }[] }) => {
-  
-  // ★ クイズ終了時にでかく出すフラッシュ表示
-  const [flashEnd, setFlashEnd] = useState(true);
 
   const [showScore, setShowScore] = useState(false);
   const [showText, setShowText] = useState(false);
@@ -62,34 +61,19 @@ const QuizResult = ({ correctCount, getTitle, titles }: { correctCount: number, 
     return comment;
   };
 
-  // ★1秒で "クイズ終了！" を消す
-  useEffect(() => {
-    const timer = setTimeout(() => setFlashEnd(false), 2000);
-    return () => clearTimeout(timer);
-  }, []);
-
   useEffect(() => {
     const timers: NodeJS.Timeout[] = [];
-    timers.push(setTimeout(() => setShowScore(true), 2000));
-    timers.push(setTimeout(() => setShowText(true), 3000));
-    timers.push(setTimeout(() => setShowRank(true), 4000));
-    timers.push(setTimeout(() => setShowButton(true), 4000));
+    timers.push(setTimeout(() => setShowScore(true), 500));
+    timers.push(setTimeout(() => setShowText(true), 1000));
+    timers.push(setTimeout(() => setShowRank(true), 2000));
+    timers.push(setTimeout(() => setShowButton(true), 2000));
 
     return () => timers.forEach(clearTimeout);
   }, []);
 
   return (
     <div className="text-center mt-6">
-
-      {/* ★ 中央に1秒だけ出る「ダンジョン終了！」 */}
-      {flashEnd && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 
-                        text-white text-5xl md:text-7xl font-extrabold">
-          ダンジョン終了！
-        </div>
-      )}
-
-      {showScore && <p className="text-3xl md:text-5xl mb-4 md:mb-6">正解数: {correctCount}問</p>}
+      {showScore && <p className="text-3xl md:text-5xl mb-4 md:mb-6">ステージ {correctCount} までクリア！</p>}
       {showText && <p className="text-xl md:text-2xl text-gray-600 mb-2">君の称号は…</p>}
 
       {showRank && (
@@ -196,6 +180,8 @@ export default function QuizModePage() {
               choices: a.quiz!.choices ? a.quiz!.choices.map(String) : [],
               genre: a.quiz!.genre,
               level: a.quiz!.level,
+              answerExplanation: a.quiz!.answerExplanation,
+              trivia: a.quiz!.trivia,
             }
           }));
 
@@ -217,23 +203,16 @@ export default function QuizModePage() {
     if (userAnswer === correctAnswer) {
       setCorrectCount(c => c + 1);
       setShowCorrectMessage(true);
-
-      setTimeout(() => {
-        setShowCorrectMessage(false);
-        nextQuestion();
-      }, 1500);
-
     } else {
       setIncorrectMessage(`ざんねん！\n答えは" ${displayAnswer} "でした！`);
-      setTimeout(() => {
-        setFinished(true);
-      }, 2500);
     }
 
     setUserAnswer(null);
   };
 
   const nextQuestion = () => {
+    setShowCorrectMessage(false);
+
     if (currentIndex + 1 >= questions.length) {
       setFinished(true);
     } else {
@@ -249,6 +228,10 @@ export default function QuizModePage() {
     return title;
   };
 
+  const finishQuiz = () => {
+    setFinished(true);
+  };
+
   if (questions.length === 0) return <p></p>;
 
   return (
@@ -261,26 +244,61 @@ export default function QuizModePage() {
 
           {questions[currentIndex].quiz && (
             <>
-              {/* 正解メッセージ */}
-              {showCorrectMessage && (
+              {(showCorrectMessage || incorrectMessage) && (
                 <>
-                  <p className="text-4xl md:text-6xl font-extrabold mb-2 text-green-600 drop-shadow-lg animate-bounce animate-pulse">
-                    　◎正解！🎉
-                  </p>
-                  <p className="text-2xl md:text-3xl text-black font-bold mt-10">
-                    　次は STAGE {currentIndex + 2}！
-                  </p>
-                  <p className="text-sm md:text-lg text-black mt-5">
-                    　（数秒後、自動で次のステージへ移動します）
-                  </p>
-                </>
-              )}
+                  {showCorrectMessage && (
+                    <p className="text-4xl md:text-6xl font-extrabold mb-2 text-green-600 drop-shadow-lg animate-bounce animate-pulse">
+                      ◎正解！🎉
+                    </p>
+                  )}
+                  {incorrectMessage && (
+                    <p className="text-3xl md:text-4xl font-extrabold mb-2 text-red-500 drop-shadow-lg animate-shake whitespace-pre-line">
+                      {incorrectMessage}
+                    </p>
+                  )}
+                  {(() => {
+                    const currentQuiz = questions[currentIndex].quiz;
+                    const answerExplanation = currentQuiz?.answerExplanation;
+                    const trivia = currentQuiz?.trivia;
 
-              {/* 不正解メッセージ */}
-              {incorrectMessage && (
-                <p className="text-3xl md:text-4xl font-extrabold mb-4 text-red-500 drop-shadow-lg animate-shake whitespace-pre-line">
-                  {incorrectMessage}
-                </p>
+                    return (
+                      <>
+                        {answerExplanation && (
+                          <div className="mt-5 md:mt-15 text-center">
+                            <p className="text-xl md:text-2xl font-bold text-blue-600">解説📖</p>
+                            <p className="mt-1 md:mt-2 text-lg md:text-xl text-gray-700">{answerExplanation}</p>
+                          </div>
+                        )}
+
+                        {trivia && (
+                          <div className="mt-5 md:mt-10 text-center">
+                            <p className="text-xl md:text-2xl font-bold text-yellow-600">知って得する豆知識💡</p>
+                            <p className="mt-1 md:mt-2 text-lg md:text-xl text-gray-700">{trivia}</p>
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
+
+                  <div className="mt-10">
+                    {showCorrectMessage && (
+                      <button
+                        className="px-5 py-3 md:px-6 md:py-3 bg-blue-500 text-white text-lg md:text-xl font-medium rounded hover:bg-blue-600 cursor-pointer"
+                        onClick={nextQuestion}
+                      >
+                        次のステージへ
+                      </button>
+                    )}
+                    {incorrectMessage && (
+                      <button
+                        className="px-5 py-3 md:px-6 md:py-3 bg-blue-500 text-white text-lg md:text-xl font-medium rounded hover:bg-blue-600 cursor-pointer"
+                        onClick={finishQuiz}
+                      >
+                        終了する
+                      </button>
+                    )}
+                  </div>
+                </>
               )}
 
               {/* 選択肢表示 */}

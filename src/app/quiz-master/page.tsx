@@ -127,17 +127,17 @@ export default function QuizMasterPage() {
         {showGenreButtons && (
           <div className="flex justify-center gap-4 mt-6">
             <Link href="/quiz-master/genre?genre=知識系">
-              <button className="px-4 py-2 md:px-6 md:py-3 bg-purple-500 text-lg md:text-xl font-bold text-white rounded-full hover:bg-purple-600 cursor-pointer shadow-lg">
+              <button className="px-4 py-2 md:px-6 md:py-3 bg-purple-500 border-2 border-black text-lg md:text-xl font-bold text-white rounded-full hover:bg-purple-600 cursor-pointer shadow-lg">
                 知識系
               </button>
             </Link>
             <Link href="/quiz-master/genre?genre=心理系">
-              <button className="px-4 py-2 md:px-6 md:py-3 bg-pink-500 text-lg md:text-xl font-bold text-white rounded-full hover:bg-pink-600 cursor-pointer shadow-lg">
+              <button className="px-4 py-2 md:px-6 md:py-3 bg-pink-500 border-2 border-black text-lg md:text-xl font-bold text-white rounded-full hover:bg-pink-600 cursor-pointer shadow-lg">
                 心理系
               </button>
             </Link>
             <Link href="/quiz-master/genre?genre=雑学系">
-              <button className="px-4 py-2 md:px-6 md:py-3 bg-yellow-500 text-lg md:text-xl font-bold text-white rounded-full hover:bg-yellow-600 cursor-pointer shadow-lg">
+              <button className="px-4 py-2 md:px-6 md:py-3 bg-yellow-500 border-2 border-black text-lg md:text-xl font-bold text-white rounded-full hover:bg-yellow-600 cursor-pointer shadow-lg">
                 雑学系
               </button>
             </Link>

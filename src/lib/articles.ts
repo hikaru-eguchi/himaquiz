@@ -11,6 +11,8 @@ export interface QuizData {
   hint?: string;
   genre?: string;
   image?: string;
+  answerExplanation?: string;
+trivia?: string;
 }
 
 export interface ArticleData {
