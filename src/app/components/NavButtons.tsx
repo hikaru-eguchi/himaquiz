@@ -16,6 +16,13 @@ export default function NavButtons() {
 
   const genres = Object.keys(genreMap);
 
+  // ジャンルごとの背景色マッピング
+  const genreBgMap: Record<string, string> = {
+    "心理系": "bg-gradient-to-br from-pink-100 via-pink-300 to-purple-100",
+    "知識系": "bg-gradient-to-br from-sky-100 via-sky-300 to-teal-100",
+    "雑学系": "bg-gradient-to-br from-yellow-100 via-green-300 to-green-100",
+  };
+
   // 選択中ボタンの装飾
   const activeStyle = "scale-110 ring-4 ring-blue-300";
 
@@ -48,7 +55,7 @@ export default function NavButtons() {
             onClick={() => setActiveUrl(url)}
           >
             <button
-              className={`${baseStyle} bg-blue-500 text-white hover:scale-105 ${
+              className={`${baseStyle} ${genreBgMap[genre]} text-black hover:scale-105 ${
                 isActive ? activeStyle : ""
               }`}
             >

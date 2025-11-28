@@ -120,7 +120,7 @@ export default async function HomePage({
               href={`/article/${article.id}`}
               className={`block rounded-xl shadow-md hover:shadow-2xl border border-black transition-shadow duration-300 ease-in-out overflow-hidden group ${getGenreBg(article.genre)}`}
             >
-              <div className="p-5 sm:p-6">
+              <div className="p-5 sm:p-6 bg-white rounded-lg m-5">
                 <h3 className="font-bold text-2xl mb-2 text-gray-900 group-hover:text-brand-dark transition-colors">
                   {article.title}
                 </h3>
