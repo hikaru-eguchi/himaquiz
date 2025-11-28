@@ -111,7 +111,7 @@ const QuizResult = ({ correctCount, getTitle, titles }: { correctCount: number, 
 
       {showButton && (
         <button
-          className="px-6 py-3 bg-green-500 text-white rounded-lg font-bold text-xl hover:bg-green-600 cursor-pointer"
+          className="px-6 py-3 bg-green-500 text-white border border-black rounded-lg font-bold text-xl hover:bg-green-600 cursor-pointer"
           onClick={() => window.location.reload()}
         >
           もう一回挑戦する
@@ -338,7 +338,7 @@ export default function QuizModePage() {
                   <div className="mt-10">
                     {showCorrectMessage && (
                       <button
-                        className="px-5 py-3 md:px-6 md:py-3 bg-blue-500 text-white text-lg md:text-xl font-medium rounded hover:bg-blue-600 cursor-pointer"
+                        className="px-5 py-3 md:px-6 md:py-3 border border-black bg-blue-500 text-white text-lg md:text-xl font-medium rounded hover:bg-blue-600 cursor-pointer"
                         onClick={nextQuestion}
                       >
                         次の問題へ
@@ -346,7 +346,7 @@ export default function QuizModePage() {
                     )}
                     {incorrectMessage && (
                       <button
-                        className="px-5 py-3 md:px-6 md:py-3 bg-blue-500 text-white text-lg md:text-xl font-medium rounded hover:bg-blue-600 cursor-pointer"
+                        className="px-5 py-3 md:px-6 md:py-3 bg-blue-500 border border-black text-white text-lg md:text-xl font-medium rounded hover:bg-blue-600 cursor-pointer"
                         onClick={finishQuiz}
                       >
                         終了する
@@ -364,7 +364,7 @@ export default function QuizModePage() {
                     setUserAnswer={setUserAnswer}
                   />
                   <button
-                    className="px-5 py-3 md:px-6 md:py-3 bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-4 hover:bg-blue-600 cursor-pointer"
+                    className="px-5 py-3 md:px-6 md:py-3 border border-black bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-4 hover:bg-blue-600 cursor-pointer"
                     onClick={checkAnswer}
                     disabled={userAnswer === null}
                   >

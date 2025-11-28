@@ -46,7 +46,7 @@ export default function QuizMasterPage() {
   }, [characters]); // ← charactersが決まってから実行
 
   return (
-    <div className="container mx-auto px-4 py-8 text-center bg-gradient-to-b from-yellow-100 via-yellow-200 to-yellow-300">
+    <div className="container mx-auto px-4 py-8 text-center bg-gradient-to-b from-yellow-50 via-yellow-100 to-yellow-200">
       <h1
         className="text-5xl md:text-7xl font-extrabold mb-6 text-center"
         style={{
