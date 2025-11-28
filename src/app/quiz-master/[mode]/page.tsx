@@ -224,7 +224,7 @@ export default function QuizModePage() {
       }, 1500);
 
     } else {
-      setIncorrectMessage(`ざんねん！ハズレ！\n答えは" ${displayAnswer} "でした！`);
+      setIncorrectMessage(`ざんねん！\n答えは" ${displayAnswer} "でした！`);
       setTimeout(() => {
         setFinished(true);
       }, 2500);

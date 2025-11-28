@@ -194,10 +194,10 @@ export default async function ArticleDetailPage({
               <Link
                 key={article.id}
                 href={`/article/${article.id}`}
-                className={`block rounded-lg shadow hover:shadow-lg transition-all duration-300 overflow-hidden ${getGenreBg(article.quiz?.genre)}`}
+                className={`block rounded-lg border border-black shadow hover:shadow-lg transition-all duration-300 overflow-hidden ${getGenreBg(article.quiz?.genre)}`}
               >
-                <div className="p-4">
-                  <h3 className="text-xl font-semibold text-gray-900 line-clamp-2 mb-2">
+                <div className="p-2 bg-white rounded-lg m-5">
+                  <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 mb-2">
                     {article.title}
                   </h3>
 

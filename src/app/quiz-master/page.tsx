@@ -48,7 +48,7 @@ export default function QuizMasterPage() {
   return (
     <div className="container mx-auto px-4 py-8 text-center bg-gradient-to-b from-purple-100 via-purple-200 to-purple-300">
       <h1
-        className="text-2xl md:text-7xl font-extrabold mb-6 text-center"
+        className="text-5xl md:text-7xl font-extrabold mb-6 text-center"
         style={{
           color: "#a78bfa",
           textShadow: `
@@ -69,7 +69,15 @@ export default function QuizMasterPage() {
           fontFamily: anton.style.fontFamily,
         }}
       >
-        クイズダンジョン
+        {/* 📱スマホ（改行あり） */}
+        <span className="block md:hidden leading-tight">
+          クイズ<br />ダンジョン
+        </span>
+
+        {/* 💻PC（1行） */}
+        <span className="hidden md:block">
+          クイズダンジョン
+        </span>
       </h1>
 
       <>

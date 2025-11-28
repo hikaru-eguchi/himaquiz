@@ -48,7 +48,7 @@ export default function QuizMasterPage() {
   return (
     <div className="container mx-auto px-4 py-8 text-center bg-gradient-to-b from-yellow-100 via-yellow-200 to-yellow-300">
       <h1
-        className="text-2xl md:text-7xl font-extrabold mb-6 text-center"
+        className="text-5xl md:text-7xl font-extrabold mb-6 text-center"
         style={{
           color: "orange",
           textShadow: `
@@ -69,7 +69,15 @@ export default function QuizMasterPage() {
           fontFamily: anton.style.fontFamily,
         }}
       >
-        連続正解チャレンジ
+        {/* 📱スマホ（改行あり） */}
+        <span className="block md:hidden leading-tight">
+          連続正解<br />チャレンジ
+        </span>
+
+        {/* 💻PC（1行） */}
+        <span className="hidden md:block">
+          連続正解チャレンジ
+        </span>
       </h1>
 
       <>

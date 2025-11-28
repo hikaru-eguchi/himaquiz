@@ -65,7 +65,7 @@ export default function NavButtons() {
         );
       })}
 
-      <div className="w-full flex justify-center gap-4 sm:gap-2 md:gap-4 sm:w-auto sm:flex-row">
+      <div className="w-full flex justify-center gap-2 sm:gap-2 md:gap-4 sm:w-auto sm:flex-row">
         {/* 連続正解チャレンジ */}
         <Link
           href="/streak-challenge"
