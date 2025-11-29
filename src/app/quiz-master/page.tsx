@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Anton } from "next/font/google";
 
@@ -8,10 +8,12 @@ const anton = Anton({ subsets: ["latin"], weight: "400" });
 
 export default function QuizMasterPage() {
   const [showGenreButtons, setShowGenreButtons] = useState(false);
+  const [showDescription, setShowDescription] = useState(false);
 
   const handleGenreClick = () => {
     setShowGenreButtons(true);
   };
+  const handleDescriptionClick = () => setShowDescription((prev) => !prev);
 
   // ★ PC用キャラ（全6枚）
   const allCharacters = [
@@ -44,6 +46,9 @@ export default function QuizMasterPage() {
       }, index * 300);
     });
   }, [characters]); // ← charactersが決まってから実行
+
+  // アコーディオン用 ref
+  const descriptionRef = useRef<HTMLParagraphElement>(null);
 
   return (
     <div className="container mx-auto px-4 py-8 text-center bg-gradient-to-b from-purple-50 via-purple-100 to-purple-200">
@@ -117,7 +122,6 @@ export default function QuizMasterPage() {
             </button>
           </Link>
         </div>
-
         {showGenreButtons && (
           <div className="flex flex-col justify-center items-center mt-3 md:mt-5">
             <div className="mb-2 md:mb-3 text-lg md:text-2xl">
@@ -142,6 +146,34 @@ export default function QuizMasterPage() {
             </div>
           </div>
         )}
+        {/* 説明ボタン */}
+        <button
+          onClick={handleDescriptionClick}
+          className="mt-4 px-6 py-1 md:px-8 md:text-xl bg-gray-200 text-gray-800 rounded-full border-2 border-black hover:bg-gray-300 shadow-md transition-colors"
+        >
+          このゲームの説明を見る
+        </button>
+
+        {/* アコーディオン説明文 */}
+        <div
+          className={`overflow-hidden transition-all duration-500 ease-in-out mt-2 rounded-xl bg-white`}
+          style={{
+            maxHeight: showDescription
+              ? descriptionRef.current?.scrollHeight
+              : 0,
+          }}
+        >
+          <p
+            ref={descriptionRef}
+            className="text-gray-700 text-md md:text-lg text-center px-4 py-2"
+          >
+            「クイズダンジョン」は、クイズを解きながらダンジョンを進むゲームです。
+            クイズに正解するとで相手に攻撃ができます。間違えると自分のHP（ライフ）が減っていきます。
+            HP（ライフ）が0になるとゲームオーバーです。
+            敵を撃破するたびにステージが進み、もらえる称号が上がっていきます。
+            最終的に「クイズマスター」の称号を獲得することが目的です。
+          </p>
+        </div>
       </>
     </div>
   );

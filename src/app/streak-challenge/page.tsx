@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Anton } from "next/font/google";
 
@@ -8,10 +8,12 @@ const anton = Anton({ subsets: ["latin"], weight: "400" });
 
 export default function QuizMasterPage() {
   const [showGenreButtons, setShowGenreButtons] = useState(false);
+  const [showDescription, setShowDescription] = useState(false);
 
   const handleGenreClick = () => {
     setShowGenreButtons(true);
   };
+  const handleDescriptionClick = () => setShowDescription((prev) => !prev);
 
   // ★ PC用キャラ（全6枚）
   const allCharacters = [
@@ -44,6 +46,9 @@ export default function QuizMasterPage() {
       }, index * 300);
     });
   }, [characters]); // ← charactersが決まってから実行
+
+  // アコーディオン用 ref
+  const descriptionRef = useRef<HTMLParagraphElement>(null);
 
   return (
     <div className="container mx-auto px-4 py-8 text-center bg-gradient-to-b from-yellow-50 via-yellow-100 to-yellow-200">
@@ -142,6 +147,33 @@ export default function QuizMasterPage() {
             </div>
           </div>
         )}
+
+        {/* 説明ボタン */}
+        <button
+          onClick={handleDescriptionClick}
+          className="mt-4 px-6 py-1 md:px-8 md:text-xl bg-gray-200 text-gray-800 rounded-full border-2 border-black hover:bg-gray-300 shadow-md transition-colors"
+        >
+          このゲームの説明を見る
+        </button>
+
+        {/* アコーディオン説明文 */}
+        <div
+          className={`overflow-hidden transition-all duration-500 ease-in-out mt-2 rounded-xl bg-white`}
+          style={{
+            maxHeight: showDescription
+              ? descriptionRef.current?.scrollHeight
+              : 0,
+          }}
+        >
+          <p
+            ref={descriptionRef}
+            className="text-gray-700 text-md md:text-lg text-center px-4 py-2"
+          >
+            「連続正解チャレンジ」は、どれだけ連続でクイズに正解できるかを競うゲームです。
+            1問の制限時間は60秒です。1問でも間違えてしまうと終了します。
+            正解数が増えると称号が上がっていきます。すごい称号を目指しましょう。
+          </p>
+        </div>
       </>
     </div>
   );
