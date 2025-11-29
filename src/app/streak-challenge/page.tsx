@@ -119,22 +119,27 @@ export default function QuizMasterPage() {
         </div>
 
         {showGenreButtons && (
-          <div className="flex justify-center gap-4 mt-6">
-            <Link href="streak-challenge/genre?genre=知識系">
-              <button className="px-4 py-2 md:px-6 md:py-3 bg-purple-500 border-2 border-black text-lg md:text-xl font-bold text-white rounded-full hover:bg-purple-600 cursor-pointer shadow-lg">
-                知識系
-              </button>
-            </Link>
-            <Link href="/streak-challenge/genre?genre=心理系">
-              <button className="px-4 py-2 md:px-6 md:py-3 bg-pink-500 border-2 border-black text-lg md:text-xl font-bold text-white rounded-full hover:bg-pink-600 cursor-pointer shadow-lg">
-                心理系
-              </button>
-            </Link>
-            <Link href="/streak-challenge/genre?genre=雑学系">
-              <button className="px-4 py-2 md:px-6 md:py-3 bg-yellow-500 border-2 border-black text-lg md:text-xl font-bold text-white rounded-full hover:bg-yellow-600 cursor-pointer shadow-lg">
-                雑学系
-              </button>
-            </Link>
+          <div className="flex flex-col justify-center items-center mt-3 md:mt-5">
+            <div className="mb-2 md:mb-3 text-lg md:text-2xl">
+              <p>ジャンルを選んでください</p>
+            </div>
+            <div className="flex justify-center gap-3">
+              <Link href="streak-challenge/genre?genre=知識系">
+                <button className="px-4 py-2 md:px-6 md:py-3 bg-gradient-to-br from-sky-100 via-sky-300 to-teal-100 border-2 border-black text-lg md:text-xl font-bold text-black rounded-full hover:bg-purple-600 cursor-pointer shadow-lg">
+                  知識系
+                </button>
+              </Link>
+              <Link href="/streak-challenge/genre?genre=心理系">
+                <button className="px-4 py-2 md:px-6 md:py-3 bg-gradient-to-br from-pink-100 via-pink-300 to-purple-100 border-2 border-black text-lg md:text-xl font-bold text-black rounded-full hover:bg-pink-600 cursor-pointer shadow-lg">
+                  心理系
+                </button>
+              </Link>
+              <Link href="/streak-challenge/genre?genre=雑学系">
+                <button className="px-4 py-2 md:px-6 md:py-3 bg-gradient-to-br from-yellow-100 via-green-300 to-green-100 border-2 border-black text-lg md:text-xl font-bold text-black rounded-full hover:bg-yellow-600 cursor-pointer shadow-lg">
+                  雑学系
+                </button>
+              </Link>
+            </div>
           </div>
         )}
       </>
