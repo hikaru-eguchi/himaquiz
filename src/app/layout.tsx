@@ -65,7 +65,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     暇つぶしクイズで遊ぶなら
                     <span className="block text-5xl md:text-7xl mt-2">ひまQ</span>
                   </h1>
-                  <p className="text-black/90 mt-4 md:text-xl tracking-wide font-bold">
+                  <p className="text-black/90 mt-3 md:mt-4 mb-1 md:mb-0 md:text-xl tracking-wide font-bold">
                     暇つぶしで頭が良くなる面白クイズ
                   </p>
                 </Link>
