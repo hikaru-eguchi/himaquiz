@@ -148,19 +148,23 @@ export default async function HomePage({
 
       {/* 今日のクイズ表示 */}
       <div className='max-w-[700px] mx-auto border-2 border-black rounded-xl m-5 p-5 bg-gradient-to-b from-red-0 via-red-50 to-red-100'>
-        <h1 className="text-2xl md:text-3xl font-bold mb-3 text-center leading-tight text-blue-600 drop-shadow-xl">
-          ❓ 今日のクイズ ❓
+        <h1 className="text-2xl md:text-3xl font-bold mb-3 text-center leading-tight text-red-500 drop-shadow-xl">
+          今日のおすすめクイズ🔍
         </h1>
         <p className="text-lg md:text-xl mb-2 text-center leading-tight mb-4">
-          今日のクイズはコレ！君は解けるかな？
+          まずはこの問題！君は解けるかな？
         </p>
         {randomQuizArticle?.quiz && (
           <QuizMDXWrapper quiz={randomQuizArticle.quiz} />
         )}
       </div>
+      
+        <p className="text-lg md:text-xl mb-2 text-center leading-tight mt-5 mb-5">
+          他のクイズはこちら👇
+        </p>
 
       <div className="max-w-[700px] mx-auto border-2 border-black rounded-xl m-5 p-5 bg-gradient-to-b from-blue-0 via-blue-50 to-blue-100">
-        <p className="text-2xl md:text-3xl font-bold mb-2 text-center leading-tight">
+        <p className="text-2xl md:text-3xl font-bold mb-2 text-center leading-tight drop-shadow-xl text-blue-500">
           📚ジャンルから選ぶ📚
         </p>
         <p className="text-lg md:text-xl mb-2 text-center leading-tight mb-4">
@@ -188,7 +192,7 @@ export default async function HomePage({
       </div>
 
       <div className="max-w-[700px] mx-auto border-2 border-black rounded-xl m-5 p-5 bg-gradient-to-b from-yellow-0 via-yellow-50 to-yellow-100">
-        <p className="text-2xl md:text-3xl font-bold mb-2 text-center leading-tight">
+        <p className="text-2xl md:text-3xl font-bold mb-2 text-center leading-tight drop-shadow-xl text-yellow-500">
           ⭐難易度から選ぶ⭐
         </p>
         <p className="text-lg md:text-xl mb-2 text-center leading-tight mb-4">
@@ -216,24 +220,41 @@ export default async function HomePage({
       </div>
 
       <div className="max-w-[700px] mx-auto border-2 border-black rounded-xl m-5 p-5 bg-gradient-to-b from-purple-0 via-purple-50 to-purple-100">
-        <p className="text-2xl md:text-3xl font-bold mb-2 text-center leading-tight">
-          👑ゲームで遊ぼう👑
+        <p className="text-2xl md:text-3xl font-bold mb-2 text-center leading-tight drop-shadow-xl text-purple-500">
+          👑ゲームで遊ぶ👑
         </p>
         <p className="text-lg md:text-xl mb-2 text-center leading-tight mb-4">
           腕試しをしたい人にオススメ！
         </p>
         <div className="flex justify-center gap-3 md:gap-5 flex-wrap">
-          <Link href="/streak-challenge">
-            <button className="px-4 md:px-6 md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-red-500 to-orange-400 text-white hover:scale-110 transition-all">
-              連続正解チャレンジ
-            </button>
-          </Link>
-
-          <Link href="/quiz-master">
-            <button className="px-4 md:px-6 md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-purple-500 to-indigo-400 text-white hover:scale-110 transition-all">
-              クイズダンジョン
-            </button>
-          </Link>
+          {/* 連続正解チャレンジ */}
+          <div className="text-center max-w-[260px]">
+            <Link href="/streak-challenge" className="w-full md:w-auto flex justify-center">
+              <button className="w-[220px] md:w-[260px] px-4 md:px-6 md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-red-500 to-orange-400 text-white hover:scale-110 transition-all">
+                連続正解チャレンジ
+              </button>
+            </Link>
+            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
+              何問連続で正解できるか挑戦！
+            </p>
+            <p className="text-sm md:text-base text-gray-700 leading-tight">
+              集中力と実力を試せるモードです。
+            </p>
+          </div>
+          {/* クイズダンジョン */}
+          <div className="text-center max-w-[260px]">
+            <Link href="/quiz-master" className="w-full md:w-auto flex justify-center">
+              <button className="w-[220px] md:w-[260px] px-4 md:px-6 md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-purple-500 to-indigo-400 text-white hover:scale-110 transition-all">
+                クイズダンジョン
+              </button>
+            </Link>
+            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
+              ダンジョン形式で進む本格派モード。
+            </p>
+            <p className="text-sm md:text-base text-gray-700 leading-tight">
+              君は深層まで進めるか！？
+            </p>
+          </div>
         </div>
       </div>
     </div>
