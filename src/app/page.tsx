@@ -148,8 +148,8 @@ export default async function HomePage({
 
       {/* 今日のクイズ表示 */}
       <div className='max-w-[700px] mx-auto border-2 border-black rounded-xl m-5 p-5 bg-gradient-to-b from-red-0 via-red-50 to-red-100'>
-        <h1 className="text-2xl md:text-3xl font-bold mb-3 text-center leading-tight text-red-500 drop-shadow-xl">
-          今日のおすすめクイズ🔍
+        <h1 className="text-2xl md:text-3xl font-extrabold mb-3 text-center leading-tight text-red-500 drop-shadow-xl">
+          今日のおすすめクイズ
         </h1>
         <p className="text-lg md:text-xl mb-2 text-center leading-tight mb-4">
           まずはこの問題！君は解けるかな？
@@ -159,7 +159,7 @@ export default async function HomePage({
         )}
       </div>
       
-        <p className="text-lg md:text-xl mb-2 text-center leading-tight mt-5 mb-5">
+        <p className="text-xl md:text-2xl mb-2 text-center leading-tight mt-5 mb-5">
           他のクイズはこちら👇
         </p>
 
@@ -170,21 +170,21 @@ export default async function HomePage({
         <p className="text-lg md:text-xl mb-2 text-center leading-tight mb-4">
           君はどれが好き？ジャンルを選ぼう！
         </p>
-        <div className="flex flex-wrap justify-center gap-3 md:gap-5">
+        <div className="flex flex-wrap justify-center gap-2 md:gap-5">
           <Link href="/quizzes/genre/psychology">
-            <button className="md:text-2xl px-3 md:px-5 py-1 md:py-2 border-2 border-black rounded-full font-bold shadow-sm bg-gradient-to-br from-pink-100 via-pink-300 to-purple-100 hover:scale-105 transition-all">
+            <button className="text-xl md:text-2xl px-3 md:px-5 py-1 md:py-2 border-2 border-black rounded-full font-bold shadow-sm bg-gradient-to-br from-pink-100 via-pink-300 to-purple-100 hover:scale-105 transition-all">
               心理系
             </button>
           </Link>
 
           <Link href="/quizzes/genre/knowledge">
-            <button className="md:text-2xl px-3 md:px-5 py-1 md:py-2 border-2 border-black rounded-full font-bold shadow-sm bg-gradient-to-br from-sky-100 via-sky-300 to-teal-100 hover:scale-105 transition-all">
+            <button className="text-xl md:text-2xl px-3 md:px-5 py-1 md:py-2 border-2 border-black rounded-full font-bold shadow-sm bg-gradient-to-br from-sky-100 via-sky-300 to-teal-100 hover:scale-105 transition-all">
               知識系
             </button>
           </Link>
 
           <Link href="/quizzes/genre/trivia">
-            <button className="md:text-2xl px-3 md:px-5 py-1 md:py-2 border-2 border-black rounded-full font-bold shadow-sm bg-gradient-to-br from-yellow-100 via-green-300 to-green-100 hover:scale-105 transition-all">
+            <button className="text-xl md:text-2xl px-3 md:px-5 py-1 md:py-2 border-2 border-black rounded-full font-bold shadow-sm bg-gradient-to-br from-yellow-100 via-green-300 to-green-100 hover:scale-105 transition-all">
               雑学系
             </button>
           </Link>
@@ -198,21 +198,21 @@ export default async function HomePage({
         <p className="text-lg md:text-xl mb-2 text-center leading-tight mb-4">
           どのレベルまで解ける？レベルを選んでね！
         </p>
-        <div className="flex flex-wrap justify-center gap-3 md:gap-5">
+        <div className="flex flex-wrap justify-center gap-2 md:gap-5">
           <Link href="/quizzes/level/easy">
-            <button className="md:text-2xl px-3 py-1 md:px-5 md:py-2 bg-white border-2 border-black rounded-full font-bold hover:scale-105 transition-all">
+            <button className="text-xl md:text-2xl px-3 py-1 md:px-5 md:py-2 bg-white border-2 border-black rounded-full font-bold hover:scale-105 transition-all">
               かんたん
             </button>
           </Link>
 
           <Link href="/quizzes/level/normal">
-            <button className="md:text-2xl px-3 py-1 md:px-5 md:py-2 bg-white border-2 border-black rounded-full font-bold hover:scale-105 transition-all">
+            <button className="text-xl md:text-2xl px-3 py-1 md:px-5 md:py-2 bg-white border-2 border-black rounded-full font-bold hover:scale-105 transition-all">
               ふつう
             </button>
           </Link>
 
           <Link href="/quizzes/level/hard">
-            <button className="md:text-2xl px-3 py-1 md:px-5 md:py-2 bg-white border-2 border-black rounded-full font-bold hover:scale-105 transition-all">
+            <button className="text-xl md:text-2xl px-3 py-1 md:px-5 md:py-2 bg-white border-2 border-black rounded-full font-bold hover:scale-105 transition-all">
               難しい
             </button>
           </Link>
@@ -228,9 +228,9 @@ export default async function HomePage({
         </p>
         <div className="flex justify-center gap-3 md:gap-5 flex-wrap">
           {/* 連続正解チャレンジ */}
-          <div className="text-center max-w-[260px]">
+          <div className="text-center max-w-[260px] mb-3 md:mb-0">
             <Link href="/streak-challenge" className="w-full md:w-auto flex justify-center">
-              <button className="w-[220px] md:w-[260px] px-4 md:px-6 md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-red-500 to-orange-400 text-white hover:scale-110 transition-all">
+              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-red-500 to-orange-400 text-white hover:scale-110 transition-all">
                 連続正解チャレンジ
               </button>
             </Link>
@@ -244,7 +244,7 @@ export default async function HomePage({
           {/* クイズダンジョン */}
           <div className="text-center max-w-[260px]">
             <Link href="/quiz-master" className="w-full md:w-auto flex justify-center">
-              <button className="w-[220px] md:w-[260px] px-4 md:px-6 md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-purple-500 to-indigo-400 text-white hover:scale-110 transition-all">
+              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-purple-500 to-indigo-400 text-white hover:scale-110 transition-all">
                 クイズダンジョン
               </button>
             </Link>
