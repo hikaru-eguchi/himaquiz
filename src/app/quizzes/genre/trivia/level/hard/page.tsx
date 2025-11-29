@@ -9,7 +9,7 @@ import LevelFilterButtons from "@/app/components/LevelFilterButtons";
 export const metadata = {
   title: "難しいレベルの雑学系クイズ｜ひまQ",
   description:
-    "ひまQでは、簡単に遊べる雑学系クイズを多数掲載。難しいレベルの雑学系クイズを楽しんで脳トレしよう！",
+    "ひまQでは、暇つぶししながら頭がよくなる難しい雑学系クイズを多数掲載。脳トレクイズや面白クイズで、ちょっとした空き時間に脳を鍛えよう。",
 };
 
 interface ArticleMeta {
@@ -89,7 +89,7 @@ export default async function KnowledgeEasyPage({
   return (
     <div className="container mx-auto px-4 py-8">
       <p className="text-center text-lg md:text-xl font-extrabold text-gray-800 leading-relaxed -mt-2 mb-6">
-        ひまな時間にぴったり！「ひまQ」は簡単に遊べる脳トレクイズや暇つぶしクイズが満載です。クイズで頭の体操をしよう！
+        暇つぶしで頭がよくなる！『ひまQ』は、暇つぶししながら頭を鍛えられる脳トレ＆面白クイズが満載。空き時間に脳力をアップしよう！
       </p>
 
       {/* 難易度ボタン */}

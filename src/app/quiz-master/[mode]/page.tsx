@@ -235,7 +235,7 @@ export default function QuizModePage() {
   if (questions.length === 0) return <p></p>;
 
   return (
-    <div className="container mx-auto p-8 text-center bg-gradient-to-b from-purple-100 via-purple-200 to-purple-300">
+    <div className="container mx-auto p-8 text-center bg-gradient-to-b from-purple-50 via-purple-100 to-purple-200">
       {!finished ? (
         <>
           <h2 className="text-5xl md:text-6xl font-extrabold mb-6 text-purple-500 drop-shadow-lg">
