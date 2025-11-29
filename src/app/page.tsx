@@ -6,7 +6,7 @@ import Pagination from "./components/Pagination";
 import LevelFilterButtons from "@/app/components/LevelFilterButtons";
 
 export const metadata = {
-  title: "全てのクイズ｜ひまQ",
+  title: "頭がよくなる暇つぶしクイズ｜ひまQ",
   description:
     "ひまQでは、暇つぶししながら頭がよくなるクイズを多数掲載。脳トレクイズや面白クイズで、ちょっとした空き時間に脳を鍛えよう。",
 };
