@@ -77,8 +77,8 @@ const QuizResult = ({ correctCount, getTitle, titles }: { correctCount: number, 
     const timers: NodeJS.Timeout[] = [];
     timers.push(setTimeout(() => setShowScore(true), 500));
     timers.push(setTimeout(() => setShowText(true), 1000));
-    timers.push(setTimeout(() => setShowRank(true), 2000));
-    timers.push(setTimeout(() => setShowButton(true), 2000));
+    timers.push(setTimeout(() => setShowRank(true), 1500));
+    timers.push(setTimeout(() => setShowButton(true), 1500));
 
     return () => timers.forEach(clearTimeout);
   }, []);

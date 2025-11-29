@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { ReactNode } from "react";
 
 interface QuizProps {
@@ -20,13 +20,19 @@ export default function QuizMDXWrapper({ quiz, children }: QuizProps) {
   const [showHint, setShowHint] = useState(false);
   const [showAnswer, setShowAnswer] = useState(false);
 
+  useEffect(() => {
+    setSelected(null);
+    setShowHint(false);
+    setShowAnswer(false);
+  }, [quiz]);
+
   const handleSelect = (i: number) => {
     setSelected(i);
     setShowAnswer(true);
   };
 
   return (
-    <div className="p-4 max-w-xl mx-auto">
+    <div className="p-4 max-w-xl mx-auto bg-white rounded-xl">
       <p className="mb-4 text-xl md:text-2xl">{quiz.question}</p>
 
       {quiz.choices.map((choice, i) => {
