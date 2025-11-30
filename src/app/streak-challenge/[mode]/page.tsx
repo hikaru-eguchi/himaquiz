@@ -126,6 +126,7 @@ export default function QuizModePage() {
   const mode = pathname.split("/").pop() || "random";
   const searchParams = useSearchParams();
   const genre = searchParams?.get("genre") || "";
+  const level = searchParams?.get("level") || "";
 
   const [questions, setQuestions] = useState<{ id: string; quiz: QuizData }[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -188,6 +189,9 @@ export default function QuizModePage() {
         if (mode === "genre" && genre) {
           all = all.filter((a) => a.quiz?.genre === genre);
         }
+        if (mode === "level" && level) {
+          all = all.filter((a) => a.quiz?.level === level);
+        }
 
         const quizQuestions: { id: string; quiz: QuizData }[] = all
           .filter(a => a.quiz)
@@ -213,7 +217,7 @@ export default function QuizModePage() {
     };
 
     fetchArticles();
-  }, [mode, genre]);
+  }, [mode, genre, level]);
 
   const shuffleArray = <T,>(arr: T[]) => [...arr].sort(() => Math.random() - 0.5);
 

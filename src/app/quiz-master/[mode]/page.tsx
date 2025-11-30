@@ -5,6 +5,54 @@ import { useSearchParams, usePathname } from "next/navigation";
 import QuizQuestion from "../../components/QuizQuestion";
 import { QuizData } from "@/lib/articles";
 
+// キャラクター情報
+const characters = [
+  { id: "warrior", name: "剣士", image: "/images/kenshi.png", description: "HPが高く、攻撃力は標準クラス。", hp: 150, Attack: 100 },
+  { id: "fighter", name: "武闘家", image: "/images/butouka.png", description: "攻撃力が高いがHPが低い。", hp: 50, Attack: 250 },
+  { id: "wizard", name: "魔法使い", image: "/images/mahoutsukai.png", description: "HP回復やヒントを見る能力がある。", hp: 80, Attack: 80 },
+];
+
+// 敵情報
+const enemies = [
+  { id: "slime", name: "スライム", image: "/images/slime.png", hp: 50, attack: 10, description: "最弱の敵。攻撃力も低い。" },
+  { id: "goblin", name: "ゴブリン", image: "/images/goblin.png", hp: 80, attack: 20, description: "素早い敵。HPはそこそこ。" },
+  { id: "dragon", name: "ドラゴン", image: "/images/dragon.png", hp: 150, attack: 40, description: "強力なボス。攻撃力も高い。" },
+];
+
+// キャラクター選択画面
+const CharacterSelect = ({ onSelect }: { onSelect: (characterId: string) => void }) => {
+  return (
+    <div className="text-center mt-5">
+      <h2 className="text-4xl md:text-5xl font-bold mb-8">キャラクターを選択してください</h2>
+      <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-10 mb-5">
+        {characters.map((char) => (
+          <div
+            key={char.id}
+            className="cursor-pointer hover:scale-105 transform transition-all duration-200 border-2 border-gray-500 rounded-xl flex flex-col items-center justify-start p-4 w-64 h-85 md:w-60 md:h-94"
+            onClick={() => onSelect(char.id)}
+          >
+            <img src={char.image} alt={char.name} className="w-32 h-40 md:w-40 md:h-50 mb-4 mx-auto" />
+            <p className="text-xl font-bold">{char.name}</p>
+            <div className="border border-gray-400 p-1 mt-2 bg-yellow-50">
+              <p className="text-sm text-gray-800">HP（ライフ）： {char.hp}</p>
+              <p className="text-sm text-gray-800">攻撃力： {char.Attack}</p>
+            </div>
+            <p className="text-sm text-gray-600 mt-3">{char.description}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ステージに応じて敵を取得する
+const getEnemyForStage = (stage: number) => {
+  // ステージに応じて敵を変える
+  if (stage < 3) return enemies[0]; // ステージ1〜2: スライム
+  if (stage < 6) return enemies[1]; // ステージ3〜5: ゴブリン
+  return enemies[2];                 // ステージ6以降: ドラゴン
+};
+
 interface ArticleData {
   id: string;
   title: string;
@@ -122,6 +170,7 @@ export default function QuizModePage() {
   const searchParams = useSearchParams();
   const genre = searchParams?.get("genre") || "";
 
+  const [character, setCharacter] = useState<string | null>(null); // 選択したキャラクター
   const [questions, setQuestions] = useState<{ id: string; quiz: QuizData }[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userAnswer, setUserAnswer] = useState<number | null>(null);
@@ -170,6 +219,7 @@ export default function QuizModePage() {
   }, [showCorrectMessage]);
 
   useEffect(() => {
+    if (!character) return; // キャラ選択前は取得しない
     const fetchArticles = async () => {
       try {
         const res = await fetch("/api/articles");
@@ -204,7 +254,7 @@ export default function QuizModePage() {
     };
 
     fetchArticles();
-  }, [mode, genre]);
+  }, [mode, genre, character]);
 
   const shuffleArray = <T,>(arr: T[]) => [...arr].sort(() => Math.random() - 0.5);
 
@@ -244,12 +294,55 @@ export default function QuizModePage() {
     setFinished(true);
   };
 
+  // キャラクター選択前は CharacterSelect を表示
+  if (!character) {
+    return <CharacterSelect onSelect={setCharacter} />;
+  }
+
   if (questions.length === 0) return <p></p>;
 
   return (
     <div className="container mx-auto p-8 text-center bg-gradient-to-b from-purple-50 via-purple-100 to-purple-200">
       {!finished ? (
         <>
+          <div className="flex items-center justify-center gap-6 mb-6">
+            {character && (
+              <div className="flex items-center justify-center gap-4 mb-6">
+                {/* 選択したキャラクター画像 */}
+                <img
+                  src={characters.find(c => c.id === character)?.image}
+                  alt={characters.find(c => c.id === character)?.name}
+                  className="w-20 h-20 md:w-24 md:h-24 rounded-full border-2 border-gray-500"
+                />
+
+                {/* HP 表示 */}
+                <div className="flex flex-col items-start">
+                  <p className="text-xl md:text-2xl font-bold">
+                    {characters.find(c => c.id === character)?.name}
+                  </p>
+                  <p className="text-lg md:text-xl text-red-600 font-semibold">
+                    HP: {characters.find(c => c.id === character)?.hp}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* 敵 */}
+            <div className="flex flex-col items-center">
+              <img
+                src={getEnemyForStage(currentIndex + 1).image}
+                alt={getEnemyForStage(currentIndex + 1).name}
+                className="w-20 h-20 md:w-24 md:h-24 rounded-full border-2 border-red-500"
+              />
+              <p className="text-lg md:text-xl font-bold text-red-600">
+                {getEnemyForStage(currentIndex + 1).name}
+              </p>
+              <p className="text-md md:text-lg text-gray-800">
+                HP: {getEnemyForStage(currentIndex + 1).hp}
+              </p>
+            </div>
+          </div>
+
           <h2 className="text-5xl md:text-6xl font-extrabold mb-6 text-purple-500 drop-shadow-lg">
             STAGE {currentIndex + 1}
           </h2>

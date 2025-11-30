@@ -149,7 +149,7 @@ export default function QuizMasterPage() {
         {/* 説明ボタン */}
         <button
           onClick={handleDescriptionClick}
-          className="mt-4 px-6 py-1 md:px-8 md:text-xl bg-gray-200 text-gray-800 rounded-full border-2 border-black hover:bg-gray-300 shadow-md transition-colors"
+          className="mt-8 px-6 py-1 md:px-8 md:text-xl bg-gray-200 text-gray-800 rounded-full border-2 border-black hover:bg-gray-300 shadow-md transition-colors"
         >
           このゲームの説明を見る
         </button>
@@ -167,11 +167,11 @@ export default function QuizMasterPage() {
             ref={descriptionRef}
             className="text-gray-700 text-md md:text-lg text-center px-4 py-2"
           >
-            「クイズダンジョン」は、クイズを解きながらダンジョンを進むゲームです。
-            クイズに正解するとで相手に攻撃ができます。間違えると自分のHP（ライフ）が減っていきます。
-            HP（ライフ）が0になるとゲームオーバーです。
-            敵を撃破するたびにステージが進み、もらえる称号が上がっていきます。
-            最終的に「クイズマスター」の称号を獲得することが目的です。
+            「クイズダンジョン」は、クイズを解いてダンジョンを攻略していくゲームです。
+            クイズに正解すると敵に攻撃でき、間違えるとあなたのHP（ライフ）が減ってしまいます。
+            HPが0になるとゲームオーバー。
+            敵を倒すごとにステージが進み、ランク（称号）もどんどん昇格していきます。
+            そして、最終称号 「クイズマスター」 を手に入れればゲームクリア！
           </p>
         </div>
       </>
