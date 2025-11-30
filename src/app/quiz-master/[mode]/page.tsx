@@ -8,7 +8,7 @@ import { QuizData } from "@/lib/articles";
 // キャラクター情報
 const characters = [
   { id: "warrior", name: "剣士", image: "/images/kenshi.png", description: "HPが高く、攻撃力は標準クラス。", hp: 150, Attack: 100 },
-  { id: "fighter", name: "武闘家", image: "/images/butouka.png", description: "攻撃力が高いがHPが低い。", hp: 50, Attack: 250 },
+  { id: "fighter", name: "武闘家", image: "/images/butouka.png", description: "攻撃力が圧倒的に高い。", hp: 50, Attack: 250 },
   { id: "wizard", name: "魔法使い", image: "/images/mahoutsukai.png", description: "HP回復やヒントを見る能力がある。", hp: 80, Attack: 80 },
 ];
 
@@ -39,16 +39,16 @@ const CharacterSelect = ({ onSelect }: { onSelect: (characterId: string) => void
         {characters.map((char) => (
           <div
             key={char.id}
-            className="cursor-pointer hover:scale-105 transform transition-all duration-200 border-2 border-gray-500 rounded-xl flex flex-col items-center justify-start p-4 w-64 h-72 md:w-60 md:h-94"
+            className="cursor-pointer hover:scale-105 transform transition-all duration-200 bg-orange-50 border-2 border-gray-500 rounded-xl flex flex-col items-center justify-start p-4 w-64 h-72 md:w-60 md:h-94"
             onClick={() => onSelect(char.id)}
           >
             <img src={char.image} alt={char.name} className="w-25 h-30 md:w-40 md:h-50 mb-4 mx-auto" />
             <p className="text-xl font-bold">{char.name}</p>
-            <div className="border border-gray-400 p-1 mt-2 bg-yellow-50">
+            <p className="text-sm text-gray-600 mt-1">{char.description}</p>
+            <div className="border border-gray-400 p-2 mt-2 bg-white">
               <p className="text-sm text-gray-800">HP（ライフ）： {char.hp}</p>
               <p className="text-sm text-gray-800">攻撃力： {char.Attack}</p>
             </div>
-            <p className="text-sm text-gray-600 mt-3">{char.description}</p>
           </div>
         ))}
       </div>
@@ -90,6 +90,7 @@ interface ArticleData {
     level: string;
     answerExplanation?: string;
     trivia?: string;
+    hint?: string;
   };
 }
 
@@ -201,6 +202,8 @@ export default function QuizModePage() {
   const [characterLevel, setCharacterLevel] = useState(1);
   const [levelUpMessage, setLevelUpMessage] = useState<string | null>(null);
   const [showNextStageButton, setShowNextStageButton] = useState(false);
+  const [showMagicButtons, setShowMagicButtons] = useState(false);
+  const [hintText, setHintText] = useState<string | null>(null);
 
   const finishedRef = useRef(finished);
   const showCorrectRef = useRef(showCorrectMessage);
@@ -256,6 +259,7 @@ export default function QuizModePage() {
               level: a.quiz!.level,
               answerExplanation: a.quiz!.answerExplanation,
               trivia: a.quiz!.trivia,
+              hint: a.quiz!.hint,
             }
           }));
 
@@ -280,6 +284,15 @@ export default function QuizModePage() {
     setShowStageIntro(true);
     setTimeout(() => setShowStageIntro(false), 4000);
   }, [currentStage]);
+
+  useEffect(() => {
+    if (character === "wizard") {
+      setShowMagicButtons(true);
+    } else {
+      setShowMagicButtons(false);
+    }
+    setHintText(null); // 次の問題でヒント非表示
+  }, [currentIndex, character]);
 
   const shuffleArray = <T,>(arr: T[]) => [...arr].sort(() => Math.random() - 0.5);
 
@@ -643,6 +656,46 @@ export default function QuizModePage() {
                   userAnswer={userAnswer}
                   setUserAnswer={setUserAnswer}
                 />
+              )}
+
+              {!showCorrectMessage && !incorrectMessage && !isAttacking && (
+                <>
+                  {/* 魔法使い専用ボタン */}
+                  {showMagicButtons && (
+                    <div className="flex justify-center gap-2 md:gap-4 mt-4 mb-2">
+                      <button
+                        className="flex-1 md:max-w-[250px] px-4 py-2 text-lg md:text-xl bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-500 text-black font-bold rounded-lg shadow-md hover:from-yellow-500 hover:via-yellow-400 hover:to-yellow-600 border border-yellow-600 transition-all"
+                        onClick={() => {
+                          setHintText(questions[currentIndex].quiz?.hint || "ヒントはありません");
+                          setShowMagicButtons(false);
+                        }}
+                      >
+                        ヒントを見る🔮
+                      </button>
+
+                      <button
+                        className="flex-1 md:max-w-[250px] px-4 py-2 text-lg md:text-xl bg-gradient-to-r from-green-400 via-green-300 to-green-500 text-black font-bold rounded-lg shadow-md hover:from-green-500 hover:via-green-400 hover:to-green-600 border border-green-600 transition-all"
+                        onClick={() => {
+                          setCharacterHP(prev => (prev ?? 0) + characterLevel * 50);
+                          setShowMagicButtons(false);
+                        }}
+                      >
+                        HP回復✨
+                      </button>
+                    </div>
+                  )}
+                  {/* ヒント表示 */}
+                  {hintText && (
+                    <div className="bg-white border-2 border-gray-400 p-2 rounded-xl max-w-md mx-auto">
+                      <p className="text-center text-xl md:text-2xl font-semibold text-black mb-2">
+                        ヒント💡
+                      </p>
+                      <p className="text-center text-xl md:text-2xl font-semibold text-blue-600 mb-2">
+                        {hintText}
+                      </p>
+                    </div>
+                  )}
+                </>
               )}
 
               {/* 回答ボタン */}
