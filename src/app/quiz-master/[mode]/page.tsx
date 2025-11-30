@@ -14,20 +14,20 @@ const characters = [
 
 // 敵情報
 const enemies = [
-  { id: "slime", name: "スライム", image: "/images/slime.png", hp: 100, attack: 30, description: "" },
-  { id: "goblin", name: "ゴブリン", image: "/images/goblin.png", hp: 150, attack: 50, description: "" },
-  { id: "mimic", name: "ミミック", image: "/images/mimic.png", hp: 200, attack: 100, description: "" },
-  { id: "berserker", name: "バーサーカー", image: "/images/berserker.png", hp: 300, attack: 150, description: "" },
-  { id: "fenikkusu", name: "フェニックス", image: "/images/fenikkusu.png", hp: 500, attack: 200, description: "" },
-  { id: "dragon", name: "ドラゴン", image: "/images/dragon.png", hp: 1000, attack: 500, description: "" },
-  { id: "blackdragon", name: "ブラックドラゴン", image: "/images/blackdragon.png", hp: 2000, attack: 1000, description: "" },
-  { id: "leviathan", name: "リヴァイアサン", image: "/images/leviathan.png", hp: 3000, attack: 1500, description: "" },
-  { id: "poseidon", name: "ポセイドン", image: "/images/poseidon.png", hp: 5000, attack: 2500, description: "" },
-  { id: "gundarimyouou", name: "軍荼利明王（ぐんだりみょうおう）", image: "/images/gundarimyouou.png", hp: 7000, attack: 3500, description: "" },
-  { id: "hades", name: "ハデス", image: "/images/hades.png", hp: 8000, attack: 4000, description: "" },
-  { id: "zeus", name: "ゼウス", image: "/images/zeus.png", hp: 10000, attack: 5000, description: "" },
-  { id: "ordin", name: "オーディン", image: "/images/ordin.png", hp: 15000, attack: 10000, description: "" },
-  { id: "yuusya_game", name: "初代クイズマスターの最強勇者", image: "/images/yuusya_game.png", hp: 30000, attack: 20000, description: "" },
+  { id: "slime", name: "スライム", image: "/images/slime.png", hp: 100, attack: 30, description: "ぷるぷるして弱そうに見えるが油断は禁物。" },
+  { id: "goblin", name: "ゴブリン", image: "/images/goblin.png", hp: 150, attack: 50, description: "素早く群れで襲いかかる小型のモンスター。" },
+  { id: "mimic", name: "ミミック", image: "/images/mimic.png", hp: 200, attack: 100, description: "宝箱に化けるトリッキーな敵。油断すると噛まれる！" },
+  { id: "berserker", name: "バーサーカー", image: "/images/berserker.png", hp: 300, attack: 150, description: "理性を失った狂戦士。攻撃力が非常に高い。" },
+  { id: "fenikkusu", name: "フェニックス", image: "/images/fenikkusu.png", hp: 500, attack: 200, description: "不死鳥の炎を操る神秘的な生物。燃え盛る翼で攻撃。" },
+  { id: "dragon", name: "ドラゴン", image: "/images/dragon.png", hp: 1000, attack: 500, description: "火を吹く巨大竜。圧倒的な力を誇る古代の王者。" },
+  { id: "blackdragon", name: "ブラックドラゴン", image: "/images/blackdragon.png", hp: 2000, attack: 1000, description: "闇の力を宿す黒竜。魔法攻撃も強力。" },
+  { id: "leviathan", name: "リヴァイアサン", image: "/images/leviathan.png", hp: 3000, attack: 1500, description: "海の深淵から現れる巨大モンスター。水流で圧倒する。" },
+  { id: "poseidon", name: "ポセイドン", image: "/images/poseidon.png", hp: 5000, attack: 2500, description: "海の神。雷と津波で敵を蹴散らす力を持つ。" },
+  { id: "gundarimyouou", name: "軍荼利明王（ぐんだりみょうおう）", image: "/images/gundarimyouou.png", hp: 7000, attack: 3500, description: "仏教の怒りの守護神。恐怖の炎で全てを焼き尽くす。" },
+  { id: "hades", name: "ハデス", image: "/images/hades.png", hp: 8000, attack: 4000, description: "冥界の支配者。死者の力を操り、強大な攻撃を仕掛ける。" },
+  { id: "zeus", name: "ゼウス", image: "/images/zeus.png", hp: 10000, attack: 5000, description: "天空の王。雷霆を操る全知全能の神。" },
+  { id: "ordin", name: "オーディン", image: "/images/ordin.png", hp: 15000, attack: 10000, description: "知恵と戦の神。魔法と剣技を極めた伝説の戦士。" },
+  { id: "yuusya_game", name: "初代クイズマスターの最強勇者", image: "/images/yuusya_game.png", hp: 30000, attack: 20000, description: "全てのクイズと戦闘を制した伝説の勇者。前人未到の強さを誇る。" },
 ];
 
 // キャラクター選択画面
@@ -140,7 +140,7 @@ const QuizResult = ({ correctCount, getTitle, titles }: { correctCount: number, 
   return (
     <div className="text-center mt-6">
       {showScore && <p className="text-3xl md:text-5xl mb-4 md:mb-6">ステージ {correctCount} までクリア！</p>}
-      {showText && <p className="text-xl md:text-2xl text-gray-600 mb-2">君の称号は…</p>}
+      {showText && <p className="text-xl md:text-2xl text-gray-600 mb-2">あなたの称号は…</p>}
 
       {showRank && (
         <>
@@ -200,6 +200,7 @@ export default function QuizModePage() {
   const [deathMessage, setDeathMessage] = useState<string | null>(null);
   const [characterLevel, setCharacterLevel] = useState(1);
   const [levelUpMessage, setLevelUpMessage] = useState<string | null>(null);
+  const [showNextStageButton, setShowNextStageButton] = useState(false);
 
   const finishedRef = useRef(finished);
   const showCorrectRef = useRef(showCorrectMessage);
@@ -373,23 +374,8 @@ export default function QuizModePage() {
         // ⭐ レベルアップメッセージをセット！
         setLevelUpMessage(`✨レベル ${newLevel} に上がった！`);
 
-        // 少し待ってから次のステージへ
-        setTimeout(() => {
-          const nextStage = currentStage + 1;
-          setCorrectCount(c => c + 1);
-          setCurrentStage(nextStage);
-
-          const nextEnemy = getEnemyForStage(nextStage + 1);
-          setEnemyHP(nextEnemy.hp);
-
-          // メッセージを消す
-          setEnemyDefeatedMessage(null);
-          setLevelUpMessage(null); // ⭐ 消す
-          setIsAttacking(false);
-
-          // 次の問題へ
-          nextQuestion();
-        }, 4500); // 1.5秒表示
+        // 次のステージに進むボタンを表示
+        setShowNextStageButton(true);
       }else{
         // 攻撃アニメ終了後にメッセージを消して次の問題へ
         setTimeout(() => {
@@ -467,7 +453,7 @@ export default function QuizModePage() {
           </h2>
 
           <div className="mb-6 bg-white p-3 border border-yellow-400 rounded-xl mx-auto w-full max-w-md md:max-w-xl">
-            <p className="text-2xl text-center mb-4">{getEnemyForStage(currentStage + 1).name}が現れた！</p>
+            <p className="text-xl md:text-2xl text-center mb-4">{getEnemyForStage(currentStage + 1).name}が現れた！クイズに正解して倒そう！</p>
             {/* 横並び */}
             <div className="flex flex-col items-center md:flex-row justify-center md:gap-12">
               {/* 自分のキャラクター */}
@@ -496,23 +482,28 @@ export default function QuizModePage() {
               )}
 
               {/* 敵キャラクター */}
-              <div className="flex items-center gap-4">
-                <img
-                  src={getEnemyForStage(currentStage + 1).image}
-                  alt={getEnemyForStage(currentStage + 1).name}
-                  className="w-20 h-20 md:w-24 md:h-24"
-                />
-                <div className="flex flex-col items-start">
-                  <p className="text-xl md:text-2xl font-bold text-red-500">
-                    {getEnemyForStage(currentStage + 1).name}
-                  </p>
-                  <p className="text-sm md:text-xl font-semibold text-red-500">
-                    HP： {enemyHP}
-                  </p>
-                  <p className="text-sm md:text-xl font-semibold text-red-500">
-                    攻撃力：{getEnemyForStage(currentStage + 1).attack}
-                  </p>
+              <div className="flex flex-col gap-2 md:gap-3">
+                <div className="flex items-center gap-4">
+                  <img
+                    src={getEnemyForStage(currentStage + 1).image}
+                    alt={getEnemyForStage(currentStage + 1).name}
+                    className="w-20 h-20 md:w-24 md:h-24"
+                  />
+                  <div className="flex flex-col items-start">
+                    <p className="text-xl md:text-2xl font-bold text-red-500">
+                      {getEnemyForStage(currentStage + 1).name}
+                    </p>
+                    <p className="text-sm md:text-xl font-semibold text-red-500">
+                      HP： {enemyHP}
+                    </p>
+                    <p className="text-sm md:text-xl font-semibold text-red-500">
+                      攻撃力：{getEnemyForStage(currentStage + 1).attack}
+                    </p>
+                  </div>
                 </div>
+                <p className="text-sm md:text-lg font-semibold text-gray-600 w-40 md:w-55">
+                  {getEnemyForStage(currentStage + 1).description}
+                </p>
               </div>
             </div>
           </div>
@@ -547,6 +538,34 @@ export default function QuizModePage() {
                 HPが上がった！
               </p>
             </div>
+          )}
+
+          {/* 次のステージへ進むボタン */}
+          {showNextStageButton && (
+            <button
+              className="px-5 py-3 md:px-6 md:py-4 mb-3 border border-black text-white text-xl md:text-2xl font-bold rounded-xl 
+                         bg-gradient-to-r from-purple-300 via-purple-400 to-purple-500
+                         hover:from-purple-400 hover:via-purple-500 hover:to-purple-600
+                         shadow-lg shadow-pink-300 cursor-pointer"
+              onClick={() => {
+                const nextStage = currentStage + 1;
+                setCorrectCount(c => c + 1);
+                setCurrentStage(nextStage);
+
+                const nextEnemy = getEnemyForStage(nextStage + 1);
+                setEnemyHP(nextEnemy.hp);
+
+                // メッセージを消す
+                setEnemyDefeatedMessage(null);
+                setLevelUpMessage(null);
+                setIsAttacking(false);
+                setShowNextStageButton(false);
+
+                nextQuestion();
+              }}
+            >
+              次のステージへ進む
+            </button>
           )}
 
           {deathMessage && (
@@ -596,18 +615,21 @@ export default function QuizModePage() {
                   <div className="mt-10">
                     {showCorrectMessage && (
                       <button
-                        className="px-5 py-3 md:px-6 md:py-3 border border-black bg-blue-500 text-white text-lg md:text-xl font-medium rounded hover:bg-blue-600 cursor-pointer"
+                        className="px-5 py-3 md:px-6 md:py-3 border border-black text-white text-lg md:text-xl font-medium rounded bg-gradient-to-r from-red-500 via-yellow-500 to-pink-500 hover:from-pink-600 hover:via-red-600 hover:to-yellow-600 cursor-pointer"
                         onClick={attackEnemy}
                       >
-                        相手に攻撃だ！🔥
+                        相手に攻撃！🗡️
                       </button>
                     )}
                     {incorrectMessage && (
                       <button
-                        className="px-5 py-3 md:px-6 md:py-3 bg-red-500 border border-black text-white text-lg md:text-xl font-medium rounded hover:bg-red-600 cursor-pointer"
+                        className="px-5 py-3 md:px-6 md:py-3 text-white text-lg md:text-xl font-medium rounded border border-black
+                                  bg-gradient-to-r from-red-700 via-purple-800 to-black
+                                  hover:from-purple-700 hover:via-red-800 hover:to-black
+                                  shadow-lg shadow-red-800 cursor-pointer"
                         onClick={attackCharacter}
                       >
-                        相手からの攻撃！
+                        相手からの攻撃！💀
                       </button>
                     )}
                   </div>

@@ -152,7 +152,7 @@ export default async function HomePage({
           今日のおすすめクイズ
         </h1>
         <p className="text-lg md:text-xl mb-2 text-center leading-tight mb-4">
-          まずはこの問題！君は解けるかな？
+          まずはこの問題！あなたは解けるかな？
         </p>
         {randomQuizArticle?.quiz && (
           <QuizMDXWrapper quiz={randomQuizArticle.quiz} />
@@ -168,7 +168,7 @@ export default async function HomePage({
           📚ジャンルから選ぶ📚
         </p>
         <p className="text-lg md:text-xl mb-2 text-center leading-tight mb-4">
-          君はどれが好き？ジャンルを選ぼう！
+          あなたはどれが好き？ジャンルを選ぼう！
         </p>
         <div className="flex flex-wrap justify-center gap-2 md:gap-5">
           <Link href="/quizzes/genre/psychology">
