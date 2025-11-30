@@ -14,9 +14,10 @@ const characters = [
 
 // 敵情報
 const enemies = [
-  { id: "slime", name: "スライム", image: "/images/slime.png", hp: 50, attack: 10, description: "最弱の敵。攻撃力も低い。" },
-  { id: "goblin", name: "ゴブリン", image: "/images/goblin.png", hp: 80, attack: 20, description: "素早い敵。HPはそこそこ。" },
-  { id: "dragon", name: "ドラゴン", image: "/images/dragon.png", hp: 150, attack: 40, description: "強力なボス。攻撃力も高い。" },
+  { id: "slime", name: "スライム", image: "/images/slime.png", hp: 100, attack: 30, description: "最弱の敵。攻撃力も低い。" },
+  { id: "goblin", name: "ゴブリン", image: "/images/goblin.png", hp: 150, attack: 50, description: "素早い敵。HPはそこそこ。" },
+  { id: "mimic", name: "ミミック", image: "/images/mimic.png", hp: 200, attack: 80, description: "まあまあ強い。" },
+  { id: "dragon", name: "ドラゴン", image: "/images/dragon.png", hp: 1000, attack: 1000, description: "強力なボス。攻撃力も高い。" },
 ];
 
 // キャラクター選択画面
@@ -48,9 +49,10 @@ const CharacterSelect = ({ onSelect }: { onSelect: (characterId: string) => void
 // ステージに応じて敵を取得する
 const getEnemyForStage = (stage: number) => {
   // ステージに応じて敵を変える
-  if (stage < 3) return enemies[0]; // ステージ1〜2: スライム
-  if (stage < 6) return enemies[1]; // ステージ3〜5: ゴブリン
-  return enemies[2];                 // ステージ6以降: ドラゴン
+  if (stage < 2) return enemies[0];
+  if (stage < 3) return enemies[1];
+  if (stage < 4) return enemies[2];
+  return enemies[3];
 };
 
 interface ArticleData {
@@ -73,31 +75,31 @@ interface ArticleData {
 // 正解数に応じて出すコメント
 const rankComments = [
   { threshold: 0, comment: "ここから冒険の始まりだ！ゆっくり進んでいこう！" },
-  { threshold: 5, comment: "クイズ戦士に昇格！戦場に立つ準備は万端だ！" },
-  { threshold: 10, comment: "駆け出しの旅人！君の旅はまだ始まったばかりだが、光るものがある！" },
-  { threshold: 15, comment: "森の探求者！知識の森をどんどん進んでいるぞ！" },
-  { threshold: 20, comment: "知識の斧使い！切れ味鋭いひらめきで問題を斬り伏せている！" },
-  { threshold: 25, comment: "真理の魔術師！その回答、まるで呪文のように正確だ！" },
-  { threshold: 30, comment: "叡智の騎士！堂々とした実力、もはや上級者の風格！" },
-  { threshold: 35, comment: "謎解きの導師！ひらめきが熟練の域に達しているぞ…！" },
-  { threshold: 40, comment: "迷宮の守護者！難問の迷宮も恐れない胆力を感じる！" },
-  { threshold: 45, comment: "啓示の賢者！まるで答えが見えているかのような閃きだ！" },
-  { threshold: 50, comment: "閃光の剣士 ⚔️ ！回答の速さと正確さが光のようだ！" },
-  { threshold: 55, comment: "深淵の呪術師 🔮！常人には見えない答えを引き寄せている…！" },
-  { threshold: 60, comment: "千里眼の召喚士 👁️！問題の先まで見抜いているのか！？" },
-  { threshold: 65, comment: "叡智の勇者 🛡️！知識と勇気を兼ね備えた英雄だ！" },
-  { threshold: 70, comment: "迷宮の支配者 👑！問題の方が君を避けているレベル！" },
-  { threshold: 75, comment: "混沌の覇者 🌀！あらゆる難問をねじ伏せる圧倒的なパワー！" },
-  { threshold: 80, comment: "運命の大賢者 ⭐！君の選択はすべて正解へ導かれている…！" },
-  { threshold: 85, comment: "世界樹の賢王 🌳！知識の生命力が桁違いだ！" },
-  { threshold: 90, comment: "次元超越者 🌌！もう次元が違う…これは人間離れしている！" },
-  { threshold: 95, comment: "世界トップランカー！ここまで来ると本物の化け物級！" },
-  { threshold: 100, comment: "ビギナーマスター 🏆！強すぎる！完全に覚醒してる！" },
-  { threshold: 110, comment: "フロアマスター 🏆！あらゆるステージを制覇する者の風格だ！" },
-  { threshold: 120, comment: "グランドマスター 🏆！歴戦の賢者のような威厳がある！" },
-  { threshold: 130, comment: "クイズマスター 🏆！最強の中の最強…殿堂入りレベル！" },
-  { threshold: 140, comment: "レジェンドクイズマスター 🌟！伝説に語り継がれる存在だ…！" },
-  { threshold: 150, comment: "クイズ王✨！ついに王の領域へ…君こそ頂点！！" },
+  { threshold: 1, comment: "クイズ戦士に昇格！戦場に立つ準備は万端だ！" },
+  { threshold: 2, comment: "駆け出しの旅人！君の旅はまだ始まったばかりだが、光るものがある！" },
+  { threshold: 3, comment: "森の探求者！知識の森をどんどん進んでいるぞ！" },
+  { threshold: 4, comment: "知識の斧使い！切れ味鋭いひらめきで問題を斬り伏せている！" },
+  { threshold: 5, comment: "真理の魔術師！その回答、まるで呪文のように正確だ！" },
+  { threshold: 6, comment: "叡智の騎士！堂々とした実力、もはや上級者の風格！" },
+  { threshold: 7, comment: "謎解きの導師！ひらめきが熟練の域に達しているぞ…！" },
+  { threshold: 8, comment: "迷宮の守護者！難問の迷宮も恐れない胆力を感じる！" },
+  { threshold: 9, comment: "啓示の賢者！まるで答えが見えているかのような閃きだ！" },
+  { threshold: 10, comment: "閃光の剣士 ⚔️ ！回答の速さと正確さが光のようだ！" },
+  { threshold: 11, comment: "深淵の呪術師 🔮！常人には見えない答えを引き寄せている…！" },
+  { threshold: 12, comment: "千里眼の召喚士 👁️！問題の先まで見抜いているのか！？" },
+  { threshold: 13, comment: "叡智の勇者 🛡️！知識と勇気を兼ね備えた英雄だ！" },
+  { threshold: 14, comment: "迷宮の支配者 👑！問題の方が君を避けているレベル！" },
+  { threshold: 15, comment: "混沌の覇者 🌀！あらゆる難問をねじ伏せる圧倒的なパワー！" },
+  { threshold: 16, comment: "運命の大賢者 ⭐！君の選択はすべて正解へ導かれている…！" },
+  { threshold: 17, comment: "世界樹の賢王 🌳！知識の生命力が桁違いだ！" },
+  { threshold: 18, comment: "次元超越者 🌌！もう次元が違う…これは人間離れしている！" },
+  { threshold: 19, comment: "世界トップランカー！ここまで来ると本物の化け物級！" },
+  { threshold: 20, comment: "ビギナーマスター 🏆！強すぎる！完全に覚醒してる！" },
+  { threshold: 21, comment: "フロアマスター 🏆！あらゆるステージを制覇する者の風格だ！" },
+  { threshold: 22, comment: "グランドマスター 🏆！歴戦の賢者のような威厳がある！" },
+  { threshold: 23, comment: "クイズマスター 🏆！最強の中の最強…殿堂入りレベル！" },
+  { threshold: 24, comment: "レジェンドクイズマスター 🌟！伝説に語り継がれる存在だ…！" },
+  { threshold: 25, comment: "クイズ王✨！一番すごい称号に到達だ…！おめでとう！！" },
 ];
 
 const QuizResult = ({ correctCount, getTitle, titles }: { correctCount: number, getTitle: () => string, titles: { threshold: number, title: string }[] }) => {
@@ -173,41 +175,49 @@ export default function QuizModePage() {
   const [character, setCharacter] = useState<string | null>(null); // 選択したキャラクター
   const [questions, setQuestions] = useState<{ id: string; quiz: QuizData }[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentStage, setCurrentStage] = useState(0);
   const [userAnswer, setUserAnswer] = useState<number | null>(null);
   const [correctCount, setCorrectCount] = useState(0);
   const [finished, setFinished] = useState(false);
   const [showCorrectMessage, setShowCorrectMessage] = useState(false);
   const [incorrectMessage, setIncorrectMessage] = useState<string | null>(null);
+  const [characterHP, setCharacterHP] = useState<number | null>(null);
+  const [enemyHP, setEnemyHP] = useState<number | null>(null);
+  const [attackMessage, setAttackMessage] = useState<string | null>(null);
+  const [isAttacking, setIsAttacking] = useState(false);
+  const [showStageIntro, setShowStageIntro] = useState(false);
+  const [enemyDefeatedMessage, setEnemyDefeatedMessage] = useState<string | null>(null);
+  const [deathMessage, setDeathMessage] = useState<string | null>(null);
 
   const finishedRef = useRef(finished);
   const showCorrectRef = useRef(showCorrectMessage);
 
   const titles = [
-    { threshold: 5, title: "クイズ戦士" },
-    { threshold: 10, title: "駆け出しの旅人" },
-    { threshold: 15, title: "森の探求者" },
-    { threshold: 20, title: "知識の斧使い" },
-    { threshold: 25, title: "真理の魔術師" },
-    { threshold: 30, title: "叡智の騎士" },
-    { threshold: 35, title: "謎解きの導師" },
-    { threshold: 40, title: "迷宮の守護者" },
-    { threshold: 45, title: "啓示の賢者" },
-    { threshold: 50, title: "閃光の剣士 ⚔️" },
-    { threshold: 55, title: "深淵の呪術師 🔮" },
-    { threshold: 60, title: "千里眼の召喚士 👁️" },
-    { threshold: 65, title: "叡智の勇者 🛡️" },
-    { threshold: 70, title: "迷宮の支配者 👑" },
-    { threshold: 75, title: "混沌の覇者 🌀" },
-    { threshold: 80, title: "運命の大賢者 ⭐" },
-    { threshold: 85, title: "世界樹の賢王 🌳" },
-    { threshold: 90, title: "次元超越者 🌌" },
-    { threshold: 95, title: "世界トップランカー" },
-    { threshold: 100, title: "ビギナーマスター 🏆" },
-    { threshold: 110, title: "フロアマスター 🏆" },
-    { threshold: 120, title: "グランドマスター 🏆" },
-    { threshold: 130, title: "クイズマスター 🏆" },
-    { threshold: 140, title: "レジェンドクイズマスター 🌟" },
-    { threshold: 150, title: "クイズ王✨" },
+    { threshold: 1, title: "クイズ戦士" },
+    { threshold: 2, title: "駆け出しの旅人" },
+    { threshold: 3, title: "森の探求者" },
+    { threshold: 4, title: "知識の斧使い" },
+    { threshold: 5, title: "真理の魔術師" },
+    { threshold: 6, title: "叡智の騎士" },
+    { threshold: 7, title: "謎解きの導師" },
+    { threshold: 8, title: "迷宮の守護者" },
+    { threshold: 9, title: "啓示の賢者" },
+    { threshold: 10, title: "閃光の剣士 ⚔️" },
+    { threshold: 11, title: "深淵の呪術師 🔮" },
+    { threshold: 12, title: "千里眼の召喚士 👁️" },
+    { threshold: 13, title: "叡智の勇者 🛡️" },
+    { threshold: 14, title: "迷宮の支配者 👑" },
+    { threshold: 15, title: "混沌の覇者 🌀" },
+    { threshold: 16, title: "運命の大賢者 ⭐" },
+    { threshold: 17, title: "世界樹の賢王 🌳" },
+    { threshold: 18, title: "次元超越者 🌌" },
+    { threshold: 19, title: "世界トップランカー" },
+    { threshold: 20, title: "ビギナーマスター 🏆" },
+    { threshold: 21, title: "フロアマスター 🏆" },
+    { threshold: 22, title: "グランドマスター 🏆" },
+    { threshold: 23, title: "クイズマスター 🏆" },
+    { threshold: 24, title: "レジェンドクイズマスター 🌟" },
+    { threshold: 25, title: "クイズ王✨" },
   ];
 
   useEffect(() => {
@@ -256,6 +266,19 @@ export default function QuizModePage() {
     fetchArticles();
   }, [mode, genre, character]);
 
+  useEffect(() => {
+    if (character) {
+      const char = characters.find(c => c.id === character);
+      if (char) setCharacterHP(char.hp);
+      setEnemyHP(getEnemyForStage(1).hp);
+    }
+  }, [character]);
+
+  useEffect(() => {
+    setShowStageIntro(true);
+    setTimeout(() => setShowStageIntro(false), 3500);
+}, [currentStage]);
+
   const shuffleArray = <T,>(arr: T[]) => [...arr].sort(() => Math.random() - 0.5);
 
   const checkAnswer = () => {
@@ -263,7 +286,6 @@ export default function QuizModePage() {
     const displayAnswer = questions[currentIndex].quiz?.displayAnswer;
 
     if (userAnswer === correctAnswer) {
-      setCorrectCount(c => c + 1);
       setShowCorrectMessage(true);
     } else {
       setIncorrectMessage(`ざんねん！\n答えは" ${displayAnswer} "でした！`);
@@ -294,6 +316,115 @@ export default function QuizModePage() {
     setFinished(true);
   };
 
+  const animateHP = (
+    startHP: number, 
+    damage: number, 
+    setHP: React.Dispatch<React.SetStateAction<number | null>>, 
+    callback: () => void
+  ) => {
+    let currentHP = startHP;
+    const targetHP = Math.max(startHP - damage, 0); // ここで0未満にならないように
+
+    const interval = setInterval(() => {
+      currentHP = Math.max(currentHP - 1, targetHP);
+      setHP(currentHP);
+
+      if (currentHP <= targetHP) {
+        clearInterval(interval);
+        callback();
+      }
+    }, 15); // 1減少ごとに10ms
+  };
+
+  const attackEnemy = () => {
+    const player = characters.find(c => c.id === character);
+    if (!player || enemyHP === null) return;
+
+    setShowCorrectMessage(false);
+    setIncorrectMessage(null);
+
+    setIsAttacking(true);
+    setAttackMessage(`${player.name}の攻撃！${getEnemyForStage(currentStage + 1).name}に${player.Attack}のダメージ！`);
+
+    animateHP(enemyHP, player.Attack, setEnemyHP, () => {
+      const remainingHP = (enemyHP ?? 0) - player.Attack;
+
+      if (remainingHP <= 0) {
+        // 敵を倒したメッセージをセット
+        const enemyName = getEnemyForStage(currentStage + 1).name;
+        setEnemyDefeatedMessage(`🎉 ${enemyName} を倒した！`);
+        setAttackMessage(null);
+
+        // 少し待ってから次のステージへ
+        setTimeout(() => {
+          const nextStage = currentStage + 1;
+          setCorrectCount(c => c + 1);
+          setCurrentStage(nextStage);
+
+          const nextEnemy = getEnemyForStage(nextStage + 1);
+          setEnemyHP(nextEnemy.hp);
+
+          // メッセージを消す
+          setEnemyDefeatedMessage(null);
+          setIsAttacking(false);
+
+          // 次の問題へ
+          nextQuestion();
+        }, 3500); // 1.5秒表示
+      }else{
+        // 攻撃アニメ終了後にメッセージを消して次の問題へ
+        setTimeout(() => {
+          setIsAttacking(false);
+          setAttackMessage(null);
+          nextQuestion();
+        }, 1000); // 1秒表示
+      }
+    });
+  };
+
+  const attackCharacter = () => {
+    const enemy = getEnemyForStage(currentStage + 1);
+    if (characterHP === null || enemyHP === null) return;
+
+    setShowCorrectMessage(false);
+    setIncorrectMessage(null);
+
+    setIsAttacking(true);
+    setAttackMessage(`${enemy.name}の攻撃！${characters.find(c => c.id === character)?.name}に${enemy.attack}のダメージ！`);
+
+    animateHP(characterHP, enemy.attack, setCharacterHP, () => {
+      const remainingHP = (characterHP ?? 0) - enemy.attack;
+
+      if (remainingHP <= 0) {
+        // メッセージをセット
+        setDeathMessage(`力尽きてしまった…`);
+        setAttackMessage(null);
+
+        setTimeout(() => {
+          setFinished(true);
+        }, 3500); // 1.5秒表示
+      } else {
+        setCharacterHP(remainingHP);
+        setTimeout(() => {
+          setIsAttacking(false);
+          setAttackMessage(null);
+          nextQuestion();
+        }, 1000);
+      }
+    });
+  };
+
+  const StageIntro = ({ enemy }: { enemy: typeof enemies[0] }) => {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center z-50">
+        <img src={enemy.image} alt={enemy.name} className="w-40 h-40 md:w-60 md:h-60 mb-4 animate-bounce" />
+        <p className="text-4xl md:text-6xl font-extrabold text-yellow-400 drop-shadow-lg animate-pulse">
+          {enemy.name} が現れた！
+        </p>
+      </div>
+    );
+  };
+
   // キャラクター選択前は CharacterSelect を表示
   if (!character) {
     return <CharacterSelect onSelect={setCharacter} />;
@@ -302,50 +433,74 @@ export default function QuizModePage() {
   if (questions.length === 0) return <p></p>;
 
   return (
+    <>
+    {showStageIntro && <StageIntro enemy={getEnemyForStage(currentStage + 1)} />}
     <div className="container mx-auto p-8 text-center bg-gradient-to-b from-purple-50 via-purple-100 to-purple-200">
       {!finished ? (
         <>
-          <div className="flex items-center justify-center gap-6 mb-6">
-            {character && (
-              <div className="flex items-center justify-center gap-4 mb-6">
-                {/* 選択したキャラクター画像 */}
-                <img
-                  src={characters.find(c => c.id === character)?.image}
-                  alt={characters.find(c => c.id === character)?.name}
-                  className="w-20 h-20 md:w-24 md:h-24 rounded-full border-2 border-gray-500"
-                />
+          <h2 className="text-5xl md:text-6xl font-extrabold mb-6 text-purple-500 drop-shadow-lg">
+            STAGE {currentStage + 1}
+          </h2>
 
-                {/* HP 表示 */}
+          <div className="mb-6 bg-white p-3 border border-yellow-400 rounded-xl mx-auto w-full max-w-md md:max-w-xl">
+            <p className="text-2xl text-center mb-4">{getEnemyForStage(currentStage + 1).name}が現れた！</p>
+            {/* 横並び */}
+            <div className="flex flex-col items-center md:flex-row justify-center md:gap-12">
+              {/* 自分のキャラクター */}
+              {character && (
+                <div className="flex items-center gap-4 mb-4 md:mb-0">
+                  <img
+                    src={characters.find(c => c.id === character)?.image}
+                    alt={characters.find(c => c.id === character)?.name}
+                    className="w-20 h-20 md:w-24 md:h-24 rounded-full border-2 border-gray-500"
+                  />
+                  <div className="flex flex-col items-start">
+                    <p className="text-xl md:text-2xl font-bold">
+                      {characters.find(c => c.id === character)?.name}
+                    </p>
+                    <p className="text-lg md:text-xl font-semibold">
+                      HP: {characterHP}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* 敵キャラクター */}
+              <div className="flex items-center gap-4">
+                <img
+                  src={getEnemyForStage(currentStage + 1).image}
+                  alt={getEnemyForStage(currentStage + 1).name}
+                  className="w-20 h-20 md:w-24 md:h-24 rounded-full border-2 border-red-500"
+                />
                 <div className="flex flex-col items-start">
-                  <p className="text-xl md:text-2xl font-bold">
-                    {characters.find(c => c.id === character)?.name}
+                  <p className="text-xl md:text-2xl font-bold text-red-500">
+                    {getEnemyForStage(currentStage + 1).name}
                   </p>
-                  <p className="text-lg md:text-xl text-red-600 font-semibold">
-                    HP: {characters.find(c => c.id === character)?.hp}
+                  <p className="text-lg md:text-xl font-semibold text-red-500">
+                    HP: {enemyHP}
                   </p>
                 </div>
               </div>
-            )}
-
-            {/* 敵 */}
-            <div className="flex flex-col items-center">
-              <img
-                src={getEnemyForStage(currentIndex + 1).image}
-                alt={getEnemyForStage(currentIndex + 1).name}
-                className="w-20 h-20 md:w-24 md:h-24 rounded-full border-2 border-red-500"
-              />
-              <p className="text-lg md:text-xl font-bold text-red-600">
-                {getEnemyForStage(currentIndex + 1).name}
-              </p>
-              <p className="text-md md:text-lg text-gray-800">
-                HP: {getEnemyForStage(currentIndex + 1).hp}
-              </p>
             </div>
           </div>
 
-          <h2 className="text-5xl md:text-6xl font-extrabold mb-6 text-purple-500 drop-shadow-lg">
-            STAGE {currentIndex + 1}
-          </h2>
+          {attackMessage && (
+            <p className="text-2xl md:text-4xl font-bold text-red-500 mb-4">
+              {attackMessage}
+            </p>
+          )}
+
+          {enemyDefeatedMessage && (
+            <p className="text-3xl md:text-5xl font-bold text-blue-500 mb-4 animate-bounce">
+              {enemyDefeatedMessage}
+            </p>
+          )}
+
+          {deathMessage && (
+            <p className="text-3xl md:text-5xl font-bold text-red-500 mb-4 animate-bounce">
+              {deathMessage}
+            </p>
+          )}
 
           {questions[currentIndex].quiz && (
             <>
@@ -389,17 +544,17 @@ export default function QuizModePage() {
                     {showCorrectMessage && (
                       <button
                         className="px-5 py-3 md:px-6 md:py-3 border border-black bg-blue-500 text-white text-lg md:text-xl font-medium rounded hover:bg-blue-600 cursor-pointer"
-                        onClick={nextQuestion}
+                        onClick={attackEnemy}
                       >
-                        次のステージへ
+                        相手に攻撃だ！🔥
                       </button>
                     )}
                     {incorrectMessage && (
                       <button
-                        className="px-5 py-3 md:px-6 md:py-3 bg-blue-500 border border-black text-white text-lg md:text-xl font-medium rounded hover:bg-blue-600 cursor-pointer"
-                        onClick={finishQuiz}
+                        className="px-5 py-3 md:px-6 md:py-3 bg-red-500 border border-black text-white text-lg md:text-xl font-medium rounded hover:bg-red-600 cursor-pointer"
+                        onClick={attackCharacter}
                       >
-                        終了する
+                        やばい！相手からの攻撃だ！
                       </button>
                     )}
                   </div>
@@ -407,7 +562,7 @@ export default function QuizModePage() {
               )}
 
               {/* 選択肢表示 */}
-              {!showCorrectMessage && !incorrectMessage && (
+              {!showCorrectMessage && !incorrectMessage && !isAttacking && (
                 <QuizQuestion
                   quiz={questions[currentIndex].quiz}
                   userAnswer={userAnswer}
@@ -416,7 +571,7 @@ export default function QuizModePage() {
               )}
 
               {/* 回答ボタン */}
-              {!showCorrectMessage && !incorrectMessage && (
+              {!showCorrectMessage && !incorrectMessage && !isAttacking && (
                 <button
                   className="px-5 py-3 md:px-6 md:py-3 border border-black bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-4 hover:bg-blue-600 cursor-pointer"
                   onClick={checkAnswer}
@@ -432,5 +587,6 @@ export default function QuizModePage() {
         <QuizResult correctCount={correctCount} getTitle={getTitle} titles={titles} />
       )}
     </div>
+    </>
   );
 }

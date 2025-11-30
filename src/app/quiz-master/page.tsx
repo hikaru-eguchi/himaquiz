@@ -19,7 +19,7 @@ export default function QuizMasterPage() {
   const allCharacters = [
     "/images/dragon.png",
     "/images/yuusya_game.png",
-    "/images/character_game_mimic.png",
+    "/images/mimic.png",
   ];
 
   // ★ スマホ専用キャラ（2枚だけ）
@@ -113,14 +113,12 @@ export default function QuizMasterPage() {
             </button>
           </Link>
 
-          <Link href="#" className="flex-1">
-            <button
-              className="flex-1 w-full px-6 py-2 md:px-8 md:py-4 bg-green-500 text-white rounded-full hover:bg-green-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
-              onClick={handleGenreClick}
-            >
-              ジャンルを選んで挑む
-            </button>
-          </Link>
+          <button
+            className="flex-1 w-full px-6 py-2 md:px-8 md:py-4 bg-green-500 text-white rounded-full hover:bg-green-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
+            onClick={() => setShowGenreButtons((prev) => !prev)}
+          >
+            ジャンルを選んで出題
+          </button>
         </div>
         {showGenreButtons && (
           <div className="flex flex-col justify-center items-center mt-3 md:mt-5">
