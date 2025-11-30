@@ -204,6 +204,7 @@ export default function QuizModePage() {
   const [showNextStageButton, setShowNextStageButton] = useState(false);
   const [showMagicButtons, setShowMagicButtons] = useState(false);
   const [hintText, setHintText] = useState<string | null>(null);
+  const [healing, setHealing] = useState<number | null>(null);
 
   const finishedRef = useRef(finished);
   const showCorrectRef = useRef(showCorrectMessage);
@@ -311,6 +312,7 @@ export default function QuizModePage() {
 
   const nextQuestion = () => {
     setShowCorrectMessage(false);
+    setHealing(null);
 
     if (currentIndex + 1 >= questions.length) {
       setFinished(true);
@@ -678,6 +680,7 @@ export default function QuizModePage() {
                         onClick={() => {
                           setCharacterHP(prev => (prev ?? 0) + characterLevel * 50);
                           setShowMagicButtons(false);
+                          setHealing(characterLevel * 50);
                         }}
                       >
                         HP回復✨
@@ -694,6 +697,12 @@ export default function QuizModePage() {
                         {hintText}
                       </p>
                     </div>
+                  )}
+                  {/* 回復表示 */}
+                  {healing && (
+                    <p className="text-center text-xl md:text-2xl text-green-500 font-semibold text-black mb-2">
+                      HPが {healing} 回復した✨
+                    </p>
                   )}
                 </>
               )}

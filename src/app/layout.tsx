@@ -9,10 +9,10 @@ const yomogi = Yomogi({ weight: "400", subsets: ["latin"], variable: "--font-yom
 
 export const metadata: Metadata = {
   title: {
-    default: "頭がよくなる暇つぶしクイズ「ひまQ」 - 空き時間で頭がよくなる脳トレクイズ",
-    template: "%s | 頭がよくなる暇つぶしクイズ「ひまQ」 - 空き時間で頭がよくなる脳トレクイズ",
+    default: "頭を鍛える暇つぶしクイズ「ひまQ」 - 空き時間で頭を鍛える脳トレクイズ",
+    template: "%s | 頭を鍛える暇つぶしクイズ「ひまQ」 - 空き時間で頭を鍛える脳トレクイズ",
   },
-  description: "暇つぶししながら頭がよくなる！脳トレクイズや面白クイズで、ちょっとした空き時間に脳を鍛えよう。無料で遊べる『ひまQ』で脳力アップ！記憶力・思考力を鍛えよう。",
+  description: "頭を鍛える暇つぶし！脳トレクイズや面白クイズで、ちょっとした空き時間に脳を鍛えよう。無料で遊べる『ひまQ』で脳力アップ！記憶力・思考力を鍛えよう。",
   metadataBase: new URL("https://www.hima-quiz.com"),
   icons: {
     icon: "/favicon.ico",
@@ -66,7 +66,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     <span className="block text-5xl md:text-7xl mt-2">ひまQ</span>
                   </h1>
                   <p className="text-black/90 mt-3 md:mt-4 mb-1 md:mb-0 md:text-xl tracking-wide font-bold">
-                    暇つぶしで頭が良くなる面白クイズ
+                    頭を鍛える暇つぶしクイズ
                   </p>
                 </Link>
               </div>

@@ -8,7 +8,7 @@ import LevelFilterButtons from "@/app/components/LevelFilterButtons";
 export const metadata = {
   title: "全てのクイズ｜ひまQ",
   description:
-    "ひまQでは、暇つぶししながら頭がよくなるクイズを多数掲載。脳トレクイズや面白クイズで、ちょっとした空き時間に脳を鍛えよう。",
+    "ひまQでは、頭を鍛える暇つぶしクイズを多数掲載。脳トレクイズや面白クイズで、ちょっとした空き時間に脳を鍛えよう。",
 };
 
 interface ArticleMeta {
@@ -86,7 +86,7 @@ export default async function QuizzesPage({ searchParams }: PageProps) {
   return (
     <div className="container mx-auto px-4 py-8">
       <p className="text-center text-lg md:text-xl font-extrabold text-gray-800 leading-relaxed -mt-2 mb-6">
-       暇つぶしで頭がよくなる！『ひまQ』は、暇つぶししながら頭を鍛えられる脳トレ＆面白クイズが満載。空き時間に脳力をアップしよう！
+        頭を鍛える暇つぶし！『ひまQ』は、暇つぶししながら頭を鍛えられる脳トレ＆面白クイズが満載。空き時間に脳力をアップしよう！
       </p>
 
       {/* 難易度ボタン */}
