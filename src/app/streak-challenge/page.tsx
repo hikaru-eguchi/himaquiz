@@ -117,23 +117,21 @@ export default function QuizMasterPage() {
             </button>
           </Link>
 
-          <Link href="#" className="flex-1">
-            <button
-              className="flex-1 w-full px-6 py-2 md:px-8 md:py-4 bg-red-500 text-white rounded-full hover:bg-red-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
-              onClick={handleLevelClick}
-            >
-              難易度を選んで出題
-            </button>
-          </Link>
+          {/* 難易度 */}
+          <button
+            className="flex-1 w-full px-6 py-2 md:px-8 md:py-4 bg-red-500 text-white rounded-full hover:bg-red-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
+            onClick={() => setShowLevelButtons((prev) => !prev)}
+          >
+            難易度を選んで出題
+          </button>
 
-          <Link href="#" className="flex-1">
-            <button
-              className="flex-1 w-full px-6 py-2 md:px-8 md:py-4 bg-green-500 text-white rounded-full hover:bg-green-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
-              onClick={handleGenreClick}
-            >
-              ジャンルを選んで出題
-            </button>
-          </Link>
+          {/* ジャンル */}
+          <button
+            className="flex-1 w-full px-6 py-2 md:px-8 md:py-4 bg-green-500 text-white rounded-full hover:bg-green-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
+            onClick={() => setShowGenreButtons((prev) => !prev)}
+          >
+            ジャンルを選んで出題
+          </button>
         </div>
 
         {showLevelButtons && (
@@ -141,7 +139,7 @@ export default function QuizMasterPage() {
             <div className="mb-2 md:mb-3 text-lg md:text-2xl">
               <p>難易度を選んでください</p>
             </div>
-            <div className="flex justify-center gap-3">
+            <div className="flex justify-center gap-1 md:gap-3">
               <Link href="streak-challenge/level?level=かんたん">
                 <button className="px-4 py-2 md:px-6 md:py-3 bg-white border-2 border-black text-lg md:text-xl font-bold text-black rounded-full cursor-pointer shadow-lg hover:scale-105">
                   かんたん
