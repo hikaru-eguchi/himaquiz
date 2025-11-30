@@ -514,7 +514,7 @@ export default function QuizModePage() {
                     </p>
                   </div>
                 </div>
-                <p className="text-sm md:text-lg font-semibold text-gray-600 w-40 md:w-55">
+                <p className="text-lg md:text-xl font-semibold text-gray-600 w-45 md:w-55">
                   {getEnemyForStage(currentStage + 1).description}
                 </p>
               </div>
