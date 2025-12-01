@@ -471,7 +471,7 @@ export default function QuizModePage() {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center z-50">
         <img src={enemy.image} alt={enemy.name} className="w-40 h-40 md:w-60 md:h-60 mb-4 animate-bounce" />
-        <p className="max-w-[300px] text-4xl md:text-6xl font-extrabold text-yellow-400 drop-shadow-lg animate-pulse">
+        <p className="text-4xl md:text-6xl font-extrabold text-yellow-400 drop-shadow-lg animate-pulse">
           {enemy.name}が現れた！
         </p>
       </div>
