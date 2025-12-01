@@ -210,10 +210,14 @@ export default function QuizModePage() {
   const [showNextStageButton, setShowNextStageButton] = useState(false);
   const [showMagicButtons, setShowMagicButtons] = useState(false);
   const [hintText, setHintText] = useState<string | null>(null);
+  const [levelUp, setLevelUp] = useState<number | null>(null);
   const [healing, setHealing] = useState<number | null>(null);
   const [isBlinking, setIsBlinking] = useState(false);
   const [isBlinkingEnemy, setIsBlinkingEnemy] = useState(false);
   const [enemyVisible, setEnemyVisible] = useState(true);
+  const [miracleSeedCount, setMiracleSeedCount] = useState(0); // 所持数
+  const [miracleSeedMessage, setMiracleSeedMessage] = useState<string | null>(null); // ドロップメッセージ
+
 
   const finishedRef = useRef(finished);
   const showCorrectRef = useRef(showCorrectMessage);
@@ -321,6 +325,7 @@ export default function QuizModePage() {
 
   const nextQuestion = () => {
     setShowCorrectMessage(false);
+    setLevelUp(null);
     setHealing(null);
 
     if (currentIndex + 1 >= questions.length) {
@@ -393,6 +398,13 @@ export default function QuizModePage() {
         const enemyName = getEnemyForStage(currentStage + 1).name;
         setEnemyDefeatedMessage(`🎉 ${enemyName} を倒した！`);
         setAttackMessage(null);
+
+        // ドロップ判定（10分の1）
+        const dropChance = Math.random();
+        if (dropChance < 0.1) {
+          setMiracleSeedCount(prev => prev + 1);
+          setMiracleSeedMessage("伝説の果実🍏を手に入れた！✨");
+        }
 
         // 現在のレベルを変数に保持（レベルアップ表示用）
         const newLevel = characterLevel + currentStage + 1;
@@ -471,7 +483,7 @@ export default function QuizModePage() {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center z-50">
         <img src={enemy.image} alt={enemy.name} className="w-40 h-40 md:w-60 md:h-60 mb-4 animate-bounce" />
-        <p className="max-w-[340px] text-4xl md:text-6xl font-extrabold text-yellow-400 drop-shadow-lg animate-pulse">
+        <p className="max-w-[340px] md:max-w-full text-4xl md:text-6xl font-extrabold text-yellow-400 drop-shadow-lg animate-pulse">
           {enemy.name}が現れた！
         </p>
       </div>
@@ -596,6 +608,22 @@ export default function QuizModePage() {
             </div>
           )}
 
+          {miracleSeedMessage && (
+            <p className="
+              text-center 
+              text-2xl md:text-4xl 
+              font-extrabold 
+              mb-5 
+              bg-gradient-to-r from-yellow-400 via-red-400 to-pink-500 
+              text-transparent 
+              bg-clip-text 
+              drop-shadow-[0_0_10px_yellow] 
+              animate-bounce
+            ">
+              {miracleSeedMessage}
+            </p>
+          )}
+
           {/* 次のステージへ進むボタン */}
           {showNextStageButton && (
             <button
@@ -617,6 +645,7 @@ export default function QuizModePage() {
                 setIsAttacking(false);
                 setShowNextStageButton(false);
                 setEnemyVisible(true);
+                setMiracleSeedMessage(null);
 
                 nextQuestion();
               }}
@@ -740,12 +769,46 @@ export default function QuizModePage() {
                       </p>
                     </div>
                   )}
+                  {/* レベルアップ表示 */}
+                  {levelUp && (
+                    <p className="text-center text-xl md:text-2xl 
+                                  font-semibold mb-1 
+                                  bg-gradient-to-r from-blue-500 via-red-400 to-yellow-500 
+                                  text-transparent bg-clip-text animate-pulse">
+                      レベルが {levelUp} 上がった！
+                    </p>
+                  )}
+                  {/* 攻撃力アップ表示 */}
+                  {levelUp && (
+                    <p className="text-center text-xl md:text-2xl text-red-500 font-semibold text-black mb-1 animate-pulse">
+                      攻撃力が上がった！
+                    </p>
+                  )}
                   {/* 回復表示 */}
                   {healing && (
-                    <p className="text-center text-xl md:text-2xl text-green-500 font-semibold text-black mb-2">
+                    <p className="text-center text-xl md:text-2xl text-green-500 font-semibold text-black mb-1 animate-pulse">
                       HPが {healing} 回復した✨
                     </p>
                   )}
+                </>
+              )}
+
+              {miracleSeedCount > 0 && !isAttacking && (
+                <>
+                  <div className="flex justify-center gap-2 md:gap-4 mt-4 mb-2">
+                    <button
+                      className="px-5 py-3 md:px-6 border-2 border-pink-200 bg-gradient-to-r from-yellow-400 via-red-400 to-pink-500 text-white text-lg md:text-xl font-bold  rounded-lg shadow-md hover:from-yellow-500 hover:via-red-500 hover:to-pink-600 transition-all cursor-pointer"
+                      onClick={() => {
+                        setCharacterHP(prev => (prev ?? 0) + 3000);
+                        setCharacterLevel(prev => prev + 30); // 攻撃力にもレベル依存して加算されます
+                        setMiracleSeedCount(prev => prev - 1);
+                        setLevelUp(30); // レベルアップ表示
+                        setHealing(3000); // 回復表示
+                      }}
+                    >
+                      伝説の実を使う
+                    </button>
+                  </div>
                 </>
               )}
 
