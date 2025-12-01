@@ -230,7 +230,7 @@ export default async function HomePage({
         </div>
       </div>
 
-      <div className="max-w-[700px] mx-auto border-2 border-black rounded-xl m-5 p-5 bg-gradient-to-b from-purple-0 via-purple-50 to-purple-100">
+      <div className="max-w-[700px] mx-auto border-2 border-black rounded-xl m-5 p-5 bg-gradient-to-b from-purple-0 via-purple-100 to-purple-200">
         <p className="text-2xl md:text-3xl font-bold mb-2 text-center leading-tight drop-shadow-xl text-purple-500">
           👑ゲームで遊ぶ👑
         </p>
