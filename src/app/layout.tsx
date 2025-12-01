@@ -3,6 +3,7 @@ import { Inter, Yomogi } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
 import NavButtons from "./components/NavButtons";
+import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const yomogi = Yomogi({ weight: "400", subsets: ["latin"], variable: "--font-yomogi" });
@@ -28,6 +29,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <link rel="icon" href="/favicon.ico?v=3" />
         <meta name="google-adsense-account" content="ca-pub-9009696291438240" />
+
+        {/* Googleタグ（gtag.js）を読み込み */}
+        <Script
+          strategy="afterInteractive"
+          src="https://www.googletagmanager.com/gtag/js?id=G-4PX63CW1YV"
+        />
+
+        {/* 設定スクリプトを挿入 */}
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-4PX63CW1YV');
+          `}
+        </Script>
       </head>
 
       <body className={`${inter.variable} ${yomogi.variable} font-sans bg-[#abe4fb]`}>
