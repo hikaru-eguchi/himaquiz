@@ -110,7 +110,7 @@ const rankComments = [
   { threshold: 11, comment: "グランドマスター ！歴戦の賢者のような威厳がある！" },
   { threshold: 12, comment: "クイズマスター ！最強の中の最強…殿堂入りレベル！" },
   { threshold: 13, comment: "レジェンドクイズマスター ！伝説に語り継がれる存在だ…！" },
-  { threshold: 14, comment: "クイズ王！ついにクイズマスターを超えたんだね！おめでとう！！一番すごい称号に到達だ！" },
+  { threshold: 14, comment: "クイズ王…！ついにクイズマスターを超えたんだね！🎉一番すごい称号に到達だ！✨" },
 ];
 
 const QuizResult = ({ correctCount, getTitle, titles }: { correctCount: number, getTitle: () => string, titles: { threshold: number, title: string }[] }) => {
@@ -119,6 +119,8 @@ const QuizResult = ({ correctCount, getTitle, titles }: { correctCount: number, 
   const [showText, setShowText] = useState(false);
   const [showRank, setShowRank] = useState(false);
   const [showButton, setShowButton] = useState(false);
+
+  const isFinalStage = correctCount === 14;
 
   const getRankComment = () => {
     let comment = "";
@@ -147,7 +149,11 @@ const QuizResult = ({ correctCount, getTitle, titles }: { correctCount: number, 
         <>
           <div className="flex flex-col md:flex-row items-center justify-center mb-10 gap-4 md:gap-10">
             <img src="/images/yuusya_game.png" alt="勇者" className="w-0 h-0 md:w-50 md:h-60" />
-            <p className="text-4xl md:text-6xl font-bold text-blue-600 drop-shadow-lg text-center animate-pulse">
+            <p
+              className={`text-4xl md:text-6xl font-bold drop-shadow-lg text-center animate-pulse ${
+                isFinalStage ? "final-title text-yellow-300" : "text-blue-600"
+              }`}
+            >
               {getTitle()}
             </p>
             <div className="flex flex-row md:flex-row items-center justify-center gap-8">
@@ -205,6 +211,9 @@ export default function QuizModePage() {
   const [showMagicButtons, setShowMagicButtons] = useState(false);
   const [hintText, setHintText] = useState<string | null>(null);
   const [healing, setHealing] = useState<number | null>(null);
+  const [isBlinking, setIsBlinking] = useState(false);
+  const [isBlinkingEnemy, setIsBlinkingEnemy] = useState(false);
+  const [enemyVisible, setEnemyVisible] = useState(true);
 
   const finishedRef = useRef(finished);
   const showCorrectRef = useRef(showCorrectMessage);
@@ -223,7 +232,7 @@ export default function QuizModePage() {
     { threshold: 11, title: "グランドマスター 🏆" },
     { threshold: 12, title: "クイズマスター 🏆" },
     { threshold: 13, title: "レジェンドクイズマスター 🌟" },
-    { threshold: 14, title: "クイズ王✨" },
+    { threshold: 14, title: "✨クイズ王👑" },
   ];
 
   useEffect(() => {
@@ -337,7 +346,8 @@ export default function QuizModePage() {
     startHP: number, 
     damage: number, 
     setHP: React.Dispatch<React.SetStateAction<number | null>>, 
-    callback: () => void
+    callback: () => void,
+    speed: number
   ) => {
     let currentHP = startHP;
     const targetHP = Math.max(startHP - damage, 0); // ここで0未満にならないように
@@ -350,7 +360,7 @@ export default function QuizModePage() {
         clearInterval(interval);
         callback();
       }
-    }, 5); // 1減少ごとに10ms
+    }, speed); // 1減少ごとに10ms→ステージによって変化する
   };
 
   const attackEnemy = () => {
@@ -367,10 +377,18 @@ export default function QuizModePage() {
     const startHP = enemyHP ?? 0;
     setAttackMessage(`${player.name}の攻撃！${getEnemyForStage(currentStage + 1).name}に${attackPower}のダメージ！`);
 
+    const speed = getSpeedByStage(currentStage);
+
+    setIsBlinkingEnemy(true);
     animateHP(startHP, attackPower, setEnemyHP, () => {
       const remainingHP = startHP - attackPower;
 
       if (remainingHP <= 0) {
+        setIsBlinkingEnemy(false);
+
+        // フェードアウト開始
+        setEnemyVisible(false);
+
         // 敵を倒したメッセージをセット
         const enemyName = getEnemyForStage(currentStage + 1).name;
         setEnemyDefeatedMessage(`🎉 ${enemyName} を倒した！`);
@@ -389,9 +407,19 @@ export default function QuizModePage() {
         // ⭐ レベルアップメッセージをセット！
         setLevelUpMessage(`✨レベル ${newLevel} に上がった！`);
 
+        // ★★★ 最終ステージ14なら強制終了 ★★★
+        if (currentStage + 1 === 14) {
+          setTimeout(() => {
+            setCurrentStage(currentStage + 1)
+            setFinished(true);
+          }, 3000); // メッセージをちょっと見せるために2秒待ち（好みで変更可）
+          return; // ここで終了して次の処理をしない
+        }
+
         // 次のステージに進むボタンを表示
         setShowNextStageButton(true);
       }else{
+        setIsBlinkingEnemy(false);
         // 攻撃アニメ終了後にメッセージを消して次の問題へ
         setTimeout(() => {
           setIsAttacking(false);
@@ -399,7 +427,7 @@ export default function QuizModePage() {
           nextQuestion();
         }, 1000); // 1秒表示
       }
-    });
+    }, speed);
   };
 
   const attackCharacter = () => {
@@ -412,10 +440,14 @@ export default function QuizModePage() {
     setIsAttacking(true);
     setAttackMessage(`${enemy.name}の攻撃！${characters.find(c => c.id === character)?.name}に${enemy.attack}のダメージ！`);
 
+    const speed = getSpeedByStage(currentStage);
+
+    setIsBlinking(true);
     animateHP(characterHP, enemy.attack, setCharacterHP, () => {
       const remainingHP = (characterHP ?? 0) - enemy.attack;
 
       if (remainingHP <= 0) {
+        setIsBlinking(false);
         // メッセージをセット
         setDeathMessage(`力尽きてしまった…`);
         setAttackMessage(null);
@@ -424,6 +456,7 @@ export default function QuizModePage() {
           setFinished(true);
         }, 3500); // 1.5秒表示
       } else {
+        setIsBlinking(false);
         setCharacterHP(remainingHP);
         setTimeout(() => {
           setIsAttacking(false);
@@ -431,18 +464,26 @@ export default function QuizModePage() {
           nextQuestion();
         }, 1000);
       }
-    });
+    }, speed);
   };
 
   const StageIntro = ({ enemy }: { enemy: typeof enemies[0] }) => {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center z-50">
         <img src={enemy.image} alt={enemy.name} className="w-40 h-40 md:w-60 md:h-60 mb-4 animate-bounce" />
-        <p className="text-4xl md:text-6xl font-extrabold text-yellow-400 drop-shadow-lg animate-pulse">
+        <p className="max-w-[300px] text-4xl md:text-6xl font-extrabold text-yellow-400 drop-shadow-lg animate-pulse">
           {enemy.name}が現れた！
         </p>
       </div>
     );
+  };
+
+  // ステージごとに減少スピードを返す関数
+  const getSpeedByStage = (stage: number) => {
+    if (stage <= 2) return 20;
+    if (stage <= 4) return 10;
+    if (stage <= 6) return 5;
+    return 0; // 7以上
   };
 
   const getCharacterAttack = () => {
@@ -467,13 +508,13 @@ export default function QuizModePage() {
             STAGE {currentStage + 1}
           </h2>
 
-          <div className="mb-6 bg-white p-3 border border-yellow-400 rounded-xl mx-auto w-full max-w-md md:max-w-xl">
-            <p className="text-xl md:text-2xl text-center mb-4">{getEnemyForStage(currentStage + 1).name}が現れた！クイズに正解して倒そう！</p>
+          <div className="mb-3 bg-white p-3 border-2 border-purple-300 rounded-xl mx-auto w-full max-w-md md:max-w-xl">
+            <p className="text-xl md:text-2xl text-center mb-2">{getEnemyForStage(currentStage + 1).name}が現れた！クイズに正解して倒そう！</p>
             {/* 横並び */}
             <div className="flex flex-col items-center md:flex-row justify-center md:gap-12">
               {/* 自分のキャラクター */}
               {character && (
-                <div className="flex items-center gap-4 mb-4 md:mb-0">
+                <div className={`flex items-center gap-4 mb-2 md:mb-0 bg-gradient-to-r from-red-100 via-orange-200 to-yellow-200 p-3 rounded-xl ${isBlinking ? "red-blink" : "border-purple-300"}`}>
                   <img
                     src={characters.find(c => c.id === character)?.image}
                     alt={characters.find(c => c.id === character)?.name}
@@ -497,26 +538,26 @@ export default function QuizModePage() {
               )}
 
               {/* 敵キャラクター */}
-              <div className="flex flex-col gap-2 md:gap-3">
-                <div className="flex items-center gap-4">
+              <div className="flex flex-col gap-1 md:gap-2">
+                <div className={`flex items-center gap-4 bg-gradient-to-r from-red-700 via-purple-800 to-black p-3 rounded-xl ${isBlinkingEnemy ? "red-blink" : "border-purple-300"} transition-opacity duration-1000 ${enemyVisible ? "opacity-100" : "opacity-0"}`}>
                   <img
                     src={getEnemyForStage(currentStage + 1).image}
                     alt={getEnemyForStage(currentStage + 1).name}
                     className="w-20 h-20 md:w-24 md:h-24"
                   />
                   <div className="flex flex-col items-start">
-                    <p className="text-xl md:text-2xl font-bold text-red-500">
+                    <p className="text-xl md:text-2xl font-bold text-purple-200 max-w-[100px]">
                       {getEnemyForStage(currentStage + 1).name}
                     </p>
-                    <p className="text-sm md:text-xl font-semibold text-red-500">
+                    <p className="text-sm md:text-xl font-semibold text-purple-200">
                       HP： {enemyHP}
                     </p>
-                    <p className="text-sm md:text-xl font-semibold text-red-500">
+                    <p className="text-sm md:text-xl font-semibold text-purple-200">
                       攻撃力：{getEnemyForStage(currentStage + 1).attack}
                     </p>
                   </div>
                 </div>
-                <p className="text-lg md:text-xl font-semibold text-gray-600 w-45 md:w-55">
+                <p className="text-lg md:text-xl font-semibold text-gray-600 w-50 md:w-55">
                   {getEnemyForStage(currentStage + 1).description}
                 </p>
               </div>
@@ -524,7 +565,7 @@ export default function QuizModePage() {
           </div>
 
           {attackMessage && (
-            <p className="text-2xl md:text-4xl font-bold text-red-500 mb-4">
+            <p className="text-2xl md:text-4xl font-bold mb-4">
               {attackMessage}
             </p>
           )}
@@ -558,10 +599,10 @@ export default function QuizModePage() {
           {/* 次のステージへ進むボタン */}
           {showNextStageButton && (
             <button
-              className="px-5 py-3 md:px-6 md:py-4 mb-3 border border-black text-white text-xl md:text-2xl font-bold rounded-xl 
+              className="px-5 py-3 md:px-6 md:py-4 mb-3 border-2 border-black text-white text-xl md:text-2xl font-bold rounded-xl 
                          bg-gradient-to-r from-purple-300 via-purple-400 to-purple-500
                          hover:from-purple-400 hover:via-purple-500 hover:to-purple-600
-                         shadow-lg shadow-pink-300 cursor-pointer"
+                         shadow-lg shadow-pink-300 cursor-pointer animate-pulse"
               onClick={() => {
                 const nextStage = currentStage + 1;
                 setCorrectCount(c => c + 1);
@@ -575,6 +616,7 @@ export default function QuizModePage() {
                 setLevelUpMessage(null);
                 setIsAttacking(false);
                 setShowNextStageButton(false);
+                setEnemyVisible(true);
 
                 nextQuestion();
               }}
@@ -633,7 +675,7 @@ export default function QuizModePage() {
                         className="px-5 py-3 md:px-6 md:py-3 border border-black text-white text-lg md:text-xl font-medium rounded bg-gradient-to-r from-red-500 via-yellow-500 to-pink-500 hover:from-pink-600 hover:via-red-600 hover:to-yellow-600 cursor-pointer"
                         onClick={attackEnemy}
                       >
-                        相手に攻撃！🗡️
+                        自分の攻撃！🔥
                       </button>
                     )}
                     {incorrectMessage && (
@@ -710,7 +752,7 @@ export default function QuizModePage() {
               {/* 回答ボタン */}
               {!showCorrectMessage && !incorrectMessage && !isAttacking && (
                 <button
-                  className="px-5 py-3 md:px-6 md:py-3 border border-black bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-4 hover:bg-blue-600 cursor-pointer"
+                  className="px-5 py-3 md:px-6 border border-black bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-2 hover:bg-blue-600 cursor-pointer"
                   onClick={checkAnswer}
                   disabled={userAnswer === null}
                 >

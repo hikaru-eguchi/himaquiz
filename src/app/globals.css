@@ -154,3 +154,72 @@ footer {
 .character-animate {
   animation: slideIn 0.5s ease-out forwards;
 }
+
+
+/* 画面全体にキラキラ粒子 */
+.final-glow {
+  position: relative;
+  overflow: hidden;
+}
+
+/* キラキラエフェクト */
+.final-glow::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 300%;
+  height: 300%;
+  background: radial-gradient(circle,
+      rgba(200, 150, 255, 0.7) 0%,   /* 紫の光 */
+      rgba(255,255,255,0) 60%
+    ),
+    url(/images/kirakira.png);
+  background-size: contain;
+  animation: sparkle 4s linear infinite;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+/* 光が流れるアニメーション */
+@keyframes sparkle {
+  0% { transform: translate(-30%, -30%) rotate(0deg); }
+  100% { transform: translate(30%, 30%) rotate(360deg); }
+}
+
+/* タイトル文字を光らせる */
+.final-title {
+  text-shadow:
+    0 0 10px #fff,
+    0 0 20px #6bc5ff,
+    0 0 30px #6bc5ff,
+    0 0 40px #00e1ff;
+  animation: glowTitle 1.8s ease-in-out infinite alternate;
+}
+
+@keyframes glowTitle {
+  from {
+    text-shadow:
+      0 0 5px #fff,
+      0 0 10px #6bc5ff,
+      0 0 20px #00e1ff;
+  }
+  to {
+    text-shadow:
+      0 0 15px #fff,
+      0 0 25px #6bc5ff,
+      0 0 40px #00e1ff,
+      0 0 60px #00e1ff;
+  }
+}
+
+@keyframes red-blink {
+  0%   { box-shadow: 0 0 20px 5px rgba(255, 0, 0, 0.8); }
+  50%  { box-shadow: 0 0 10px 2px rgba(255, 0, 0, 0.3); }
+  100% { box-shadow: 0 0 20px 5px rgba(255, 0, 0, 0.8); }
+}
+
+.red-blink {
+  animation: red-blink 0.3s infinite;
+  border-color: red !important;  /* オプション：枠線も赤く */
+}

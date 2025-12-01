@@ -10,7 +10,7 @@ interface Props {
 
 export default function QuizQuestion({ quiz, userAnswer, setUserAnswer }: Props) {
   return (
-    <div className="my-6 text-center bg-white border border-black rounded-lg p-6 max-w-md mx-auto">
+    <div className="my-3 text-center bg-white border border-black rounded-lg p-6 max-w-md mx-auto">
       <p className="text-xl md:text-2xl font-semibold mb-6 md:mb-8">{quiz.question}</p>
       <div className="flex flex-col gap-2">
         {quiz.choices.map((choice, idx) => (

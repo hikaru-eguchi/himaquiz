@@ -185,8 +185,8 @@ export default async function ArticleDetailPage({
             background: "linear-gradient(90deg, #ffd36b, #fff87d, #a0e8ff)"
           }}
         >
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8 text-center">
-            おすすめクイズ
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3 text-center">
+            こっちも挑戦！
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

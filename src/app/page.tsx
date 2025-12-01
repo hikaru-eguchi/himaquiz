@@ -148,10 +148,21 @@ export default async function HomePage({
 
       {/* 今日のクイズ表示 */}
       <div className='max-w-[700px] mx-auto border-2 border-black rounded-xl m-5 p-5 bg-gradient-to-b from-red-0 via-red-50 to-red-100'>
-        <h1 className="text-2xl md:text-3xl font-extrabold mb-3 text-center leading-tight text-red-500 drop-shadow-xl">
-          今日のおすすめクイズ
+        <h1 className="
+          text-2xl md:text-4xl 
+          font-extrabold 
+          mb-3 
+          text-center 
+          bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 
+          text-transparent 
+          bg-clip-text 
+          drop-shadow-2xl
+          animate-bounce
+          animate-pulse
+        ">
+          今日のチャレンジクイズ！🔥
         </h1>
-        <p className="text-lg md:text-xl mb-2 text-center leading-tight mb-4">
+        <p className="text-lg md:text-xl mb-2 text-center leading-tight mb-4 underline">
           まずはこの問題！あなたは解けるかな？
         </p>
         {randomQuizArticle?.quiz && (
