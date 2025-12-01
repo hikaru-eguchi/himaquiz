@@ -147,7 +147,7 @@ export default async function HomePage({
       </p>
 
       {/* 今日のクイズ表示 */}
-      <div className='max-w-[700px] mx-auto border-2 border-black rounded-xl m-5 p-5 bg-gradient-to-b from-red-0 via-red-50 to-red-100'>
+      <div className='max-w-[700px] mx-auto border-2 border-black rounded-xl m-5 p-5 bg-gradient-to-b from-red-0 via-red-100 to-red-200'>
         <h1 className="
           text-2xl md:text-4xl 
           font-extrabold 
