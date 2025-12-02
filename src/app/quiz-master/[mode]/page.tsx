@@ -9,25 +9,25 @@ import { QuizData } from "@/lib/articles";
 const characters = [
   { id: "warrior", name: "剣士", image: "/images/kenshi.png", description: "HPが高く、攻撃力は標準クラス。", hp: 150, Attack: 100 },
   { id: "fighter", name: "武闘家", image: "/images/butouka.png", description: "攻撃力が圧倒的に高い。", hp: 50, Attack: 250 },
-  { id: "wizard", name: "魔法使い", image: "/images/mahoutsukai.png", description: "HP回復やヒントを見る能力がある。", hp: 80, Attack: 80 },
+  { id: "wizard", name: "魔法使い", image: "/images/mahoutsukai.png", description: "HP回復やヒントを見る能力がある。", hp: 50, Attack: 80 },
 ];
 
 // 敵情報
 const enemies = [
   { id: "slime", name: "スライム", image: "/images/slime.png", hp: 100, attack: 30, description: "ぷるぷるして弱そうに見えるが油断は禁物。" },
-  { id: "goblin", name: "ゴブリン", image: "/images/goblin.png", hp: 150, attack: 50, description: "素早く群れで襲いかかる小型のモンスター。" },
-  { id: "mimic", name: "ミミック", image: "/images/mimic.png", hp: 200, attack: 100, description: "宝箱に化けるトリッキーな敵。油断すると噛まれる！" },
-  { id: "berserker", name: "バーサーカー", image: "/images/berserker.png", hp: 300, attack: 150, description: "理性を失った狂戦士。攻撃力が非常に高い。" },
-  { id: "fenikkusu", name: "フェニックス", image: "/images/fenikkusu.png", hp: 500, attack: 200, description: "不死鳥の炎を操る神秘的な生物。燃え盛る翼で攻撃。" },
-  { id: "dragon", name: "ドラゴン", image: "/images/dragon.png", hp: 1000, attack: 500, description: "火を吹く巨大竜。圧倒的な力を誇る古代の王者。" },
-  { id: "blackdragon", name: "ブラックドラゴン", image: "/images/blackdragon.png", hp: 2000, attack: 1000, description: "闇の力を宿す黒竜。魔法攻撃も強力。" },
-  { id: "leviathan", name: "リヴァイアサン", image: "/images/leviathan.png", hp: 3000, attack: 1500, description: "海の深淵から現れる巨大モンスター。水流で圧倒する。" },
-  { id: "poseidon", name: "ポセイドン", image: "/images/poseidon.png", hp: 5000, attack: 2500, description: "海の神。雷と津波で敵を蹴散らす力を持つ。" },
-  { id: "gundarimyouou", name: "軍荼利明王（ぐんだりみょうおう）", image: "/images/gundarimyouou.png", hp: 7000, attack: 3500, description: "仏教の怒りの守護神。恐怖の炎で全てを焼き尽くす。" },
-  { id: "hades", name: "ハデス", image: "/images/hades.png", hp: 8000, attack: 4000, description: "冥界の支配者。死者の力を操り、強大な攻撃を仕掛ける。" },
-  { id: "zeus", name: "ゼウス", image: "/images/zeus.png", hp: 10000, attack: 5000, description: "天空の王。雷霆を操る全知全能の神。" },
+  { id: "goblin", name: "ゴブリン", image: "/images/goblin.png", hp: 200, attack: 50, description: "素早く群れで襲いかかる小型のモンスター。" },
+  { id: "mimic", name: "ミミック", image: "/images/mimic.png", hp: 350, attack: 100, description: "宝箱に化けるトリッキーな敵。油断すると噛まれる！" },
+  { id: "berserker", name: "バーサーカー", image: "/images/berserker.png", hp: 500, attack: 150, description: "理性を失った狂戦士。攻撃力が非常に高い。" },
+  { id: "fenikkusu", name: "フェニックス", image: "/images/fenikkusu.png", hp: 1000, attack: 200, description: "不死鳥の炎を操る神秘的な生物。燃え盛る翼で攻撃。" },
+  { id: "dragon", name: "ドラゴン", image: "/images/dragon.png", hp: 2000, attack: 500, description: "火を吹く巨大竜。圧倒的な力を誇る古代の王者。" },
+  { id: "blackdragon", name: "ブラックドラゴン", image: "/images/blackdragon.png", hp: 3500, attack: 1000, description: "闇の力を宿す黒竜。魔法攻撃も強力。" },
+  { id: "leviathan", name: "リヴァイアサン", image: "/images/leviathan.png", hp: 5000, attack: 1500, description: "海の深淵から現れる巨大モンスター。水流で圧倒する。" },
+  { id: "poseidon", name: "ポセイドン", image: "/images/poseidon.png", hp: 7000, attack: 2500, description: "海の神。雷と津波で敵を蹴散らす力を持つ。" },
+  { id: "gundarimyouou", name: "軍荼利明王（ぐんだりみょうおう）", image: "/images/gundarimyouou.png", hp: 8500, attack: 3500, description: "仏教の怒りの守護神。恐怖の炎で全てを焼き尽くす。" },
+  { id: "hades", name: "ハデス", image: "/images/hades.png", hp: 10000, attack: 4000, description: "冥界の支配者。死者の力を操り、強大な攻撃を仕掛ける。" },
+  { id: "zeus", name: "ゼウス", image: "/images/zeus.png", hp: 12000, attack: 5000, description: "天空の王。雷霆を操る全知全能の神。" },
   { id: "ordin", name: "オーディン", image: "/images/ordin.png", hp: 15000, attack: 10000, description: "知恵と戦の神。魔法と剣技を極めた伝説の戦士。" },
-  { id: "yuusya_game", name: "初代クイズマスターの最強勇者", image: "/images/yuusya_game.png", hp: 30000, attack: 20000, description: "全てのクイズと戦闘を制した伝説の勇者。前人未到の強さを誇る。" },
+  { id: "yuusya_game", name: "初代クイズマスターの最強勇者", image: "/images/yuusya_game.png", hp: 20000, attack: 20000, description: "全てのクイズと戦闘を制した伝説の勇者。前人未到の強さを誇る。" },
 ];
 
 // キャラクター選択画面
@@ -203,6 +203,8 @@ export default function QuizModePage() {
   const [attackMessage, setAttackMessage] = useState<string | null>(null);
   const [isAttacking, setIsAttacking] = useState(false);
   const [showStageIntro, setShowStageIntro] = useState(false);
+  const [showAttackEffect, setShowAttackEffect] = useState(false);
+  const [showEnemyAttackEffect, setShowEnemyAttackEffect] = useState(false);
   const [enemyDefeatedMessage, setEnemyDefeatedMessage] = useState<string | null>(null);
   const [deathMessage, setDeathMessage] = useState<string | null>(null);
   const [characterLevel, setCharacterLevel] = useState(1);
@@ -217,7 +219,6 @@ export default function QuizModePage() {
   const [enemyVisible, setEnemyVisible] = useState(true);
   const [miracleSeedCount, setMiracleSeedCount] = useState(0); // 所持数
   const [miracleSeedMessage, setMiracleSeedMessage] = useState<string | null>(null); // ドロップメッセージ
-
 
   const finishedRef = useRef(finished);
   const showCorrectRef = useRef(showCorrectMessage);
@@ -298,7 +299,7 @@ export default function QuizModePage() {
     setShowStageIntro(true);
     setTimeout(() => setShowStageIntro(false), 4000);
   }, [currentStage]);
-
+  
   useEffect(() => {
     if (character === "wizard") {
       setShowMagicButtons(true);
@@ -372,6 +373,9 @@ export default function QuizModePage() {
     const player = characters.find(c => c.id === character);
     if (!player || enemyHP === null) return;
 
+    // ⭐ 攻撃エフェクト表示！
+    setShowAttackEffect(true);
+
     setShowCorrectMessage(false);
     setIncorrectMessage(null);
 
@@ -384,67 +388,76 @@ export default function QuizModePage() {
 
     const speed = getSpeedByStage(currentStage);
 
-    setIsBlinkingEnemy(true);
-    animateHP(startHP, attackPower, setEnemyHP, () => {
-      const remainingHP = startHP - attackPower;
+    // ⭐ AttackEffect が終わってから HP を減らす
+    setTimeout(() => {
+      // エフェクト消す
+      setShowAttackEffect(false);
 
-      if (remainingHP <= 0) {
-        setIsBlinkingEnemy(false);
+      setIsBlinkingEnemy(true);
+      animateHP(startHP, attackPower, setEnemyHP, () => {
+        const remainingHP = startHP - attackPower;
 
-        // フェードアウト開始
-        setEnemyVisible(false);
+        if (remainingHP <= 0) {
+          setIsBlinkingEnemy(false);
 
-        // 敵を倒したメッセージをセット
-        const enemyName = getEnemyForStage(currentStage + 1).name;
-        setEnemyDefeatedMessage(`🎉 ${enemyName} を倒した！`);
-        setAttackMessage(null);
+          // フェードアウト開始
+          setEnemyVisible(false);
 
-        // ドロップ判定（10分の1）
-        const dropChance = Math.random();
-        if (dropChance < 0.1) {
-          setMiracleSeedCount(prev => prev + 1);
-          setMiracleSeedMessage("伝説の果実🍏を手に入れた！✨");
-        }
-
-        // 現在のレベルを変数に保持（レベルアップ表示用）
-        const newLevel = characterLevel + currentStage + 1;
-
-        // 🎉 ステージごとにレベル +ステージの数
-        setCharacterLevel(newLevel);
-        setCharacterHP(prevHP => {
-          const baseHP = characters.find(c => c.id === character)?.hp ?? 0;
-          return (prevHP ?? 0) + baseHP * (currentStage + 1);
-        });
-
-        // ⭐ レベルアップメッセージをセット！
-        setLevelUpMessage(`✨レベル ${newLevel} に上がった！`);
-
-        // ★★★ 最終ステージ14なら強制終了 ★★★
-        if (currentStage + 1 === 14) {
-          setTimeout(() => {
-            setCurrentStage(currentStage + 1)
-            setFinished(true);
-          }, 3000); // メッセージをちょっと見せるために2秒待ち（好みで変更可）
-          return; // ここで終了して次の処理をしない
-        }
-
-        // 次のステージに進むボタンを表示
-        setShowNextStageButton(true);
-      }else{
-        setIsBlinkingEnemy(false);
-        // 攻撃アニメ終了後にメッセージを消して次の問題へ
-        setTimeout(() => {
-          setIsAttacking(false);
+          // 敵を倒したメッセージをセット
+          const enemyName = getEnemyForStage(currentStage + 1).name;
+          setEnemyDefeatedMessage(`🎉 ${enemyName} を倒した！`);
           setAttackMessage(null);
-          nextQuestion();
-        }, 1000); // 1秒表示
-      }
-    }, speed);
+
+          // ドロップ判定（10分の1）
+          const dropChance = Math.random();
+          if (dropChance < 0.05) {
+            setMiracleSeedCount(prev => prev + 1);
+            setMiracleSeedMessage("伝説の果実🍏を手に入れた！✨");
+          }
+
+          // 現在のレベルを変数に保持（レベルアップ表示用）
+          const newLevel = characterLevel + currentStage + 1;
+
+          // 🎉 ステージごとにレベル +ステージの数
+          setCharacterLevel(newLevel);
+          setCharacterHP(prevHP => {
+            const baseHP = characters.find(c => c.id === character)?.hp ?? 0;
+            return (prevHP ?? 0) + baseHP * (currentStage + 1);
+          });
+
+          // ⭐ レベルアップメッセージをセット！
+          setLevelUpMessage(`✨レベル ${newLevel} に上がった！`);
+
+          // ★★★ 最終ステージ14なら強制終了 ★★★
+          if (currentStage + 1 === 14) {
+            setTimeout(() => {
+              setCurrentStage(currentStage + 1)
+              setFinished(true);
+            }, 3000); // メッセージをちょっと見せるために2秒待ち（好みで変更可）
+            return; // ここで終了して次の処理をしない
+          }
+
+          // 次のステージに進むボタンを表示
+          setShowNextStageButton(true);
+        }else{
+          setIsBlinkingEnemy(false);
+          // 攻撃アニメ終了後にメッセージを消して次の問題へ
+          setTimeout(() => {
+            setIsAttacking(false);
+            setAttackMessage(null);
+            nextQuestion();
+          }, 1000); // 1秒表示
+        }
+      }, speed);
+    }, 1500); // ← この間 AttackEffect を見せたい時間（1.2秒など好みで）
   };
 
   const attackCharacter = () => {
     const enemy = getEnemyForStage(currentStage + 1);
     if (characterHP === null || enemyHP === null) return;
+
+    // ⭐ 敵攻撃エフェクト表示！
+    setShowEnemyAttackEffect(true);
 
     setShowCorrectMessage(false);
     setIncorrectMessage(null);
@@ -454,37 +467,248 @@ export default function QuizModePage() {
 
     const speed = getSpeedByStage(currentStage);
 
-    setIsBlinking(true);
-    animateHP(characterHP, enemy.attack, setCharacterHP, () => {
-      const remainingHP = (characterHP ?? 0) - enemy.attack;
+    // ⭐ EnemyAttackEffect が終わってから HP を減らす
+    setTimeout(() => {
+      // エフェクト消す
+      setShowEnemyAttackEffect(false);
 
-      if (remainingHP <= 0) {
-        setIsBlinking(false);
-        // メッセージをセット
-        setDeathMessage(`力尽きてしまった…`);
-        setAttackMessage(null);
+      setIsBlinking(true);
+      animateHP(characterHP, enemy.attack, setCharacterHP, () => {
+        const remainingHP = (characterHP ?? 0) - enemy.attack;
 
-        setTimeout(() => {
-          setFinished(true);
-        }, 3500); // 1.5秒表示
-      } else {
-        setIsBlinking(false);
-        setCharacterHP(remainingHP);
-        setTimeout(() => {
-          setIsAttacking(false);
+        if (remainingHP <= 0) {
+          setIsBlinking(false);
+          // メッセージをセット
+          setDeathMessage(`力尽きてしまった…`);
           setAttackMessage(null);
-          nextQuestion();
-        }, 1000);
-      }
-    }, speed);
+
+          setTimeout(() => {
+            setFinished(true);
+          }, 3500); // 1.5秒表示
+        } else {
+          setIsBlinking(false);
+          setCharacterHP(remainingHP);
+          setTimeout(() => {
+            setIsAttacking(false);
+            setAttackMessage(null);
+            nextQuestion();
+          }, 1000);
+        }
+      }, speed);
+    }, 1500); // ← この間 EnemyAttackEffect を見せたい時間（1.2秒など好みで）
   };
 
   const StageIntro = ({ enemy }: { enemy: typeof enemies[0] }) => {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center z-50">
         <img src={enemy.image} alt={enemy.name} className="w-40 h-40 md:w-60 md:h-60 mb-4 animate-bounce" />
-        <p className="max-w-[340px] md:max-w-full text-4xl md:text-6xl font-extrabold text-yellow-400 drop-shadow-lg animate-pulse">
+        <p className="max-w-[340px] md:max-w-full text-4xl md:text-6xl font-extrabold text-yellow-300 drop-shadow-lg animate-pulse">
           {enemy.name}が現れた！
+        </p>
+      </div>
+    );
+  };
+
+  const AttackEffect = ({ chara }: { chara?: (typeof characters)[number] }) => {
+    if (!chara) return null;
+
+    const isWarrior = chara.id === "warrior";
+    const isFighter = chara.id === "fighter";
+    const isWizard = chara.id === "wizard";
+
+    return (
+      <div className="fixed inset-0 flex flex-col items-center justify-center z-50 overflow-hidden">
+
+        {/* === 背景エフェクト === */}
+        {isWarrior && (
+          <div className="absolute inset-0 bg-blue-900 bg-opacity-60 animate-bg-fade"></div>
+        )}
+        {isFighter && (
+          <div className="absolute inset-0 bg-orange-700 bg-opacity-60 animate-bg-fade"></div>
+        )}
+        {isWizard && (
+          <div className="absolute inset-0 bg-purple-800 bg-opacity-60 animate-bg-fade"></div>
+        )}
+
+        {/* === 技エフェクト === */}
+
+        {/* 剣士：斬撃エフェクト */}
+        {isWarrior && (
+          <div className="absolute w-[150%] h-[4px] bg-blue-300 rotate-45 animate-slash"></div>
+        )}
+
+        {/* 武闘家：拳圧（衝撃波） */}
+        {isFighter && (
+          <div className="absolute w-48 h-48 bg-orange-300 rounded-full opacity-40 animate-fist"></div>
+        )}
+
+        {/* 魔法使い：魔法陣 + 光の柱 */}
+        {isWizard && (
+          <>
+            <div className="absolute w-56 h-56 border-4 border-purple-300 rounded-full animate-magic-circle"></div>
+            <div className="absolute w-10 h-80 bg-purple-200 opacity-40 animate-pillar"></div>
+          </>
+        )}
+
+        {/* === キャラ画像（右からスライドイン） === */}
+        <img
+          src={chara.image}
+          alt={chara.name}
+          className="w-40 h-40 md:w-60 md:h-60 animate-slide-in"
+        />
+
+        {/* === 攻撃文字 === */}
+        <p
+          className={`mt-4 text-5xl md:text-7xl font-extrabold drop-shadow-2xl animate-swing
+            ${isWarrior ? "text-blue-300" : ""}
+            ${isFighter ? "text-orange-300" : ""}
+            ${isWizard ? "text-purple-300" : ""}
+          `}
+        >
+          {chara.name}の攻撃！
+        </p>
+      </div>
+    );
+  };
+
+  const EnemyAttackEffect = ({ enemy }: { enemy: typeof enemies[0] }) => {
+    if (!enemy) return null;
+
+    // === ここで敵の種類によって演出を決定 ===
+    const id = enemy.id;
+
+    const bgColor =
+      id === "slime" ? "bg-blue-900 bg-opacity-60" :
+      id === "goblin" ? "bg-green-900 bg-opacity-60" :
+      id === "mimic" ? "bg-yellow-900 bg-opacity-60" :
+      id === "berserker" ? "bg-amber-900 bg-opacity-60" :
+      id === "fenikkusu" ? "bg-red-900 bg-opacity-60" :
+      id === "dragon" ? "bg-red-950 bg-opacity-60" :
+      id === "blackdragon" ? "bg-purple-900 bg-opacity-60" :
+      id === "leviathan" ? "bg-blue-800 bg-opacity-60" :
+      id === "poseidon" ? "bg-blue-800 bg-opacity-60" :
+      id === "gundarimyouou" ? "bg-blue-900 bg-opacity-70" :
+      id === "hades" ? "bg-indigo-900 bg-opacity-80" :
+      id === "zeus" ? "bg-yellow-300 bg-opacity-30" :
+      id === "ordin" ? "bg-gray-300 bg-opacity-20" :
+      id === "yuusya_game" ? "bg-gradient-to-r from-purple-700 via-red-700 to-yellow-400 bg-opacity-80" :
+      "bg-gray-900 bg-opacity-60";
+
+    // 攻撃用カラー
+    const textColor =
+      id === "slime" ? "text-blue-300" :
+      id === "goblin" ? "text-green-300" :
+      id === "mimic" ? "text-yellow-300" :
+      id === "berserker" ? "text-amber-300" :
+      id === "fenikkusu" ? "text-red-300" :
+      id === "dragon" ? "text-red-400" :
+      id === "blackdragon" ? "text-purple-300" :
+      id === "leviathan" ? "text-blue-300" :
+      id === "poseidon" ? "text-blue-300" :
+      id === "gundarimyouou" ? "text-blue-400" :
+      id === "hades" ? "text-indigo-300" :
+      id === "zeus" ? "text-yellow-200" :
+      id === "ordin" ? "text-gray-200" :
+      id === "yuusya_game" ? "text-yellow-300" :
+      "text-white";
+
+    return (
+      <div className={`fixed inset-0 flex flex-col items-center justify-center z-50 overflow-hidden`}>
+        
+        {/* === 背景（敵ごとに色変更） === */}
+        <div className={`absolute inset-0 animate-bg-fade ${bgColor}`}></div>
+
+        {/* === 敵ごとの攻撃エフェクト === */}
+
+        {/* スライム：かわいい水しぶき */}
+        {id === "slime" && (
+          <div className="absolute w-40 h-40 bg-blue-300 rounded-full opacity-40 animate-enemy-slime-pop"></div>
+        )}
+
+        {/* ゴブリン：パンチ */}
+        {id === "goblin" && (
+          <div className="absolute w-32 h-32 bg-green-400 rounded-full opacity-50 animate-enemy-punch"></div>
+        )}
+
+        {/* ミミック：かみつき */}
+        {id === "mimic" && (
+          <div className="absolute w-48 h-48 border-8 border-yellow-700 rounded-full animate-enemy-bite"></div>
+        )}
+
+        {/* バーサーカー：切りつけ */}
+        {id === "berserker" && (
+          <div className="absolute w-[150%] h-[4px] bg-amber-300 rotate-12 animate-enemy-slash"></div>
+        )}
+
+        {/* フェニックス：炎の波動 */}
+        {id === "fenikkusu" && (
+          <div className="absolute w-56 h-56 bg-red-400 opacity-40 rounded-full animate-enemy-fire"></div>
+        )}
+
+        {/* ドラゴン：火炎ブレス */}
+        {id === "dragon" && (
+          <div className="absolute w-72 h-20 bg-red-600 opacity-60 animate-enemy-firebreath"></div>
+        )}
+
+        {/* ブラックドラゴン：闇の爆発 */}
+        {id === "blackdragon" && (
+          <div className="absolute w-72 h-72 bg-purple-900 opacity-60 rounded-full animate-enemy-darkburst"></div>
+        )}
+
+        {/* リヴァイアサン：水流 */}
+        {id === "leviathan" && (
+          <div className="absolute w-64 h-64 bg-blue-300 opacity-40 rounded-full animate-enemy-water"></div>
+        )}
+
+        {/* ポセイドン：雷＋津波 */}
+        {id === "poseidon" && (
+          <>
+            <div className="absolute w-56 h-56 bg-blue-400 opacity-40 rounded-full animate-enemy-tsunami"></div>
+            <div className="absolute w-4 h-40 bg-yellow-200 animate-enemy-lightning"></div>
+          </>
+        )}
+
+        {/* 軍荼利明王：炎の爆発 */}
+        {id === "gundarimyouou" && (
+          <div className="absolute w-80 h-80 bg-blue-500 opacity-30 rounded-full animate-enemy-divine-fire"></div>
+        )}
+
+        {/* ハデス：冥界の黒炎 */}
+        {id === "hades" && (
+          <div className="absolute w-72 h-72 bg-indigo-600 opacity-50 rounded-full animate-enemy-hellfire"></div>
+        )}
+
+        {/* ゼウス：雷 */}
+        {id === "zeus" && (
+          <div className="absolute w-4 h-64 bg-yellow-200 animate-enemy-zeus-lightning"></div>
+        )}
+
+        {/* オーディン：魔法陣＋剣気 */}
+        {id === "ordin" && (
+          <>
+            <div className="absolute w-60 h-60 border-4 border-gray-200 rounded-full animate-enemy-magic-circle"></div>
+            <div className="absolute w-[150%] h-[6px] bg-gray-200 rotate-45 animate-enemy-swordwave"></div>
+          </>
+        )}
+
+        {/* 初代クイズマスター最強勇者：光の爆発 */}
+        {id === "yuusya_game" && (
+          <>
+            <div className="absolute w-72 h-72 bg-yellow-300 opacity-40 rounded-full animate-enemy-ultimate"></div>
+            <div className="absolute w-5 h-72 bg-white animate-enemy-ultimate-beam"></div>
+          </>
+        )}
+
+        {/* === 敵画像（左からスライドイン） === */}
+        <img
+          src={enemy.image}
+          alt={enemy.name}
+          className="w-40 h-40 md:w-60 md:h-60 animate-enemy-slide-in"
+        />
+
+        {/* === 敵攻撃文字 === */}
+        <p className={`mt-4 text-5xl md:text-7xl font-extrabold drop-shadow-2xl animate-enemy-swing ${textColor}`}>
+          {enemy.name}の攻撃！
         </p>
       </div>
     );
@@ -513,6 +737,12 @@ export default function QuizModePage() {
   return (
     <>
     {showStageIntro && <StageIntro enemy={getEnemyForStage(currentStage + 1)} />}
+    {showAttackEffect && (
+      <AttackEffect chara={characters.find(c => c.id === character)} />
+    )}
+    {showEnemyAttackEffect && (
+      <EnemyAttackEffect enemy={getEnemyForStage(currentStage + 1)} />
+    )}
     <div className="container mx-auto p-8 text-center bg-gradient-to-b from-purple-50 via-purple-100 to-purple-200">
       {!finished ? (
         <>
@@ -583,24 +813,24 @@ export default function QuizModePage() {
           )}
 
           {enemyDefeatedMessage && (
-            <p className="text-2xl md:text-4xl font-bold text-blue-500 mb-4 animate-bounce">
+            <p className="text-2xl md:text-4xl font-bold text-blue-500 mb-1 md:mb-4 animate-bounce">
               {enemyDefeatedMessage}
             </p>
           )}
 
           {levelUpMessage && (
             <div className="flex flex-col items-center gap-2 mb-4">
-              <p className="text-2xl md:text-4xl font-bold mb-4 animate-bounce 
+              <p className="text-2xl md:text-4xl font-bold md:mb-4 animate-bounce 
                             bg-gradient-to-r from-blue-500 via-red-500 to-yellow-500 
                             text-transparent bg-clip-text drop-shadow-lg">
                 {levelUpMessage}
               </p>
-              <p className="text-2xl md:text-4xl font-bold mb-4 animate-bounce 
+              <p className="text-2xl md:text-4xl font-bold md:mb-4 animate-bounce 
                             bg-red-500
                             text-transparent bg-clip-text drop-shadow-md">
                 攻撃力が上がった！
               </p>
-              <p className="text-2xl md:text-4xl font-bold mb-4 animate-bounce 
+              <p className="text-2xl md:text-4xl font-bold md:mb-4 animate-bounce 
                             bg-green-500
                             text-transparent bg-clip-text drop-shadow-md">
                 HPが上がった！
@@ -613,7 +843,7 @@ export default function QuizModePage() {
               text-center 
               text-2xl md:text-4xl 
               font-extrabold 
-              mb-5 
+              mb-3 
               bg-gradient-to-r from-yellow-400 via-red-400 to-pink-500 
               text-transparent 
               bg-clip-text 
@@ -735,27 +965,30 @@ export default function QuizModePage() {
                 <>
                   {/* 魔法使い専用ボタン */}
                   {showMagicButtons && (
-                    <div className="flex justify-center gap-2 md:gap-4 mt-4 mb-2">
-                      <button
-                        className="flex-1 md:max-w-[250px] px-4 py-2 text-lg md:text-xl bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-500 text-black font-bold rounded-lg shadow-md hover:from-yellow-500 hover:via-yellow-400 hover:to-yellow-600 border border-yellow-600 transition-all"
-                        onClick={() => {
-                          setHintText(questions[currentIndex].quiz?.hint || "ヒントはありません");
-                          setShowMagicButtons(false);
-                        }}
-                      >
-                        ヒントを見る🔮
-                      </button>
+                    <div>
+                      <p className="text-lg md:text-xl">このターンで選べる能力は1つだけです</p>
+                      <div className="flex justify-center gap-2 md:gap-4 mt-2 mb-2">
+                        <button
+                          className="flex-1 md:max-w-[220px] px-4 py-2 text-lg md:text-xl bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-500 text-black font-bold rounded-lg shadow-md hover:from-yellow-500 hover:via-yellow-400 hover:to-yellow-600 border border-yellow-600 transition-all"
+                          onClick={() => {
+                            setHintText(questions[currentIndex].quiz?.hint || "ヒントはありません");
+                            setShowMagicButtons(false);
+                          }}
+                        >
+                          ヒントを見る🔮
+                        </button>
 
-                      <button
-                        className="flex-1 md:max-w-[250px] px-4 py-2 text-lg md:text-xl bg-gradient-to-r from-green-400 via-green-300 to-green-500 text-black font-bold rounded-lg shadow-md hover:from-green-500 hover:via-green-400 hover:to-green-600 border border-green-600 transition-all"
-                        onClick={() => {
-                          setCharacterHP(prev => (prev ?? 0) + characterLevel * 50);
-                          setShowMagicButtons(false);
-                          setHealing(characterLevel * 50);
-                        }}
-                      >
-                        HP回復✨
-                      </button>
+                        <button
+                          className="flex-1 md:max-w-[220px] px-4 py-2 text-lg md:text-xl bg-gradient-to-r from-green-400 via-green-300 to-green-500 text-black font-bold rounded-lg shadow-md hover:from-green-500 hover:via-green-400 hover:to-green-600 border border-green-600 transition-all"
+                          onClick={() => {
+                            setCharacterHP(prev => (prev ?? 0) + characterLevel * 30);
+                            setShowMagicButtons(false);
+                            setHealing(characterLevel * 30);
+                          }}
+                        >
+                          HP回復✨
+                        </button>
+                      </div>
                     </div>
                   )}
                   {/* ヒント表示 */}
@@ -787,26 +1020,26 @@ export default function QuizModePage() {
                   {/* 回復表示 */}
                   {healing && (
                     <p className="text-center text-xl md:text-2xl text-green-500 font-semibold text-black mb-1 animate-pulse">
-                      HPが {healing} 回復した✨
+                      HPが {healing} 上がった！✨
                     </p>
                   )}
                 </>
               )}
 
-              {miracleSeedCount > 0 && !isAttacking && (
+              {miracleSeedCount > 0 && !isAttacking && !showCorrectMessage && !incorrectMessage && (
                 <>
                   <div className="flex justify-center gap-2 md:gap-4 mt-4 mb-2">
                     <button
                       className="px-5 py-3 md:px-6 border-2 border-pink-200 bg-gradient-to-r from-yellow-400 via-red-400 to-pink-500 text-white text-lg md:text-xl font-bold  rounded-lg shadow-md hover:from-yellow-500 hover:via-red-500 hover:to-pink-600 transition-all cursor-pointer"
                       onClick={() => {
-                        setCharacterHP(prev => (prev ?? 0) + 3000);
-                        setCharacterLevel(prev => prev + 30); // 攻撃力にもレベル依存して加算されます
+                        setCharacterHP(prev => (prev ?? 0) + 5000);
+                        setCharacterLevel(prev => prev + 50); // 攻撃力にもレベル依存して加算されます
                         setMiracleSeedCount(prev => prev - 1);
-                        setLevelUp(30); // レベルアップ表示
-                        setHealing(3000); // 回復表示
+                        setLevelUp(50); // レベルアップ表示
+                        setHealing(5000); // 回復表示
                       }}
                     >
-                      伝説の実を使う
+                      伝説の果実🍏を使う
                     </button>
                   </div>
                 </>

@@ -187,7 +187,7 @@ export default function QuizMasterPage() {
         {/* 説明ボタン */}
         <button
           onClick={handleDescriptionClick}
-          className="mt-8 px-6 py-1 md:px-8 md:text-xl bg-white text-gray-800 rounded-full border-2 border-black hover:bg-gray-300 shadow-md transition-colors"
+          className="mt-4 px-6 py-1 md:px-8 md:text-xl bg-white text-gray-800 rounded-full border-2 border-black hover:bg-gray-300 shadow-md transition-colors"
         >
           このゲームの説明を見る
         </button>
@@ -205,7 +205,7 @@ export default function QuizMasterPage() {
             ref={descriptionRef}
             className="text-gray-700 text-md md:text-lg text-center px-4 py-2"
           >
-            「連続正解チャレンジ」は、どれだけクイズに連続正解できるかを競うモードです。
+            「連続正解チャレンジ」は、どれだけクイズに連続正解できるかを競うゲームです。
             1問あたりの制限時間は60秒。
             1問でも間違えた時点でチャレンジ終了となります。
             連続正解数が増えるほど、あなたの称号もランクアップ！
