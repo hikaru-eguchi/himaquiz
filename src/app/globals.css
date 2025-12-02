@@ -345,14 +345,15 @@ footer {
 }
 
 /* 斬撃（剣士） */
-@keyframes slash {
-  0% { transform: translateX(-150%) rotate(45deg); opacity: 0; }
-  40% { opacity: 1; }
-  100% { transform: translateX(150%) rotate(45deg); opacity: 0; }
-}
-.animate-slash {
-  animation: slash 0.4s ease-in-out;
-}
+@keyframes slash-1 { 0% {opacity:0} 50% {opacity:1} 100% {opacity:0} }
+@keyframes slash-2 { 0% {opacity:0} 40% {opacity:0} 60% {opacity:1} 100% {opacity:0} }
+@keyframes slash-3 { 0% {opacity:0} 70% {opacity:0} 90% {opacity:1} 100% {opacity:0} }
+
+.animate-slash-1 { animation: slash-1 0.4s ease-in-out forwards; }
+.animate-slash-2 { animation: slash-2 0.4s ease-in-out forwards; animation-delay: 0.1s; }
+.animate-slash-3 { animation: slash-3 0.4s ease-in-out forwards; animation-delay: 0.2s; }
+
+
 
 /* 拳圧（武闘家）衝撃波 */
 @keyframes fist {
@@ -426,9 +427,12 @@ footer {
     animation: enemy-punch 0.4s ease-out forwards;
   }
   @keyframes enemy-punch {
-    0% { transform: translateX(-200px) scale(0.5); opacity: 0; }
-    70% { transform: translateX(50px) scale(1.2); opacity: 1; }
-    100% { transform: translateX(0px) scale(1); opacity: 0; }
+    0% { transform: translateX(-200px) scale(0.5); opacity: 1; }
+    20% { transform: translateX(-150px) scale(0.7); opacity: 1; }
+    50% { transform: translateX(-100px) scale(0.9); opacity: 1; }
+    70% { transform: translateX(-50px) scale(1.2); opacity: 1; }
+    70% { transform: translateX(50px) scale(1.4); opacity: 1; }
+    100% { transform: translateX(100px) scale(1.5); opacity: 0; }
   }
 
 
@@ -453,7 +457,7 @@ footer {
   }
   @keyframes enemy-slash {
     0% { transform: translateX(-400px) rotate(0deg); opacity: 0; }
-    100% { transform: translateX(400px) rotate(25deg); opacity: 1; }
+    100% { transform: translateX(500px) rotate(90deg); opacity: 1; }
   }
 
 
@@ -477,8 +481,9 @@ footer {
     animation: firebreath 0.5s ease-out forwards;
   }
   @keyframes firebreath {
-    0% { transform: translateX(-300px) scaleX(0.3); opacity: 0; }
-    100% { transform: translateX(50px) scaleX(1); opacity: 1; }
+    0% { transform: scale(0.3); opacity: 0; }
+    60% { transform: scale(1.3); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 0; }
   }
 
 

@@ -39,12 +39,20 @@ const CharacterSelect = ({ onSelect }: { onSelect: (characterId: string) => void
         {characters.map((char) => (
           <div
             key={char.id}
-            className="cursor-pointer hover:scale-105 transform transition-all duration-200 bg-orange-50 border-2 border-gray-500 rounded-xl flex flex-col items-center justify-start p-4 w-64 h-72 md:w-60 md:h-94"
+            className={`cursor-pointer hover:scale-105 transform transition-all duration-200 border-2 border-gray-500 rounded-xl flex flex-col items-center justify-start p-4 w-64 h-72 md:w-60 md:h-94 ${
+              char.id === "warrior"
+                ? "bg-gradient-to-r from-blue-400 via-blue-200 to-cyan-300"
+                : char.id === "fighter"
+                ? "bg-gradient-to-r from-red-400 via-orange-200 to-yellow-300"
+                : char.id === "wizard"
+                ? "bg-gradient-to-r from-purple-400 via-pink-200 to-pink-300"
+                : "bg-gray-50"
+            }`}
             onClick={() => onSelect(char.id)}
           >
             <img src={char.image} alt={char.name} className="w-25 h-30 md:w-40 md:h-50 mb-4 mx-auto" />
             <p className="text-xl font-bold">{char.name}</p>
-            <p className="text-sm text-gray-600 mt-1">{char.description}</p>
+            <p className="text-sm text-gray-900 mt-1">{char.description}</p>
             <div className="border border-gray-400 p-2 mt-2 bg-white">
               <p className="text-sm text-gray-800">HP（ライフ）： {char.hp}</p>
               <p className="text-sm text-gray-800">攻撃力： {char.Attack}</p>
@@ -521,20 +529,24 @@ export default function QuizModePage() {
 
         {/* === 背景エフェクト === */}
         {isWarrior && (
-          <div className="absolute inset-0 bg-blue-900 bg-opacity-60 animate-bg-fade"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-800 via-blue-500 to-cyan-400 animate-bg-fade"></div>
         )}
         {isFighter && (
-          <div className="absolute inset-0 bg-orange-700 bg-opacity-60 animate-bg-fade"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-red-700 via-orange-600 to-yellow-400 animate-bg-fade"></div>
         )}
         {isWizard && (
-          <div className="absolute inset-0 bg-purple-800 bg-opacity-60 animate-bg-fade"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-900 via-indigo-700 to-pink-500 animate-bg-fade"></div>
         )}
 
         {/* === 技エフェクト === */}
 
         {/* 剣士：斬撃エフェクト */}
         {isWarrior && (
-          <div className="absolute w-[150%] h-[4px] bg-blue-300 rotate-45 animate-slash"></div>
+          <>
+            <div className="absolute w-[150%] h-[4px] bg-blue-400 rotate-45 animate-slash-1"></div>
+            <div className="absolute w-[150%] h-[4px] bg-blue-400 rotate-90 animate-slash-2"></div>
+            <div className="absolute w-[150%] h-[4px] bg-blue-400 rotate-0 animate-slash-3"></div>
+          </>
         )}
 
         {/* 武闘家：拳圧（衝撃波） */}
@@ -578,30 +590,30 @@ export default function QuizModePage() {
     const id = enemy.id;
 
     const bgColor =
-      id === "slime" ? "bg-blue-900 bg-opacity-60" :
-      id === "goblin" ? "bg-green-900 bg-opacity-60" :
-      id === "mimic" ? "bg-yellow-900 bg-opacity-60" :
-      id === "berserker" ? "bg-amber-900 bg-opacity-60" :
-      id === "fenikkusu" ? "bg-red-900 bg-opacity-60" :
-      id === "dragon" ? "bg-red-950 bg-opacity-60" :
-      id === "blackdragon" ? "bg-purple-900 bg-opacity-60" :
-      id === "leviathan" ? "bg-blue-800 bg-opacity-60" :
-      id === "poseidon" ? "bg-blue-800 bg-opacity-60" :
-      id === "gundarimyouou" ? "bg-blue-900 bg-opacity-70" :
-      id === "hades" ? "bg-indigo-900 bg-opacity-80" :
-      id === "zeus" ? "bg-yellow-300 bg-opacity-30" :
-      id === "ordin" ? "bg-gray-300 bg-opacity-20" :
+      id === "slime" ? "bg-gradient-to-r from-red-700 via-purple-800 to-black" :
+      id === "goblin" ? "bg-gradient-to-r from-red-700 via-purple-800 to-black" :
+      id === "mimic" ? "bg-gradient-to-r from-red-700 via-purple-800 to-black" :
+      id === "berserker" ? "bg-gradient-to-r from-red-700 via-purple-800 to-black" :
+      id === "fenikkusu" ? "bg-gradient-to-r from-red-700 via-purple-800 to-black" :
+      id === "dragon" ? "bg-gradient-to-r from-red-800 via-orange-600 to-yellow-400" :
+      id === "blackdragon" ? "bg-gradient-to-r from-black via-purple-900 to-red-800" :
+      id === "leviathan" ? "bg-gradient-to-r from-blue-900 via-blue-600 to-cyan-400" :
+      id === "poseidon" ? "bg-gradient-to-r from-blue-900 via-blue-500 to-yellow-400" :
+      id === "gundarimyouou" ? "bg-gradient-to-r from-red-800 via-orange-600 to-purple-900" :
+      id === "hades" ? "bg-gradient-to-r from-indigo-900 via-purple-800 to-black" :
+      id === "zeus" ? "bg-gradient-to-r from-blue-800 via-cyan-400 to-white" :
+      id === "ordin" ? "bg-gradient-to-r from-gray-900 via-purple-700 to-yellow-400" :
       id === "yuusya_game" ? "bg-gradient-to-r from-purple-700 via-red-700 to-yellow-400 bg-opacity-80" :
       "bg-gray-900 bg-opacity-60";
 
     // 攻撃用カラー
     const textColor =
       id === "slime" ? "text-blue-300" :
-      id === "goblin" ? "text-green-300" :
-      id === "mimic" ? "text-yellow-300" :
-      id === "berserker" ? "text-amber-300" :
+      id === "goblin" ? "text-purple-300" :
+      id === "mimic" ? "text-purple-300" :
+      id === "berserker" ? "text-purple-300" :
       id === "fenikkusu" ? "text-red-300" :
-      id === "dragon" ? "text-red-400" :
+      id === "dragon" ? "text-red-200" :
       id === "blackdragon" ? "text-purple-300" :
       id === "leviathan" ? "text-blue-300" :
       id === "poseidon" ? "text-blue-300" :
@@ -627,17 +639,17 @@ export default function QuizModePage() {
 
         {/* ゴブリン：パンチ */}
         {id === "goblin" && (
-          <div className="absolute w-32 h-32 bg-green-400 rounded-full opacity-50 animate-enemy-punch"></div>
+          <div className="absolute w-32 h-32 bg-purple-400 rounded-full opacity-50 animate-enemy-punch"></div>
         )}
 
         {/* ミミック：かみつき */}
         {id === "mimic" && (
-          <div className="absolute w-48 h-48 border-8 border-yellow-700 rounded-full animate-enemy-bite"></div>
+          <div className="absolute w-48 h-48 border-8 border-purple-700 rounded-full animate-enemy-bite"></div>
         )}
 
         {/* バーサーカー：切りつけ */}
         {id === "berserker" && (
-          <div className="absolute w-[150%] h-[4px] bg-amber-300 rotate-12 animate-enemy-slash"></div>
+          <div className="absolute w-[150%] h-[10px] bg-amber-300 rotate-12 animate-enemy-slash"></div>
         )}
 
         {/* フェニックス：炎の波動 */}
@@ -647,17 +659,17 @@ export default function QuizModePage() {
 
         {/* ドラゴン：火炎ブレス */}
         {id === "dragon" && (
-          <div className="absolute w-72 h-20 bg-red-600 opacity-60 animate-enemy-firebreath"></div>
+          <div className="absolute w-56 h-56 bg-red-200 opacity-40 rounded-full animate-enemy-firebreath"></div>
         )}
 
         {/* ブラックドラゴン：闇の爆発 */}
         {id === "blackdragon" && (
-          <div className="absolute w-72 h-72 bg-purple-900 opacity-60 rounded-full animate-enemy-darkburst"></div>
+          <div className="absolute w-72 h-72 bg-purple-400 opacity-60 rounded-full animate-enemy-darkburst"></div>
         )}
 
         {/* リヴァイアサン：水流 */}
         {id === "leviathan" && (
-          <div className="absolute w-64 h-64 bg-blue-300 opacity-40 rounded-full animate-enemy-water"></div>
+          <div className="absolute w-64 h-64 bg-blue-200 opacity-40 rounded-full animate-enemy-water"></div>
         )}
 
         {/* ポセイドン：雷＋津波 */}
@@ -756,7 +768,19 @@ export default function QuizModePage() {
             <div className="flex flex-col items-center md:flex-row justify-center md:gap-12">
               {/* 自分のキャラクター */}
               {character && (
-                <div className={`flex items-center gap-4 mb-2 md:mb-0 bg-gradient-to-r from-red-100 via-orange-200 to-yellow-200 p-3 rounded-xl ${isBlinking ? "red-blink" : "border-purple-300"}`}>
+                <div
+                  className={`flex items-center gap-4 mb-2 md:mb-0 p-3 rounded-xl ${
+                    isBlinking ? "red-blink" : "border-purple-300"
+                  } ${
+                    character === "warrior"
+                      ? "bg-gradient-to-r from-blue-400 via-blue-200 to-cyan-300"
+                      : character === "fighter"
+                      ? "bg-gradient-to-r from-red-400 via-orange-200 to-yellow-300"
+                      : character === "wizard"
+                      ? "bg-gradient-to-r from-purple-400 via-pink-200 to-pink-300"
+                      : "bg-gray-200"
+                  }`}
+                >
                   <img
                     src={characters.find(c => c.id === character)?.image}
                     alt={characters.find(c => c.id === character)?.name}
@@ -858,8 +882,8 @@ export default function QuizModePage() {
           {showNextStageButton && (
             <button
               className="px-5 py-3 md:px-6 md:py-4 mb-3 border-2 border-black text-white text-xl md:text-2xl font-bold rounded-xl 
-                         bg-gradient-to-r from-purple-300 via-purple-400 to-purple-500
-                         hover:from-purple-400 hover:via-purple-500 hover:to-purple-600
+                         bg-gradient-to-r from-purple-400 via-purple-500 to-purple-600
+                         hover:from-purple-500 hover:via-purple-600 hover:to-purple-700
                          shadow-lg shadow-pink-300 cursor-pointer animate-pulse"
               onClick={() => {
                 const nextStage = currentStage + 1;
