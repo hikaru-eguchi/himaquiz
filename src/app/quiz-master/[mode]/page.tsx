@@ -9,24 +9,24 @@ import { QuizData } from "@/lib/articles";
 const characters = [
   { id: "warrior", name: "剣士", image: "/images/kenshi.png", description: "HPが高く、攻撃力は標準クラス。", hp: 150, Attack: 100 },
   { id: "fighter", name: "武闘家", image: "/images/butouka.png", description: "攻撃力が圧倒的に高い。", hp: 50, Attack: 250 },
-  { id: "wizard", name: "魔法使い", image: "/images/mahoutsukai.png", description: "HP回復やヒントを見る能力がある。", hp: 50, Attack: 80 },
+  { id: "wizard", name: "魔法使い", image: "/images/mahoutsukai.png", description: "HP回復やヒントを見る能力がある。", hp: 50000, Attack: 80000 },
 ];
 
 // 敵情報
 const enemies = [
   { id: "slime", name: "スライム", image: "/images/slime.png", hp: 100, attack: 30, description: "ぷるぷるして弱そうに見えるが油断は禁物。" },
-  { id: "goblin", name: "ゴブリン", image: "/images/goblin.png", hp: 200, attack: 50, description: "素早く群れで襲いかかる小型のモンスター。" },
-  { id: "mimic", name: "ミミック", image: "/images/mimic.png", hp: 350, attack: 100, description: "宝箱に化けるトリッキーな敵。油断すると噛まれる！" },
-  { id: "berserker", name: "バーサーカー", image: "/images/berserker.png", hp: 500, attack: 150, description: "理性を失った狂戦士。攻撃力が非常に高い。" },
-  { id: "fenikkusu", name: "フェニックス", image: "/images/fenikkusu.png", hp: 1000, attack: 200, description: "不死鳥の炎を操る神秘的な生物。燃え盛る翼で攻撃。" },
-  { id: "dragon", name: "ドラゴン", image: "/images/dragon.png", hp: 2000, attack: 500, description: "火を吹く巨大竜。圧倒的な力を誇る古代の王者。" },
-  { id: "blackdragon", name: "ブラックドラゴン", image: "/images/blackdragon.png", hp: 3500, attack: 1000, description: "闇の力を宿す黒竜。魔法攻撃も強力。" },
-  { id: "leviathan", name: "リヴァイアサン", image: "/images/leviathan.png", hp: 5000, attack: 1500, description: "海の深淵から現れる巨大モンスター。水流で圧倒する。" },
-  { id: "poseidon", name: "ポセイドン", image: "/images/poseidon.png", hp: 7000, attack: 2500, description: "海の神。雷と津波で敵を蹴散らす力を持つ。" },
-  { id: "gundarimyouou", name: "軍荼利明王（ぐんだりみょうおう）", image: "/images/gundarimyouou.png", hp: 8500, attack: 3500, description: "仏教の怒りの守護神。恐怖の炎で全てを焼き尽くす。" },
+  { id: "goblin", name: "ゴブリン", image: "/images/goblin.png", hp: 200, attack: 60, description: "素早く群れで襲いかかる小型のモンスター。" },
+  { id: "mimic", name: "ミミック", image: "/images/mimic.png", hp: 350, attack: 120, description: "宝箱に化けるトリッキーな敵。油断すると噛まれる！" },
+  { id: "berserker", name: "バーサーカー", image: "/images/berserker.png", hp: 500, attack: 200, description: "理性を失った狂戦士。攻撃力が非常に高い。" },
+  { id: "fenikkusu", name: "フェニックス", image: "/images/fenikkusu.png", hp: 1000, attack: 330, description: "不死鳥の炎を操る神秘的な生物。燃え盛る翼で攻撃。" },
+  { id: "dragon", name: "ドラゴン", image: "/images/dragon.png", hp: 2000, attack: 600, description: "火を吹く巨大竜。圧倒的な力を誇る古代の王者。" },
+  { id: "blackdragon", name: "ブラックドラゴン", image: "/images/blackdragon.png", hp: 3500, attack: 850, description: "闇の力を宿す黒竜。魔法攻撃も強力。" },
+  { id: "leviathan", name: "リヴァイアサン", image: "/images/leviathan.png", hp: 5000, attack: 1200, description: "海の深淵から現れる巨大モンスター。水流で圧倒する。" },
+  { id: "poseidon", name: "ポセイドン", image: "/images/poseidon.png", hp: 7000, attack: 2000, description: "海の神。雷と津波で敵を蹴散らす力を持つ。" },
+  { id: "gundarimyouou", name: "軍荼利明王（ぐんだりみょうおう）", image: "/images/gundarimyouou.png", hp: 8500, attack: 3000, description: "仏教の怒りの守護神。恐怖の炎で全てを焼き尽くす。" },
   { id: "hades", name: "ハデス", image: "/images/hades.png", hp: 10000, attack: 4000, description: "冥界の支配者。死者の力を操り、強大な攻撃を仕掛ける。" },
   { id: "zeus", name: "ゼウス", image: "/images/zeus.png", hp: 12000, attack: 5000, description: "天空の王。雷霆を操る全知全能の神。" },
-  { id: "ordin", name: "オーディン", image: "/images/ordin.png", hp: 15000, attack: 10000, description: "知恵と戦の神。魔法と剣技を極めた伝説の戦士。" },
+  { id: "ordin", name: "オーディン", image: "/images/ordin.png", hp: 15000, attack: 8000, description: "知恵と戦の神。魔法と剣技を極めた伝説の戦士。" },
   { id: "yuusya_game", name: "初代クイズマスターの最強勇者", image: "/images/yuusya_game.png", hp: 20000, attack: 20000, description: "全てのクイズと戦闘を制した伝説の勇者。前人未到の強さを誇る。" },
 ];
 
@@ -106,19 +106,19 @@ interface ArticleData {
 const rankComments = [
   { threshold: 0, comment: "ここから冒険の始まりだ！ゆっくり進んでいこう！" },
   { threshold: 1, comment: "クイズ戦士に昇格！戦場に立つ準備は万端だ！" },
-  { threshold: 2, comment: "謎解きの導師！ひらめきが熟練の域に達しているぞ…！" },
-  { threshold: 3, comment: "迷宮の守護者！難問の迷宮も恐れない胆力を感じる！" },
-  { threshold: 4, comment: "啓示の賢者！まるで答えが見えているかのような閃きだ！" },
-  { threshold: 5, comment: "叡智の勇者 ！知識と勇気を兼ね備えた英雄だ！" },
-  { threshold: 6, comment: "迷宮の支配者 ！問題の方が君を避けているレベル！" },
-  { threshold: 7, comment: "混沌の覇者 ！あらゆる難問をねじ伏せる圧倒的なパワー！" },
-  { threshold: 8, comment: "運命の大賢者 ！君の選択はすべて正解へ導かれている…！" },
-  { threshold: 9, comment: "次元超越者 ！もう次元が違う…これは人間離れしている！" },
-  { threshold: 10, comment: "フロアマスター ！あらゆるステージを制覇する者の風格だ！" },
-  { threshold: 11, comment: "グランドマスター ！歴戦の賢者のような威厳がある！" },
-  { threshold: 12, comment: "クイズマスター ！最強の中の最強…殿堂入りレベル！" },
-  { threshold: 13, comment: "レジェンドクイズマスター ！伝説に語り継がれる存在だ…！" },
-  { threshold: 14, comment: "クイズ王…！ついにクイズマスターを超えたんだね！🎉一番すごい称号に到達だ！✨" },
+  { threshold: 2, comment: "謎解きファイター！試練に立ち向かう力がついてきた！" },
+  { threshold: 3, comment: "頭脳の騎士！君の知識が冒険の武器になる！" },
+  { threshold: 4, comment: "ひらめきハンター！まるで答えが見えているかのような閃きだ！" },
+  { threshold: 5, comment: "真理の探究者！知識の深みを極め、迷宮を読み解く力がある！" },
+  { threshold: 6, comment: "知恵の勇者！知識と勇気を兼ね備えた英雄だ！" },
+  { threshold: 7, comment: "クイズ大賢者！君の選択はすべて正解へ導かれている…！" },
+  { threshold: 8, comment: "答えの覇者！あらゆる難問をねじ伏せる圧倒的なパワー！" },
+  { threshold: 9, comment: "クイズ超越者！もう次元が違う…これは人間離れしている！" },
+  { threshold: 10, comment: "フロアマスター！あらゆるステージを制覇する者の風格だ！" },
+  { threshold: 11, comment: "グランドマスター！歴戦の賢者のような威厳がある！" },
+  { threshold: 12, comment: "クイズマスター！最強の中の最強…殿堂入りレベル！" },
+  { threshold: 13, comment: "レジェンドクイズマスター！伝説に語り継がれる存在だ…！" },
+  { threshold: 14, comment: "クイズ王…！ついにクイズマスターを倒した！🎉一番すごい称号に到達だ！✨" },
 ];
 
 const QuizResult = ({ correctCount, getTitle, titles }: { correctCount: number, getTitle: () => string, titles: { threshold: number, title: string }[] }) => {
@@ -233,14 +233,14 @@ export default function QuizModePage() {
 
   const titles = [
     { threshold: 1, title: "クイズ戦士" },
-    { threshold: 2, title: "謎解きの導師" },
-    { threshold: 3, title: "迷宮の守護者" },
-    { threshold: 4, title: "啓示の賢者" },
-    { threshold: 5, title: "叡智の勇者 🛡️" },
-    { threshold: 6, title: "迷宮の支配者 👑" },
-    { threshold: 7, title: "混沌の覇者 🌀" },
-    { threshold: 8, title: "運命の大賢者 ⭐" },
-    { threshold: 9, title: "次元超越者 🌌" },
+    { threshold: 2, title: "謎解きファイター" },
+    { threshold: 3, title: "頭脳の騎士" },
+    { threshold: 4, title: "ひらめきハンター" },
+    { threshold: 5, title: "真理の探究者" },
+    { threshold: 6, title: "知恵の勇者 🛡️" },
+    { threshold: 7, title: "クイズ大賢者 ⭐" },
+    { threshold: 8, title: "答えの覇者 🌀" },
+    { threshold: 9, title: "クイズ超越者 🌌" },
     { threshold: 10, title: "フロアマスター 🏆" },
     { threshold: 11, title: "グランドマスター 🏆" },
     { threshold: 12, title: "クイズマスター 🏆" },
@@ -544,23 +544,48 @@ export default function QuizModePage() {
         {isWarrior && (
           <>
             <div className="absolute w-[150%] h-[4px] bg-blue-400 rotate-45 animate-slash-1"></div>
-            <div className="absolute w-[150%] h-[4px] bg-blue-400 rotate-90 animate-slash-2"></div>
-            <div className="absolute w-[150%] h-[4px] bg-blue-400 rotate-0 animate-slash-3"></div>
+            <div className="absolute w-[150%] h-[4px] bg-blue-400 rotate-135 animate-slash-2"></div>
+            <div className="absolute w-[150%] h-[4px] bg-blue-400 rotate-90 animate-slash-3"></div>
+            <div className="absolute w-[150%] h-[4px] bg-blue-400 rotate-0 animate-slash-4"></div>
           </>
         )}
 
         {/* 武闘家：拳圧（衝撃波） */}
         {isFighter && (
-          <div className="absolute w-48 h-48 bg-orange-300 rounded-full opacity-40 animate-fist"></div>
-        )}
-
-        {/* 魔法使い：魔法陣 + 光の柱 */}
-        {isWizard && (
           <>
-            <div className="absolute w-56 h-56 border-4 border-purple-300 rounded-full animate-magic-circle"></div>
-            <div className="absolute w-10 h-80 bg-purple-200 opacity-40 animate-pillar"></div>
+            {/* 上の円 */}
+            <div className="absolute w-48 h-48 bg-orange-300 rounded-full opacity-40 animate-fist-1"
+                style={{ top: "20%", left: "30%", transform: "translateX(-50%)" }}></div>
+
+            {/* 左下の円 */}
+            <div className="absolute w-48 h-48 bg-orange-300 rounded-full opacity-40 animate-fist-2"
+                style={{ top: "50%", left: "10%", transform: "translate(-50%, -50%)" }}></div>
+
+            {/* 右下の円 */}
+            <div className="absolute w-48 h-48 bg-orange-300 rounded-full opacity-40 animate-fist-3"
+                style={{ top: "50%", left: "65%", transform: "translate(-50%, -50%)" }}></div>
           </>
         )}
+
+        {/* 魔法使い：魔方陣 */}
+        {isWizard && (
+          <div className="absolute w-56 h-56 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+            {/* 外円 */}
+            <div className="absolute w-full h-full border-4 border-purple-400 rounded-full animate-rotate-clockwise"></div>
+            
+            {/* 内側の模様を大きめに */}
+            <div className="absolute w-30 h-30 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-t-2 border-r-2 border-purple-300 rotate-0 animate-rotate-counterclockwise"></div>
+            <div className="absolute w-30 h-30 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-t-2 border-r-2 border-purple-300 rotate-60 animate-rotate-counterclockwise"></div>
+            <div className="absolute w-30 h-30 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-t-2 border-r-2 border-purple-300 rotate-120 animate-rotate-counterclockwise"></div>
+            <div className="absolute w-30 h-30 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-t-2 border-r-2 border-purple-300 rotate-180 animate-rotate-counterclockwise"></div>
+            <div className="absolute w-30 h-30 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-t-2 border-r-2 border-purple-300 rotate-240 animate-rotate-counterclockwise"></div>
+            <div className="absolute w-30 h-30 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-t-2 border-r-2 border-purple-300 rotate-300 animate-rotate-counterclockwise"></div>
+          
+            {/* 外側に広がる円 */}
+            <div className="absolute w-56 h-56 border-2 border-purple-200 rounded-full opacity-50 animate-expand-circle top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+          </div>
+        )}
+
 
         {/* === キャラ画像（右からスライドイン） === */}
         <img
@@ -572,9 +597,9 @@ export default function QuizModePage() {
         {/* === 攻撃文字 === */}
         <p
           className={`mt-4 text-5xl md:text-7xl font-extrabold drop-shadow-2xl animate-swing
-            ${isWarrior ? "text-blue-300" : ""}
-            ${isFighter ? "text-orange-300" : ""}
-            ${isWizard ? "text-purple-300" : ""}
+            ${isWarrior ? "text-blue-100" : ""}
+            ${isFighter ? "text-orange-100" : ""}
+            ${isWizard ? "text-purple-100" : ""}
           `}
         >
           {chara.name}の攻撃！
@@ -608,20 +633,20 @@ export default function QuizModePage() {
 
     // 攻撃用カラー
     const textColor =
-      id === "slime" ? "text-blue-300" :
-      id === "goblin" ? "text-purple-300" :
-      id === "mimic" ? "text-purple-300" :
-      id === "berserker" ? "text-purple-300" :
-      id === "fenikkusu" ? "text-red-300" :
-      id === "dragon" ? "text-red-200" :
-      id === "blackdragon" ? "text-purple-300" :
-      id === "leviathan" ? "text-blue-300" :
-      id === "poseidon" ? "text-blue-300" :
-      id === "gundarimyouou" ? "text-blue-400" :
-      id === "hades" ? "text-indigo-300" :
-      id === "zeus" ? "text-yellow-200" :
-      id === "ordin" ? "text-gray-200" :
-      id === "yuusya_game" ? "text-yellow-300" :
+      id === "slime" ? "text-blue-100" :
+      id === "goblin" ? "text-purple-100" :
+      id === "mimic" ? "text-purple-100" :
+      id === "berserker" ? "text-purple-100" :
+      id === "fenikkusu" ? "text-red-100" :
+      id === "dragon" ? "text-red-100" :
+      id === "blackdragon" ? "text-purple-100" :
+      id === "leviathan" ? "text-blue-100" :
+      id === "poseidon" ? "text-blue-100" :
+      id === "gundarimyouou" ? "text-blue-100" :
+      id === "hades" ? "text-indigo-100" :
+      id === "zeus" ? "text-yellow-100" :
+      id === "ordin" ? "text-gray-100" :
+      id === "yuusya_game" ? "text-yellow-100" :
       "text-white";
 
     return (
@@ -634,27 +659,39 @@ export default function QuizModePage() {
 
         {/* スライム：かわいい水しぶき */}
         {id === "slime" && (
-          <div className="absolute w-40 h-40 bg-blue-300 rounded-full opacity-40 animate-enemy-slime-pop"></div>
+          <div className="absolute w-50 h-50 bg-blue-300 rounded-full opacity-40 animate-enemy-slime-wave"></div>
         )}
 
-        {/* ゴブリン：パンチ */}
+        {/* ゴブリン：切りつけ */}
         {id === "goblin" && (
-          <div className="absolute w-32 h-32 bg-purple-400 rounded-full opacity-50 animate-enemy-punch"></div>
+          <div className="absolute animate-enemy-slash"></div>
         )}
 
         {/* ミミック：かみつき */}
         {id === "mimic" && (
-          <div className="absolute w-48 h-48 border-8 border-purple-700 rounded-full animate-enemy-bite"></div>
+          <div className="absolute w-48 h-48 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex justify-center items-start gap-7 z-50">
+            {[0, 1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="w-2 h-30 bg-white animate-enemy-bite"
+                style={{ animationDelay: '0.5s' }}
+              ></div>
+            ))}
+          </div>
         )}
 
         {/* バーサーカー：切りつけ */}
         {id === "berserker" && (
-          <div className="absolute w-[150%] h-[10px] bg-amber-300 rotate-12 animate-enemy-slash"></div>
+          <>
+            <div className="absolute w-[150%] h-[4px] bg-white rotate-45 animate-slashb-1"></div>
+            <div className="absolute w-[150%] h-[4px] bg-white rotate-135 animate-slashb-2"></div>
+            <div className="absolute w-[150%] h-[4px] bg-white rotate-90 animate-slashb-3"></div>
+          </>
         )}
 
         {/* フェニックス：炎の波動 */}
         {id === "fenikkusu" && (
-          <div className="absolute w-56 h-56 bg-red-400 opacity-40 rounded-full animate-enemy-fire"></div>
+          <div className="absolute w-56 h-56 bg-red-300 opacity-40 rounded-full animate-enemy-fire"></div>
         )}
 
         {/* ドラゴン：火炎ブレス */}
@@ -664,50 +701,130 @@ export default function QuizModePage() {
 
         {/* ブラックドラゴン：闇の爆発 */}
         {id === "blackdragon" && (
-          <div className="absolute w-72 h-72 bg-purple-400 opacity-60 rounded-full animate-enemy-darkburst"></div>
+          <div className="absolute w-72 h-72 bg-black opacity-60 rounded-full animate-enemy-darkburst"></div>
         )}
 
         {/* リヴァイアサン：水流 */}
         {id === "leviathan" && (
-          <div className="absolute w-64 h-64 bg-blue-200 opacity-40 rounded-full animate-enemy-water"></div>
+          <>
+            {/* 最初の水流 */}
+            <div className="absolute w-64 h-64 bg-blue-200 opacity-40 rounded-full animate-enemy-water"></div>
+
+            {/* 遅延させたもう一つの水流 */}
+            <div className="absolute w-64 h-64 bg-blue-200 opacity-30 rounded-full animate-enemy-water" style={{ animationDelay: '0.3s' }}></div>
+
+            {/* 遅延させたもう一つの水流 */}
+            <div className="absolute w-64 h-64 bg-blue-200 opacity-20 rounded-full animate-enemy-water" style={{ animationDelay: '0.6s' }}></div>
+          </>
         )}
 
         {/* ポセイドン：雷＋津波 */}
         {id === "poseidon" && (
           <>
-            <div className="absolute w-56 h-56 bg-blue-400 opacity-40 rounded-full animate-enemy-tsunami"></div>
-            <div className="absolute w-4 h-40 bg-yellow-200 animate-enemy-lightning"></div>
+            <div className="absolute w-56 h-56 bg-blue-400 opacity-0 rounded-full animate-enemy-tsunami"></div>
+            <div className="absolute w-48 h-48 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+            {/* 三角形の角の位置に落とす稲妻 */}
+              <div
+                className="absolute w-5 h-100 bg-yellow-300 opacity-0 animate-enemy-lightning"
+                style={{ left: '50%', transform: 'translateX(-50%)', animationDelay: '0s' }}
+              ></div>
+              <div
+                className="absolute w-5 h-100 bg-yellow-300 opacity-0 animate-enemy-lightning"
+                style={{ left: '25%', top: '-40%', animationDelay: '0.2s' }}
+              ></div>
+              <div
+                className="absolute w-5 h-100 bg-yellow-300 opacity-0 animate-enemy-lightning"
+                style={{ left: '75%', top: '-40%', animationDelay: '0.4s' }}
+              ></div>
+            </div>
+            <div className="absolute w-156 h-156 bg-yellow-300 opacity-0 rounded-full animate-enemy-tsunami" style={{ animationDelay: '0.4s' }}></div>
+            <div className="absolute w-156 h-156 bg-yellow-300 opacity-0 rounded-full animate-enemy-tsunami" style={{ animationDelay: '0.8s' }}></div>
+            <div className="absolute w-156 h-156 bg-blue-300 opacity-0 rounded-full animate-enemy-tsunami" style={{ animationDelay: '1.2s' }}></div>
           </>
         )}
 
         {/* 軍荼利明王：炎の爆発 */}
         {id === "gundarimyouou" && (
-          <div className="absolute w-80 h-80 bg-blue-500 opacity-30 rounded-full animate-enemy-divine-fire"></div>
+          <>
+            <div className="absolute w-80 h-80 bg-blue-500 opacity-30 rounded-full animate-enemy-divine-fire"></div>
+            <div className="absolute w-80 h-80 bg-blue-500 opacity-30 rounded-full animate-enemy-divine-fire" style={{ animationDelay: '0.6s' }}></div>
+            <div className="absolute w-80 h-80 bg-blue-500 opacity-30 rounded-full animate-enemy-divine-fire" style={{ animationDelay: '1.2s' }}></div>
+          </>
         )}
 
         {/* ハデス：冥界の黒炎 */}
         {id === "hades" && (
-          <div className="absolute w-72 h-72 bg-indigo-600 opacity-50 rounded-full animate-enemy-hellfire"></div>
+          <div className="absolute w-72 h-72 bg-black opacity-50 rounded-full animate-enemy-hellfire"></div>
         )}
 
         {/* ゼウス：雷 */}
         {id === "zeus" && (
-          <div className="absolute w-4 h-64 bg-yellow-200 animate-enemy-zeus-lightning"></div>
+          <>
+            <div className="absolute w-48 h-48 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+            {/* 三角形の角の位置に落とす稲妻 */}
+              <div
+                className="absolute w-5 h-100 bg-yellow-300 opacity-0 animate-enemy-lightning"
+                style={{ left: '50%', transform: 'translateX(-50%)', animationDelay: '0s' }}
+              ></div>
+              <div
+                className="absolute w-5 h-100 bg-yellow-300 opacity-0 animate-enemy-lightning"
+                style={{ left: '25%', top: '-40%', animationDelay: '0.2s' }}
+              ></div>
+              <div
+                className="absolute w-5 h-100 bg-yellow-300 opacity-0 animate-enemy-lightning"
+                style={{ left: '75%', top: '-40%', animationDelay: '0.4s' }}
+              ></div>
+              <div
+                className="absolute w-5 h-100 bg-yellow-300 opacity-0 animate-enemy-lightning"
+                style={{ left: '0%', top: '0%', animationDelay: '0.6s' }}
+              ></div>
+              <div
+                className="absolute w-5 h-100 bg-yellow-300 opacity-0 animate-enemy-lightning"
+                style={{ left: '100%', top: '0%', animationDelay: '0.8s' }}
+              ></div>
+              <div
+                className="absolute w-5 h-100 bg-yellow-300 opacity-0 animate-enemy-lightning"
+                style={{ left: '-25%', top: '-40%', animationDelay: '1.0s' }}
+              ></div>
+              <div
+                className="absolute w-5 h-100 bg-yellow-300 opacity-0 animate-enemy-lightning"
+                style={{ left: '125%', top: '-40%', animationDelay: '1.2s' }}
+              ></div>
+            </div>
+            <div className="absolute w-156 h-156 bg-yellow-300 opacity-0 rounded-full animate-enemy-tsunami" style={{ animationDelay: '0.4s' }}></div>
+            <div className="absolute w-156 h-156 bg-yellow-300 opacity-0 rounded-full animate-enemy-tsunami" style={{ animationDelay: '0.8s' }}></div>
+            <div className="absolute w-156 h-156 bg-yellow-300 opacity-0 rounded-full animate-enemy-tsunami" style={{ animationDelay: '1.2s' }}></div>
+          </>
         )}
 
         {/* オーディン：魔法陣＋剣気 */}
         {id === "ordin" && (
           <>
-            <div className="absolute w-60 h-60 border-4 border-gray-200 rounded-full animate-enemy-magic-circle"></div>
-            <div className="absolute w-[150%] h-[6px] bg-gray-200 rotate-45 animate-enemy-swordwave"></div>
+            <div className="absolute w-56 h-56 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+              {/* 外円 */}
+              <div className="absolute w-full h-full border-4 border-yellow-400 rounded-full animate-rotate-clockwise"></div>
+              
+              {/* 内側の模様を大きめに */}
+              <div className="absolute w-30 h-30 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-t-2 border-r-2 border-yellow-300 rotate-0 animate-rotate-counterclockwise"></div>
+              <div className="absolute w-30 h-30 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-t-2 border-r-2 border-yellow-300 rotate-60 animate-rotate-counterclockwise"></div>
+              <div className="absolute w-30 h-30 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-t-2 border-r-2 border-yellow-300 rotate-120 animate-rotate-counterclockwise"></div>
+              <div className="absolute w-30 h-30 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-t-2 border-r-2 border-yellow-300 rotate-180 animate-rotate-counterclockwise"></div>
+              <div className="absolute w-30 h-30 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-t-2 border-r-2 border-yellow-300 rotate-240 animate-rotate-counterclockwise"></div>
+              <div className="absolute w-30 h-30 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-t-2 border-r-2 border-yellow-300 rotate-300 animate-rotate-counterclockwise"></div>
+            </div>
+            <div className="absolute w-[150%] h-[4px] bg-yellow-300 rotate-45 animate-slashb-1" style={{ animationDelay: '0.6s' }}></div>
+            <div className="absolute w-156 h-156 bg-yellow-300 opacity-0 rounded-full animate-enemy-tsunami" style={{ animationDelay: '0.8s' }}></div>
           </>
         )}
 
         {/* 初代クイズマスター最強勇者：光の爆発 */}
         {id === "yuusya_game" && (
           <>
-            <div className="absolute w-72 h-72 bg-yellow-300 opacity-40 rounded-full animate-enemy-ultimate"></div>
-            <div className="absolute w-5 h-72 bg-white animate-enemy-ultimate-beam"></div>
+            <div className="absolute w-[150%] h-[4px] bg-yellow-300 rotate-45 animate-slash-1"></div>
+            <div className="absolute w-[150%] h-[4px] bg-yellow-300 rotate-135 animate-slash-2"></div>
+            <div className="absolute w-[150%] h-[4px] bg-yellow-300 rotate-90 animate-slash-3"></div>
+            <div className="absolute w-[150%] h-[4px] bg-yellow-300 rotate-0 animate-slash-4"></div>
+            <div className="absolute w-72 h-72 bg-yellow-300 opacity-40 rounded-full animate-enemy-ultimate" style={{ animationDelay: '1.0s' }}></div>
           </>
         )}
 
@@ -1005,9 +1122,9 @@ export default function QuizModePage() {
                         <button
                           className="flex-1 md:max-w-[220px] px-4 py-2 text-lg md:text-xl bg-gradient-to-r from-green-400 via-green-300 to-green-500 text-black font-bold rounded-lg shadow-md hover:from-green-500 hover:via-green-400 hover:to-green-600 border border-green-600 transition-all"
                           onClick={() => {
-                            setCharacterHP(prev => (prev ?? 0) + characterLevel * 30);
+                            setCharacterHP(prev => (prev ?? 0) + characterLevel * 25);
                             setShowMagicButtons(false);
-                            setHealing(characterLevel * 30);
+                            setHealing(characterLevel * 25);
                           }}
                         >
                           HP回復✨

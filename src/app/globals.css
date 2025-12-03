@@ -345,42 +345,70 @@ footer {
 }
 
 /* 斬撃（剣士） */
-@keyframes slash-1 { 0% {opacity:0} 50% {opacity:1} 100% {opacity:0} }
-@keyframes slash-2 { 0% {opacity:0} 40% {opacity:0} 60% {opacity:1} 100% {opacity:0} }
-@keyframes slash-3 { 0% {opacity:0} 70% {opacity:0} 90% {opacity:1} 100% {opacity:0} }
+/* 各斬撃アニメーションを均等に表示 */
+@keyframes slash-1 { 0%, 20% { opacity: 0; } 20%, 40% { opacity: 1; } 40%, 100% { opacity: 0; } }
+@keyframes slash-2 { 0%, 20% { opacity: 0; } 20%, 40% { opacity: 1; } 40%, 100% { opacity: 0; } }
+@keyframes slash-3 { 0%, 20% { opacity: 0; } 20%, 40% { opacity: 1; } 40%, 100% { opacity: 0; } }
+@keyframes slash-4 { 0%, 20% { opacity: 0; } 20%, 40% { opacity: 1; } 40%, 100% { opacity: 0; } }
 
-.animate-slash-1 { animation: slash-1 0.4s ease-in-out forwards; }
-.animate-slash-2 { animation: slash-2 0.4s ease-in-out forwards; animation-delay: 0.1s; }
-.animate-slash-3 { animation: slash-3 0.4s ease-in-out forwards; animation-delay: 0.2s; }
+/* 共通設定 */
+.animate-slash-1, 
+.animate-slash-2, 
+.animate-slash-3, 
+.animate-slash-4 {
+  animation-duration: 0.8s; /* 全部同じ長さ */
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: forwards;
+  opacity: 0; /* 最初は見えない */
+}
+
+/* 遅延設定で順番に表示 */
+.animate-slash-1 { animation-name: slash-1; animation-delay: 0s; }
+.animate-slash-2 { animation-name: slash-2; animation-delay: 0.2s; }
+.animate-slash-3 { animation-name: slash-3; animation-delay: 0.4s; }
+.animate-slash-4 { animation-name: slash-4; animation-delay: 0.6s; }
 
 
 
 /* 拳圧（武闘家）衝撃波 */
 @keyframes fist {
   0% { transform: scale(0.3); opacity: 0.6; }
-  100% { transform: scale(2); opacity: 0; }
+  100% { transform: scale(3); opacity: 0; }
 }
-.animate-fist {
-  animation: fist 0.45s ease-out;
-}
+/* それぞれ時間差で発動 */
+.animate-fist-1 { animation: fist 0.45s ease-out forwards; }
+.animate-fist-2 { animation: fist 0.45s ease-out forwards; animation-delay: 0.2s; }
+.animate-fist-3 { animation: fist 0.45s ease-out forwards; animation-delay: 0.4s; }
 
 /* 魔法陣 */
-@keyframes magicCircle {
-  0% { transform: scale(0.5) rotate(0deg); opacity: 0.4; }
-  100% { transform: scale(1.2) rotate(180deg); opacity: 0; }
+/* 外円：時計回りに回転 */
+@keyframes rotateClockwise {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
-.animate-magic-circle {
-  animation: magicCircle 0.8s ease-out;
+.animate-rotate-clockwise {
+  animation: rotateClockwise 2s linear infinite;
 }
 
-/* 光の柱（魔法使い） */
-@keyframes pillar {
-  0% { opacity: 0.2; transform: scaleY(0.2); }
-  100% { opacity: 0; transform: scaleY(1.2); }
+/* 内側の星や模様：反時計回り */
+@keyframes rotateCounter {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(-360deg); }
 }
-.animate-pillar {
-  animation: pillar 0.6s ease-out;
+.animate-rotate-counterclockwise {
+  animation: rotateCounter 3s linear infinite;
 }
+
+/* 外側に広がる円 */
+@keyframes expandCircle {
+  0% { transform: scale(0.5); opacity: 0.3; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+.animate-expand-circle {
+  animation: expandCircle 1.5s ease-out infinite;
+}
+
 
 /* 攻撃文字の揺れ */
 @keyframes swing {
@@ -408,31 +436,72 @@ footer {
 
 
   /* ===============================
-     スライム：ぷるっと弾ける
+    スライム：波紋のように広がる
   =============================== */
-  .animate-enemy-slime-pop {
-    animation: slime-pop 0.5s ease-out forwards;
+  .animate-enemy-slime-wave {
+    animation: slime-wave 0.8s ease-out forwards;
   }
-  @keyframes slime-pop {
-    0% { transform: scale(0.4); opacity: 0; }
-    60% { transform: scale(1.3); opacity: 0.7; }
-    100% { transform: scale(1); opacity: 0; }
+
+  @keyframes slime-wave {
+    0% {
+      transform: scale(0.2);   /* とても小さい状態 */
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.4);   /* 最大まで広がる */
+      opacity: 0.7;
+    }
+    70% {
+      transform: scale(1.1);   /* 少し縮む・揺れ感 */
+      opacity: 0.5;
+    }
+    85% {
+      transform: scale(1.2);   /* 小さく揺れる */
+      opacity: 0.4;
+    }
+    100% {
+      transform: scale(1);     /* 元に戻る */
+      opacity: 0;              /* 消える */
+    }
   }
+
 
 
   /* ===============================
-     ゴブリン：パンチ
+     ゴブリン：切りつけ
   =============================== */
-  .animate-enemy-punch {
-    animation: enemy-punch 0.4s ease-out forwards;
+  .animate-enemy-slash {
+    height: 5px; /* 刃の太さ */
+    width: 50px; /* 初期は短く */
+    background: linear-gradient(90deg, #fff, #fff); /* 光る刃風 */
+    position: absolute;
+    animation: enemy-slash-left-to-right 0.4s ease-out forwards;
   }
-  @keyframes enemy-punch {
-    0% { transform: translateX(-200px) scale(0.5); opacity: 1; }
-    20% { transform: translateX(-150px) scale(0.7); opacity: 1; }
-    50% { transform: translateX(-100px) scale(0.9); opacity: 1; }
-    70% { transform: translateX(-50px) scale(1.2); opacity: 1; }
-    70% { transform: translateX(50px) scale(1.4); opacity: 1; }
-    100% { transform: translateX(100px) scale(1.5); opacity: 0; }
+
+  @keyframes enemy-slash-left-to-right {
+    0% {
+      transform: translate(-20px, -200px) rotate(60deg); /* 上から */
+      width: 50px;
+      opacity: 0;
+    }
+    30% {
+      transform: translate(-10px, -100px) rotate(50deg);
+      width: 200px;
+      opacity: 1;
+    }
+    60% {
+      transform: translate(0px, 0px) rotate(30deg); /* 中央あたり */
+      width: 300px;
+    }
+    80% {
+      transform: translate(0px, 100px) rotate(20deg);
+      width: 180px;
+    }
+    100% {
+      transform: translate(0px, 200px) rotate(10deg); /* 下まで */
+      width: 120px;
+      opacity: 0;
+    }
   }
 
 
@@ -440,36 +509,68 @@ footer {
      ミミック：噛みつき
   =============================== */
   .animate-enemy-bite {
-    animation: enemy-bite 0.45s ease-in-out forwards;
+    animation: enemy-bite 1s ease-out forwards;
+    opacity: 0; /* 初期状態を透明にする */
   }
   @keyframes enemy-bite {
-    0% { transform: scale(0.1) rotate(-20deg); opacity: 0; }
-    40% { transform: scale(1.1) rotate(10deg); opacity: 1; }
-    100% { transform: scale(0.9) rotate(0deg); opacity: 0; }
+    0% {
+      transform: translateY(-50px); /* 上に少し待機 */
+      opacity: 0;
+    }
+    30% {
+      transform: translateY(0px); /* 下に振り下ろす */
+      opacity: 1;
+    }
+    60% {
+      transform: translateY(10px); /* 少し戻す */
+    }
+    100% {
+      transform: translateY(-50px); /* 元の位置に戻る */
+      opacity: 0;
+    }
   }
 
 
   /* ===============================
      バーサーカー：斬撃
   =============================== */
-  .animate-enemy-slash {
-    animation: enemy-slash 0.4s ease-out forwards;
+  @keyframes slashb-1 { 0%, 20% { opacity: 0; } 20%, 40% { opacity: 1; } 40%, 100% { opacity: 0; } }
+  @keyframes slashb-2 { 0%, 20% { opacity: 0; } 20%, 40% { opacity: 1; } 40%, 100% { opacity: 0; } }
+  @keyframes slashb-3 { 0%, 20% { opacity: 0; } 20%, 40% { opacity: 1; } 40%, 100% { opacity: 0; } }
+
+  /* 共通設定 */
+  .animate-slashb-1, 
+  .animate-slashb-2, 
+  .animate-slashb-3{
+    animation-duration: 0.8s; /* 全部同じ長さ */
+    animation-timing-function: ease-in-out;
+    animation-fill-mode: forwards;
+    opacity: 0; /* 最初は見えない */
   }
-  @keyframes enemy-slash {
-    0% { transform: translateX(-400px) rotate(0deg); opacity: 0; }
-    100% { transform: translateX(500px) rotate(90deg); opacity: 1; }
-  }
+
+  /* 遅延設定で順番に表示 */
+  .animate-slashb-1 { animation-name: slash-1; animation-delay: 0s; }
+  .animate-slashb-2 { animation-name: slash-2; animation-delay: 0.2s; }
+  .animate-slashb-3 { animation-name: slash-3; animation-delay: 0.4s; }
 
 
   /* ===============================
      フェニックス：火の羽・火炎波
   =============================== */
   .animate-enemy-fire {
-    animation: enemy-fire 0.6s ease-out forwards;
+    animation: enemy-fire 1.2s ease-out forwards;
   }
   @keyframes enemy-fire {
-    0% { transform: scale(0.3); opacity: 0; }
-    60% { transform: scale(1.3); opacity: 0.8; }
+    0% { transform: scale(0.2); opacity: 0.8; }
+    10% { transform: scale(0.5); opacity: 0.8; }
+    20% { transform: scale(0.4); opacity: 0.8; }
+    30% { transform: scale(0.7); opacity: 0.8; }
+    40% { transform: scale(0.6); opacity: 0.8; }
+    50% { transform: scale(0.9); opacity: 0.8; }
+    60% { transform: scale(0.8); opacity: 0.8; }
+    70% { transform: scale(1.1); opacity: 0.8; }
+    80% { transform: scale(1.1); opacity: 0.8; }
+    90% { transform: scale(1.5); opacity: 0.8; }
     100% { transform: scale(1); opacity: 0; }
   }
 
@@ -478,11 +579,11 @@ footer {
      ドラゴン：火炎ブレス
   =============================== */
   .animate-enemy-firebreath {
-    animation: firebreath 0.5s ease-out forwards;
+    animation: firebreath 1s ease-out forwards;
   }
   @keyframes firebreath {
     0% { transform: scale(0.3); opacity: 0; }
-    60% { transform: scale(1.3); opacity: 0.8; }
+    60% { transform: scale(1.5); opacity: 0.8; }
     100% { transform: scale(1); opacity: 0; }
   }
 
@@ -491,11 +592,11 @@ footer {
      ブラックドラゴン：闇の大爆発
   =============================== */
   .animate-enemy-darkburst {
-    animation: darkburst 0.6s ease-out forwards;
+    animation: darkburst 1.5s ease-out forwards;
   }
   @keyframes darkburst {
     0% { transform: scale(0.1); opacity: 0; }
-    70% { transform: scale(1.4); opacity: 0.7; }
+    90% { transform: scale(3.0); opacity: 0.7; }
     100% { transform: scale(1); opacity: 0; }
   }
 
@@ -504,14 +605,31 @@ footer {
      リヴァイアサン：水の波動
   =============================== */
   .animate-enemy-water {
-    animation: enemy-water 0.6s ease-out forwards;
-  }
-  @keyframes enemy-water {
-    0% { transform: scale(0.2); opacity: 0; }
-    50% { transform: scale(1.5); opacity: 0.6; }
-    100% { transform: scale(1); opacity: 0; }
+    animation: enemy-water-tsunami 1.5s ease-out forwards;
   }
 
+  @keyframes enemy-water-tsunami {
+    0% {
+      transform: scaleX(0.5) scaleY(0.2) translateY(50px);
+      opacity: 0;
+    }
+    30% {
+      transform: scaleX(2.2) scaleY(1.8) translateY(20px);
+      opacity: 0.6;
+    }
+    60% {
+      transform: scaleX(2.5) scaleY(2.2) translateY(0px);
+      opacity: 0.8;
+    }
+    80% {
+      transform: scaleX(2.7) scaleY(2.4) translateY(0px);
+      opacity: 0.5;
+    }
+    100% {
+      transform: scaleX(1) scaleY(1) translateY(-20px);
+      opacity: 0;
+    }
+  }
 
   /* ===============================
      ポセイドン：津波 & 雷撃
@@ -521,13 +639,14 @@ footer {
   }
   @keyframes enemy-tsunami {
     0% { transform: translateY(200px) scale(0.2); opacity: 0; }
-    60% { transform: translateY(-20px) scale(1.4); opacity: 0.7; }
+    60% { transform: translateY(-20px) scale(3.0); opacity: 0.7; }
     100% { transform: scale(1); opacity: 0; }
   }
 
   .animate-enemy-lightning {
-    animation: enemy-lightning 0.3s ease-out forwards;
+    animation: enemy-lightning 1s ease-out forwards;
   }
+
   @keyframes enemy-lightning {
     0% { opacity: 0; transform: translateY(-100px); }
     40% { opacity: 1; transform: translateY(0px); }
@@ -539,11 +658,11 @@ footer {
      軍荼利明王：神炎
   =============================== */
   .animate-enemy-divine-fire {
-    animation: divine-fire 0.7s ease-out forwards;
+    animation: divine-fire 0.6s ease-out forwards;
   }
   @keyframes divine-fire {
     0% { transform: scale(0.2); opacity: 0; }
-    50% { transform: scale(1.6); opacity: 0.7; }
+    70% { transform: scale(3.0); opacity: 0.7; }
     100% { transform: scale(1); opacity: 0; }
   }
 
@@ -556,7 +675,7 @@ footer {
   }
   @keyframes hellfire {
     0% { transform: scale(0.1); opacity: 0; }
-    50% { transform: scale(1.5); opacity: 0.8; }
+    50% { transform: scale(3.5); opacity: 0.8; }
     100% { transform: scale(1); opacity: 0; }
   }
 
@@ -602,7 +721,7 @@ footer {
   }
   @keyframes ultimate-burst {
     0% { transform: scale(0.2); opacity: 0; }
-    50% { transform: scale(2); opacity: 0.9; }
+    50% { transform: scale(4); opacity: 0.9; }
     100% { transform: scale(1); opacity: 0; }
   }
 
