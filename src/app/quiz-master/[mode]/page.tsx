@@ -554,16 +554,28 @@ export default function QuizModePage() {
         {isFighter && (
           <>
             {/* 上の円 */}
-            <div className="absolute w-48 h-48 bg-orange-300 rounded-full opacity-40 animate-fist-1"
+            <div className="absolute w-40 h-40 bg-orange-100 rounded-full opacity-0 animate-fist-1"
                 style={{ top: "20%", left: "30%", transform: "translateX(-50%)" }}></div>
 
             {/* 左下の円 */}
-            <div className="absolute w-48 h-48 bg-orange-300 rounded-full opacity-40 animate-fist-2"
+            <div className="absolute w-40 h-40 bg-orange-100 rounded-full opacity-0 animate-fist-2"
                 style={{ top: "50%", left: "10%", transform: "translate(-50%, -50%)" }}></div>
 
             {/* 右下の円 */}
-            <div className="absolute w-48 h-48 bg-orange-300 rounded-full opacity-40 animate-fist-3"
-                style={{ top: "50%", left: "65%", transform: "translate(-50%, -50%)" }}></div>
+            <div className="absolute w-40 h-40 bg-orange-100 rounded-full opacity-0 animate-fist-3"
+                style={{ top: "30%", left: "65%", transform: "translate(-50%, -50%)" }}></div>
+
+            {/* 左下の円 */}
+            <div className="absolute w-40 h-40 bg-orange-100 rounded-full opacity-0 animate-fist-4"
+                style={{ top: "40%", left: "20%", transform: "translate(-50%, -50%)" }}></div>
+
+            {/* 右下の円 */}
+            <div className="absolute w-40 h-40 bg-orange-100 rounded-full opacity-0 animate-fist-5"
+                style={{ top: "60%", left: "50%", transform: "translate(-50%, -50%)" }}></div>
+
+            {/* 真ん中の円 */}
+            <div className="absolute w-40 h-40 bg-orange-100 rounded-full opacity-0 animate-fist-6"
+                style={{ top: "38%", left: "33%", transform: "translate(-50%, -50%)" }}></div>
           </>
         )}
 

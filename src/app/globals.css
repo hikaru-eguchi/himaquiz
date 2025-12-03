@@ -373,12 +373,21 @@ footer {
 /* 拳圧（武闘家）衝撃波 */
 @keyframes fist {
   0% { transform: scale(0.3); opacity: 0.6; }
-  100% { transform: scale(3); opacity: 0; }
+  70% { transform: scale(0.6); opacity: 1; }
+  100% { transform: scale(1); opacity: 0; }
+}
+@keyframes fist2 {
+  0% { transform: scale(0.3); opacity: 0.6; }
+  50% { transform: scale(3.0); opacity: 1; }
+  100% { transform: scale(1); opacity: 0; }
 }
 /* それぞれ時間差で発動 */
 .animate-fist-1 { animation: fist 0.45s ease-out forwards; }
 .animate-fist-2 { animation: fist 0.45s ease-out forwards; animation-delay: 0.2s; }
 .animate-fist-3 { animation: fist 0.45s ease-out forwards; animation-delay: 0.4s; }
+.animate-fist-4 { animation: fist 0.45s ease-out forwards; animation-delay: 0.6s; }
+.animate-fist-5 { animation: fist 0.45s ease-out forwards; animation-delay: 0.8s; }
+.animate-fist-6 { animation: fist2 0.45s ease-out forwards; animation-delay: 1.0s; }
 
 /* 魔法陣 */
 /* 外円：時計回りに回転 */
