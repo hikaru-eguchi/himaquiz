@@ -56,7 +56,7 @@ export default function NavButtons() {
       })}
 
       {/* 最後の3つのボタン */}
-      <div className="flex gap-2 md:gap-4 py-2 md:py-0
+      <div className="flex gap-2 md:gap-4 py-2 md:py-0 px-2 md:px-0
                       overflow-x-auto md:overflow-visible
                       whitespace-nowrap w-full md:w-auto">
         <Link href="/streak-challenge" onClick={() => setActiveUrl("/streak-challenge")}>

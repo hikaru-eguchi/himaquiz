@@ -17,7 +17,7 @@ export default function QuizMasterPage() {
   const handleDescriptionClick = () => setShowDescription((prev) => !prev);
 
   // ★ 入力された制限時間（クエリで渡す）
-  const [limitTime, setLimitTime] = useState<number>(5);
+  const [limitTime, setLimitTime] = useState<number | null>(1);
 
   // ★ PC用キャラ（全3枚）
   const allCharacters = [
@@ -121,8 +121,27 @@ export default function QuizMasterPage() {
               type="number"
               min={1}
               max={100}
-              defaultValue={5}
-              onChange={(e) => setLimitTime(Number(e.target.value))}
+              value={limitTime === null ? "" : limitTime}
+              onChange={(e) => {
+                const raw = e.target.value;
+
+                // 入力欄が空の場合は一時的に null をセット（空を許容）
+                if (raw === "") {
+                  setLimitTime(null);
+                  return;
+                }
+
+                const value = Number(raw);
+
+                // 下限・上限を強制
+                if (value > 100) setLimitTime(100);
+                else if (value < 1) setLimitTime(1);
+                else setLimitTime(value);
+              }}
+              onBlur={() => {
+                // フォーカスが外れた時に値が null（空）なら最低値の 1 を入れる
+                if (limitTime === null) setLimitTime(1);
+              }}
               className="
                 w-32 md:w-48 px-4 py-2 text-lg md:text-2xl 
                 border-2 border-black rounded-full 

@@ -298,7 +298,7 @@ export default function QuizModePage() {
           <p
             className={`
               text-2xl md:text-4xl font-extrabold mb-4 px-4 py-2 rounded-lg inline-block shadow-lg
-              ${timeLeft <= 30 ? 'bg-red-700 text-white animate-pulse' : 'bg-red-700 text-white'}
+              ${timeLeft <= 30 ? 'bg-red-700 text-white animate-pulse' : ' text-black bg-white border-2 border-black'}
               transition-colors duration-300
             `}
           >

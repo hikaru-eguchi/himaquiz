@@ -356,17 +356,36 @@ footer {
 .animate-slash-2, 
 .animate-slash-3, 
 .animate-slash-4 {
-  animation-duration: 0.8s; /* 全部同じ長さ */
+  animation-duration: 0.5s; /* 全部同じ長さ */
   animation-timing-function: ease-in-out;
   animation-fill-mode: forwards;
   opacity: 0; /* 最初は見えない */
 }
 
 /* 遅延設定で順番に表示 */
-.animate-slash-1 { animation-name: slash-1; animation-delay: 0s; }
-.animate-slash-2 { animation-name: slash-2; animation-delay: 0.2s; }
-.animate-slash-3 { animation-name: slash-3; animation-delay: 0.4s; }
-.animate-slash-4 { animation-name: slash-4; animation-delay: 0.6s; }
+.animate-slash-1 { animation-name: slash-1; animation-delay: 0.2s; }
+.animate-slash-2 { animation-name: slash-2; animation-delay: 0.4s; }
+.animate-slash-3 { animation-name: slash-3; animation-delay: 0.6s; }
+.animate-slash-4 { animation-name: slash-4; animation-delay: 0.8s; }
+
+/* 光る斬撃ライン（元の太さ・角度・動きはそのまま） */
+.slash-line {
+  width: 150%;
+  height: 4px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(100, 180, 255, 0.9),
+    white,
+    rgba(100, 180, 255, 0.9),
+    transparent
+  );
+  border-radius: 50px;
+  filter: drop-shadow(0 0 6px rgba(120, 180, 255, 0.9));
+  opacity: 0;
+  position: absolute;
+}
+
 
 
 
@@ -448,7 +467,9 @@ footer {
     スライム：波紋のように広がる
   =============================== */
   .animate-enemy-slime-wave {
-    animation: slime-wave 0.8s ease-out forwards;
+    animation: slime-wave 0.6s ease-out forwards;
+    animation-delay: 0.3s;
+    opacity: 0;
   }
 
   @keyframes slime-wave {
@@ -480,35 +501,37 @@ footer {
      ゴブリン：切りつけ
   =============================== */
   .animate-enemy-slash {
-    height: 5px; /* 刃の太さ */
+    height: 7px; /* 刃の太さ */
     width: 50px; /* 初期は短く */
     background: linear-gradient(90deg, #fff, #fff); /* 光る刃風 */
     position: absolute;
     animation: enemy-slash-left-to-right 0.4s ease-out forwards;
+    animation-delay: 0.3s;
+    opacity: 0;
   }
 
   @keyframes enemy-slash-left-to-right {
     0% {
-      transform: translate(-20px, -200px) rotate(60deg); /* 上から */
+      transform: translate(-80px, -200px) rotate(60deg); /* 上から */
       width: 50px;
       opacity: 0;
     }
     30% {
-      transform: translate(-10px, -100px) rotate(50deg);
-      width: 200px;
+      transform: translate(-70px, -100px) rotate(50deg);
+      width: 120px;
       opacity: 1;
     }
     60% {
       transform: translate(0px, 0px) rotate(30deg); /* 中央あたり */
-      width: 300px;
+      width: 200px;
     }
     80% {
       transform: translate(0px, 100px) rotate(20deg);
-      width: 180px;
+      width: 140px;
     }
     100% {
       transform: translate(0px, 200px) rotate(10deg); /* 下まで */
-      width: 120px;
+      width: 20px;
       opacity: 0;
     }
   }
@@ -523,7 +546,7 @@ footer {
   }
   @keyframes enemy-bite {
     0% {
-      transform: translateY(-50px); /* 上に少し待機 */
+      transform: translateY(-100px); /* 上に少し待機 */
       opacity: 0;
     }
     30% {
@@ -571,29 +594,47 @@ footer {
   }
   @keyframes enemy-fire {
     0% { transform: scale(0.2); opacity: 0.8; }
-    10% { transform: scale(0.5); opacity: 0.8; }
+    10% { transform: scale(0.7); opacity: 0.8; }
     20% { transform: scale(0.4); opacity: 0.8; }
-    30% { transform: scale(0.7); opacity: 0.8; }
+    30% { transform: scale(1.2); opacity: 0.8; }
     40% { transform: scale(0.6); opacity: 0.8; }
-    50% { transform: scale(0.9); opacity: 0.8; }
-    60% { transform: scale(0.8); opacity: 0.8; }
-    70% { transform: scale(1.1); opacity: 0.8; }
-    80% { transform: scale(1.1); opacity: 0.8; }
-    90% { transform: scale(1.5); opacity: 0.8; }
-    100% { transform: scale(1); opacity: 0; }
+    50% { transform: scale(1.8); opacity: 0.8; }
+    60% { transform: scale(1.2); opacity: 0.8; }
+    70% { transform: scale(2.1); opacity: 0.8; }
+    80% { transform: scale(1.6); opacity: 0.8; }
+    90% { transform: scale(2.5); opacity: 0.8; }
+    100% { transform: scale(3); opacity: 0; }
   }
 
 
   /* ===============================
-     ドラゴン：火炎ブレス
-  =============================== */
-  .animate-enemy-firebreath {
-    animation: firebreath 1s ease-out forwards;
+    ドラゴン：火炎ブレス / 2段爆発
+  ================================ */
+
+  /* 前の薄い赤（手前・小さめ） */
+  .animate-fire-front {
+    animation: fireFront 1.0s ease-out forwards;
+    animation-delay: 0.3s;
+    opacity: 0;
   }
-  @keyframes firebreath {
+
+  @keyframes fireFront {
     0% { transform: scale(0.3); opacity: 0; }
-    60% { transform: scale(1.5); opacity: 0.8; }
-    100% { transform: scale(1); opacity: 0; }
+    60% { transform: scale(2.2); opacity: 0.7; }
+    100% { transform: scale(2.8); opacity: 0; }
+  }
+
+  /* 後ろの濃い赤（奥・大きめ・遅れて） */
+  .animate-fire-back {
+    animation: fireBack 1.2s ease-out forwards;
+    animation-delay: 0.45s;
+    opacity: 0;
+  }
+
+  @keyframes fireBack {
+    0% { transform: scale(0.2); opacity: 0; }
+    60% { transform: scale(3.2); opacity: 0.8; }
+    100% { transform: scale(4.0); opacity: 0; }
   }
 
 
@@ -609,33 +650,42 @@ footer {
     100% { transform: scale(1); opacity: 0; }
   }
 
-
-  /* ===============================
-     リヴァイアサン：水の波動
-  =============================== */
-  .animate-enemy-water {
-    animation: enemy-water-tsunami 1.5s ease-out forwards;
+    /* 後ろの黒（奥・大きめ・遅れて） */
+  .animate-fire-back2 {
+    animation: fireBack2 1.2s ease-out forwards;
+    animation-delay: 0.7s;
+    opacity: 0;
   }
 
-  @keyframes enemy-water-tsunami {
+  @keyframes fireBack2 {
+    0% { transform: scale(0.2); opacity: 0; }
+    60% { transform: scale(4.5); opacity: 0.8; }
+    100% { transform: scale(5.0); opacity: 0; }
+  }
+
+
+  /* ===============================
+    リヴァイアサン：水流アニメーション
+  =============================== */
+  .animate-water-stream {
+    animation: water-stream 0.8s ease-out forwards;
+  }
+
+  @keyframes water-stream {
     0% {
-      transform: scaleX(0.5) scaleY(0.2) translateY(50px);
+      transform: translateY(-200%) scaleX(0.7);
       opacity: 0;
     }
     30% {
-      transform: scaleX(2.2) scaleY(1.8) translateY(20px);
-      opacity: 0.6;
-    }
-    60% {
-      transform: scaleX(2.5) scaleY(2.2) translateY(0px);
+      transform: translateY(-60%) scaleX(1);
       opacity: 0.8;
     }
-    80% {
-      transform: scaleX(2.7) scaleY(2.4) translateY(0px);
-      opacity: 0.5;
+    60% {
+      transform: translateY(10%) scaleX(0.95);
+      opacity: 0.6;
     }
     100% {
-      transform: scaleX(1) scaleY(1) translateY(-20px);
+      transform: translateY(120%) scaleX(1);
       opacity: 0;
     }
   }
@@ -730,8 +780,8 @@ footer {
   }
   @keyframes ultimate-burst {
     0% { transform: scale(0.2); opacity: 0; }
-    50% { transform: scale(4); opacity: 0.9; }
-    100% { transform: scale(1); opacity: 0; }
+    50% { transform: scale(8); opacity: 0.9; }
+    100% { transform: scale(9); opacity: 0; }
   }
 
   .animate-enemy-ultimate-beam {
