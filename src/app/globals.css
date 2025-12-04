@@ -581,9 +581,9 @@ footer {
   }
 
   /* 遅延設定で順番に表示 */
-  .animate-slashb-1 { animation-name: slash-1; animation-delay: 0s; }
-  .animate-slashb-2 { animation-name: slash-2; animation-delay: 0.2s; }
-  .animate-slashb-3 { animation-name: slash-3; animation-delay: 0.4s; }
+  .animate-slashb-1 { animation-name: slash-1; animation-delay: 0.3s; }
+  .animate-slashb-2 { animation-name: slash-2; animation-delay: 0.5s; }
+  .animate-slashb-3 { animation-name: slash-3; animation-delay: 0.7s; }
 
 
   /* ===============================
