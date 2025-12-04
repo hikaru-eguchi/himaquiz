@@ -121,7 +121,7 @@ const rankComments = [
   { threshold: 12, comment: "クイズマスター！最強の中の最強…殿堂入りレベル！" },
   { threshold: 13, comment: "レジェンドクイズマスター！伝説に語り継がれる存在だ…！" },
   { threshold: 14, comment: "クイズ王…！ついにクイズマスターを倒した！🎉君はクイズ界の王者だ！！" },
-  { threshold: 15, comment: "クイズ神…！ついにクイズ王を倒した！🎉🎉🎉一番すごい称号に到達だ！✨" },
+  { threshold: 15, comment: "クイズ神…！ついにクイズ王を倒した！🎉🎉一番すごい称号に到達だ！✨" },
 ];
 
 const QuizResult = ({ correctCount, getTitle, titles }: { correctCount: number, getTitle: () => string, titles: { threshold: number, title: string }[] }) => {
@@ -230,6 +230,10 @@ export default function QuizModePage() {
   const [enemyVisible, setEnemyVisible] = useState(true);
   const [miracleSeedCount, setMiracleSeedCount] = useState(0); // 所持数
   const [miracleSeedMessage, setMiracleSeedMessage] = useState<string | null>(null); // ドロップメッセージ
+  // 最後にヒントボタンを使った問題番号
+  const [lastHintUsedIndex, setLastHintUsedIndex] = useState<number | null>(null);
+  // 最後に回復ボタンを使った問題番号
+  const [lastHealUsedIndex, setLastHealUsedIndex] = useState<number | null>(null);
 
   const finishedRef = useRef(finished);
   const showCorrectRef = useRef(showCorrectMessage);
@@ -510,6 +514,9 @@ export default function QuizModePage() {
       }, speed);
     }, 1500); // ← この間 EnemyAttackEffect を見せたい時間（1.2秒など好みで）
   };
+
+  const hintCooldown = lastHintUsedIndex !== null && currentIndex - lastHintUsedIndex < 3;
+  const healCooldown = lastHealUsedIndex !== null && currentIndex - lastHealUsedIndex < 3;
 
   const StageIntro = ({ enemy }: { enemy: typeof enemies[0] }) => {
     return (
@@ -1196,24 +1203,40 @@ export default function QuizModePage() {
                   {/* 魔法使い専用ボタン */}
                   {showMagicButtons && (
                     <div>
-                      <p className="text-lg md:text-xl">このターンで選べる能力は1つだけです</p>
+                      <p className="text-lg md:text-xl">能力を使用するとその能力は2ターン使用できません</p>
                       <div className="flex justify-center gap-2 md:gap-4 mt-2 mb-2">
                         <button
-                          className="flex-1 md:max-w-[220px] px-4 py-2 text-lg md:text-xl bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-500 text-black font-bold rounded-lg shadow-md hover:from-yellow-500 hover:via-yellow-400 hover:to-yellow-600 border border-yellow-600 transition-all"
+                          disabled={hintCooldown}
+                          className={`
+                            flex-1 md:max-w-[220px] px-4 py-2 text-lg md:text-xl font-bold rounded-lg shadow-md border transition-all
+                            ${hintCooldown
+                              ? "bg-gray-400 text-gray-200 cursor-not-allowed"
+                              : "bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-500 text-black hover:from-yellow-500 hover:via-yellow-400 hover:to-yellow-600 border-yellow-600"
+                            }
+                          `}
                           onClick={() => {
+                            if (hintCooldown) return;
                             setHintText(questions[currentIndex].quiz?.hint || "ヒントはありません");
-                            setShowMagicButtons(false);
+                            setLastHintUsedIndex(currentIndex); // ★ 使用した問題番号を記録
                           }}
                         >
                           ヒントを見る🔮
                         </button>
 
                         <button
-                          className="flex-1 md:max-w-[220px] px-4 py-2 text-lg md:text-xl bg-gradient-to-r from-green-400 via-green-300 to-green-500 text-black font-bold rounded-lg shadow-md hover:from-green-500 hover:via-green-400 hover:to-green-600 border border-green-600 transition-all"
+                          disabled={healCooldown}
+                          className={`
+                            flex-1 md:max-w-[220px] px-4 py-2 text-lg md:text-xl font-bold rounded-lg shadow-md border transition-all
+                            ${healCooldown
+                              ? "bg-gray-400 text-gray-200 cursor-not-allowed"
+                              : "bg-gradient-to-r from-green-400 via-green-300 to-green-500 text-black hover:from-green-500 hover:via-green-400 hover:to-green-600 border-green-600"
+                            }
+                          `}
                           onClick={() => {
+                            if (healCooldown) return;
                             setCharacterHP(prev => (prev ?? 0) + characterLevel * 35);
-                            setShowMagicButtons(false);
                             setHealing(characterLevel * 35);
+                            setLastHealUsedIndex(currentIndex); // ★ 記録
                           }}
                         >
                           HP回復✨
