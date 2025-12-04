@@ -67,6 +67,7 @@ export default async function KnowledgeEasyPage({
   const genreParam = "knowledge"; // URL 用（英語）
   const displayGenre = "知識系"; // 表示用（日本語）
   const levelParam = "かんたん";
+  const urlLevelParam = "easy";
   const currentPage = Number(searchParams?.page) || 1;
 
   const allArticles = await getSortedArticlesData();
@@ -145,7 +146,7 @@ export default async function KnowledgeEasyPage({
           totalPages={totalPages}
           basePath={`/quizzes/genre/${encodeURIComponent(
             genreParam
-          )}/level/${encodeURIComponent(levelParam)}`}
+          )}/level/${encodeURIComponent(urlLevelParam)}`}
         />
       </div>
     </div>

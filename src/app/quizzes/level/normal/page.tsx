@@ -65,6 +65,7 @@ type PageProps = {
 
 export default async function EasyLevelPage({ searchParams }: PageProps) {
   const levelParam = "ふつう";
+  const urlLevelParam = "normal";
   const currentPage = Number(searchParams?.page) || 1;
 
   const allArticles = await getSortedArticlesData();
@@ -141,7 +142,7 @@ export default async function EasyLevelPage({ searchParams }: PageProps) {
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
-          basePath={`/quizzes/level/${encodeURIComponent(levelParam)}`}
+          basePath={`/quizzes/level/${encodeURIComponent(urlLevelParam)}`}
         />
       </div>
     </div>
