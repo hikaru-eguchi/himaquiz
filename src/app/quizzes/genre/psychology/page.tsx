@@ -93,7 +93,7 @@ export default async function TriviaAllPage({
       </div>
 
       <h1 className="text-3xl font-bold mb-2 text-center text-pink-600 leading-tight">
-        全て<span className="block sm:inline"> の 心理系 クイズ</span>
+        心理系の暇つぶしクイズ｜性格がわかる脳トレクイズ！
       </h1>
 
       <p className="text-center text-xl md:text-2xl font-extrabold mb-6">

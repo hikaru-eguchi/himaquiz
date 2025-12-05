@@ -7,9 +7,9 @@ import Pagination from "@/app/components/Pagination";
 import LevelFilterButtons from "@/app/components/LevelFilterButtons";
 
 export const metadata = {
-  title: "難しいレベルのクイズ｜ひまQ",
+  title: "上級者向け難しいクイズ｜本気の暇つぶし脳トレ｜ひまQ",
   description:
-    "ひまQでは、頭を鍛える難しいクイズを多数掲載。脳トレクイズや面白クイズで、ちょっとした空き時間に脳を鍛えよう。",
+    "ひまQのむずかしいクイズは、上級者でも悩む高難度問題を収録。暇つぶしとは思えないレベルの脳トレクイズで、頭をフル回転して挑戦しよう。",
 };
 
 interface ArticleMeta {
@@ -96,7 +96,7 @@ export default async function EasyLevelPage({ searchParams }: PageProps) {
       </div>
 
       <h1 className="text-3xl font-bold mb-2 text-center">
-        難しいレベル<span className="block sm:inline"> の クイズ</span>
+        難しいレベルの暇つぶしクイズ｜上級者向け脳トレ問題！
       </h1>
 
       {/* クイズ数 */}

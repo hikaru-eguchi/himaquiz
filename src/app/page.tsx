@@ -146,9 +146,20 @@ export default async function HomePage({
         頭を鍛える暇つぶし！『ひまQ』は、暇つぶししながら頭を鍛えられる脳トレ＆面白クイズが満載。空き時間に脳力をアップしよう！
       </p>
 
+      <h1
+        className="text-3xl font-bold mb-2 text-center leading-tight"
+        style={{
+          background: "linear-gradient(90deg, #007BFF, #4C6EF5, #845EF7)",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+        }}
+      >
+        頭を鍛える暇つぶしクイズ｜脳トレ＆面白問題が満載！
+      </h1>
+
       {/* 今日のクイズ表示 */}
       <div className='max-w-[700px] mx-auto border-2 border-black rounded-xl m-5 p-5 bg-gradient-to-b from-red-0 via-red-100 to-red-200'>
-        <h1 className="
+        <h2 className="
           text-2xl md:text-4xl 
           font-extrabold 
           mb-3 
@@ -161,7 +172,7 @@ export default async function HomePage({
           animate-pulse
         ">
           今日のチャレンジクイズ！🔥
-        </h1>
+        </h2>
         <p className="text-lg md:text-xl mb-2 text-center leading-tight mb-4 underline">
           まずはこの問題！あなたは解けるかな？
         </p>

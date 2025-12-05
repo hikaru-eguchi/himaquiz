@@ -6,7 +6,7 @@ import Pagination from "../components/Pagination";
 import LevelFilterButtons from "@/app/components/LevelFilterButtons";
 
 export const metadata = {
-  title: "全てのクイズ｜ひまQ",
+  title: "頭を鍛える暇つぶしクイズ｜ひまQ",
   description:
     "ひまQでは、頭を鍛える暇つぶしクイズを多数掲載。脳トレクイズや面白クイズで、ちょっとした空き時間に脳を鍛えよう。",
 };
@@ -95,7 +95,7 @@ export default async function QuizzesPage({ searchParams }: PageProps) {
       </div>
 
       <h1 className="text-3xl font-bold mb-2 text-center leading-tight">
-        全て の クイズ
+        頭を鍛える暇つぶしクイズ一覧｜脳トレ＆面白問題が満載！
       </h1>
 
       {/* ★ クイズ数表示（中央） */}

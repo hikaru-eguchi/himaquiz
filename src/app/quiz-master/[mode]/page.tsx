@@ -15,7 +15,7 @@ const characters = [
 // 敵情報
 const enemies = [
   { id: "slime", name: "スライム", image: "/images/slime.png", hp: 100, attack: 30, description: "ぷるぷるして弱そうに見えるが油断は禁物。" },
-  { id: "goblin", name: "ゴブリン", image: "/images/goblin.png", hp: 200, attack: 60, description: "素早く群れで襲いかかる小型のモンスター。" },
+  { id: "goblin", name: "ゴブリン", image: "/images/goblin.png", hp: 220, attack: 60, description: "素早く群れで襲いかかる小型のモンスター。" },
   { id: "mimic", name: "ミミック", image: "/images/mimic.png", hp: 350, attack: 120, description: "宝箱に化けるトリッキーな敵。油断すると噛まれる！" },
   { id: "berserker", name: "バーサーカー", image: "/images/berserker.png", hp: 500, attack: 200, description: "理性を失った狂戦士。攻撃力が非常に高い。" },
   { id: "fenikkusu", name: "フェニックス", image: "/images/fenikkusu.png", hp: 1000, attack: 330, description: "不死鳥の炎を操る神秘的な生物。燃え盛る翼で攻撃。" },
@@ -426,7 +426,7 @@ export default function QuizModePage() {
 
           // ドロップ判定（10分の1）
           const dropChance = Math.random();
-          if (dropChance < 0.05) {
+          if (dropChance < 0.03) {
             setMiracleSeedCount(prev => prev + 1);
             setMiracleSeedMessage("伝説の果実🍏を手に入れた！✨");
           }
@@ -1234,8 +1234,8 @@ export default function QuizModePage() {
                           `}
                           onClick={() => {
                             if (healCooldown) return;
-                            setCharacterHP(prev => (prev ?? 0) + characterLevel * 35);
-                            setHealing(characterLevel * 35);
+                            setCharacterHP(prev => (prev ?? 0) + characterLevel * 40);
+                            setHealing(characterLevel * 40);
                             setLastHealUsedIndex(currentIndex); // ★ 記録
                           }}
                         >
@@ -1281,19 +1281,22 @@ export default function QuizModePage() {
 
               {miracleSeedCount > 0 && !isAttacking && !showCorrectMessage && !incorrectMessage && (
                 <>
-                  <div className="flex justify-center gap-2 md:gap-4 mt-4 mb-2">
-                    <button
-                      className="px-5 py-3 md:px-6 border-2 border-pink-200 bg-gradient-to-r from-yellow-400 via-red-400 to-pink-500 text-white text-lg md:text-xl font-bold  rounded-lg shadow-md hover:from-yellow-500 hover:via-red-500 hover:to-pink-600 transition-all cursor-pointer"
-                      onClick={() => {
-                        setCharacterHP(prev => (prev ?? 0) + 5000);
-                        setCharacterLevel(prev => prev + 50); // 攻撃力にもレベル依存して加算されます
-                        setMiracleSeedCount(prev => prev - 1);
-                        setLevelUp(50); // レベルアップ表示
-                        setHealing(5000); // 回復表示
-                      }}
-                    >
-                      伝説の果実🍏を使う
-                    </button>
+                  <div>
+                    <p className="text-lg md:text-xl">能力が上がるといわれている伝説の果実</p>
+                    <div className="flex justify-center gap-2 md:gap-4 mt-2 mb-2">
+                      <button
+                        className="px-5 py-3 md:px-6 border-2 border-pink-200 bg-gradient-to-r from-yellow-400 via-red-400 to-pink-500 text-white text-lg md:text-xl font-bold  rounded-lg shadow-md hover:from-yellow-500 hover:via-red-500 hover:to-pink-600 transition-all cursor-pointer"
+                        onClick={() => {
+                          setCharacterHP(prev => (prev ?? 0) + 5000);
+                          setCharacterLevel(prev => prev + 50); // 攻撃力にもレベル依存して加算されます
+                          setMiracleSeedCount(prev => prev - 1);
+                          setLevelUp(50); // レベルアップ表示
+                          setHealing(5000); // 回復表示
+                        }}
+                      >
+                        伝説の果実🍏を使う
+                      </button>
+                    </div>
                   </div>
                 </>
               )}

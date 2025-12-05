@@ -96,7 +96,7 @@ export default async function TriviaAllPage({
       </div>
 
       <h1 className="text-3xl font-bold mb-2 text-center text-green-700 leading-tight">
-        全て<span className="block sm:inline"> の 雑学系 クイズ</span>
+        雑学系の暇つぶしクイズ｜面白い豆知識の脳トレ問題！
       </h1>
 
       {/* ★ クイズ数表示（中央） */}

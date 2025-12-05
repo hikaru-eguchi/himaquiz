@@ -7,9 +7,9 @@ import Pagination from "@/app/components/Pagination";
 import LevelFilterButtons from "@/app/components/LevelFilterButtons";
 
 export const metadata = {
-  title: "難しいレベルの心理系クイズ｜ひまQ",
+  title: "心理学に基づく本格心理クイズ（むずかしい）｜暇つぶし脳トレ｜ひまQ",
   description:
-    "ひまQでは、頭を鍛える難しい心理系クイズを多数掲載。脳トレクイズや面白クイズで、ちょっとした空き時間に脳を鍛えよう。",
+    "心理学の考え方を取り入れた分析系クイズを多数収録。暇つぶししながら深く心理を読み解く力が鍛えられます。",
 };
 
 interface ArticleMeta {
@@ -99,7 +99,7 @@ export default async function KnowledgeEasyPage({
       </div>
 
       <h1 className="text-3xl font-bold mb-2 text-center text-pink-600 leading-tight">
-        難しいレベル<span className="block sm:inline"> の 心理系 クイズ</span>
+        難しいレベルの心理系の暇つぶしクイズ｜性格がわかる脳トレクイズ！
       </h1>
 
       {/* ★ クイズ数表示（中央） */}

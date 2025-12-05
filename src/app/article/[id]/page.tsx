@@ -149,7 +149,7 @@ export default async function ArticleDetailPage({
   const allArticles = await getAllArticles();
   const relatedArticles = allArticles
     .filter((a) => a.id !== id)
-    .filter((a) => a.quiz?.level === articleData.quiz?.level)
+    .filter((a) => a.quiz?.genre === articleData.quiz?.genre)
     .slice(0, 4);
 
   return (
@@ -186,7 +186,7 @@ export default async function ArticleDetailPage({
           }}
         >
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3 text-center">
-            こっちも挑戦！
+            おすすめクイズ！
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
