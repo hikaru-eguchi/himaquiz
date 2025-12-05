@@ -250,7 +250,7 @@ export default async function HomePage({
         </p>
         <div className="flex justify-center gap-3 md:gap-5 flex-wrap">
           {/* 連続正解チャレンジ */}
-          <div className="text-center max-w-[260px] mb-3 md:mb-0">
+          <div className="text-center max-w-[260px] md:mb-0">
             <Link href="/streak-challenge" className="w-full md:w-auto flex justify-center">
               <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-red-500 to-orange-400 text-white hover:scale-110 transition-all">
                 連続正解チャレンジ
