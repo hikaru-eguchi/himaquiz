@@ -33,7 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Googleタグ（gtag.js）を読み込み */}
         <Script
           strategy="afterInteractive"
-          src="https://www.googletagmanager.com/gtag/js?id=G-4PX63CW1YV"
+          src="https://www.googletagmanager.com/gtag/js?id=G-RJ2YBMWVYN"
         />
 
         {/* 設定スクリプトを挿入 */}
@@ -42,7 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', 'G-4PX63CW1YV');
+            gtag('config', 'G-RJ2YBMWVYN');
           `}
         </Script>
       </head>
