@@ -63,13 +63,12 @@ async function getSortedArticlesData(): Promise<ArticleMeta[]> {
 }
 
 type PageProps = {
-  searchParams?: {
-    page?: string;
-  };
+  searchParams: Promise<{ page?: string }>; // Promiseに変更
 };
 
 export default async function QuizzesPage({ searchParams }: PageProps) {
-  const currentPage = Number(searchParams?.page) || 1;
+  const params = await searchParams;
+  const currentPage = Number(params?.page) || 1;
 
   const allArticles = await getSortedArticlesData();
 

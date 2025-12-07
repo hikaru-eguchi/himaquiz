@@ -62,13 +62,14 @@ async function getSortedArticlesData(): Promise<ArticleMeta[]> {
 export default async function KnowledgeEasyPage({
   searchParams,
 }: {
-  searchParams?: { page?: string };
+  searchParams: Promise<{ page?: string }>;
 }) {
   const genreParam = "psychology"; // URL 用（英語）
   const displayGenre = "心理系"; // 表示用（日本語）
   const levelParam = "かんたん";
   const urlLevelParam = "easy";
-  const currentPage = Number(searchParams?.page) || 1;
+  const params = await searchParams;
+  const currentPage = Number(params?.page) || 1;
 
   const allArticles = await getSortedArticlesData();
 

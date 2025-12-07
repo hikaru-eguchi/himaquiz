@@ -62,13 +62,14 @@ async function getSortedArticlesData(): Promise<ArticleMeta[]> {
 export default async function KnowledgeEasyPage({
   searchParams,
 }: {
-  searchParams?: { page?: string };
+  searchParams: Promise<{ page?: string }>;
 }) {
   const genreParam = "trivia"; // URL 用（英語）
   const displayGenre = "雑学系"; // 表示用（日本語）
   const levelParam = "難しい";
   const urlLevelParam = "hard";
-  const currentPage = Number(searchParams?.page) || 1;
+  const params = await searchParams;
+  const currentPage = Number(params?.page) || 1;
 
   const allArticles = await getSortedArticlesData();
 

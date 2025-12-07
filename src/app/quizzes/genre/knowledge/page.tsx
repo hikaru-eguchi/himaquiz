@@ -62,10 +62,11 @@ async function getSortedArticlesData(): Promise<ArticleMeta[]> {
 export default async function TriviaAllPage({
   searchParams,
 }: {
-  searchParams?: { page?: string };
+  searchParams: Promise<{ page?: string }>;
 }) {
   const genreParam = "knowledge";
-  const currentPage = Number(searchParams?.page) || 1;
+  const params = await searchParams;
+  const currentPage = Number(params?.page) || 1;
 
   const allArticles = await getSortedArticlesData();
 
