@@ -271,17 +271,17 @@ export default async function HomePage({
               </button>
             </Link>
             <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
-              ダンジョン形式で進む本格派クイズ。
+              ダンジョン形式で進む本格派クイズ！
             </p>
             <p className="text-sm md:text-base text-gray-700 leading-tight">
               君は深層まで進めるか！？
             </p>
           </div>
-          {/* 時間制限クイズ */}
+          {/* 制限時間クイズ */}
           <div className="text-center max-w-[260px]">
             <Link href="/time-quiz" className="w-full md:w-auto flex justify-center">
-              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-[#4A0000] via-[#8B0000] to-[#D40000] text-white hover:scale-110 transition-all">
-                時間制限クイズ
+              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-[#ec0101] via-[#FF6B6B] to-[#fb9797] text-white hover:scale-110 transition-all">
+                制限時間クイズ
               </button>
             </Link>
             <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
@@ -289,6 +289,20 @@ export default async function HomePage({
             </p>
             <p className="text-sm md:text-base text-gray-700 leading-tight">
               友達や家族と対決してみよう！
+            </p>
+          </div>
+          {/* クイズガチャ */}
+          <div className="text-center max-w-[260px]">
+            <Link href="/quiz-gacha" className="w-full md:w-auto flex justify-center">
+              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-br from-red-400 via-sky-400 to-green-400 text-white hover:scale-110 transition-all">
+                クイズガチャ
+              </button>
+            </Link>
+            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
+              クイズに正解してガチャにチャレンジ！
+            </p>
+            <p className="text-sm md:text-base text-gray-700 leading-tight">
+              超レアキャラを引き当てよう！
             </p>
           </div>
         </div>

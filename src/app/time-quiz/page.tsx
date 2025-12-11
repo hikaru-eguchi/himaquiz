@@ -60,11 +60,11 @@ export default function QuizMasterPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 text-center bg-gradient-to-b from-[#4A0000] via-[#8B0000] to-[#D40000]">
+    <div className="container mx-auto px-4 py-8 text-center bg-gradient-to-b from-red-100 via-red-200 to-red-300">
       <h1
         className="text-5xl md:text-7xl font-extrabold mb-6 text-center"
         style={{
-          color: "yellow",
+          color: "#f85d5d", // 薄めで鮮やかすぎない赤（使いやすい）
           textShadow: `
             2px 2px 0 #000,
             -2px 2px 0 #000,
@@ -78,19 +78,19 @@ export default function QuizMasterPage() {
             -1px 1px 0 #000,
             1px -1px 0 #000,
             -1px -1px 0 #000,
-            0 0 10px #FFA500
+            0 0 10px #ff0d0d
           `,
           fontFamily: anton.style.fontFamily,
         }}
       >
         <span className="block md:hidden leading-tight">
-          時間制限<br />クイズ
+          制限時間<br />クイズ
         </span>
-        <span className="hidden md:block">時間制限クイズ</span>
+        <span className="hidden md:block">制限時間クイズ</span>
       </h1>
 
       <>
-        <p className="text-md md:text-2xl font-semibold text-gray-300 mb-8">
+        <p className="text-md md:text-2xl font-semibold text-gray-900 mb-8">
           制限時間内に何問正解できるか挑戦だ！友達や家族とスコアを競おう！
         </p>
 
@@ -112,7 +112,7 @@ export default function QuizMasterPage() {
 
         {/* ▼ 制限時間入力エリア ▼ */}
         <div className="flex flex-col items-center mb-6">
-          <label className="text-white text-lg md:text-2xl font-semibold mb-2">
+          <label className="text-gray-900 text-lg md:text-2xl font-semibold mb-2">
             制限時間を入力（1〜100分）
           </label>
 
@@ -148,10 +148,10 @@ export default function QuizMasterPage() {
                 text-center shadow-md bg-white
               "
             />
-            <span className="text-white text-lg md:text-2xl font-semibold">分</span>
+            <span className="text-gray-900 text-lg md:text-2xl font-semibold">分</span>
           </div>
 
-          <p className="text-white text-sm md:text-md mt-1 opacity-80">
+          <p className="text-gray-900 text-sm md:text-md mt-1 opacity-80">
             ※ 最大100分まで設定できます
           </p>
         </div>
@@ -256,10 +256,12 @@ export default function QuizMasterPage() {
             ref={descriptionRef}
             className="text-gray-700 text-md md:text-lg text-center px-4 py-2"
           >
-            「制限時間クイズ」は、制限時間内にどれだけクイズに正解できるかを競うゲームです。
-            制限時間は自分で設定できます。
-            正解数が増えるほど、あなたの称号もランクアップ！
-            最高ランクの称号を目指して挑戦してみましょう。
+            「制限時間クイズ」は、時間内にどれだけ正解して高得点を狙えるかを競うチャレンジゲームです。
+            制限時間は 1〜100分の間で自由に設定できます。
+            問題に正解すると、難易度に応じてポイントを獲得できます：かんたん…50P、ふつう…100P、むずかしい…150P。
+            ただし油断は禁物！3問連続で間違えると、得点が100ポイント減ってしまいます。
+            得点が増えるほど、あなたの称号もランクアップ！
+            最高ランクの称号を目指して、ぜひ挑戦してみてください。
           </p>
         </div>
       </>

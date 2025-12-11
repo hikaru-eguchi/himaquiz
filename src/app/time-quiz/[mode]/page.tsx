@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams, usePathname } from "next/navigation";
 import QuizQuestion from "../../components/QuizQuestion";
-import { QuizData } from "@/lib/articles";
+import { QuizData } from "@/lib/articles";7
+import { motion, AnimatePresence } from "framer-motion";
 
 interface ArticleData {
   id: string;
@@ -25,41 +26,41 @@ interface ArticleData {
 // 正解数に応じて出すコメント
 const rankComments = [
   { threshold: 0, comment: "これからが始まり！まずは肩慣らしだね！" },
-  { threshold: 3, comment: "優等生デビュー！いいスタートだ、頭のキレが光ってる！" },
-  { threshold: 5, comment: "異端児級の発想力！普通じゃない才能が見えてきたぞ…！" },
-  { threshold: 8, comment: "賢者レベル到達！知識の風が君の味方をしている！" },
-  { threshold: 10, comment: "博識者の風格！どんな問題も冷静に捌いていく姿が見える！" },
-  { threshold: 13, comment: "クイズ研究家並みの洞察力！その分析力はガチで本物！" },
-  { threshold: 15, comment: "クイズ学者級！知識量がもう一般人のそれじゃない…！" },
-  { threshold: 18, comment: "クイズ教授の域に到達！説明したら講義が開けるレベルだ！" },
-  { threshold: 20, comment: "クイズ名人の実力！どんなクイズも楽しんで倒していく強さがある！" },
-  { threshold: 23, comment: "クイズ達人の風格！読みも早い、ひらめきも鋭い！完璧か！" },
-  { threshold: 25, comment: "クイズ仙人級！悟りを開き、問題の未来すら見えている…？" },
-  { threshold: 28, comment: "クイズ星人！地球の常識を超えた動きだ…異次元！" },
-  { threshold: 30, comment: "知識マスター認定！君の脳内には百科事典が入ってるだろ！？" },
-  { threshold: 33, comment: "天才クイズプレイヤー！天才と言うより天災級の強さ！" },
-  { threshold: 35, comment: "脳内図書館レベル！その頭の中、何階建てなんだ！？" },
-  { threshold: 38, comment: "クイズマシーン化！もはや動きが機械的に正確すぎる！" },
-  { threshold: 40, comment: "問題バスター！問題が君に立ち向かっては消えていく…！" },
-  { threshold: 43, comment: "答えの支配者！答えの方から君に寄ってきてる感じすらある！" },
-  { threshold: 45, comment: "クイズモンスター降臨！解答速度も正確さも怪物級！" },
-  { threshold: 48, comment: "答えの錬金術師！知識を組み合わせて正解を生み出す様は芸術！" },
-  { threshold: 50, comment: "ひらめきの妖精！君の頭の中、ずっと光ってるだろ！" },
-  { threshold: 53, comment: "クイズ帝王の貫禄！問題たちがひれ伏すレベルの威圧感！" },
-  { threshold: 55, comment: "問題ハンター！問題を次々狩っていく爽快な強さだ！" },
-  { threshold: 58, comment: "記憶の魔術師！どんな知識も自由自在に操る魔法級の頭脳！" },
-  { threshold: 60, comment: "IQ200超えの賢者！ついに常識を突破した…！" },
-  { threshold: 65, comment: "クイズ鬼人！もう人間の枠を外れた強さだ…！" },
-  { threshold: 70, comment: "クイズ竜王！燃えるような知識の炎がほとばしっている！" },
-  { threshold: 75, comment: "クイズ魔人！正解を食らい尽くす圧倒的存在感！" },
-  { threshold: 80, comment: "クイズ覇王！すべてを見通したかのような絶対的支配力だ！" },
-  { threshold: 85, comment: "オリンポスの支配者級！知識の神々が君を迎え入れたぞ…！" },
-  { threshold: 90, comment: "レジェンドクイズマスター！伝説の名の通り、後世に語り継がれる強さ！" },
-  { threshold: 95, comment: "究極クイズマスター！到達者ほぼゼロの究極領域！" },
-  { threshold: 100, comment: "神（ゴッド）…！凄すぎて何も言えないよ！最高ランクに到達だ！" },
+  { threshold: 300, comment: "優等生デビュー！いいスタートだ、頭のキレが光ってる！" },
+  { threshold: 500, comment: "異端児級の発想力！普通じゃない才能が見えてきたぞ…！" },
+  { threshold: 800, comment: "賢者レベル到達！知識の風が君の味方をしている！" },
+  { threshold: 1000, comment: "博識者の風格！どんな問題も冷静に捌いていく姿が見える！" },
+  { threshold: 1300, comment: "クイズ研究家並みの洞察力！その分析力はガチで本物！" },
+  { threshold: 1500, comment: "クイズ学者級！知識量がもう一般人のそれじゃない…！" },
+  { threshold: 1800, comment: "クイズ教授の域に到達！説明したら講義が開けるレベルだ！" },
+  { threshold: 2000, comment: "クイズ名人の実力！どんなクイズも楽しんで倒していく強さがある！" },
+  { threshold: 2300, comment: "クイズ達人の風格！読みも早い、ひらめきも鋭い！完璧か！" },
+  { threshold: 2500, comment: "クイズ仙人級！悟りを開き、問題の未来すら見えている…？" },
+  { threshold: 2800, comment: "クイズ星人！地球の常識を超えた動きだ…異次元！" },
+  { threshold: 3000, comment: "知識マスター認定！君の脳内には百科事典が入ってるだろ！？" },
+  { threshold: 3300, comment: "天才クイズプレイヤー！天才と言うより天災級の強さ！" },
+  { threshold: 3500, comment: "脳内図書館レベル！その頭の中、何階建てなんだ！？" },
+  { threshold: 3800, comment: "クイズマシーン化！もはや動きが機械的に正確すぎる！" },
+  { threshold: 4000, comment: "問題バスター！問題が君に立ち向かっては消えていく…！" },
+  { threshold: 4300, comment: "答えの支配者！答えの方から君に寄ってきてる感じすらある！" },
+  { threshold: 4500, comment: "クイズモンスター降臨！解答速度も正確さも怪物級！" },
+  { threshold: 4800, comment: "答えの錬金術師！知識を組み合わせて正解を生み出す様は芸術！" },
+  { threshold: 5000, comment: "ひらめきの妖精！君の頭の中、ずっと光ってるだろ！" },
+  { threshold: 5300, comment: "クイズ帝王の貫禄！問題たちがひれ伏すレベルの威圧感！" },
+  { threshold: 5500, comment: "問題ハンター！問題を次々狩っていく爽快な強さだ！" },
+  { threshold: 5800, comment: "記憶の魔術師！どんな知識も自由自在に操る魔法級の頭脳！" },
+  { threshold: 6000, comment: "IQ200超えの賢者！ついに常識を突破した…！" },
+  { threshold: 6500, comment: "クイズ鬼人！もう人間の枠を外れた強さだ…！" },
+  { threshold: 7000, comment: "クイズ竜王！燃えるような知識の炎がほとばしっている！" },
+  { threshold: 7500, comment: "クイズ魔人！正解を食らい尽くす圧倒的存在感！" },
+  { threshold: 8000, comment: "クイズ覇王！すべてを見通したかのような絶対的支配力だ！" },
+  { threshold: 8500, comment: "オリンポスの支配者級！知識の神々が君を迎え入れたぞ…！" },
+  { threshold: 9000, comment: "レジェンドクイズマスター！伝説の名の通り、後世に語り継がれる強さ！" },
+  { threshold: 9500, comment: "究極クイズマスター！到達者ほぼゼロの究極領域！" },
+  { threshold: 10000, comment: "神（ゴッド）…！凄すぎて何も言えないよ！最高ランクに到達だ！" },
 ];
 
-const QuizResult = ({ correctCount, getTitle, titles }: { correctCount: number, getTitle: () => string, titles: { threshold: number, title: string }[] }) => {
+const QuizResult = ({ correctCount, getTitle, titles , score }: { correctCount: number, getTitle: () => string, titles: { threshold: number, title: string }[], score: number; }) => {
   const [showScore, setShowScore] = useState(false);
   const [showText, setShowText] = useState(false);
   const [showRank, setShowRank] = useState(false);
@@ -68,7 +69,7 @@ const QuizResult = ({ correctCount, getTitle, titles }: { correctCount: number, 
   const getRankComment = () => {
     let comment = "";
     rankComments.forEach((r) => {
-      if (correctCount >= r.threshold) comment = r.comment;
+      if (score >= r.threshold) comment = r.comment;
     });
     return comment;
   };
@@ -85,7 +86,12 @@ const QuizResult = ({ correctCount, getTitle, titles }: { correctCount: number, 
 
   return (
     <div className="text-center mt-6">
-      {showScore && <p className="text-3xl md:text-5xl mb-4 md:mb-6">正解数: {correctCount}問</p>}
+      {showScore && <p className="text-3xl md:text-5xl mb-4 md:mb-6">正解数： {correctCount}問</p>}
+      {showScore && (
+        <p className="text-3xl md:text-5xl mb-4 md:mb-6 text-blue-500 font-bold">
+          得点：{score} P
+        </p>
+      )}
       {showText && <p className="text-xl md:text-2xl text-gray-600 mb-2">あなたの称号は…</p>}
 
       {showRank && (
@@ -139,44 +145,47 @@ export default function QuizModePage() {
   const timeParam = searchParams?.get("time") || "1"; // デフォルト1分
   const totalTime = parseInt(timeParam) * 60; // 秒単位
   const [timeLeft, setTimeLeft] = useState(totalTime);
-
+  const [score, setScore] = useState(0);
+  const [wrongStreak, setWrongStreak] = useState(0);
+  const wrongStreakRef = useRef(0);
+  const [scoreChange, setScoreChange] = useState<number | null>(null);
 
   const finishedRef = useRef(finished);
   const showCorrectRef = useRef(showCorrectMessage);
 
   const titles = [
-    { threshold: 3, title: "優等生" },
-    { threshold: 5, title: "異端児" },
-    { threshold: 8, title: "賢者" },
-    { threshold: 10, title: "博識者" },
-    { threshold: 13, title: "クイズ研究家" },
-    { threshold: 15, title: "クイズ学者" },
-    { threshold: 18, title: "クイズ教授" },
-    { threshold: 20, title: "クイズ名人" },
-    { threshold: 23, title: "クイズ達人" },
-    { threshold: 25, title: "クイズ仙人" },
-    { threshold: 28, title: "クイズ星人" },
-    { threshold: 30, title: "知識マスター" },
-    { threshold: 33, title: "天才クイズプレイヤー" },
-    { threshold: 35, title: "脳内図書館 " },
-    { threshold: 38, title: "クイズマシーン " },
-    { threshold: 40, title: "問題バスター " },
-    { threshold: 43, title: "答えの支配者 " },
-    { threshold: 45, title: "クイズモンスター " },
-    { threshold: 48, title: "答えの錬金術師" },
-    { threshold: 50, title: "ひらめきの妖精" },
-    { threshold: 53, title: "クイズ帝王" },
-    { threshold: 55, title: "問題ハンター" },
-    { threshold: 58, title: "記憶の魔術師" },
-    { threshold: 60, title: "IQ200超えの賢者" },
-    { threshold: 65, title: "クイズ鬼人" },
-    { threshold: 70, title: "クイズ竜王" },
-    { threshold: 75, title: "クイズ魔人" },
-    { threshold: 80, title: "クイズ覇王" },
-    { threshold: 85, title: "クイズオリンポスの支配者" },
-    { threshold: 90, title: "レジェンドクイズマスター" },
-    { threshold: 95, title: "究極クイズマスター" },
-    { threshold: 100, title: "神（ゴッド）🌟" },
+    { threshold: 300, title: "優等生" },
+    { threshold: 500, title: "異端児" },
+    { threshold: 800, title: "賢者" },
+    { threshold: 1000, title: "博識者" },
+    { threshold: 1300, title: "クイズ研究家" },
+    { threshold: 1500, title: "クイズ学者" },
+    { threshold: 1800, title: "クイズ教授" },
+    { threshold: 2000, title: "クイズ名人" },
+    { threshold: 2300, title: "クイズ達人" },
+    { threshold: 2500, title: "クイズ仙人" },
+    { threshold: 2800, title: "クイズ星人" },
+    { threshold: 3000, title: "知識マスター" },
+    { threshold: 3300, title: "天才クイズプレイヤー" },
+    { threshold: 3500, title: "脳内図書館 " },
+    { threshold: 3800, title: "クイズマシーン " },
+    { threshold: 4000, title: "問題バスター " },
+    { threshold: 4300, title: "答えの支配者 " },
+    { threshold: 4500, title: "クイズモンスター " },
+    { threshold: 4800, title: "答えの錬金術師" },
+    { threshold: 5000, title: "ひらめきの妖精" },
+    { threshold: 5300, title: "クイズ帝王" },
+    { threshold: 5500, title: "問題ハンター" },
+    { threshold: 5800, title: "記憶の魔術師" },
+    { threshold: 6000, title: "IQ200超えの賢者" },
+    { threshold: 6500, title: "クイズ鬼人" },
+    { threshold: 7000, title: "クイズ竜王" },
+    { threshold: 7500, title: "クイズ魔人" },
+    { threshold: 8000, title: "クイズ覇王" },
+    { threshold: 8500, title: "クイズオリンポスの支配者" },
+    { threshold: 9000, title: "レジェンドクイズマスター" },
+    { threshold: 9500, title: "究極クイズマスター" },
+    { threshold: 10000, title: "神（ゴッド）🌟" },
   ];
 
   useEffect(() => { finishedRef.current = finished; }, [finished]);
@@ -241,22 +250,47 @@ export default function QuizModePage() {
   const checkAnswer = () => {
     const correctAnswer = questions[currentIndex].quiz?.answer;
     const displayAnswer = questions[currentIndex].quiz?.displayAnswer;
+    const level = questions[currentIndex].quiz?.level;
 
     if (userAnswer === correctAnswer) {
+      setCorrectCount(c => c + 1);
+      wrongStreakRef.current = 0;
+      setWrongStreak(0);
+
+      // 難易度に応じて加点
+      setScore(prev => {
+        let add = 0;
+        if (level === "かんたん") add = 50;
+        if (level === "ふつう") add = 100;
+        if (level === "難しい") add = 150;
+        setScoreChange(add); // +50, +100, +150
+        setTimeout(() => setScoreChange(null), 800);
+        return prev + add;
+      });
+
       setCorrectCount(c => {
         const newCount = c + 1;
-
-        if (newCount % 10 === 0) {
-          setFlashMilestone(`${newCount}問正解！`);
-          setTimeout(() => setFlashMilestone(null), 1000);
-        }
-
         return newCount;
       });
 
       setShowCorrectMessage(true);
 
     } else {
+      wrongStreakRef.current = wrongStreakRef.current + 1;
+      const newStreak = wrongStreakRef.current;
+      setWrongStreak(newStreak);
+      if (newStreak >= 3) {
+        // ペナルティはここで一度だけ確実に行う
+        setScore(prev => {
+          const newScore = Math.max(0, prev - 100);
+          setScoreChange(-100);
+          setTimeout(() => setScoreChange(null), 800);
+          return newScore;
+        });
+        // リセット
+        wrongStreakRef.current = 0;
+        setWrongStreak(0);
+      }
       setIncorrectMessage(`ざんねん！\n答えは" ${displayAnswer} "でした！`);
     }
     setUserAnswer(null);
@@ -280,7 +314,7 @@ export default function QuizModePage() {
   const getTitle = () => {
     let title = "クイズ初心者";
     titles.forEach((t) => {
-      if (correctCount >= t.threshold) title = t.title;
+      if (score >= t.threshold) title = t.title;
     });
     return title;
   };
@@ -294,16 +328,44 @@ export default function QuizModePage() {
           <h2 className="text-5xl md:text-6xl font-extrabold mb-6 text-black drop-shadow-lg">
             第 {currentIndex + 1} 問
           </h2>
+            
+          <div className="flex flex-col">
+            <p
+              className={`
+                w-[280px] md:w-[400px] mx-auto text-2xl md:text-4xl font-extrabold mb-2 px-4 py-2 rounded-lg inline-block shadow-lg
+                ${timeLeft <= 30 ? 'bg-red-700 text-white animate-pulse' : ' text-black bg-white border-2 border-black'}
+                transition-colors duration-300
+              `}
+            >
+              残り時間: {Math.floor(timeLeft / 60)}分 {timeLeft % 60}秒
+            </p>
 
-          <p
-            className={`
-              text-2xl md:text-4xl font-extrabold mb-4 px-4 py-2 rounded-lg inline-block shadow-lg
-              ${timeLeft <= 30 ? 'bg-red-700 text-white animate-pulse' : ' text-black bg-white border-2 border-black'}
-              transition-colors duration-300
-            `}
-          >
-            残り時間: {Math.floor(timeLeft / 60)}分 {timeLeft % 60}秒
-          </p>
+            <div className="relative w-[180px] md:w-[250px] mx-auto">
+              <p
+                className="
+                  w-[180px] md:w-[250px] mx-auto text-2xl md:text-4xl font-bold mb-2 px-4 py-2 rounded-lg inline-block shadow-lg
+                  bg-white text-blue-600 border-2 border-blue-600
+                "
+              >
+                得点：{score} P
+              </p>
+
+              <AnimatePresence>
+                {scoreChange !== null && (
+                  <motion.div
+                    key={scoreChange}
+                    initial={{ opacity: 1, y: 0 }}
+                    animate={{ opacity: 0, y: -20 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 2, ease: "easeOut" }}
+                    className={`absolute left-1/2 -translate-x-1/2 -top-3 font-bold text-2xl md:text-4xl ${scoreChange > 0 ? 'text-green-500' : 'text-red-500'}`}
+                  >
+                    {scoreChange > 0 ? `+${scoreChange}` : `${scoreChange}`}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
 
           {questions[currentIndex].quiz && (
             <>
@@ -392,7 +454,7 @@ export default function QuizModePage() {
           )}
         </>
       ) : (
-        <QuizResult correctCount={correctCount} getTitle={getTitle} titles={titles} />
+        <QuizResult correctCount={correctCount} getTitle={getTitle} titles={titles} score={score}/>
       )}
     </div>
   );

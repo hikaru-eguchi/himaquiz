@@ -10,6 +10,7 @@ export interface QuizData {
   displayAnswer?: string;
   hint?: string;
   genre?: string;
+  level?: string;
   image?: string;
   answerExplanation?: string;
 trivia?: string;

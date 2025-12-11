@@ -85,7 +85,7 @@ const QuizResult = ({ correctCount, getTitle, titles }: { correctCount: number, 
 
   return (
     <div className="text-center mt-6">
-      {showScore && <p className="text-3xl md:text-5xl mb-4 md:mb-6">連続正解数: {correctCount}問</p>}
+      {showScore && <p className="text-3xl md:text-5xl mb-4 md:mb-6">連続正解数： {correctCount}問</p>}
       {showText && <p className="text-xl md:text-2xl text-gray-600 mb-2">あなたの称号は…</p>}
 
       {showRank && (

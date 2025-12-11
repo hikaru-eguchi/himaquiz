@@ -14,14 +14,14 @@ const characters = [
 
 // 敵情報
 const enemies = [
-  { id: "slime", name: "スライム", image: "/images/slime.png", hp: 100, attack: 30, description: "ぷるぷるして弱そうに見えるが油断は禁物。" },
-  { id: "goblin", name: "ゴブリン", image: "/images/goblin.png", hp: 220, attack: 60, description: "素早く群れで襲いかかる小型のモンスター。" },
-  { id: "mimic", name: "ミミック", image: "/images/mimic.png", hp: 350, attack: 120, description: "宝箱に化けるトリッキーな敵。油断すると噛まれる！" },
-  { id: "berserker", name: "バーサーカー", image: "/images/berserker.png", hp: 500, attack: 200, description: "理性を失った狂戦士。攻撃力が非常に高い。" },
-  { id: "fenikkusu", name: "フェニックス", image: "/images/fenikkusu.png", hp: 1000, attack: 330, description: "不死鳥の炎を操る神秘的な生物。燃え盛る翼で攻撃。" },
-  { id: "dragon", name: "ドラゴン", image: "/images/dragon.png", hp: 2000, attack: 600, description: "火を吹く巨大竜。圧倒的な力を誇る古代の王者。" },
-  { id: "blackdragon", name: "ブラックドラゴン", image: "/images/blackdragon.png", hp: 3500, attack: 850, description: "闇の力を宿す黒竜。魔法攻撃も強力。" },
-  { id: "leviathan", name: "リヴァイアサン", image: "/images/leviathan.png", hp: 5000, attack: 1200, description: "海の深淵から現れる巨大モンスター。水流で圧倒する。" },
+  { id: "slime", name: "スライム", image: "/images/slime.png", hp: 100, attack: 50, description: "ぷるぷるして弱そうに見えるが油断は禁物。" },
+  { id: "goblin", name: "ゴブリン", image: "/images/goblin.png", hp: 220, attack: 100, description: "素早く群れで襲いかかる小型のモンスター。" },
+  { id: "mimic", name: "ミミック", image: "/images/mimic.png", hp: 350, attack: 200, description: "宝箱に化けるトリッキーな敵。油断すると噛まれる！" },
+  { id: "berserker", name: "バーサーカー", image: "/images/berserker.png", hp: 500, attack: 400, description: "理性を失った狂戦士。攻撃力が非常に高い。" },
+  { id: "fenikkusu", name: "フェニックス", image: "/images/fenikkusu.png", hp: 1000, attack: 650, description: "不死鳥の炎を操る神秘的な生物。燃え盛る翼で攻撃。" },
+  { id: "dragon", name: "ドラゴン", image: "/images/dragon.png", hp: 2000, attack: 800, description: "火を吹く巨大竜。圧倒的な力を誇る古代の王者。" },
+  { id: "blackdragon", name: "ブラックドラゴン", image: "/images/blackdragon.png", hp: 3500, attack: 1000, description: "闇の力を宿す黒竜。魔法攻撃も強力。" },
+  { id: "leviathan", name: "リヴァイアサン", image: "/images/leviathan.png", hp: 5000, attack: 1500, description: "海の深淵から現れる巨大モンスター。水流で圧倒する。" },
   { id: "poseidon", name: "ポセイドン", image: "/images/poseidon.png", hp: 7000, attack: 2000, description: "海の神。雷と津波で敵を蹴散らす力を持つ。" },
   { id: "gundarimyouou", name: "軍荼利明王（ぐんだりみょうおう）", image: "/images/gundarimyouou.png", hp: 8500, attack: 3000, description: "仏教の怒りの守護神。恐怖の炎で全てを焼き尽くす。" },
   { id: "hades", name: "ハデス", image: "/images/hades.png", hp: 10000, attack: 4000, description: "冥界の支配者。死者の力を操り、強大な攻撃を仕掛ける。" },

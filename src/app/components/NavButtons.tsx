@@ -61,7 +61,7 @@ export default function NavButtons() {
                       whitespace-nowrap w-full md:w-auto">
         <Link href="/streak-challenge" onClick={() => setActiveUrl("/streak-challenge")}>
           <button
-            className={`${baseStyle} bg-gradient-to-r from-red-500 to-orange-400 text-white shadow-xl ring-2 ring-orange-300 hover:scale-110 ${
+            className={`${baseStyle} bg-gradient-to-r from-red-500 to-orange-400 text-white shadow-xl ring-2 ring-orange-400 hover:scale-110 ${
               activeUrl === "/streak-challenge" ? activeStyle : ""
             }`}
           >
@@ -81,11 +81,21 @@ export default function NavButtons() {
 
         <Link href="/time-quiz" onClick={() => setActiveUrl("/time-quiz")}>
           <button
-            className={`${baseStyle} bg-gradient-to-r from-[#4A0000] via-[#8B0000] to-[#D40000] text-white shadow-xl ring-2 ring-red-600 hover:scale-110 ${
+            className={`${baseStyle} bg-gradient-to-r from-[#ec0101] via-[#FF6B6B] to-[#fb9797] text-white shadow-xl ring-2 ring-red-400 hover:scale-110 ${
               activeUrl === "/time-quiz" ? activeStyle : ""
             }`}
           >
-            時間制限クイズ
+            制限時間クイズ
+          </button>
+        </Link>
+
+        <Link href="/quiz-gacha" onClick={() => setActiveUrl("/quiz-gacha")}>
+          <button
+            className={`${baseStyle} bg-gradient-to-r from-red-400 via-sky-400 to-green-400 text-white shadow-xl ring-2 ring-white hover:scale-110 ${
+              activeUrl === "/quiz-gacha" ? activeStyle : ""
+            }`}
+          >
+            クイズガチャ
           </button>
         </Link>
       </div>

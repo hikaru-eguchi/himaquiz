@@ -106,7 +106,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <Link href="/privacy" className="hover:scale-110 transition-transform">プライバシー</Link>
                 <Link href="/contact" className="hover:scale-110 transition-transform">お問い合わせ</Link>
               </div>
-              <p className="text-xs text-gray-600 mb-5">当サイトのイラストは「いらすとや」様の素材を使用しています。</p>
+              <p className="text-xs text-gray-600 mb-5">当サイトのイラストは「いらすとや」様、「illustAC」様の素材を使用しています。</p>
               <p className="text-xs text-gray-600">&copy; 2025 ひまQ. All Rights Reserved.</p>
             </div>
           </footer>
