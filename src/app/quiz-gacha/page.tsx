@@ -81,7 +81,7 @@ export default function QuizMasterPage() {
         }}
       >
         <span className="block md:hidden leading-tight">
-          クイズガチャ
+          クイズ<br />ガチャ
         </span>
         <span className="hidden md:block">クイズガチャ</span>
       </h1>
