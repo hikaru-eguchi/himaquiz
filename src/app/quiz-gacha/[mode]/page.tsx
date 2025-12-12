@@ -237,7 +237,7 @@ const QuizGacha = ({
                       filter: 'blur(4px)',
                     }}
                     animate={{ y: [-10, 10] }}
-                    transition={{ duration: 1 + Math.random(), repeat: Infinity, yoyo: Infinity }}
+                    transition={{ duration: 1 + Math.random(), repeat: Infinity, repeatType: "reverse", }}
                   />
                 ))}
 

@@ -114,7 +114,7 @@ export default function QuizMasterPage() {
             onClick={handleRandomQuizStart}
             className="w-full md:w-80 px-6 py-2 md:px-8 md:py-4 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 text-white rounded-full hover:bg-gradient-to-r hover:from-yellow-500 hover:via-yellow-600 hover:to-yellow-700 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
           >
-            ガチャをはじめる
+            ゲームスタート
           </button>
         </div>
 
@@ -139,10 +139,29 @@ export default function QuizMasterPage() {
             ref={descriptionRef}
             className="text-gray-700 text-md md:text-lg text-center px-4 py-2"
           >
-            「クイズガチャ」は、クイズに答えてポイントを集め、そのポイントでガチャを回して楽しめるゲームです。
-            正解すれば難易度に応じてポイントを獲得でき、ガチャは 1回100P で回せます。
-            獲得ポイントは難易度ごとに変化します：かんたん…100P、ふつう…150P、むずかしい…200P。
-            ガチャから登場するキャラは全17種類！ポイントを集めて、全キャラコンプリートを目指そう！
+            「クイズガチャ」は、クイズに答えてポイントを集め、そのポイントでガチャを回して楽しめるゲームです。<br />
+            正解すれば難易度に応じてポイントを獲得でき、ガチャは 1回100P で回せます。<br />
+            獲得ポイントは難易度ごとに変化します：かんたん…100P、ふつう…150P、むずかしい…200P。<br />
+            ガチャから登場するキャラは全17種類！ポイントを集めて、全キャラコンプリートを目指そう！<br /><br />
+            ＜キャラ出現率＞<br />
+            ・スライム　30%　レア度：ノーマル　　<br />
+            ・ゴブリン　25%　レア度：ノーマル　　<br />
+            ・ミミック　15%　レア度：ノーマル　　<br />
+            ・バ〇〇ー　10%　レア度：ノーマル　　<br />
+            ・フ〇〇ス　8%　レア度：レア　　　　<br />
+            ・ド〇〇ン　5%　レア度：レア　　　　<br />
+            ・ブ〇〇ン　3%　レア度：超レア　　　<br />
+            ・リ〇〇ン　2%　レア度：超レア　　　<br />
+            ・ポ〇〇ン　1.5%　レア度：超レア　　　<br />
+            ・軍〇〇王　1%　レア度：超レア　　　<br />
+            ・ハ〇〇ス　0.5%　レア度：激レア　　　<br />
+            ・ゼ〇〇ス　0.3%　レア度：激レア　　　<br />
+            ・オ〇〇ン　0.2%　レア度：激レア　　　<br />
+            ・？？？？　0.1%　レア度：超激レア　　<br />
+            ・？？？？　0.02%　レア度：神レア　　　<br />
+            ・？？？？　0.02%　レア度：神レア　　　<br />
+            ・？？？？　0.01%　レア度：シークレット<br />
+            　
           </p>
         </div>
       </>
