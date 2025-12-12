@@ -368,7 +368,7 @@ export default function QuizModePage() {
     if (userAnswer === correctAnswer) {
       // ★ レベルに応じてポイント加算
       const level = (questions[currentIndex].quiz as any)?.level ?? "かんたん";
-      const addPoint = level === "かんたん" ? 100 : level === "ふつう" ? 150 : 200;
+      const addPoint = level === "かんたん" ? 100 : level === "ふつう" ? 200 : 300;
 
       setPoints(p => p + addPoint);
       setScoreChange(addPoint);
