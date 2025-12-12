@@ -85,8 +85,8 @@ const QuizGacha = ({
       const timer1 = setTimeout(() => setShowOpen(true), 500);
       // 1秒後に光のエフェクト
       const timer2 = setTimeout(() => setShowEffect(true), 1000);
-      // 1.5秒後に当たりキャラクター表示
-      const timer3 = setTimeout(() => setShowResult(true), 1500);
+      // 0.5秒後に当たりキャラクター表示
+      const timer3 = setTimeout(() => setShowResult(true), 1100);
 
       return () => {
         clearTimeout(timer1);
@@ -118,6 +118,13 @@ const QuizGacha = ({
           </p>
         </div>
       </div>
+
+      <p className="text-xl md:text-2xl font-extrabold text-black">
+        ポイントでガチャをまわそう！
+      </p>
+      <p className="text-xl md:text-2xl font-extrabold mb-6 text-black">
+        ポイントがなくなったらクイズ画面でためれるよ。
+      </p>
 
       <div className="flex flex-col items-center justify-center gap-6 mb-10">
         <img src="/images/gacha.png" className="w-50 h-60 md:w-80 md:h-100" />
@@ -205,39 +212,58 @@ const QuizGacha = ({
               />
             )}
 
-            {/* --- 光のエフェクト：showEffect が true のときだけ --- */}
-            {showEffect && !showResult && (
-              <motion.div
-                className="absolute w-80 h-80 rounded-full bg-yellow-400 opacity-60 pointer-events-none"
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 2, opacity: 1 }}
-                transition={{ duration: 0.6 }}
-              />
-            )}
-
             {/* --- 当たりキャラクター（結果） --- */}
             {showResult && (
-              <motion.div
-                className={`
-                  text-center mt-6 z-50 p-6 rounded-2xl shadow-2xl
-                  bg-gradient-to-r ${rarityGradient[gachaResult.rarity as keyof typeof rarityGradient]}
-                  animate-gradient
-                `}
-                initial={{ scale: 0.6, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.5 }}
-              >
-                <img src={gachaResult.image} className="w-36 h-36 mx-auto drop-shadow-lg" />
-                <p className="text-3xl font-bold mt-4 text-white drop-shadow">
-                  {gachaResult.name} が当たった！
-                </p>
-                <p className="text-2xl md:text-xl font-extrabold mt-2 text-white drop-shadow">
-                  レアリティ：{gachaResult.rarity}
-                </p>
-                <p className="text-yellow-300 text-4xl font-extrabold mt-1 drop-shadow">
-                  {"★".repeat(rarityToStarCount[gachaResult.rarity] || 1)}
-                </p>
-              </motion.div>
+              <div className="relative w-full flex justify-center mt-6">
+                {/* 画面全体のカラフルもわもわ */}
+                <div
+                  className="fixed inset-0 -z-10"
+                  style={{
+                    background: 'radial-gradient(circle at 30% 30%, #ff00ff, #00ffff, #ffff00, #ff0000)',
+                    filter: 'blur(120px)',
+                    opacity: 0.6,
+                  }}
+                />
+
+                {/* 小さいキラキラ粒子も画面全体 */}
+                {Array.from({ length: 30 }).map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute w-4 h-4 rounded-full bg-white"
+                    style={{
+                      top: `${Math.random() * 100}%`,
+                      left: `${Math.random() * 100}%`,
+                      opacity: 0.6,
+                      filter: 'blur(4px)',
+                    }}
+                    animate={{ y: [-10, 10] }}
+                    transition={{ duration: 1 + Math.random(), repeat: Infinity, yoyo: Infinity }}
+                  />
+                ))}
+
+                {/* ガチャ結果枠 */}
+                <motion.div
+                  className={`
+                    relative text-center z-50 p-6 rounded-2xl shadow-2xl
+                    bg-gradient-to-r ${rarityGradient[gachaResult.rarity as keyof typeof rarityGradient]}
+                    animate-gradient
+                  `}
+                  initial={{ scale: 0.6, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: "spring", bounce: 0.5 }}
+                >
+                  <img src={gachaResult.image} className="w-36 h-36 mx-auto drop-shadow-lg" />
+                  <p className="text-3xl md:text-5xl font-bold mt-4 text-white drop-shadow">
+                    {gachaResult.name} が当たった！
+                  </p>
+                  <p className="text-2xl md:text-4xl font-extrabold mt-2 text-white drop-shadow">
+                    レアリティ：{gachaResult.rarity}
+                  </p>
+                  <p className="text-yellow-300 text-4xl md:text-6xl font-extrabold mt-1 drop-shadow">
+                    {"★".repeat(rarityToStarCount[gachaResult.rarity] || 1)}
+                  </p>
+                </motion.div>
+              </div>
             )}
 
             {/* --- 閉じるボタンは結果が出たときだけ表示。z-index高めにして確実に見えるように --- */}
@@ -341,7 +367,7 @@ export default function QuizModePage() {
     if (userAnswer === correctAnswer) {
       // ★ レベルに応じてポイント加算
       const level = (questions[currentIndex].quiz as any)?.level ?? "かんたん";
-      const addPoint = level === "かんたん" ? 50 : level === "ふつう" ? 100 : 150;
+      const addPoint = level === "かんたん" ? 100 : level === "ふつう" ? 150 : 200;
 
       setPoints(p => p + addPoint);
       setScoreChange(addPoint);
@@ -449,9 +475,12 @@ export default function QuizModePage() {
             </div>
           </div>
           
-          <h2 className="text-4xl md:text-5xl font-extrabold mb-6 text-black drop-shadow-lg">
-            第 {currentIndex + 1} 問
-          </h2>
+          <p className="text-xl md:text-2xl font-extrabold text-black">
+            クイズに正解するとポイントがもらえるよ。
+          </p>
+          <p className="text-xl md:text-2xl font-extrabold mb-6 text-black">
+            ポイントが貯まったらガチャ画面へ進もう！
+          </p>
 
           {questions[currentIndex].quiz && (
             <>
