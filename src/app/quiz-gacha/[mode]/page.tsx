@@ -103,6 +103,14 @@ const QuizGacha = ({
 
   return (
     <div className="text-center">
+      <div>
+        <p className="text-xl md:text-2xl font-extrabold text-black">
+          ポイントでガチャをまわそう！
+        </p>
+        <p className="text-xl md:text-2xl font-extrabold mb-6 text-black">
+          ポイントがなくなったらクイズ画面でためれるよ。
+        </p>
+      </div>
       <div className="flex flex-col items-center justify-between mb-6 w-full mx-auto">
         <button
           className="px-5 py-1 md:px-4 md:py-2 mb-2 md:mt-0 bg-green-500 text-white border border-black rounded 
@@ -118,13 +126,6 @@ const QuizGacha = ({
           </p>
         </div>
       </div>
-
-      <p className="text-xl md:text-2xl font-extrabold text-black">
-        ポイントでガチャをまわそう！
-      </p>
-      <p className="text-xl md:text-2xl font-extrabold mb-6 text-black">
-        ポイントがなくなったらクイズ画面でためれるよ。
-      </p>
 
       <div className="flex flex-col items-center justify-center gap-6 mb-10">
         <img src="/images/gacha.png" className="w-50 h-60 md:w-80 md:h-100" />
@@ -444,6 +445,14 @@ export default function QuizModePage() {
     <div className="container mx-auto p-8 text-center bg-gradient-to-b from-red-100 via-blue-100 to-green-100">
       {!gachastart ? (
         <>
+          <div>
+            <p className="text-xl md:text-2xl font-extrabold text-black">
+              クイズに正解するとポイントがもらえるよ。
+            </p>
+            <p className="text-xl md:text-2xl font-extrabold mb-6 text-black">
+              ポイントが貯まったらガチャ画面へ進もう！
+            </p>
+          </div>
           <div className="flex flex-col items-center justify-between mb-6 w-full mx-auto">
             <button
               className="px-5 py-1 md:px-4 md:py-2 border border-black bg-red-500 text-white 
@@ -474,13 +483,6 @@ export default function QuizModePage() {
               </AnimatePresence>
             </div>
           </div>
-          
-          <p className="text-xl md:text-2xl font-extrabold text-black">
-            クイズに正解するとポイントがもらえるよ。
-          </p>
-          <p className="text-xl md:text-2xl font-extrabold mb-6 text-black">
-            ポイントが貯まったらガチャ画面へ進もう！
-          </p>
 
           {questions[currentIndex].quiz && (
             <>
