@@ -51,6 +51,7 @@ const QuizGacha = ({
   const [showOpen, setShowOpen] = useState(false);
   const [showEffect, setShowEffect] = useState(false);
   const [showResult, setShowResult] = useState(false);
+  const [selectedHistory, setSelectedHistory] = useState<null | { name: string; image: string; rarity: string }>(null);
   const rarityToStarCount: Record<string, number> = {
     "ノーマル": 1,
     "レア": 2,
@@ -166,7 +167,7 @@ const QuizGacha = ({
               {/* 横スクロール用の実データ */}
               <div className="flex flex-nowrap gap-4 py-2">
                 {history.map((item, index) => (
-                  <div key={index} className="text-center flex-shrink-0">
+                  <div key={index} className="text-center flex-shrink-0 cursor-pointer" onClick={() => setSelectedHistory(item)}>
                     <img src={item.image} className="w-16 h-16 md:w-32 md:h-32 mx-auto rounded" />
                     <p className="text-sm md:text-xl font-bold mt-1">{item.name}</p>
                     <p
@@ -184,6 +185,66 @@ const QuizGacha = ({
         )}
       </div>
 
+      {/* --- モーダル（拡大表示） --- */}
+      <AnimatePresence>
+        {selectedHistory && (
+          <motion.div
+            className="fixed inset-0 flex items-center justify-center z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedHistory(null)}
+          >
+            {/* 背景：カラフルもわもわ */}
+            <div className="fixed inset-0 -z-10">
+              <div
+                style={{
+                  background: 'radial-gradient(circle at 30% 30%, #ff00ff, #00ffff, #ffff00, #ff0000)',
+                  filter: 'blur(120px)',
+                  opacity: 0.6,
+                  width: '100%',
+                  height: '100%',
+                }}
+              />
+              {/* 小さいキラキラ粒子 */}
+              {Array.from({ length: 30 }).map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute w-4 h-4 rounded-full bg-white"
+                  style={{
+                    top: `${Math.random() * 100}%`,
+                    left: `${Math.random() * 100}%`,
+                    opacity: 0.6,
+                    filter: 'blur(4px)',
+                  }}
+                  animate={{ y: [-10, 10] }}
+                  transition={{ duration: 1 + Math.random(), repeat: Infinity, repeatType: "reverse" }}
+                />
+              ))}
+            </div>
+
+            {/* モーダル本体 */}
+            <motion.div
+              className="bg-white p-6 rounded-2xl flex flex-col items-center z-50"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0 }}
+              transition={{ type: "spring", stiffness: 200, damping: 20 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img src={selectedHistory.image} className="w-40 h-40 md:w-64 md:h-64 rounded mb-4" />
+              <p className="text-3xl md:text-5xl font-bold">{selectedHistory.name}</p>
+              <p className="text-xl md:text-3xl font-extrabold mt-3 md:mt-5 text-gray-500 drop-shadow">
+                レアリティ：<span className={`text-xl md:text-3xl font-bold ${rarityText[selectedHistory.rarity]}`}>{selectedHistory.rarity}</span>
+              </p>
+              <p className="text-yellow-300 text-2xl md:text-4xl font-extrabold mt-1 md:mt-3 drop-shadow">
+                {"★".repeat(rarityToStarCount[selectedHistory.rarity] || 1)}
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <AnimatePresence>
         {gachaResult && (
           <motion.div
@@ -196,8 +257,8 @@ const QuizGacha = ({
             {!showOpen && (
               <motion.img
                 src="/images/gacha_close.png"
-                initial={{ x: "100vw" }}
-                animate={{ x: 0 }}
+                initial={{ y: "-100vw" }}
+                animate={{ y: 0 }}
                 transition={{ duration: 0.5 }}
                 // onAnimationCompleteは不要（タイマーで制御）
               />
