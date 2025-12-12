@@ -206,21 +206,6 @@ const QuizGacha = ({
                   height: '100%',
                 }}
               />
-              {/* 小さいキラキラ粒子 */}
-              {Array.from({ length: 30 }).map((_, i) => (
-                <motion.div
-                  key={i}
-                  className="absolute w-4 h-4 rounded-full bg-white"
-                  style={{
-                    top: `${Math.random() * 100}%`,
-                    left: `${Math.random() * 100}%`,
-                    opacity: 0.6,
-                    filter: 'blur(4px)',
-                  }}
-                  animate={{ y: [-10, 10] }}
-                  transition={{ duration: 1 + Math.random(), repeat: Infinity, repeatType: "reverse" }}
-                />
-              ))}
             </div>
 
             {/* モーダル本体 */}
