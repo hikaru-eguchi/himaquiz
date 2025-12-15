@@ -243,7 +243,7 @@ export default async function HomePage({
 
       <div className="max-w-[700px] mx-auto border-2 border-black rounded-xl m-5 p-5 bg-gradient-to-b from-purple-0 via-purple-100 to-purple-200">
         <p className="text-2xl md:text-3xl font-bold mb-2 text-center leading-tight drop-shadow-xl text-purple-500">
-          👑ゲームで遊ぶ👑
+          🎮ゲームで遊ぶ🎮
         </p>
         <p className="text-lg md:text-xl mb-2 text-center leading-tight mb-4">
           腕試しをしたい人にオススメ！
@@ -263,20 +263,6 @@ export default async function HomePage({
               集中力と実力を試せるゲームです。
             </p>
           </div>
-          {/* クイズダンジョン */}
-          <div className="text-center max-w-[260px]">
-            <Link href="/quiz-master" className="w-full md:w-auto flex justify-center">
-              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-purple-500 to-indigo-400 text-white hover:scale-110 transition-all">
-                クイズダンジョン
-              </button>
-            </Link>
-            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
-              ダンジョン形式で進む本格派クイズ！
-            </p>
-            <p className="text-sm md:text-base text-gray-700 leading-tight">
-              君は深層まで進めるか！？
-            </p>
-          </div>
           {/* 制限時間クイズ */}
           <div className="text-center max-w-[260px]">
             <Link href="/time-quiz" className="w-full md:w-auto flex justify-center">
@@ -291,6 +277,20 @@ export default async function HomePage({
               友達や家族と対決してみよう！
             </p>
           </div>
+          {/* クイズダンジョン */}
+          <div className="text-center max-w-[260px]">
+            <Link href="/quiz-master" className="w-full md:w-auto flex justify-center">
+              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-purple-500 to-indigo-400 text-white hover:scale-110 transition-all">
+                クイズダンジョン
+              </button>
+            </Link>
+            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
+              ダンジョン形式で進む本格派クイズ！
+            </p>
+            <p className="text-sm md:text-base text-gray-700 leading-tight">
+              君は深層まで進めるか！？
+            </p>
+          </div>
           {/* クイズガチャ */}
           <div className="text-center max-w-[260px]">
             <Link href="/quiz-gacha" className="w-full md:w-auto flex justify-center">
@@ -303,6 +303,31 @@ export default async function HomePage({
             </p>
             <p className="text-sm md:text-base text-gray-700 leading-tight">
               超レアキャラを引き当てよう！
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-[700px] mx-auto border-2 border-black rounded-xl m-5 p-5 bg-gradient-to-b from-sky-0 via-sky-100 to-sky-200">
+        <p className="text-2xl md:text-3xl font-bold mb-2 text-center leading-tight drop-shadow-xl text-sky-500">
+          🌐だれかと遊ぶ🌐
+        </p>
+        <p className="text-lg md:text-xl mb-2 text-center leading-tight mb-4">
+          ネットの誰かと！友達や家族と！みんなで一緒に遊ぼう🎉
+        </p>
+        <div className="flex justify-center gap-3 md:gap-5 flex-wrap">
+          {/* 対戦クイズ */}
+          <div className="text-center max-w-[260px]">
+            <Link href="/quiz-battle" className="w-full md:w-auto flex justify-center">
+              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-pink-500 via-yellow-400 to-green-500 text-white hover:scale-110 transition-all">
+                クイズバトル
+              </button>
+            </Link>
+            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
+              2分間でどれだけ正解できるか勝負だ！
+            </p>
+            <p className="text-sm md:text-base text-gray-700 leading-tight">
+              相手よりハイスコアを狙おう！
             </p>
           </div>
         </div>

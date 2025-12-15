@@ -5,6 +5,7 @@ import { useSearchParams, usePathname } from "next/navigation";
 import QuizQuestion from "../../components/QuizQuestion";
 import { QuizData } from "@/lib/articles";
 import { motion, AnimatePresence } from "framer-motion";
+import type { Rarity } from "../../../types/gacha";
 
 interface ArticleData {
   id: string;
@@ -38,20 +39,21 @@ const QuizGacha = ({
   gachaResult: null | {
     name: string;
     image: string;
-    rarity: string;
+    rarity: Rarity;
+    no: string;
   };
-  setGachaResult: (v: null | { name: string; image: string; rarity: string }) => void;
-  history: { name: string; image: string; rarity: string;}[];
+  setGachaResult: (v: null | { name: string; image: string; rarity: Rarity; no: string }) => void;
+  history: { name: string; image: string; rarity: Rarity; no: string}[];
   setHistory: React.Dispatch<
     React.SetStateAction<
-      { name: string; image: string; rarity: string;}[]
+      { name: string; image: string; rarity: Rarity; no: string}[]
     >
   >;
 }) => {
   const [showOpen, setShowOpen] = useState(false);
   const [showEffect, setShowEffect] = useState(false);
   const [showResult, setShowResult] = useState(false);
-  const [selectedHistory, setSelectedHistory] = useState<null | { name: string; image: string; rarity: string }>(null);
+  const [selectedHistory, setSelectedHistory] = useState<null | { name: string; image: string; rarity: Rarity; no: string }>(null);
   const rarityToStarCount: Record<string, number> = {
     "ノーマル": 1,
     "レア": 2,
@@ -79,22 +81,49 @@ const QuizGacha = ({
     "神レア": "text-green-400",
     "シークレット": "text-black",
   };
+  const ULTRA_RARES = {
+    "超レア": true,
+    "激レア": true,
+    "超激レア": true,
+    "神レア": true,
+    "シークレット": true,
+  } as const;
+
+  const isUltraRare =
+    !!gachaResult && gachaResult.rarity in ULTRA_RARES;
+
+  const [showDark, setShowDark] = useState(false);
+  const [showFlash, setShowFlash] = useState(false);
 
   useEffect(() => {
-    if (gachaResult) {
-      // 0.5秒後にカプセル開く
-      const timer1 = setTimeout(() => setShowOpen(true), 500);
-      // 1秒後に光のエフェクト
-      const timer2 = setTimeout(() => setShowEffect(true), 1000);
-      // 0.5秒後に当たりキャラクター表示
-      const timer3 = setTimeout(() => setShowResult(true), 1100);
+    if (!gachaResult) return;
+
+    if (isUltraRare) {
+      // 超レア以上の特別演出
+      const t1 = setTimeout(() => setShowOpen(true), 500);
+      const t2 = setTimeout(() => setShowDark(true), 1200);   // 暗転
+      const t3 = setTimeout(() => setShowFlash(true), 2500);  // きらーん
+      const t4 = setTimeout(() => setShowResult(true), 2800); // キャラ登場
 
       return () => {
-        clearTimeout(timer1);
-        clearTimeout(timer2);
-        clearTimeout(timer3);
+        clearTimeout(t1);
+        clearTimeout(t2);
+        clearTimeout(t3);
+        clearTimeout(t4);
         setShowOpen(false);
-        setShowEffect(false);
+        setShowDark(false);
+        setShowFlash(false);
+        setShowResult(false);
+      };
+    } else {
+      // 通常演出（今まで通り）
+      const t1 = setTimeout(() => setShowOpen(true), 500);
+      const t2 = setTimeout(() => setShowResult(true), 1100);
+
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+        setShowOpen(false);
         setShowResult(false);
       };
     }
@@ -218,7 +247,8 @@ const QuizGacha = ({
               onClick={(e) => e.stopPropagation()}
             >
               <img src={selectedHistory.image} className="w-40 h-40 md:w-64 md:h-64 rounded mb-4" />
-              <p className="text-3xl md:text-5xl font-bold">{selectedHistory.name}</p>
+              <p className="text-lg md:text-2xl text-gray-700">No：{selectedHistory.no}</p>
+              <p className="text-3xl md:text-5xl font-bold mt-1 md:mt-2">{selectedHistory.name}</p>
               <p className="text-xl md:text-3xl font-extrabold mt-3 md:mt-5 text-gray-500 drop-shadow">
                 レアリティ：<span className={`text-xl md:text-3xl font-bold ${rarityText[selectedHistory.rarity]}`}>{selectedHistory.rarity}</span>
               </p>
@@ -259,45 +289,73 @@ const QuizGacha = ({
               />
             )}
 
-            {/* --- 当たりキャラクター（結果） --- */}
+            {isUltraRare && showDark && (
+              <motion.div
+                className="fixed inset-0 bg-black z-40"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.9 }}
+                transition={{ duration: 0.6 }}
+              />
+            )}
+
+            {isUltraRare && showFlash && (
+              <motion.div
+                className="fixed inset-0 z-40"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: [0, 1, 1] }}
+                transition={{ duration: 1.2 }}
+                style={{
+                  background:
+                    "radial-gradient(circle at center, #ffffff, #ffff99, transparent 90%)",
+                }}
+              />
+            )}
+
             {showResult && (
-              <div className="relative w-full flex justify-center mt-6">
-                {/* 画面全体のカラフルもわもわ */}
+              <>
+                {/* 🌈 背景（キャラの後ろ専用） */}
                 <div
-                  className="fixed inset-0 -z-10"
+                  className="fixed inset-0 z-30"
                   style={{
-                    background: 'radial-gradient(circle at 30% 30%, #ff00ff, #00ffff, #ffff00, #ff0000)',
-                    filter: 'blur(120px)',
-                    opacity: 0.6,
+                    background:
+                      "radial-gradient(circle at 30% 30%, #ff00ff, #00ffff, #ffff00, #ff0000)",
+                    filter: "blur(120px)",
+                    opacity: isUltraRare ? 0.6 : 0.5,
                   }}
                 />
 
-                {/* 小さいキラキラ粒子も画面全体 */}
+                {/* ✨ キラキラ粒子（背景とキャラの間） */}
                 {Array.from({ length: 30 }).map((_, i) => (
-                  <motion.div
-                    key={i}
-                    className="absolute w-4 h-4 rounded-full bg-white"
-                    style={{
-                      top: `${Math.random() * 100}%`,
-                      left: `${Math.random() * 100}%`,
-                      opacity: 0.6,
-                      filter: 'blur(4px)',
-                    }}
-                    animate={{ y: [-10, 10] }}
-                    transition={{ duration: 1 + Math.random(), repeat: Infinity, repeatType: "reverse", }}
-                  />
-                ))}
+                    <motion.div
+                      key={i}
+                      className="fixed z-40 w-4 h-4 rounded-full bg-white"
+                      style={{
+                        top: `${Math.random() * 100}%`,
+                        left: `${Math.random() * 100}%`,
+                        opacity: isUltraRare ? 0.6 : 0.5,
+                        filter: "blur(4px)",
+                      }}
+                      animate={{ y: [-10, 10] }}
+                      transition={{
+                        duration: 1 + Math.random(),
+                        repeat: Infinity,
+                        repeatType: "reverse",
+                      }}
+                    />
+                  ))}
 
-                {/* ガチャ結果枠 */}
+                {/* 🧱 キャラコンテナ（最前面） */}
                 <motion.div
+                  initial={{ opacity: 0, scale: 0.3, y: 80 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{
+                    duration: isUltraRare ? 1.5 : 0.5,
+                    ease: "easeOut",
+                  }}
                   className={`
-                    relative text-center z-50 p-6 rounded-2xl shadow-2xl
-                    bg-gradient-to-r ${rarityGradient[gachaResult.rarity as keyof typeof rarityGradient]}
-                    animate-gradient
+                    relative z-50 text-center p-6 rounded-2xl shadow-2xl
+                    bg-gradient-to-r ${rarityGradient[gachaResult.rarity]}
                   `}
-                  initial={{ scale: 0.6, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ type: "spring", bounce: 0.5 }}
                 >
                   <img src={gachaResult.image} className="w-36 h-36 mx-auto drop-shadow-lg" />
                   <p className="text-3xl md:text-5xl font-bold mt-4 text-white drop-shadow">
@@ -310,7 +368,7 @@ const QuizGacha = ({
                     {"★".repeat(rarityToStarCount[gachaResult.rarity] || 1)}
                   </p>
                 </motion.div>
-              </div>
+              </>
             )}
 
             {/* --- 閉じるボタンは結果が出たときだけ表示。z-index高めにして確実に見えるように --- */}
@@ -354,11 +412,12 @@ export default function QuizModePage() {
   const [gachaResult, setGachaResult] = useState<null | {
     name: string;
     image: string;
-    rarity: string;
+    rarity: Rarity;
+    no: string;
   }>(null);
   const [scoreChange, setScoreChange] = useState<number | null>(null);
   const [history, setHistory] = useState<
-    { name: string; image: string; rarity: string;}[]
+    { name: string; image: string; rarity: Rarity; no: string;}[]
   >([]);
 
   const showCorrectRef = useRef(showCorrectMessage);
@@ -443,24 +502,30 @@ export default function QuizModePage() {
     }
   };
 
-  const gachaCharacters = [
-    { name: "スライム", image: "/images/slime.png", rarity: "ノーマル", weight: 20 },
-    { name: "ゴブリン", image: "/images/goblin.png", rarity: "ノーマル", weight: 17 },
-    { name: "ミミック", image: "/images/mimic.png", rarity: "ノーマル", weight: 15 },
-    { name: "バーサーカー", image: "/images/berserker.png", rarity: "ノーマル", weight: 12 },
-    { name: "フェニックス", image: "/images/fenikkusu.png", rarity: "レア", weight: 10 },
-    { name: "ドラゴン", image: "/images/dragon.png", rarity: "レア", weight: 7.5 },
-    { name: "ブラックドラゴン", image: "/images/blackdragon.png", rarity: "超レア", weight: 6.8 },
-    { name: "リヴァイアサン", image: "/images/leviathan.png", rarity: "超レア", weight: 5 },
-    { name: "ポセイドン", image: "/images/poseidon.png", rarity: "超レア", weight: 3 },
-    { name: "軍荼利明王（ぐんだりみょうおう）", image: "/images/gundarimyouou.png", rarity: "超レア", weight: 2 },
-    { name: "ハデス", image: "/images/hades.png", rarity: "激レア", weight: 1 },
-    { name: "ゼウス", image: "/images/zeus.png", rarity: "激レア", weight: 0.5 },
-    { name: "オーディン", image: "/images/ordin.png", rarity: "激レア", weight: 0.1 },
-    { name: "初代クイズマスターの最強勇者", image: "/images/yuusya_game.png", rarity: "超激レア", weight: 0.05 },
-    { name: "クイズ王", image: "/images/quiz_man.png", rarity: "神レア", weight: 0.02 },
-    { name: "クイズ女王", image: "/images/quiz_woman.png", rarity: "神レア", weight: 0.02 },
-    { name: "シークレットクイズ王", image: "/images/quiz.png", rarity: "シークレット", weight: 0.01 },
+  const gachaCharacters: {
+    name: string;
+    image: string;
+    rarity: Rarity;
+    weight: number;
+    no: string;
+  }[] = [
+    { name: "スライム", image: "/images/slime.png", rarity: "ノーマル", weight: 20 , no: "1" },
+    { name: "ゴブリン", image: "/images/goblin.png", rarity: "ノーマル", weight: 17 , no: "2" },
+    { name: "ミミック", image: "/images/mimic.png", rarity: "ノーマル", weight: 15 , no: "3" },
+    { name: "バーサーカー", image: "/images/berserker.png", rarity: "ノーマル", weight: 12 , no: "4" },
+    { name: "フェニックス", image: "/images/fenikkusu.png", rarity: "レア", weight: 10 , no: "5" },
+    { name: "ドラゴン", image: "/images/dragon.png", rarity: "レア", weight: 7.5 , no: "6" },
+    { name: "ブラックドラゴン", image: "/images/blackdragon.png", rarity: "超レア", weight: 6.8 , no: "7" },
+    { name: "リヴァイアサン", image: "/images/leviathan.png", rarity: "超レア", weight: 5 , no: "8" },
+    { name: "ポセイドン", image: "/images/poseidon.png", rarity: "超レア", weight: 3 , no: "9" },
+    { name: "軍荼利明王（ぐんだりみょうおう）", image: "/images/gundarimyouou.png", rarity: "超レア", weight: 2 , no: "10" },
+    { name: "ハデス", image: "/images/hades.png", rarity: "激レア", weight: 1 , no: "11" },
+    { name: "ゼウス", image: "/images/zeus.png", rarity: "激レア", weight: 0.5 , no: "12" },
+    { name: "オーディン", image: "/images/ordin.png", rarity: "激レア", weight: 0.1 , no: "13" },
+    { name: "初代クイズマスターの最強勇者", image: "/images/yuusya_game.png", rarity: "超激レア", weight: 0.05 , no: "14" },
+    { name: "クイズ王", image: "/images/quiz_man.png", rarity: "神レア", weight: 0.02 , no: "15" },
+    { name: "クイズ女王", image: "/images/quiz_woman.png", rarity: "神レア", weight: 0.02 , no: "16" },
+    { name: "シークレットクイズ王", image: "/images/quiz.png", rarity: "シークレット", weight: 0.01 , no: "17" },
   ];
   
 

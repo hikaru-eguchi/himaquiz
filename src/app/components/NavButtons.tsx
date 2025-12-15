@@ -69,16 +69,6 @@ export default function NavButtons() {
           </button>
         </Link>
 
-        <Link href="/quiz-master" onClick={() => setActiveUrl("/quiz-master")}>
-          <button
-            className={`${baseStyle} bg-gradient-to-r from-purple-500 to-indigo-400 text-white shadow-xl ring-2 ring-purple-400 hover:scale-110 ${
-              activeUrl === "/quiz-master" ? activeStyle : ""
-            }`}
-          >
-            クイズダンジョン
-          </button>
-        </Link>
-
         <Link href="/time-quiz" onClick={() => setActiveUrl("/time-quiz")}>
           <button
             className={`${baseStyle} bg-gradient-to-r from-[#ec0101] via-[#FF6B6B] to-[#fb9797] text-white shadow-xl ring-2 ring-red-400 hover:scale-110 ${
@@ -89,6 +79,16 @@ export default function NavButtons() {
           </button>
         </Link>
 
+        <Link href="/quiz-master" onClick={() => setActiveUrl("/quiz-master")}>
+          <button
+            className={`${baseStyle} bg-gradient-to-r from-purple-500 to-indigo-400 text-white shadow-xl ring-2 ring-purple-400 hover:scale-110 ${
+              activeUrl === "/quiz-master" ? activeStyle : ""
+            }`}
+          >
+            クイズダンジョン
+          </button>
+        </Link>
+
         <Link href="/quiz-gacha" onClick={() => setActiveUrl("/quiz-gacha")}>
           <button
             className={`${baseStyle} bg-gradient-to-r from-red-400 via-sky-400 to-green-400 text-white shadow-xl ring-2 ring-white hover:scale-110 ${
@@ -96,6 +96,16 @@ export default function NavButtons() {
             }`}
           >
             クイズガチャ
+          </button>
+        </Link>
+
+        <Link href="/quiz-battle" onClick={() => setActiveUrl("/quiz-battle")}>
+          <button
+            className={`${baseStyle} bg-gradient-to-r from-pink-500 via-yellow-400 to-green-500 text-white shadow-xl ring-2 ring-pink-500 hover:scale-110 ${
+              activeUrl === "/quiz-battle" ? activeStyle : ""
+            }`}
+          >
+            クイズバトル
           </button>
         </Link>
       </div>
