@@ -912,12 +912,12 @@ export default function QuizModePage() {
             <div>
               {/* メッセージボタン */}
               <div className="text-center">
-                <p className="text-gray-500 text-md md:text-xl mb-1">メッセージを送ろう！</p>
+                <p className="text-gray-600 text-md md:text-xl mb-1">メッセージを送ろう！</p>
                 {["よろしく！", "強いな！", "負けないぞ！", "ありがとう！"].map((msg) => (
                   <button
                     key={msg}
                     onClick={() => sendMessage(msg)}
-                    className="mx-1 my-1 px-2 py-1 text-md md:text-lg md:text-xl rounded-full border-2 border-gray-500 bg-gray-100 hover:bg-gray-200"
+                    className="mx-1 my-1 px-2 py-1 text-md md:text-lg md:text-xl rounded-full border-2 border-gray-500 bg-white hover:bg-gray-200"
                   >
                     {msg}
                   </button>
