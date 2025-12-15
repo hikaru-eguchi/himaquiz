@@ -836,7 +836,7 @@ export default function QuizModePage() {
             </p>
           </div>
           <div className="flex flex-col items-center">
-            <div className="flex justify-center gap-2 md:gap-4 mb-4">
+            <div className="flex justify-center gap-2 md:gap-4 mb-2">
               {orderedPlayers.map((p) => {
                 const isMe = p.socketId === mySocketId;
                 const change = scoreChanges[p.socketId];
@@ -909,25 +909,7 @@ export default function QuizModePage() {
                 );
               })}
             </div>
-            <div>
-              {/* メッセージボタン */}
-              <div className="text-center">
-                <p className="text-gray-600 text-md md:text-xl mb-1">メッセージを送ろう！</p>
-                {["よろしく！", "強いな！", "負けないぞ！", "ありがとう！"].map((msg) => (
-                  <button
-                    key={msg}
-                    onClick={() => sendMessage(msg)}
-                    className="mx-1 my-1 px-2 py-1 text-md md:text-lg md:text-xl rounded-full border-2 border-gray-500 bg-white hover:bg-gray-200"
-                  >
-                    {msg}
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
-          <h2 className="text-4xl md:text-5xl font-extrabold mt-1 mb-4 text-black drop-shadow-lg">
-            第 {currentIndex + 1} 問
-          </h2>
 
           {/* 相手がまだ回答中のときのメッセージ */}
           {answeredAll && !finished && (
@@ -972,7 +954,7 @@ export default function QuizModePage() {
                     setUserAnswer={setUserAnswer}
                   />
                   <button
-                    className="px-5 py-3 md:px-6 md:py-3 border border-black bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-4 hover:bg-blue-600 cursor-pointer"
+                    className="px-5 py-3 md:px-6 md:py-3 border border-black bg-blue-500 text-white text-lg md:text-xl font-medium rounded hover:bg-blue-600 cursor-pointer"
                     onClick={checkAnswer}
                     disabled={userAnswer === null}
                   >
@@ -982,6 +964,21 @@ export default function QuizModePage() {
               )}
             </>
           )}
+
+          <div className="flex flex-col items-center mt-3">
+            {/* メッセージボタン */}
+            <div className="text-center border border-black p-1 rounded-xl bg-white">
+              {["よろしく！", "強いな！", "負けないぞ！", "ありがとう！"].map((msg) => (
+                <button
+                  key={msg}
+                  onClick={() => sendMessage(msg)}
+                  className="mx-1 my-1 px-2 py-1 text-md md:text-lg md:text-xl rounded-full border-2 border-gray-500 bg-white hover:bg-gray-200"
+                >
+                  {msg}
+                </button>
+              ))}
+            </div>
+          </div>
         </>
       ) : (
         <QuizResult
