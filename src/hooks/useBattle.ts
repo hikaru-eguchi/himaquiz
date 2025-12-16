@@ -16,6 +16,7 @@ export const useBattle = (playerName: string) => {
   const [bothReady, setBothReady] = useState(false);
   const [mySocketId, setMySocketId] = useState<string>("");
   const [startAt, setStartAt] = useState<number | null>(null);
+  const [handicap, setHandicap] = useState<number>(0);
   const sendMessage = (message: string) => {
     if (!socket || !roomCode) return;
     socket.emit("send_message", { roomCode, fromId: mySocketId, message });
@@ -79,6 +80,13 @@ export const useBattle = (playerName: string) => {
       setPlayers(players);
       setQuestionIds(questionIds);
       setMatched(true);
+    });
+
+    s.on("start_game_with_handicap", ({ startAt, players, questionIds }) => {
+      setPlayers(players);
+      setQuestionIds(questionIds);
+      setStartAt(startAt);
+      setBothReady(true);
     });
 
     /* =========================
@@ -164,21 +172,21 @@ export const useBattle = (playerName: string) => {
   /* =========================
      Ready 通知
   ========================= */
-  const sendReady = () => {
-    if (!socket || !roomCode) {
-      console.warn("[useBattle] sendReady: socket または roomCode 未設定");
-      return;
-    }
+  const sendReady = (value?: number) => {
+    if (!socket || !roomCode) return;
+
+    const h = value ?? handicap; // ★ state を使う
 
     socket.emit("player_ready", {
       roomCode,
       socketId: socket.id,
+      handicap: h,
     });
   };
 
   const requestRematch = (roomCode: string) => {
     if (!socket) return;
-    socket.emit("request_rematch", { roomCode });
+    socket.emit("request_rematch", { roomCode , handicap});
   };
 
   /* =========================
@@ -204,6 +212,7 @@ export const useBattle = (playerName: string) => {
     requestRematch,
     resetMatch,
     updateStartAt,
+    setHandicap,
     players,
     roomCode,
     questionIds,
@@ -212,5 +221,6 @@ export const useBattle = (playerName: string) => {
     startAt,
     mySocketId,
     socket,
+    handicap,
   };
 };

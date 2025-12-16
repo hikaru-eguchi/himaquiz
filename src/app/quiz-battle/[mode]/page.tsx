@@ -244,7 +244,7 @@ const QuizResult = ({
             </div>
             {/* 相手待ちメッセージを下に隔離 */}
             {rematchRequested && !rematchAvailable && (
-              <p className="text-center text-2xl md:text-3xl text-gray-700 mt-4 md:mt-2">
+              <p className="text-center text-2xl md:text-3xl text-gray-700 bg-white rounded-xl p-2 mt-4 md:mt-2">
                 相手の準備を待っています…
               </p>
             )}
@@ -273,7 +273,6 @@ export default function QuizModePage() {
   const [showCorrectMessage, setShowCorrectMessage] = useState(false);
   const [incorrectMessage, setIncorrectMessage] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState(totalTime);
-  const [score, setScore] = useState(0);
   const [wrongStreak, setWrongStreak] = useState(0);
   const wrongStreakRef = useRef(0);
   const [scoreChanges, setScoreChanges] = useState<Record<string, number | null>>({});
@@ -292,6 +291,7 @@ export default function QuizModePage() {
   const [matchEnded, setMatchEnded] = useState(false);
   const [roomCode, setRoomCode] = useState<string>("");
   const [bothReadyState, setBothReadyState] = useState(false);
+  const [handicap, setHandicap] = useState<number>(0);
 
   const {
     joinRandom,
@@ -352,7 +352,6 @@ export default function QuizModePage() {
     setCorrectCount(0);
     setFinished(false);
     setAnsweredAll(false);
-    setScore(0);
     setWrongStreak(0);
     wrongStreakRef.current = 0;
     setScoreChanges({});
@@ -371,7 +370,6 @@ export default function QuizModePage() {
     setCountdown(null);
     setTimeLeft(totalTime);
     setAnsweredAll(false);
-    setScore(0);
     setCorrectCount(0);
     setWrongStreak(0);
     wrongStreakRef.current = 0;
@@ -552,7 +550,7 @@ export default function QuizModePage() {
       setCountdown(null);
       setTimeLeft(totalTime);
 
-      sendReady();
+      sendReady(handicap);
     });
 
     // 再戦開始通知
@@ -606,15 +604,31 @@ export default function QuizModePage() {
       setCorrectCount(c => c + 1);
       wrongStreakRef.current = 0;
       setWrongStreak(0);
-      setScore(prev => {
-        let add = 0;
-        if (level === "かんたん") add = 50;
-        if (level === "ふつう") add = 100;
-        if (level === "難しい") add = 150;
-        const next = prev + add;
+
+      let add = 0;
+      if (level === "かんたん") add = 50;
+      if (level === "ふつう") add = 100;
+      if (level === "難しい") add = 150;
+      setScoreChanges(prev => ({
+        ...prev,
+        [myId]: add,
+      }));
+      setTimeout(() => {
         setScoreChanges(prev => ({
           ...prev,
-          [myId]: add,
+          [myId]: null,
+        }));
+      }, 800);
+      updateScore(add); // ★ 差分のみ送信
+
+      setShowCorrectMessage(true);
+    } else {
+      wrongStreakRef.current++;
+      setWrongStreak(wrongStreakRef.current);
+      if (wrongStreakRef.current >= 3) {
+        setScoreChanges(prev => ({
+          ...prev,
+          [myId]: -100,
         }));
         setTimeout(() => {
           setScoreChanges(prev => ({
@@ -622,33 +636,7 @@ export default function QuizModePage() {
             [myId]: null,
           }));
         }, 800);
-        updateScore(next);
-        return next;
-      });
-      setShowCorrectMessage(true);
-    } else {
-      wrongStreakRef.current++;
-      setWrongStreak(wrongStreakRef.current);
-      if (wrongStreakRef.current >= 3) {
-        setScore(prev => {
-          const newScore = Math.max(0, prev - 100);
-
-          setScoreChanges(prev => ({
-            ...prev,
-            [myId]: -100,
-          }));
-
-          setTimeout(() => {
-            setScoreChanges(prev => ({
-              ...prev,
-              [myId]: null,
-            }));
-          }, 800);
-
-          updateScore(newScore); 
-
-          return newScore;
-        });
+        updateScore(-100); // ★ 差分のみ
         wrongStreakRef.current = 0;
         setWrongStreak(0);
       }
@@ -760,7 +748,7 @@ export default function QuizModePage() {
         {!readyToStart ? (
           <button
             onClick={() => {
-              sendReady();
+              sendReady(handicap);
               setReadyToStart(true);
             }}
             className="
@@ -785,6 +773,33 @@ export default function QuizModePage() {
               ? `${opponent.name}さんのスタートを待っています…`
               : "マッチ相手のスタートを待っています…"}
           </p>
+        )}
+        {mode === "code" && !readyToStart && (
+          <div className="mt-8">
+            <label className="text-xl md:text-3xl font-bold">
+              もらうハンデ：
+              <input
+                type="number"
+                value={handicap}
+                min={0}
+                max={10000}
+                step={100}
+                onChange={(e) => {
+                  // 入力途中はそのまま
+                  setHandicap(Number(e.target.value));
+                }}
+                onBlur={() => {
+                  // フォーカスを外した瞬間に丸める
+                  setHandicap((prev) =>
+                    Math.min(10000, Math.max(0, Math.floor(prev / 100) * 100))
+                  );
+                }}
+                className="ml-2 border px-2 py-1 w-24 text-center"
+              />
+              点
+            </label>
+            <p className="mt-2 md:text-lg">※100 の単位で設定できます</p>
+          </div>
         )}
       </div>
     );
@@ -897,8 +912,8 @@ export default function QuizModePage() {
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: -20, scale: 0.8 }}
                             transition={{ duration: 0.3, ease: "easeOut" }}
-                            className={`absolute left-0 top-0 w-34 md:w-44 px-2 py-1 rounded shadow text-md md:text-lg ${
-                              p.socketId === mySocketId ? "bg-blue-400 text-white" : "bg-red-400 text-white"
+                            className={`absolute left-0 top-0 w-34 md:w-44 px-2 py-1 rounded shadow text-md md:text-lg font-bold border-2 ${
+                              p.socketId === mySocketId ? "bg-blue-400 text-white border-blue-200" : "bg-red-400 text-white border-red-200"
                             }`}
                           >
                             {m.message}

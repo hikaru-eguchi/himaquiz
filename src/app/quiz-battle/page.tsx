@@ -114,18 +114,23 @@ export default function QuizMasterPage() {
         </div>
 
         <div className="flex flex-col md:flex-row justify-center gap-3 md:gap-4 max-w-4xl mx-auto">
-          <button
-            onClick={handleRandomQuizStart}
-            className="w-full md:w-80 px-6 py-2 md:px-8 md:py-4 bg-sky-500 text-white rounded-full hover:bg-sky-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
-          >
-            オンラインでだれかと対戦
-          </button>
-          <button
-            onClick={() => setShowCodeInput(true)}
-            className="w-full md:w-80 px-6 py-2 md:px-8 md:py-4 bg-pink-500 text-white rounded-full hover:bg-pink-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
-          >
-            知り合いと対戦
-          </button>
+          <div>
+            <button
+              onClick={handleRandomQuizStart}
+              className="w-full md:w-80 px-6 py-2 md:px-8 md:py-4 bg-sky-500 text-white rounded-full hover:bg-sky-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
+            >
+              オンラインでだれかと対戦
+            </button>
+            <p className="text-sm text-gray-800 mt-1">※一定時間マッチしないとCPUとの対戦になります</p>
+          </div>
+          <div>
+            <button
+              onClick={() => setShowCodeInput(true)}
+              className="w-full md:w-80 px-6 py-2 md:px-8 md:py-4 bg-pink-500 text-white rounded-full hover:bg-pink-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
+            >
+              知り合いと対戦
+            </button>
+          </div>
         </div>
 
         {showCodeInput && (
