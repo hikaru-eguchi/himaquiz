@@ -330,11 +330,11 @@ export default async function HomePage({
               相手よりハイスコアを狙おう！
             </p>
           </div>
-          {/* 協力アドベンチャー */}
+          {/* 協力ダンジョン */}
           <div className="text-center max-w-[260px]">
             <Link href="/quiz-adventure" className="w-full md:w-auto flex justify-center">
               <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-indigo-500 via-blue-500 to-sky-500 text-white hover:scale-110 transition-all">
-                協力アドベンチャー
+                協力ダンジョン
               </button>
             </Link>
             <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
