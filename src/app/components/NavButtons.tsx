@@ -108,6 +108,16 @@ export default function NavButtons() {
             クイズバトル
           </button>
         </Link>
+
+        <Link href="/quiz-adventure" onClick={() => setActiveUrl("/quiz-adventure")}>
+          <button
+            className={`${baseStyle} bg-gradient-to-r from-indigo-500 via-blue-500 to-sky-500 text-white shadow-xl ring-2 ring-blue-500 hover:scale-110 ${
+              activeUrl === "/quiz-adventure" ? activeStyle : ""
+            }`}
+          >
+            協力ダンジョン
+          </button>
+        </Link>
       </div>
     </div>
   );

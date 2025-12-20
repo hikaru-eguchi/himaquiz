@@ -6,6 +6,50 @@ import QuizQuestion from "../../components/QuizQuestion";
 import { QuizData } from "@/lib/articles";
 import { motion, AnimatePresence } from "framer-motion";
 import { useBattle } from "../../../hooks/useBattle";
+import { useQuestionPhase } from "../../../hooks/useQuestionPhase";
+import PlayerAttackEffect from "../../components/battle/PlayerAttackEffect";
+import EnemyAttackEffect from "../../components/battle/EnemyAttackEffect";
+import EnemyDefeatEffect from "../../components/battle/EnemyDefeatEffect";
+
+// 敵情報
+const enemies = [
+  { id: "slime", name: "スライム", image: "/images/slime.png", hp: 100, attack: 50, description: "ぷるぷるして弱そうに見えるが油断は禁物。" },
+  { id: "goblin", name: "ゴブリン", image: "/images/goblin.png", hp: 220, attack: 100, description: "素早く群れで襲いかかる小型のモンスター。" },
+  { id: "mimic", name: "ミミック", image: "/images/mimic.png", hp: 350, attack: 200, description: "宝箱に化けるトリッキーな敵。油断すると噛まれる！" },
+  { id: "berserker", name: "バーサーカー", image: "/images/berserker.png", hp: 500, attack: 400, description: "理性を失った狂戦士。攻撃力が非常に高い。" },
+  { id: "fenikkusu", name: "フェニックス", image: "/images/fenikkusu.png", hp: 1000, attack: 650, description: "不死鳥の炎を操る神秘的な生物。燃え盛る翼で攻撃。" },
+  { id: "dragon", name: "ドラゴン", image: "/images/dragon.png", hp: 2000, attack: 800, description: "火を吹く巨大竜。圧倒的な力を誇る古代の王者。" },
+  { id: "blackdragon", name: "ブラックドラゴン", image: "/images/blackdragon.png", hp: 3500, attack: 1000, description: "闇の力を宿す黒竜。魔法攻撃も強力。" },
+  { id: "leviathan", name: "リヴァイアサン", image: "/images/leviathan.png", hp: 5000, attack: 1500, description: "海の深淵から現れる巨大モンスター。水流で圧倒する。" },
+  { id: "poseidon", name: "ポセイドン", image: "/images/poseidon.png", hp: 7000, attack: 2000, description: "海の神。雷と津波で敵を蹴散らす力を持つ。" },
+  { id: "gundarimyouou", name: "軍荼利明王（ぐんだりみょうおう）", image: "/images/gundarimyouou.png", hp: 8500, attack: 3000, description: "仏教の怒りの守護神。恐怖の炎で全てを焼き尽くす。" },
+  { id: "hades", name: "ハデス", image: "/images/hades.png", hp: 10000, attack: 4000, description: "冥界の支配者。死者の力を操り、強大な攻撃を仕掛ける。" },
+  { id: "zeus", name: "ゼウス", image: "/images/zeus.png", hp: 12000, attack: 5000, description: "天空の王。雷霆を操る全知全能の神。" },
+  { id: "ordin", name: "オーディン", image: "/images/ordin.png", hp: 15000, attack: 8000, description: "知恵と戦の神。魔法と剣技を極めた伝説の戦士。" },
+  { id: "yuusya_game", name: "初代クイズマスターの最強勇者", image: "/images/yuusya_game.png", hp: 20000, attack: 20000, description: "全てのクイズと戦闘を制した伝説の勇者。前人未到の強さを誇る。" },
+  { id: "quizou", name: "クイズ王", image: "/images/quiz_man.png", hp: 35000, attack: 35000, description: "クイズの王様。クイズ界の支配者。" },
+];
+
+// ステージに応じて敵を取得する
+const getEnemyForStage = (stage: number) => {
+  // ステージに応じて敵を変える
+  if (stage < 2) return enemies[0];
+  if (stage < 3) return enemies[1];
+  if (stage < 4) return enemies[2];
+  if (stage < 5) return enemies[3];
+  if (stage < 6) return enemies[4];
+  if (stage < 7) return enemies[5];
+  if (stage < 8) return enemies[6];
+  if (stage < 9) return enemies[7];
+  if (stage < 10) return enemies[8];
+  if (stage < 11) return enemies[9];
+  if (stage < 12) return enemies[10];
+  if (stage < 13) return enemies[11];
+  if (stage < 14) return enemies[12];
+  if (stage < 15) return enemies[13];
+  if (stage < 16) return enemies[14];
+  return enemies[14];
+};
 
 interface ArticleData {
   id: string;
@@ -26,14 +70,12 @@ interface ArticleData {
 
 interface Player {
   socketId: string;
-  name: string;  // 表示用の名前
-  score: number;
+  playerName: string;
 }
 
 interface QuizResultProps {
   correctCount: number;
-  myScore: number;
-  opponentScore: number;
+  stageCount: number;
   onRetry: () => void;
   matchEnded: boolean;
   rematchAvailable: boolean;
@@ -44,8 +86,7 @@ interface QuizResultProps {
 
 const QuizResult = ({
   correctCount,
-  myScore,
-  opponentScore,
+  stageCount,
   onRetry,
   matchEnded,
   rematchAvailable,
@@ -65,85 +106,11 @@ const QuizResult = ({
     return () => timers.forEach(clearTimeout);
   }, []);
 
-  // ============================
-  // 🔥 勝敗判定
-  // ============================
-  const isWin = myScore > opponentScore;
-  const isLose = myScore < opponentScore;
-  const isDraw = myScore === opponentScore;
-
-  // ============================
-  // 🔥 演出用スタイル
-  // ============================
-  const bgClass = isWin
-    ? "bg-gradient-to-b from-yellow-200 via-pink-200 to-white"
-    : isLose
-    ? "bg-gray-900/80 text-gray-200"
-    : "bg-white";
 
   return (
     <motion.div
-      className={`text-center mt-6 p-8 rounded-lg ${bgClass}`}
-      initial={isLose ? { opacity: 0 } : false}
-      animate={isLose ? { opacity: 1 } : false}
-      transition={isLose ? { duration: 3 } : undefined} // ★ ゆっくり暗転
+      className={`text-center mt-6 p-8 rounded-lg`}
     >
-
-      {/* ============================
-          🔥 勝敗メッセージ
-      ============================ */}
-      {showText && (
-        <>
-          {isWin && (
-            <motion.p
-              initial={{ scale: 0.5, opacity: 0 }}
-              animate={{ scale: 1.2, opacity: 1 }}
-              transition={{ duration: 0.6 }}
-              className="text-3xl md:text-5xl font-extrabold text-yellow-500 mb-6"
-            >
-              あなたの勝ち！やったね！🎉✨
-            </motion.p>
-          )}
-
-          {isLose && (
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                duration: 2.5,      // ★ ゆっくり
-                ease: "easeOut",    // ★ 優しい減速
-              }}
-              className="text-3xl md:text-5xl font-extrabold text-gray-300 mb-6"
-            >
-              あなたの負け、、次は頑張ろう！💪
-            </motion.p>
-          )}
-
-          {isDraw && (
-            <motion.div
-              initial={{ scale: 0.5, opacity: 0 }}
-              animate={{ scale: [1.2, 1], opacity: 1 }}
-              transition={{ duration: 1.2, ease: "easeOut" }}
-              className="mb-6 p-6 rounded-lg bg-gradient-to-r from-gray-200 via-gray-100 to-white shadow-lg"
-            >
-              <p className="text-4xl md:text-6xl font-extrabold text-gray-700">
-                引き分け！いい勝負だったね！🤝
-              </p>
-
-              {/* 軽くキラキラ演出 */}
-              {[...Array(10)].map((_, i) => (
-                <motion.span
-                  key={i}
-                  className="absolute w-2 h-2 bg-yellow-300 rounded-full"
-                  initial={{ x: Math.random() * 100 - 50, y: Math.random() * 50 - 25, opacity: 1 }}
-                  animate={{ y: -40, opacity: 0 }}
-                  transition={{ duration: 1.5, delay: Math.random() }}
-                />
-              ))}
-            </motion.div>
-          )}
-        </>
-      )}
 
       {/* ============================
           🔥 スコア表示
@@ -155,33 +122,10 @@ const QuizResult = ({
           </p>
 
           <p className="text-2xl md:text-4xl font-bold mb-2">
-            あなた：{myScore} P
-          </p>
-
-          <p className="text-2xl md:text-4xl font-bold mb-6">
-            相手：{opponentScore} P
+            到達ステージ：{stageCount} 
           </p>
         </>
       )}
-
-      {/* ============================
-          🔥 勝ちだけキラキラ演出
-      ============================ */}
-      {isWin &&
-        showText &&
-        [...Array(20)].map((_, i) => (
-          <motion.span
-            key={i}
-            className="absolute w-3 h-3 bg-yellow-400 rounded-full"
-            initial={{
-              x: Math.random() * 300 - 150,
-              y: Math.random() * 200 - 100,
-              opacity: 1,
-            }}
-            animate={{ y: -200, opacity: 0 }}
-            transition={{ duration: 2, delay: Math.random() }}
-          />
-        ))}
 
       {/* ============================
           🔥 リトライボタン
@@ -203,7 +147,7 @@ const QuizResult = ({
               onClick={handleRematch}
               className="px-6 py-3 bg-green-500 text-white rounded-lg text-xl"
             >
-              対戦スタート！
+              冒険スタート！
             </button>
           </div>
         ) : (
@@ -222,7 +166,7 @@ const QuizResult = ({
                     transition-all duration-300
                   "
                 >
-                  もう一回対戦する
+                  もう一回挑戦する
                 </button>
   
                 <button
@@ -242,10 +186,10 @@ const QuizResult = ({
               </div>
               
             </div>
-            {/* 相手待ちメッセージを下に隔離 */}
+            {/* 仲間待ちメッセージを下に隔離 */}
             {rematchRequested && !rematchAvailable && (
               <p className="text-center text-2xl md:text-3xl text-gray-700 bg-white rounded-xl p-2 mt-4 md:mt-2">
-                相手の準備を待っています…
+                仲間の準備を待っています…
               </p>
             )}
           </div>
@@ -260,14 +204,13 @@ export default function QuizModePage() {
   const searchParams = useSearchParams();
   const mode = pathname.split("/").pop() || "random";
   const code = searchParams?.get("code") || ""; 
+  const count = searchParams?.get("count") || ""; 
   const genre = searchParams?.get("genre") || "";
   const level = searchParams?.get("level") || "";
   const timeParam = searchParams?.get("time") || "2";
   const totalTime = parseInt(timeParam) * 60;
 
   const [questions, setQuestions] = useState<{ id: string; quiz: QuizData }[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [userAnswer, setUserAnswer] = useState<number | null>(null);
   const [correctCount, setCorrectCount] = useState(0);
   const [finished, setFinished] = useState(false);
   const [showCorrectMessage, setShowCorrectMessage] = useState(false);
@@ -283,7 +226,6 @@ export default function QuizModePage() {
   const [nameError, setNameError] = useState<string | null>(null);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [timeUp, setTimeUp] = useState(false);
-  const [answeredAll, setAnsweredAll] = useState(false);
   const [messages, setMessages] = useState<{ fromId: string; message: string }[]>([]);
   const [visibleMessages, setVisibleMessages] = useState<{ fromId: string; message: string }[]>([]);
   const [rematchRequested, setRematchRequested] = useState(false);
@@ -292,6 +234,38 @@ export default function QuizModePage() {
   const [roomCode, setRoomCode] = useState<string>("");
   const [bothReadyState, setBothReadyState] = useState(false);
   const [handicap, setHandicap] = useState<number>(0);
+  const [showDefeatEffect, setShowDefeatEffect] = useState(false);
+  const [showAttackEffect, setShowAttackEffect] = useState(false);
+  const [showEnemyHit, setShowEnemyHit] = useState(false);
+  const [lastDamage, setLastDamage] = useState(0);
+  const [userAnswer, setUserAnswer] = useState<number | null>(null);
+  const [roomFull, setRoomFull] = useState(false);
+  const [playerCount, setPlayerCount] = useState("0/4");
+  const [roomPlayers, setRoomPlayers] = useState<Player[]>([]);
+  const [maxPlayers, setMaxPlayers] = useState(4);
+  const [roomLocked, setRoomLocked] = useState(false);
+  const roomLockedRef = useRef(false);
+  useEffect(() => {
+    roomLockedRef.current = roomLocked;
+  }, [roomLocked]);
+
+  const getStageBonusTime = (stage: number) => {
+    if (stage < 4) return 0;
+    if (stage < 5) return 30;
+    if (stage < 6) return 45;
+    if (stage < 7) return 60;
+    if (stage < 8) return 75;
+    if (stage < 9) return 90;
+    if (stage < 10) return 105;
+    if (stage < 11) return 120;
+    if (stage < 12) return 135;
+    if (stage < 13) return 150;
+    if (stage < 14) return 165;
+    if (stage < 15) return 180;
+    if (stage < 16) return 195;
+    if (stage < 17) return 210;
+    return 225;
+  };
 
   const {
     joinRandom,
@@ -308,12 +282,27 @@ export default function QuizModePage() {
     startAt,
     mySocketId,
     socket,
+    enemyHP,
+    maxHP,
+    stageCount,
   } = useBattle(playerName);
+
+  const questionPhase = useQuestionPhase(
+    socket,
+    roomCode
+  );
+
+  const phase = questionPhase?.phase ?? "question";
+  const results = questionPhase?.results ?? [];
+  const damage = questionPhase?.damage ?? 0;
+  const canAnswer = questionPhase?.canAnswer ?? false;
+  const currentIndex = questionPhase?.currentIndex ?? 0;
+  const questionTimeLeft = questionPhase?.questionTimeLeft ?? 15;
+  const submitAnswer = questionPhase?.submitAnswer ?? (() => {});
   
   const players: Player[] = rawPlayers.map((p) => ({
     socketId: p.socketId,
-    name: p.name,
-    score: p.score,
+    playerName: p.name,
   }));
   
   const me = players.find(p => p.socketId === mySocketId);
@@ -321,8 +310,37 @@ export default function QuizModePage() {
 
   // --- プレイヤー人数監視 ---
   useEffect(() => {
-    if (players.length >= 2) setRoomReady(true);
-  }, [players]);
+    if (!socket) return;
+
+    socket.on("room_full", () => {
+      setRoomPlayers(players);
+      setRoomFull(true);
+    });
+
+    return () => {
+      socket.off("room_full");
+    };
+  }, [socket]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on("update_room_count", ({ players, current, max }) => {
+      if (roomLockedRef.current) return;
+
+      setRoomPlayers(players);
+      setPlayerCount(`${current}/${max}`);
+      setMaxPlayers(max);
+
+      if (current >= max) {
+        setRoomLocked(true); // 4人揃ったらロック
+      }
+    });
+
+    return () => {
+      socket.off("update_room_count");
+    };
+  }, [socket]);
 
   const handleJoin = () => {
     if (!playerName.trim()) {
@@ -340,28 +358,34 @@ export default function QuizModePage() {
 
     setNameError(null);
     setJoined(true);
+
+    // ★ ここで roomLocked をリセット
+    setRoomLocked(false);
+    roomLockedRef.current = false;
+
     if (mode === "random") {
-      joinRandom({ maxPlayers: 2, gameType:"quiz" },(code) => setRoomCode(code)); // コールバックで state にセット
+      joinRandom({ maxPlayers: 4, gameType:"dungeon" }, (code) => setRoomCode(code)); // コールバックで state にセット
     } else {
-      joinWithCode(code,"2","quiz");
-      setRoomCode("quiz_" + code); // 入力済みコードを state にセット
+      joinWithCode(code,count,"dungeon");
+      setRoomCode("dungeon_" + code); // 入力済みコードを state にセット
     }
   };
 
   const handleRetry = () => {
     setCorrectCount(0);
     setFinished(false);
-    setAnsweredAll(false);
     setWrongStreak(0);
     wrongStreakRef.current = 0;
     setScoreChanges({});
-    setCurrentIndex(0);
-    setUserAnswer(null);
     setIncorrectMessage(null);
     setShowCorrectMessage(false);
   };
 
   const handleNewMatch = () => {
+    // ★ ここで roomLocked をリセット
+    setRoomLocked(false);
+    roomLockedRef.current = false;
+
     setRematchRequested(false);
     setRematchAvailable(false);
     setMatchEnded(false);
@@ -369,13 +393,10 @@ export default function QuizModePage() {
     setFinished(false);
     setCountdown(null);
     setTimeLeft(totalTime);
-    setAnsweredAll(false);
     setCorrectCount(0);
     setWrongStreak(0);
     wrongStreakRef.current = 0;
     setScoreChanges({});
-    setCurrentIndex(0);
-    setUserAnswer(null);
     setIncorrectMessage(null);
     setShowCorrectMessage(false);
 
@@ -384,10 +405,10 @@ export default function QuizModePage() {
     resetMatch();
 
     if (mode === "random") {
-      joinRandom({ maxPlayers: 2, gameType:"quiz" },(code) => setRoomCode(code));
+      joinRandom({ maxPlayers: 4, gameType:"dungeon" }, (code) => setRoomCode(code));
     } else {
-      joinWithCode(code,"2","quiz");
-      setRoomCode("quiz_" + code);
+      joinWithCode(code, count,"dungeon");
+      setRoomCode("dungeon_" + code);
     }
   };
 
@@ -449,7 +470,7 @@ export default function QuizModePage() {
 
     const tick = () => {
       const elapsed = Math.floor((Date.now() - startAt) / 1000);
-      const remain = Math.max(0, totalTime - elapsed + 3);
+      const remain = Math.max(0, totalTime - elapsed + 3 + getStageBonusTime(stageCount));
       setTimeLeft(remain);
     };
 
@@ -458,6 +479,18 @@ export default function QuizModePage() {
 
     return () => clearInterval(timer);
   }, [startAt, totalTime]);
+
+  // ステージが変わるたびにタイマーを2分にリセット
+  useEffect(() => {
+    if (!startAt) return;
+
+    // ステージが変わるたびに startAt を更新して残り時間をリセット
+    const newStartAt = Date.now();
+    updateStartAt(newStartAt);
+
+    setTimeLeft(2 * 60 + getStageBonusTime(stageCount)); // 2分+ステージに応じた時間にリセット
+
+  }, [stageCount]);
 
   useEffect(() => {
     if (timeLeft > 0) return;
@@ -538,6 +571,17 @@ export default function QuizModePage() {
   }, [bothReadyState]);
 
   useEffect(() => {
+    if (enemyHP === 0 && maxHP > 0) {
+      setShowDefeatEffect(true);
+
+      setTimeout(() => {
+        setShowDefeatEffect(false);
+        // 次のステージ or リザルトへ
+      }, 2500);
+    }
+  }, [enemyHP, maxHP]);
+
+  useEffect(() => {
     if (!socket) return;
 
     socket.on("both_rematch_ready", () => {
@@ -591,75 +635,21 @@ export default function QuizModePage() {
       socket.off("both_rematch_ready");
       socket.off("rematch_start");
       socket.off("both_ready_start");
+      socket.off("answer_result");
+      socket.off("question_start");
     };
   }, [socket]);
 
   const checkAnswer = () => {
     const correctAnswer = questions[currentIndex].quiz?.answer;
     const displayAnswer = questions[currentIndex].quiz?.displayAnswer;
-    const level = questions[currentIndex].quiz?.level;
-    const myId = mySocketId;
 
     if (userAnswer === correctAnswer) {
-      setCorrectCount(c => c + 1);
-      wrongStreakRef.current = 0;
-      setWrongStreak(0);
-
-      let add = 0;
-      if (level === "かんたん") add = 50;
-      if (level === "ふつう") add = 100;
-      if (level === "難しい") add = 150;
-      setScoreChanges(prev => ({
-        ...prev,
-        [myId]: add,
-      }));
-      setTimeout(() => {
-        setScoreChanges(prev => ({
-          ...prev,
-          [myId]: null,
-        }));
-      }, 800);
-      updateScore(add); // ★ 差分のみ送信
-
-      setShowCorrectMessage(true);
+      submitAnswer(true)
     } else {
-      wrongStreakRef.current++;
-      setWrongStreak(wrongStreakRef.current);
-      if (wrongStreakRef.current >= 3) {
-        const currentScore = me?.score ?? 0;
-
-        if (currentScore > 0) {
-          const penalty = Math.min(100, currentScore);
-
-          setScoreChanges(prev => ({
-            ...prev,
-            [myId]: -penalty,
-          }));
-          setTimeout(() => {
-            setScoreChanges(prev => ({
-              ...prev,
-              [myId]: null,
-            }));
-          }, 800);
-          updateScore(-penalty); // ★ 差分のみ
-        }
-        wrongStreakRef.current = 0;
-        setWrongStreak(0);
-      }
-      setIncorrectMessage(`ざんねん！\n答えは" ${displayAnswer} "でした！`);
+      submitAnswer(false)
     }
     setUserAnswer(null);
-  };
-
-  const nextQuestion = () => {
-    setShowCorrectMessage(false);
-    setIncorrectMessage(null);
-    if (currentIndex + 1 >= questions.length) {
-      // 全問回答済み
-      setAnsweredAll(true); // ★自分は終わった状態にする
-    } else {
-      setCurrentIndex(i => i + 1);
-    }
   };
 
   // --- 不適切ワードリスト ---
@@ -667,22 +657,6 @@ export default function QuizModePage() {
     "ばか","馬鹿","バカ","くそ","糞","クソ","死ね","しね","アホ","あほ","ごみ","ゴミ",
     "fuck", "shit", "bastard", "idiot", "asshole",
   ]
-
-  if (joined && questions.length === 0)
-    return (
-      <div className="text-center">
-        {/* 自分のニックネーム */}
-        {playerName && (
-          <p className="text-xl md:text-3xl mb-6 font-bold text-gray-700">
-            あなた：{playerName}
-          </p>
-        )}
-
-        <p className="text-3xl md:text-5xl animate-pulse">
-          対戦相手を探しています...
-        </p>
-      </div>
-    );
 
   if (!joined) {
     return (
@@ -728,29 +702,55 @@ export default function QuizModePage() {
             transition-all duration-300
           "
         >
-          対戦相手を探す
+          仲間を探す
         </button>
       </div>
     );
   }
 
-  if (!roomReady || !matched) {
+  const allPlayersReady = roomPlayers.length >= maxPlayers;
+
+  if (!allPlayersReady) {
     return (
-      <div className="container p-8 text-center">
-        <p className="text-3xl md:text-5xl mt-35 text-center animate-pulse">対戦相手を探しています...</p>
-      </div>
+      <>
+        <div className="text-center">
+          {/* 自分のニックネーム */}
+          {playerName && (
+            <p className="text-xl md:text-3xl mb-6 font-bold text-gray-700">
+              あなた：{playerName}
+            </p>
+          )}
+        </div>
+        <div className="text-center">
+          <p className="text-3xl animate-pulse">
+            仲間を探しています（{playerCount}）
+          </p>
+        </div>
+      </>
     );
   }
 
-  if (matched && !bothReady) {
+  if (allPlayersReady && !bothReady) {
     return (
       <div className="container p-8 text-center">
-        <h2 className="text-3xl md:text-5xl font-extrabold mb-4 md:mb-6">
-          {opponent
-            ? `${opponent.name} さんとマッチしました！`
-            : "マッチしました！"}
-        </h2>
-        <p className="text-lg md:text-2xl text-gray-500 mb-4">準備できたら「対戦スタート！」を押そう！お互い押すとクイズバトルが始まるよ！</p>
+        <div>
+          <p className="text-3xl md:text-5xl font-extrabold text-yellow-400 mb-6 animate-pulse drop-shadow-[0_0_10px_yellow]">
+            仲間が揃ったよ！
+          </p>
+
+          {/* ルームメンバー表示 */}
+          <div className="flex flex-wrap justify-center gap-1 md:gap-4 mb-6">
+            {roomPlayers.map((p, i) => (
+              <div
+                key={p.socketId}
+                className="w-32 md:w-32 p-2 bg-white rounded-lg shadow-md border-2 border-gray-300"
+              >
+                <p className="font-bold text-lg md:text-xl truncate">{p.playerName}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <p className="text-lg md:text-2xl text-gray-500 mb-4">準備できたら「冒険スタート！」を押そう！全員押すとダンジョンが始まるよ！</p>
         {!readyToStart ? (
           <button
             onClick={() => {
@@ -771,41 +771,14 @@ export default function QuizModePage() {
               animate-pulse
             "
           >
-            対戦スタート！ 
+            冒険スタート！
           </button>
         ) : (
           <p className="text-xl md:text-3xl mt-2">
             {opponent
-              ? `${opponent.name}さんのスタートを待っています…`
-              : "マッチ相手のスタートを待っています…"}
+              ? `全員の準備を待っています…`
+              : "仲間の準備を待っています…"}
           </p>
-        )}
-        {mode === "code" && !readyToStart && (
-          <div className="mt-8">
-            <label className="text-xl md:text-3xl font-bold">
-              もらうハンデ：
-              <input
-                type="number"
-                value={handicap}
-                min={0}
-                max={10000}
-                step={100}
-                onChange={(e) => {
-                  // 入力途中はそのまま
-                  setHandicap(Number(e.target.value));
-                }}
-                onBlur={() => {
-                  // フォーカスを外した瞬間に丸める
-                  setHandicap((prev) =>
-                    Math.min(10000, Math.max(0, Math.floor(prev / 100) * 100))
-                  );
-                }}
-                className="ml-2 border px-2 py-1 w-24 text-center"
-              />
-              点
-            </label>
-            <p className="mt-2 md:text-lg">※100 の単位で設定できます</p>
-          </div>
         )}
       </div>
     );
@@ -819,7 +792,7 @@ export default function QuizModePage() {
   });
 
   return (
-    <div className="container mx-auto p-8 text-center bg-gradient-to-b from-pink-200 via-yellow-200 to-green-200">
+    <div className="container mx-auto p-8 text-center bg-gradient-to-b from-indigo-300 via-slate-300 to-sky-300">
       {countdown !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
           <motion.div
@@ -850,76 +823,147 @@ export default function QuizModePage() {
 
       {!finished ? (
         <>
+          <h2 className="text-5xl md:text-6xl font-extrabold mb-6 text-white drop-shadow-lg">
+            STAGE {stageCount}
+          </h2>
+
           <div className="flex flex-col items-center">
             <p className={`w-[280px] md:w-[400px] text-2xl md:text-4xl font-extrabold mb-2 px-4 py-2 rounded-lg shadow-lg 
                           ${timeLeft <= 30 ? 'bg-red-700 text-white animate-pulse' : 'bg-white text-black border-2 border-black'}`}>
               残り時間: {Math.floor(timeLeft / 60)}分 {timeLeft % 60}秒
             </p>
           </div>
+
+          <div className="mb-3 bg-white p-3 border-2 border-purple-300 rounded-xl mx-auto w-full max-w-md md:max-w-xl">
+            <p className="text-xl md:text-2xl text-center">
+              {getEnemyForStage(stageCount).name}が現れた！
+            </p>
+
+            {/* 敵表示 */}
+            <div className="flex flex-col items-center relative">
+              {/* ダメージ数字ポップ */}
+              <AnimatePresence>
+                {damage > 0 && (
+                  <motion.div
+                    key={damage}
+                    initial={{ opacity: 0, y: 20, scale: 0.8 }}
+                    animate={{ opacity: 1, y: -20, scale: 1.2 }}
+                    exit={{ opacity: 0, y: -40, scale: 0.8 }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    className="absolute -top-3 text-3xl md:text-4xl font-extrabold text-red-600 drop-shadow-lg"
+                  >
+                    -{damage}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* 敵画像（HP減少時に揺れる） */}
+              <motion.img
+                key={enemyHP} // ★ HPが変わるたびにアニメーション
+                src={getEnemyForStage(stageCount).image}
+                alt={getEnemyForStage(stageCount).name}
+                className="w-24 h-24 md:w-32 md:h-32"
+                animate={{ x: [0, -6, 6, -4, 4, 0] }}
+                transition={{ duration: 0.25 }}
+              />
+
+              {/* HPテキスト（残り少ないと赤＆点滅） */}
+              <p
+                className={`text-lg md:text-xl font-bold transition-colors ${
+                  enemyHP / maxHP < 0.3
+                    ? "text-red-600 animate-pulse"
+                    : "text-gray-800"
+                }`}
+              >
+                HP {enemyHP} / {maxHP}
+              </p>
+
+              {/* HPバー */}
+              <div className="w-64 md:w-80 h-4 bg-gray-300 rounded overflow-hidden">
+                <motion.div
+                  className="h-4 bg-red-500 rounded"
+                  initial={false}
+                  animate={{ width: `${(enemyHP / maxHP) * 100}%` }}
+                  transition={{ duration: 0.4 }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {showDefeatEffect && <EnemyDefeatEffect />}
+          {phase === "result" && (
+            <>
+              <p className="mt-1 text-xl md:text-2xl font-bold text-black">
+                正解人数：{results.filter(r => r.isCorrect).length}人
+              </p>
+              <p className="mb-2 text-xl md:text-2xl font-bold text-red-600 drop-shadow-lg">
+                与えたダメージ：{damage}
+              </p>
+            </>
+          )}
           <div className="flex flex-col items-center">
-            <div className="flex justify-center gap-2 md:gap-4 mb-2">
+            <div className="grid grid-cols-4 md:grid-cols-4 gap-1 md:gap-2 mb-2 justify-items-center">
               {orderedPlayers.map((p) => {
                 const isMe = p.socketId === mySocketId;
                 const change = scoreChanges[p.socketId];
+                const result = results.find(r => r.socketId === p.socketId); // ← 結果取得
 
                 return (
                   <div
                     key={p.socketId}
                     className={`
                       relative
-                      w-40 md:w-50 p-2 rounded-lg
+                      w-17 md:w-22
+                      aspect-square
+                      rounded-lg
                       bg-white
                       border-4
-                      ${isMe ? "border-blue-500" : "border-red-500"}
+                      ${isMe ? "border-blue-500" : "border-pink-500"}
                       shadow-md
+                      flex flex-col items-center justify-center
                     `}
                   >
-                    {/* ★ 加点・減点アニメーション */}
-                    <AnimatePresence>
-                      {change !== null && change !== undefined && (
-                        <motion.div
-                          key={change}
-                          initial={{ opacity: 1, y: 0 }}
-                          animate={{ opacity: 0, y: -20 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 1.2, ease: "easeOut" }}
-                          className={`absolute left-1/2 -translate-x-1/2 -bottom-1
-                            font-extrabold text-2xl
-                            ${change > 0 ? "text-green-500" : "text-red-500"}
-                          `}
-                        >
-                          {change > 0 ? `+${change}` : change}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-
-                    <p
-                      className={`font-extrabold text-lg md:text-xl ${
-                        isMe ? "text-blue-600" : "text-red-600"
-                      }`}
-                    >
-                      {isMe ? "自分" : "相手"}
+                    <p className="font-bold text-gray-800 text-lg md:text-xl text-center">
+                      {p.playerName.length > 5 ? p.playerName.slice(0, 5) + "..." : p.playerName}
                     </p>
 
-                    <p className="font-bold text-gray-800 text-lg md:text-2xl">{p.name}</p>
-
-                    <p className="mt-1 text-gray-700 text-lg md:text-2xl">
-                      得点： <span className="font-bold">{p.score}</span>
+                    {/* 結果表示 */}
+                    <p
+                      className={`text-lg md:text-xl font-bold mt-1 ${
+                        phase === "result"
+                          ? result?.isCorrect
+                            ? "text-green-600"
+                            : "text-red-600"
+                          : result
+                            ? "text-gray-800"  // 回答済みだけど結果発表前
+                            : "text-gray-400"  // 回答待ち
+                      }`}
+                    >
+                      {phase === "result"
+                        ? result
+                          ? result.isCorrect
+                            ? "⭕"
+                            : "❌"
+                          : "未回答"
+                        : result
+                          ? "？"
+                          : "思考中"}
                     </p>
 
                     {/* 吹き出し表示 */}
-                    <div className="absolute -bottom-1 w-36 md:w-46">
+                    <div className="absolute -bottom-1 w-20 md:w-28">
                       {visibleMessages
                         .filter(m => m.fromId === p.socketId)
                         .map((m, i) => (
                           <motion.div
                             key={i}
+                            style={{ zIndex: i + 10 }}
                             initial={{ opacity: 0, y: 20, scale: 0.8 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: -20, scale: 0.8 }}
                             transition={{ duration: 0.3, ease: "easeOut" }}
-                            className={`absolute left-0 top-0 w-34 md:w-44 px-2 py-1 rounded shadow text-md md:text-lg font-bold border-2 ${
-                              p.socketId === mySocketId ? "bg-blue-400 text-white border-blue-200" : "bg-red-400 text-white border-red-200"
+                            className={`absolute right-2 md:right-4 top-0 w-16 md:w-20 px-2 py-1 rounded shadow text-sm md:text-md font-bold border-2 ${
+                              isMe ? "bg-blue-400 text-white border-blue-200" : "bg-red-400 text-white border-red-200"
                             }`}
                           >
                             {m.message}
@@ -931,13 +975,6 @@ export default function QuizModePage() {
               })}
             </div>
           </div>
-
-          {/* 相手がまだ回答中のときのメッセージ */}
-          {answeredAll && !finished && (
-            <p className="text-xl md:text-2xl font-bold text-gray-700 mb-4">
-              相手が終わるまで待ってね…
-            </p>
-          )}
 
           {questions[currentIndex]?.quiz && (
             <>
@@ -959,28 +996,52 @@ export default function QuizModePage() {
                       <p className="mt-1 md:mt-2 text-lg md:text-xl text-gray-700">{questions[currentIndex].quiz.trivia}</p>
                     </div>
                   )}
-
-                  <button
-                    className="px-5 py-3 md:px-6 md:py-3 border border-black bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-4 hover:bg-blue-600 cursor-pointer"
-                    onClick={nextQuestion}
-                  >
-                    次の問題へ
-                  </button>
                 </>
               ) : (
                 <>
+                  <p
+                    className={`text-xl md:text-3xl text-center mb-2 font-bold ${
+                      questionTimeLeft <= 5 ? "text-red-500 animate-pulse" : "text-gray-700"
+                    }`}
+                    >
+                    回答の残り時間：{questionTimeLeft}秒
+                  </p>
+
+                  {phase === "result" && (
+                    <div>
+                      <p className="mt-2 text-xl md:text-3xl text-gray-600 font-extrabold">
+                        答え：{questions[currentIndex].quiz.displayAnswer}
+                      </p>
+
+                      <p className="mt-2 mb-3 text-md md:text-xl text-gray-600">
+                        解説：{questions[currentIndex].quiz.answerExplanation}
+                      </p>
+                    </div>
+                  )}
+                
                   <QuizQuestion
                     quiz={questions[currentIndex].quiz}
                     userAnswer={userAnswer}
                     setUserAnswer={setUserAnswer}
                   />
-                  <button
-                    className="px-5 py-3 md:px-6 md:py-3 border border-black bg-blue-500 text-white text-lg md:text-xl font-medium rounded hover:bg-blue-600 cursor-pointer"
-                    onClick={checkAnswer}
-                    disabled={userAnswer === null}
-                  >
-                    回答
-                  </button>
+                  {/* 回答フェーズ */}
+                  {phase === "question" && (
+                    <>
+                      {canAnswer && (
+                        <button
+                          onClick={checkAnswer}
+                          className="px-6 py-3 bg-blue-500 text-white rounded-lg"
+                        >
+                          回答
+                        </button>
+                      )}
+                      {!canAnswer && (
+                        <p className="mt-4 text-xl md:text-2xl font-bold text-gray-600 animate-pulse">
+                          他の人の回答を待っています…
+                        </p>
+                      )}
+                    </>
+                  )}
                 </>
               )}
             </>
@@ -989,7 +1050,7 @@ export default function QuizModePage() {
           <div className="flex flex-col items-center mt-3">
             {/* メッセージボタン */}
             <div className="text-center border border-black p-1 rounded-xl bg-white">
-              {["よろしく！", "強いな！", "負けないぞ！", "ありがとう！"].map((msg) => (
+              {["よろしく！", "ドンマイ！", "まだいける！", "ありがとう！"].map((msg) => (
                 <button
                   key={msg}
                   onClick={() => sendMessage(msg)}
@@ -1003,9 +1064,8 @@ export default function QuizModePage() {
         </>
       ) : (
         <QuizResult
-          correctCount={correctCount}
-          myScore={me?.score ?? 0}
-          opponentScore={opponent?.score ?? 0}
+          correctCount={0}
+          stageCount={stageCount}
           onRetry={handleRetry}
           matchEnded={matchEnded}
           rematchAvailable={rematchAvailable}

@@ -17,6 +17,11 @@ export const useBattle = (playerName: string) => {
   const [mySocketId, setMySocketId] = useState<string>("");
   const [startAt, setStartAt] = useState<number | null>(null);
   const [handicap, setHandicap] = useState<number>(0);
+  const [enemyHP, setEnemyHP] = useState<number>(0);
+  const [maxHP, setMaxHP] = useState<number>(0);
+  const [stageCount, setStageCount] = useState<number>(1);
+  const [roomPlayers, setRoomPlayers] = useState<{ socketId: string; name: string }[]>([]);
+  const [playerCount, setPlayerCount] = useState("0/4");
   const sendMessage = (message: string) => {
     if (!socket || !roomCode) return;
     socket.emit("send_message", { roomCode, fromId: mySocketId, message });
@@ -65,6 +70,7 @@ export const useBattle = (playerName: string) => {
       setStartAt(startAt);
       setBothReady(true);
       setScoreChanges({});
+      setStageCount(1);
     });
 
     /* =========================
@@ -80,6 +86,7 @@ export const useBattle = (playerName: string) => {
       setPlayers(players);
       setQuestionIds(questionIds);
       setMatched(true);
+      setStageCount(1);
     });
 
     s.on("start_game_with_handicap", ({ startAt, players, questionIds }) => {
@@ -129,26 +136,112 @@ export const useBattle = (playerName: string) => {
     };
   }, []);
 
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleRoomPlayersUpdate = ({
+      gameType,
+      players,
+      current,
+      max
+    }: {
+      gameType: "quiz" | "dungeon";
+      players: { socketId: string; playerName: string }[];
+      current: number;
+      max: number;
+    }) => {
+      setRoomPlayers(players.map(p => ({ socketId: p.socketId, name: p.playerName })));
+      setPlayerCount(`${current}/${max}`);
+      console.log(`[update_room_count] ${current}/${max}`, players);
+
+      if (gameType === "dungeon") {
+        setPlayers(players.map(p => ({
+          socketId: p.socketId,
+          name: p.playerName,
+          score: 0, // 初期スコア
+        })));
+      }
+    };
+
+    socket.on("update_room_count", handleRoomPlayersUpdate);
+
+    return () => {
+      socket.off("update_room_count", handleRoomPlayersUpdate);
+    };
+  }, [socket]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const onEnemyState = ({ enemyHP, maxHP }: {
+      enemyHP: number;
+      maxHP: number;
+    }) => {
+      setEnemyHP(enemyHP);
+      setMaxHP(maxHP);
+    };
+
+    socket.on("enemy_state", onEnemyState);
+    socket.on("answer_result", onEnemyState); // ★ 共通処理
+
+    return () => {
+      socket.off("enemy_state", onEnemyState);
+      socket.off("answer_result", onEnemyState);
+    };
+  }, [socket]);
+  /* =========================
+     ステージクリア
+  ========================= */
+  useEffect(() => {
+    if (!socket) return;
+
+    const onStageClear = ({
+      stage,
+      enemyHP,
+      maxHP,
+    }: {
+      stage: number;
+      enemyHP: number;
+      maxHP: number;
+    }) => {
+      setStageCount(stage);
+      setEnemyHP(enemyHP);
+      setMaxHP(maxHP);
+    };
+
+    socket.on("stage_clear", onStageClear);
+
+    return () => {
+      socket.off("stage_clear", onStageClear);
+    };
+  }, [socket]);
+
+
   /* =========================
      参加処理
   ========================= */
-  const joinRandom = (onJoined?: (code: string) => void) => {
+  const joinRandom = (options?: { maxPlayers?: number; gameType?: "quiz" | "dungeon" }, onJoined?: (code: string) => void) => {
     if (!socket) return;
-    socket.emit("join_random", playerName);
+    const maxPlayers = options?.maxPlayers ?? 2;
+    const gameType = options?.gameType ?? "quiz";
+    socket.emit("join_random", { playerName, maxPlayers, gameType });
     socket.on("start_game", ({ roomCode: code }) => {
       setRoomCode(code);
       if (onJoined) onJoined(code);
     });
   };
 
-  const joinWithCode = (code: string) => {
+  const joinWithCode = (code: string, count: string, gameType: string) => {
     if (!socket) {
       console.warn("[useBattle] joinWithCode: socket 未接続");
       return;
     }
+    const roomKey = `${gameType}_${code}`;
     socket.emit("join_with_code", {
       playerName,
-      code,
+      code: roomKey,
+      count,
+      gameType,
     });
   };
 
@@ -213,6 +306,8 @@ export const useBattle = (playerName: string) => {
     resetMatch,
     updateStartAt,
     setHandicap,
+    setRoomPlayers,
+    setPlayerCount,
     players,
     roomCode,
     questionIds,
@@ -222,5 +317,8 @@ export const useBattle = (playerName: string) => {
     mySocketId,
     socket,
     handicap,
+    enemyHP,
+    maxHP,
+    stageCount,
   };
 };
