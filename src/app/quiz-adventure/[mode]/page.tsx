@@ -942,8 +942,8 @@ export default function QuizModePage() {
                       {phase === "result"
                         ? result
                           ? result.isCorrect
-                            ? "⭕"
-                            : "❌"
+                            ? "正解〇"
+                            : "誤答×"
                           : "未回答"
                         : result
                           ? "？"
@@ -999,13 +999,15 @@ export default function QuizModePage() {
                 </>
               ) : (
                 <>
-                  <p
-                    className={`text-xl md:text-3xl text-center mb-2 font-bold ${
-                      questionTimeLeft <= 5 ? "text-red-500 animate-pulse" : "text-gray-700"
-                    }`}
-                    >
-                    回答の残り時間：{questionTimeLeft}秒
-                  </p>
+                  {phase !== "result" && (
+                    <p
+                      className={`text-xl md:text-3xl text-center mb-2 font-bold ${
+                        questionTimeLeft <= 5 ? "text-red-500 animate-pulse" : "text-gray-700"
+                      }`}
+                      >
+                      回答の残り時間：{questionTimeLeft}秒
+                    </p>
+                  )}
 
                   {phase === "result" && (
                     <div>
@@ -1019,11 +1021,13 @@ export default function QuizModePage() {
                     </div>
                   )}
                 
-                  <QuizQuestion
-                    quiz={questions[currentIndex].quiz}
-                    userAnswer={userAnswer}
-                    setUserAnswer={setUserAnswer}
-                  />
+                  {phase !== "result" && (
+                    <QuizQuestion
+                      quiz={questions[currentIndex].quiz}
+                      userAnswer={userAnswer}
+                      setUserAnswer={setUserAnswer}
+                    />
+                  )}
                   {/* 回答フェーズ */}
                   {phase === "question" && (
                     <>
