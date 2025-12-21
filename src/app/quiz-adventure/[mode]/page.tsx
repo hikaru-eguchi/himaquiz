@@ -309,6 +309,7 @@ export default function QuizModePage() {
   const [roomPlayers, setRoomPlayers] = useState<Player[]>([]);
   const [maxPlayers, setMaxPlayers] = useState(4);
   const [roomLocked, setRoomLocked] = useState(false);
+  const [allPlayersDead, setAllPlayersDead] = useState(false);
   const roomLockedRef = useRef(false);
   useEffect(() => {
     roomLockedRef.current = roomLocked;
@@ -376,6 +377,8 @@ export default function QuizModePage() {
     enemyHP,
     maxHP,
     stageCount,
+    playerLives,
+    isGameOver,
   } = useBattle(playerName);
 
   const questionPhase = useQuestionPhase(
@@ -391,6 +394,7 @@ export default function QuizModePage() {
   const questionTimeLeft = questionPhase?.questionTimeLeft ?? 15;
   const submitAnswer = questionPhase?.submitAnswer ?? (() => {});
   const [displayedEnemyHP, setDisplayedEnemyHP] = useState(enemyHP);
+  const [displayLives, setDisplayLives] = useState<Record<string, number>>({});
   
   const players: Player[] = rawPlayers.map((p) => ({
     socketId: p.socketId,
@@ -597,6 +601,23 @@ export default function QuizModePage() {
   }, [timeLeft]);
 
   useEffect(() => {
+    if (!isGameOver) return;
+
+    const deadTimer  = setTimeout(() => {
+      setAllPlayersDead(true);
+    }, 4000);
+
+    const finishTimer  = setTimeout(() => {
+      setFinished(true);
+    }, 8000); // ← 正解発表演出のあと
+
+    return () => {
+      clearTimeout(deadTimer);
+      clearTimeout(finishTimer);
+    };
+  }, [phase, isGameOver]);
+
+  useEffect(() => {
     if (!bothReady) return;
 
     setCountdown(3);
@@ -642,6 +663,13 @@ export default function QuizModePage() {
 
   useEffect(() => {
     if (!bothReadyState) return;
+
+    const resetLives: Record<string, number> = {};
+    players.forEach(p => {
+      resetLives[p.socketId] = 3;
+    });
+
+    setDisplayLives(resetLives);
 
     // まず3秒にリセット
     setCountdown(3);
@@ -745,9 +773,20 @@ export default function QuizModePage() {
   }, [enemyHP]);
 
   useEffect(() => {
+    setDisplayLives(playerLives);
     setDisplayedEnemyHP(getEnemyForStage(stageCount).hp); // 新しい敵のHPにリセット
     setShowDefeatEffect(false); // 「倒した！」演出を非表示に
   }, [stageCount]);
+
+  useEffect(() => {
+    if (phase !== "result") return;
+
+    const timer = setTimeout(() => {
+      setDisplayLives(playerLives);
+    }, 600); // ← 正解発表演出のあと
+
+    return () => clearTimeout(timer);
+  }, [phase, playerLives]);
 
   useEffect(() => {
     if (!socket) return;
@@ -778,6 +817,8 @@ export default function QuizModePage() {
         setTimeUp(false);
         setCountdown(null);
         setTimeLeft(totalTime);
+        setDisplayLives({});
+        setAllPlayersDead(false);
 
         // 新しいゲーム開始
         updateStartAt(startAt);
@@ -879,6 +920,8 @@ export default function QuizModePage() {
   }
 
   const allPlayersReady = roomPlayers.length >= maxPlayers;
+  const myLife = playerLives[mySocketId] ?? 3;
+  const isDead = myLife <= 0;
 
   if (!allPlayersReady) {
     return (
@@ -1096,12 +1139,23 @@ export default function QuizModePage() {
             </div>
           )}
 
+          <p className="text-gray-600">不正解の場合、ライフが1減少します。</p>
+
           <div className="flex flex-col items-center">
             <div className="grid grid-cols-4 md:grid-cols-4 gap-1 md:gap-2 mb-2 justify-items-center">
               {orderedPlayers.map((p) => {
                 const isMe = p.socketId === mySocketId;
                 const change = scoreChanges[p.socketId];
                 const result = results.find(r => r.socketId === p.socketId); // ← 結果取得
+                const life = displayLives[p.socketId] ?? 3;
+                const lifeColor =
+                  life <= 0
+                    ? "text-red-700"
+                    : life === 1
+                      ? "text-red-500"
+                      : life === 2
+                        ? "text-orange-400"
+                        : "text-green-500";
 
                 return (
                   <div
@@ -1131,7 +1185,7 @@ export default function QuizModePage() {
                             : "text-red-600"
                           : result
                             ? "text-gray-800"  // 回答済みだけど結果発表前
-                            : "text-gray-400"  // 回答待ち
+                            : lifeColor  // 回答待ち
                       }`}
                     >
                       {phase === "result"
@@ -1144,7 +1198,7 @@ export default function QuizModePage() {
                           : "　" // 表示させない場合は空文字
                         : result
                           ? "？"
-                          : "思考中"
+                          : `ライフ:${life}`
                       }
                     </p>
 
@@ -1173,8 +1227,22 @@ export default function QuizModePage() {
               })}
             </div>
           </div>
+
+          {isGameOver && allPlayersDead && (
+            <p className="
+              mt-10 mb-15
+              text-3xl md:text-5xl
+              font-extrabold
+              tracking-wider
+              text-red-600
+              drop-shadow-lg
+              animate-pulse
+            ">
+              パーティが全滅した…
+            </p>
+          )}
   
-          {phase === "result" && (
+          {phase === "result" && !allPlayersDead &&(
             <>
               <div>
                 {showAnswerText && (
@@ -1251,15 +1319,18 @@ export default function QuizModePage() {
                   {/* 回答フェーズ */}
                   {phase === "question" && (
                     <>
-                      {canAnswer && (
+                      {isDead ? (
+                        <p className="mt-4 text-xl md:text-2xl font-bold text-gray-800">
+                          ライフが0のため、回答できません
+                        </p>
+                      ) : canAnswer ? (
                         <button
                           onClick={checkAnswer}
                           className="px-6 py-3 bg-blue-500 text-white rounded-lg"
                         >
                           回答
                         </button>
-                      )}
-                      {!canAnswer && (
+                      ) : (
                         <p className="mt-4 text-xl md:text-2xl font-bold text-gray-600 animate-pulse">
                           他の人の回答を待っています…
                         </p>

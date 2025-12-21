@@ -26,6 +26,8 @@ export const useBattle = (playerName: string) => {
     if (!socket || !roomCode) return;
     socket.emit("send_message", { roomCode, fromId: mySocketId, message });
   };
+  const [playerLives, setPlayerLives] = useState<Record<string, number>>({});
+  const [isGameOver, setIsGameOver] = useState(false);
 
   const [scoreChanges, setScoreChanges] = useState<Record<string, number | null>>(
     {}
@@ -65,12 +67,14 @@ export const useBattle = (playerName: string) => {
 
     s.on("rematch_start", ({ startAt, questionIds, players }: { startAt: number; questionIds: string[]; players: Player[] }) => {
       console.log("[rematch_start]", startAt);
+      setIsGameOver(false);
       setPlayers(players);
       setQuestionIds(questionIds);
       setStartAt(startAt);
       setBothReady(true);
       setScoreChanges({});
       setStageCount(1);
+      setPlayerLives({});
     });
 
     /* =========================
@@ -82,18 +86,22 @@ export const useBattle = (playerName: string) => {
       console.log("players:", players);
       console.log("mySocketId:", s.id);
 
+      setIsGameOver(false);
       setRoomCode(roomCode);
       setPlayers(players);
       setQuestionIds(questionIds);
       setMatched(true);
       setStageCount(1);
+      setPlayerLives({});
     });
 
     s.on("start_game_with_handicap", ({ startAt, players, questionIds }) => {
+      setIsGameOver(false);
       setPlayers(players);
       setQuestionIds(questionIds);
       setStartAt(startAt);
       setBothReady(true);
+      setPlayerLives({});
     });
 
     /* =========================
@@ -216,6 +224,48 @@ export const useBattle = (playerName: string) => {
     };
   }, [socket]);
 
+  /* =========================
+     プレイヤーライフ関連
+  ========================= */
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const onUpdateLife = ({
+      socketId,
+      life,
+    }: {
+      socketId: string;
+      life: number;
+    }) => {
+      setPlayerLives(prev => ({
+        ...prev,
+        [socketId]: life,
+      }));
+    };
+
+    socket.on("update_life", onUpdateLife);
+
+    return () => {
+      socket.off("update_life", onUpdateLife);
+    };
+  }, [socket]);
+  
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const onGameOver = ({ reason }: { reason: string }) => {
+      console.log("[game_over]", reason);
+      setIsGameOver(true);
+    };
+
+    socket.on("game_over", onGameOver);
+
+    return () => {
+      socket.off("game_over", onGameOver);
+    };
+  }, [socket]);
 
   /* =========================
      参加処理
@@ -286,6 +336,7 @@ export const useBattle = (playerName: string) => {
     マッチ状態リセット
   ========================= */
   const resetMatch = () => {
+    setIsGameOver(false);
     setRoomCode(null);
     setPlayers([]);
     setQuestionIds([]);
@@ -320,5 +371,7 @@ export const useBattle = (playerName: string) => {
     enemyHP,
     maxHP,
     stageCount,
+    playerLives,
+    isGameOver,
   };
 };
