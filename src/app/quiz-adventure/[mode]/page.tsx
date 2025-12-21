@@ -7,9 +7,6 @@ import { QuizData } from "@/lib/articles";
 import { motion, AnimatePresence } from "framer-motion";
 import { useBattle } from "../../../hooks/useBattle";
 import { useQuestionPhase } from "../../../hooks/useQuestionPhase";
-import PlayerAttackEffect from "../../components/battle/PlayerAttackEffect";
-import EnemyAttackEffect from "../../components/battle/EnemyAttackEffect";
-import EnemyDefeatEffect from "../../components/battle/EnemyDefeatEffect";
 
 // 敵情報
 const enemies = [
@@ -76,6 +73,8 @@ interface Player {
 interface QuizResultProps {
   correctCount: number;
   stageCount: number;
+  titles: { threshold: number; title: string }[];
+  getTitle: () => string;
   onRetry: () => void;
   matchEnded: boolean;
   rematchAvailable: boolean;
@@ -84,9 +83,31 @@ interface QuizResultProps {
   handleRematch: () => void;
 }
 
+// 正解数に応じて出すコメント
+const rankComments = [
+  { threshold: 0, comment: "ここから冒険の始まりだ！ゆっくり進んでいこう！" },
+  { threshold: 2, comment: "クイズ戦士に昇格！戦場に立つ準備は万端だ！" },
+  { threshold: 5, comment: "謎解きファイター！試練に立ち向かう力がついてきた！" },
+  { threshold: 7, comment: "頭脳の騎士！君の知識が冒険の武器になる！" },
+  { threshold: 10, comment: "ひらめきハンター！まるで答えが見えているかのような閃きだ！" },
+  { threshold: 15, comment: "真理の探究者！知識の深みを極め、迷宮を読み解く力がある！" },
+  { threshold: 20, comment: "知恵の勇者！知識と勇気を兼ね備えた英雄だ！" },
+  { threshold: 25, comment: "クイズ大賢者！君の選択はすべて正解へ導かれている…！" },
+  { threshold: 30, comment: "答えの覇者！あらゆる難問をねじ伏せる圧倒的なパワー！" },
+  { threshold: 35, comment: "クイズ超越者！もう次元が違う…これは人間離れしている！" },
+  { threshold: 40, comment: "フロアマスター！あらゆるステージを制覇する者の風格だ！" },
+  { threshold: 45, comment: "グランドマスター！歴戦の賢者のような威厳がある！" },
+  { threshold: 50, comment: "クイズマスター！最強の中の最強…殿堂入りレベル！" },
+  { threshold: 65, comment: "レジェンドクイズマスター！伝説に語り継がれる存在だ…！" },
+  { threshold: 80, comment: "クイズ王…！ついにクイズマスターを倒した！🎉君はクイズ界の王者だ！！" },
+  { threshold: 100, comment: "クイズ神…！ついにクイズ王を倒した！🎉🎉一番すごい称号に到達だ！✨" },
+];
+
 const QuizResult = ({
   correctCount,
   stageCount,
+  titles,
+  getTitle,
   onRetry,
   matchEnded,
   rematchAvailable,
@@ -96,12 +117,22 @@ const QuizResult = ({
 }: QuizResultProps) => {
   const [showScore, setShowScore] = useState(false);
   const [showText, setShowText] = useState(false);
+  const [showRank, setShowRank] = useState(false);
   const [showButton, setShowButton] = useState(false);
+
+  const getRankComment = () => {
+    let comment = "";
+    rankComments.forEach((r) => {
+      if (correctCount >= r.threshold) comment = r.comment;
+    });
+    return comment;
+  };
 
   useEffect(() => {
     const timers: NodeJS.Timeout[] = [];
     timers.push(setTimeout(() => setShowScore(true), 500));
     timers.push(setTimeout(() => setShowText(true), 1000));
+    timers.push(setTimeout(() => setShowRank(true), 1300));
     timers.push(setTimeout(() => setShowButton(true), 1500));
     return () => timers.forEach(clearTimeout);
   }, []);
@@ -117,13 +148,40 @@ const QuizResult = ({
       ============================ */}
       {showScore && (
         <>
-          <p className="text-2xl md:text-4xl mb-2">
+          <p className="text-2xl md:text-4xl mb-2 md:mb-4">
             正解数：{correctCount}問
           </p>
 
-          <p className="text-2xl md:text-4xl font-bold mb-2">
+          <p className="text-3xl md:text-5xl font-bold mb-2 md:mb-4">
             到達ステージ：{stageCount} 
           </p>
+        </>
+      )}
+
+      {showText && <p className="text-xl md:text-2xl text-gray-600 mb-2">あなたの称号は…</p>}
+
+      {showRank && (
+        <>
+          <div className="flex flex-col md:flex-row items-center justify-center mb-10 gap-4 md:gap-10">
+            <img src="/images/yuusya_game.png" alt="勇者" className="w-0 h-0 md:w-50 md:h-60" />
+            <p
+              className={`text-4xl md:text-6xl font-bold drop-shadow-lg text-center animate-pulse text-blue-600
+              }`}
+            >
+              {getTitle()}
+            </p>
+            <div className="flex flex-row md:flex-row items-center justify-center gap-8">
+              <img src="/images/yuusya_game.png" alt="勇者" className="w-20 h-25 md:w-0 md:h-0" />
+              <img src="/images/dragon.png" alt="ドラゴン" className="w-20 h-18 md:w-50 md:h-45" />
+            </div>
+          </div>
+
+          {/* ★ 正解数に応じたコメント */}
+          {getRankComment() && (
+            <p className="text-lg md:text-2xl text-gray-800 mb-8 font-bold whitespace-pre-line">
+              {getRankComment()}
+            </p>
+          )}
         </>
       )}
 
@@ -235,11 +293,11 @@ export default function QuizModePage() {
   const [bothReadyState, setBothReadyState] = useState(false);
   const [handicap, setHandicap] = useState<number>(0);
   const [showDefeatEffect, setShowDefeatEffect] = useState(false);
-  const [showAttackEffect, setShowAttackEffect] = useState(false);
-  const [showEnemyHit, setShowEnemyHit] = useState(false);
+  const [showDamage, setShowDamage] = useState(false);
   const [lastDamage, setLastDamage] = useState(0);
   const [userAnswer, setUserAnswer] = useState<number | null>(null);
   const [roomFull, setRoomFull] = useState(false);
+  const [showStageEntrance, setShowStageEntrance] = useState(false);
   const [playerCount, setPlayerCount] = useState("0/4");
   const [roomPlayers, setRoomPlayers] = useState<Player[]>([]);
   const [maxPlayers, setMaxPlayers] = useState(4);
@@ -265,6 +323,32 @@ export default function QuizModePage() {
     if (stage < 16) return 195;
     if (stage < 17) return 210;
     return 225;
+  };
+
+  const titles = [
+    { threshold: 2, title: "クイズ戦士" },
+    { threshold: 5, title: "謎解きファイター" },
+    { threshold: 7, title: "頭脳の騎士" },
+    { threshold: 10, title: "ひらめきハンター" },
+    { threshold: 15, title: "真理の探究者" },
+    { threshold: 20, title: "知恵の勇者 🛡️" },
+    { threshold: 25, title: "クイズ大賢者 ⭐" },
+    { threshold: 30, title: "答えの覇者 🌀" },
+    { threshold: 35, title: "クイズ超越者 🌌" },
+    { threshold: 40, title: "フロアマスター 🏆" },
+    { threshold: 45, title: "グランドマスター 🏆" },
+    { threshold: 50, title: "クイズマスター 🏆" },
+    { threshold: 65, title: "レジェンドクイズマスター 🌟" },
+    { threshold: 80, title: "✨クイズ王👑" },
+    { threshold: 100, title: "💫クイズ神💫" },
+  ];
+
+  const getTitle = () => {
+    let title = "見習い冒険者";
+    titles.forEach((t) => {
+      if (correctCount >= t.threshold) title = t.title;
+    });
+    return title;
   };
 
   const {
@@ -581,6 +665,31 @@ export default function QuizModePage() {
     }
   }, [enemyHP, maxHP]);
 
+  // damage が変わったら表示
+  useEffect(() => {
+    if (damage > 0) {
+      setLastDamage(damage);
+      setShowDamage(true);
+
+      const timer = setTimeout(() => {
+        setShowDamage(false);
+      }, 2000); // 1秒で消える
+
+      return () => clearTimeout(timer);
+    }
+  }, [damage]);
+
+  useEffect(() => {
+    // ステージが変わるたびに演出を出す
+    setShowStageEntrance(true);
+
+    const timer = setTimeout(() => {
+      setShowStageEntrance(false);
+    }, 2000); // 2秒表示
+
+    return () => clearTimeout(timer);
+  }, [stageCount]); // stageCountが変わるたびに発火
+
   useEffect(() => {
     if (!socket) return;
 
@@ -602,6 +711,7 @@ export default function QuizModePage() {
         console.log("[rematch_start]再戦開始通知", startAt);
 
         // 状態をリセット
+        setCorrectCount(0)
         handleRetry();           // 問題やスコアをリセット
         setRematchRequested(false);
         setRematchAvailable(false);
@@ -646,6 +756,7 @@ export default function QuizModePage() {
 
     if (userAnswer === correctAnswer) {
       submitAnswer(true)
+      setCorrectCount(prev => prev + 1);
     } else {
       submitAnswer(false)
     }
@@ -830,42 +941,75 @@ export default function QuizModePage() {
           <div className="flex flex-col items-center">
             <p className={`w-[280px] md:w-[400px] text-2xl md:text-4xl font-extrabold mb-2 px-4 py-2 rounded-lg shadow-lg 
                           ${timeLeft <= 30 ? 'bg-red-700 text-white animate-pulse' : 'bg-white text-black border-2 border-black'}`}>
-              残り時間: {Math.floor(timeLeft / 60)}分 {timeLeft % 60}秒
+              制限時間: {Math.floor(timeLeft / 60)}分 {timeLeft % 60}秒
             </p>
           </div>
 
           <div className="mb-3 bg-white p-3 border-2 border-purple-300 rounded-xl mx-auto w-full max-w-md md:max-w-xl">
-            <p className="text-xl md:text-2xl text-center">
-              {getEnemyForStage(stageCount).name}が現れた！
+            <p className="text-xl md:text-2xl text-center font-bold">
+              {enemyHP <= 0
+                ? `${getEnemyForStage(stageCount).name}を倒した！`
+                : `${getEnemyForStage(stageCount).name}が現れた！`}
             </p>
 
             {/* 敵表示 */}
             <div className="flex flex-col items-center relative">
-              {/* ダメージ数字ポップ */}
               <AnimatePresence>
-                {damage > 0 && (
+                {showStageEntrance && (
                   <motion.div
-                    key={damage}
+                    key="stage-entrance"
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0 }}
+                      transition={{ duration: 0.8 }}
+                      className="text-center"
+                    >
+                      <img
+                        src={getEnemyForStage(stageCount).image}
+                        alt={getEnemyForStage(stageCount).name}
+                        className="w-40 h-40 md:w-60 md:h-60 mx-auto"
+                      />
+                      <p className="text-3xl md:text-5xl font-extrabold text-white mt-4 drop-shadow-lg">
+                        {getEnemyForStage(stageCount).name} が現れた！
+                      </p>
+                    </motion.div>
+                  </motion.div>
+                )}
+                {/* ダメージ数字ポップ */}
+                {showDamage && lastDamage > 0 && (
+                  <motion.div
+                    key={lastDamage} // damage ごとにアニメーション更新
                     initial={{ opacity: 0, y: 20, scale: 0.8 }}
                     animate={{ opacity: 1, y: -20, scale: 1.2 }}
                     exit={{ opacity: 0, y: -40, scale: 0.8 }}
                     transition={{ duration: 0.6, ease: "easeOut" }}
-                    className="absolute -top-3 text-3xl md:text-4xl font-extrabold text-red-600 drop-shadow-lg"
+                    className="absolute -top-2 text-3xl md:text-4xl font-extrabold text-red-600 drop-shadow-lg"
                   >
-                    -{damage}
+                    -{lastDamage}
                   </motion.div>
                 )}
-              </AnimatePresence>
 
-              {/* 敵画像（HP減少時に揺れる） */}
-              <motion.img
-                key={enemyHP} // ★ HPが変わるたびにアニメーション
-                src={getEnemyForStage(stageCount).image}
-                alt={getEnemyForStage(stageCount).name}
-                className="w-24 h-24 md:w-32 md:h-32"
-                animate={{ x: [0, -6, 6, -4, 4, 0] }}
-                transition={{ duration: 0.25 }}
-              />
+                {/* 敵画像（HP減少時に揺れる） */}
+                {enemyHP > 0 ? ( // HP 0でも showDefeatEffect を使ってフェードアウト
+                  <motion.img
+                    key={getEnemyForStage(stageCount).id} // 敵ごとにユニークに
+                    src={getEnemyForStage(stageCount).image}
+                    alt={getEnemyForStage(stageCount).name}
+                    className="w-24 h-24 md:w-32 md:h-32"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1, x: [0, -6, 6, -4, 4, 0] }} // HP減少時の揺れも反映
+                    exit={{ opacity: 0 }}
+                    transition={{ opacity: { duration: 3 } }} // フェードアウト3秒
+                  />
+                ) : null}
+              </AnimatePresence>
 
               {/* HPテキスト（残り少ないと赤＆点滅） */}
               <p
@@ -890,7 +1034,6 @@ export default function QuizModePage() {
             </div>
           </div>
 
-          {showDefeatEffect && <EnemyDefeatEffect />}
           {phase === "result" && (
             <>
               <p className="mt-1 text-xl md:text-2xl font-bold text-black">
@@ -1005,7 +1148,7 @@ export default function QuizModePage() {
                         questionTimeLeft <= 5 ? "text-red-500 animate-pulse" : "text-gray-700"
                       }`}
                       >
-                      回答の残り時間：{questionTimeLeft}秒
+                      回答タイマー：{questionTimeLeft}秒
                     </p>
                   )}
 
@@ -1054,7 +1197,7 @@ export default function QuizModePage() {
           <div className="flex flex-col items-center mt-3">
             {/* メッセージボタン */}
             <div className="text-center border border-black p-1 rounded-xl bg-white">
-              {["よろしく！", "ドンマイ！", "まだいける！", "ありがとう！"].map((msg) => (
+              {["よろしく！", "やったね✌", "まだいける！", "ありがとう！"].map((msg) => (
                 <button
                   key={msg}
                   onClick={() => sendMessage(msg)}
@@ -1068,8 +1211,10 @@ export default function QuizModePage() {
         </>
       ) : (
         <QuizResult
-          correctCount={0}
+          correctCount={correctCount}
           stageCount={stageCount}
+          getTitle={getTitle}
+          titles={titles}
           onRetry={handleRetry}
           matchEnded={matchEnded}
           rematchAvailable={rematchAvailable}
