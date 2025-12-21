@@ -148,12 +148,12 @@ const QuizResult = ({
       ============================ */}
       {showScore && (
         <>
-          <p className="text-2xl md:text-4xl mb-2 md:mb-4">
+          <p className="text-3xl md:text-5xl mb-2 md:mb-6">
             正解数：{correctCount}問
           </p>
 
-          <p className="text-3xl md:text-5xl font-bold mb-2 md:mb-4">
-            到達ステージ：{stageCount} 
+          <p className="text-3xl md:text-5xl font-bold mb-2 md:mb-6">
+            {stageCount} ステージまで到達！
           </p>
         </>
       )}
@@ -298,6 +298,13 @@ export default function QuizModePage() {
   const [userAnswer, setUserAnswer] = useState<number | null>(null);
   const [roomFull, setRoomFull] = useState(false);
   const [showStageEntrance, setShowStageEntrance] = useState(false);
+  const [showStageEvent, setShowStageEvent] = useState(false);
+  const [showAnswer, setShowAnswer] = useState(false);
+  const [showAnswerText, setShowAnswerText] = useState(false);
+  const [showExplanation, setShowExplanation] = useState(false);
+  const [showDamageResult, setShowDamageResult] = useState(false);
+  const [showCorrectCount, setShowCorrectCount] = useState(false);
+  const [dungeonStart, setDungeonStart] = useState(false);
   const [playerCount, setPlayerCount] = useState("0/4");
   const [roomPlayers, setRoomPlayers] = useState<Player[]>([]);
   const [maxPlayers, setMaxPlayers] = useState(4);
@@ -383,6 +390,7 @@ export default function QuizModePage() {
   const currentIndex = questionPhase?.currentIndex ?? 0;
   const questionTimeLeft = questionPhase?.questionTimeLeft ?? 15;
   const submitAnswer = questionPhase?.submitAnswer ?? (() => {});
+  const [displayedEnemyHP, setDisplayedEnemyHP] = useState(enemyHP);
   
   const players: Player[] = rawPlayers.map((p) => ({
     socketId: p.socketId,
@@ -601,7 +609,10 @@ export default function QuizModePage() {
 
           setTimeout(() => {
             setCountdown(null);
+            setDungeonStart(true);
+            setShowStageEvent(true);
           }, 800);
+          setShowStageEvent(false);
 
           return 0;
         }
@@ -668,27 +679,75 @@ export default function QuizModePage() {
   // damage が変わったら表示
   useEffect(() => {
     if (damage > 0) {
-      setLastDamage(damage);
-      setShowDamage(true);
-
       const timer = setTimeout(() => {
-        setShowDamage(false);
-      }, 2000); // 1秒で消える
+        setLastDamage(damage);
+        setShowDamage(true);
+
+        const timer = setTimeout(() => {
+          setShowDamage(false);
+        }, 2000); // 1秒で消える
+      }, 3000);// 3秒遅延
 
       return () => clearTimeout(timer);
     }
   }, [damage]);
 
   useEffect(() => {
-    // ステージが変わるたびに演出を出す
-    setShowStageEntrance(true);
+      // ステージが変わるたびに演出を出す
+      setShowStageEntrance(true);
 
-    const timer = setTimeout(() => {
-      setShowStageEntrance(false);
-    }, 2000); // 2秒表示
+      const timer = setTimeout(() => {
+        setShowStageEntrance(false);
+      }, 2000); // 2秒表示
 
     return () => clearTimeout(timer);
-  }, [stageCount]); // stageCountが変わるたびに発火
+  }, [stageCount,showStageEvent]); // stageCountが変わるたびに発火
+
+  useEffect(() => {
+    if (phase === "result") {
+      setShowAnswerText(false);
+      setShowAnswer(false);
+      setShowExplanation(false);
+      setShowCorrectCount(false);
+      setShowDamageResult(false);
+      
+      // 正解は、、を表示
+      const answerTextTimer = setTimeout(() => setShowAnswerText(true), 200);
+
+      // 答えを表示
+      const answerTimer = setTimeout(() => setShowAnswer(true), 1000);
+
+      // 解説を表示
+      const explanationTimer = setTimeout(() => setShowExplanation(true), 2000);
+
+      // 正解人数表示
+      const correctCountTimer = setTimeout(() => setShowCorrectCount(true), 3000);
+
+      // ダメージ表示
+      const damageTimer = setTimeout(() => setShowDamageResult(true), 3000);
+
+      return () => {
+        clearTimeout(answerTextTimer);
+        clearTimeout(answerTimer);
+        clearTimeout(explanationTimer);
+        clearTimeout(correctCountTimer);
+        clearTimeout(damageTimer);
+      };
+    }
+  }, [phase]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDisplayedEnemyHP(enemyHP); // 3秒後に表示を更新
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [enemyHP]);
+
+  useEffect(() => {
+    setDisplayedEnemyHP(getEnemyForStage(stageCount).hp); // 新しい敵のHPにリセット
+    setShowDefeatEffect(false); // 「倒した！」演出を非表示に
+  }, [stageCount]);
 
   useEffect(() => {
     if (!socket) return;
@@ -945,105 +1004,98 @@ export default function QuizModePage() {
             </p>
           </div>
 
-          <div className="mb-3 bg-white p-3 border-2 border-purple-300 rounded-xl mx-auto w-full max-w-md md:max-w-xl">
-            <p className="text-xl md:text-2xl text-center font-bold">
-              {enemyHP <= 0
-                ? `${getEnemyForStage(stageCount).name}を倒した！`
-                : `${getEnemyForStage(stageCount).name}が現れた！`}
-            </p>
-
-            {/* 敵表示 */}
-            <div className="flex flex-col items-center relative">
-              <AnimatePresence>
-                {showStageEntrance && (
-                  <motion.div
-                    key="stage-entrance"
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      exit={{ scale: 0 }}
-                      transition={{ duration: 0.8 }}
-                      className="text-center"
-                    >
-                      <img
-                        src={getEnemyForStage(stageCount).image}
-                        alt={getEnemyForStage(stageCount).name}
-                        className="w-40 h-40 md:w-60 md:h-60 mx-auto"
-                      />
-                      <p className="text-3xl md:text-5xl font-extrabold text-white mt-4 drop-shadow-lg">
-                        {getEnemyForStage(stageCount).name} が現れた！
-                      </p>
-                    </motion.div>
-                  </motion.div>
-                )}
-                {/* ダメージ数字ポップ */}
-                {showDamage && lastDamage > 0 && (
-                  <motion.div
-                    key={lastDamage} // damage ごとにアニメーション更新
-                    initial={{ opacity: 0, y: 20, scale: 0.8 }}
-                    animate={{ opacity: 1, y: -20, scale: 1.2 }}
-                    exit={{ opacity: 0, y: -40, scale: 0.8 }}
-                    transition={{ duration: 0.6, ease: "easeOut" }}
-                    className="absolute -top-2 text-3xl md:text-4xl font-extrabold text-red-600 drop-shadow-lg"
-                  >
-                    -{lastDamage}
-                  </motion.div>
-                )}
-
-                {/* 敵画像（HP減少時に揺れる） */}
-                {enemyHP > 0 ? ( // HP 0でも showDefeatEffect を使ってフェードアウト
-                  <motion.img
-                    key={getEnemyForStage(stageCount).id} // 敵ごとにユニークに
-                    src={getEnemyForStage(stageCount).image}
-                    alt={getEnemyForStage(stageCount).name}
-                    className="w-24 h-24 md:w-32 md:h-32"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1, x: [0, -6, 6, -4, 4, 0] }} // HP減少時の揺れも反映
-                    exit={{ opacity: 0 }}
-                    transition={{ opacity: { duration: 3 } }} // フェードアウト3秒
-                  />
-                ) : null}
-              </AnimatePresence>
-
-              {/* HPテキスト（残り少ないと赤＆点滅） */}
-              <p
-                className={`text-lg md:text-xl font-bold transition-colors ${
-                  enemyHP / maxHP < 0.3
-                    ? "text-red-600 animate-pulse"
-                    : "text-gray-800"
-                }`}
-              >
-                HP {enemyHP} / {maxHP}
+          {dungeonStart && (
+            <div className="mb-3 bg-white p-3 border-2 border-purple-300 rounded-xl mx-auto w-full max-w-md md:max-w-xl">
+              <p className="text-xl md:text-2xl text-center font-bold">
+                {displayedEnemyHP == 0
+                  ? `${getEnemyForStage(stageCount).name}を倒した！`
+                  : `${getEnemyForStage(stageCount).name}が現れた！`}
               </p>
 
-              {/* HPバー */}
-              <div className="w-64 md:w-80 h-4 bg-gray-300 rounded overflow-hidden">
-                <motion.div
-                  className="h-4 bg-red-500 rounded"
-                  initial={false}
-                  animate={{ width: `${(enemyHP / maxHP) * 100}%` }}
-                  transition={{ duration: 0.4 }}
-                />
+              {/* 敵表示 */}
+              <div className="flex flex-col items-center relative">
+                <AnimatePresence>
+                  {showStageEntrance && (
+                    <motion.div
+                      key="stage-entrance"
+                      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        exit={{ scale: 0 }}
+                        transition={{ duration: 0.8 }}
+                        className="text-center"
+                      >
+                        <img
+                          src={getEnemyForStage(stageCount).image}
+                          alt={getEnemyForStage(stageCount).name}
+                          className="w-40 h-40 md:w-60 md:h-60 mx-auto"
+                        />
+                        <p className="text-3xl md:text-5xl font-extrabold text-white mt-4 drop-shadow-lg">
+                          {getEnemyForStage(stageCount).name} が現れた！
+                        </p>
+                      </motion.div>
+                    </motion.div>
+                  )}
+                  {/* ダメージ数字ポップ */}
+                  {showDamage && lastDamage > 0 && (
+                    <motion.div
+                      key={lastDamage} // damage ごとにアニメーション更新
+                      initial={{ opacity: 0, y: 20, scale: 0.8 }}
+                      animate={{ opacity: 1, y: -20, scale: 1.2 }}
+                      exit={{ opacity: 0, y: -40, scale: 0.8 }}
+                      transition={{ duration: 0.6, ease: "easeOut" }}
+                      className="absolute -top-2 text-3xl md:text-4xl font-extrabold text-red-600 drop-shadow-lg"
+                    >
+                      -{lastDamage}
+                    </motion.div>
+                  )}
+
+                  {/* 敵画像（HP減少時に揺れる） */}
+                  {displayedEnemyHP > 0 ? ( // HP 0でも showDefeatEffect を使ってフェードアウト
+                    <motion.img
+                      key={getEnemyForStage(stageCount).id} // 敵ごとにユニークに
+                      src={getEnemyForStage(stageCount).image}
+                      alt={getEnemyForStage(stageCount).name}
+                      className="w-24 h-24 md:w-32 md:h-32"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1, x: [0, -6, 6, -4, 4, 0] }} // HP減少時の揺れも反映
+                      exit={{ opacity: 0 }}
+                      transition={{ opacity: { duration: 3 } }} // フェードアウト3秒
+                    />
+                  ) : null}
+                </AnimatePresence>
+
+                {/* HPテキスト（残り少ないと赤＆点滅） */}
+                <p
+                  className={`text-lg md:text-xl font-bold transition-colors ${
+                    displayedEnemyHP / maxHP < 0.3
+                      ? "text-red-600 animate-pulse"
+                      : "text-gray-800"
+                  }`}
+                >
+                  HP {displayedEnemyHP} / {maxHP}
+                </p>
+
+                {/* HPバー */}
+                <div className="w-64 md:w-80 h-4 bg-gray-300 rounded overflow-hidden">
+                  <motion.div
+                    className="h-4 bg-red-500 rounded"
+                    initial={false}
+                    animate={{ width: `${(displayedEnemyHP / maxHP) * 100}%` }}
+                    transition={{ duration: 0.4 }}
+                  />
+                </div>
+                
               </div>
             </div>
-          </div>
-
-          {phase === "result" && (
-            <>
-              <p className="mt-1 text-xl md:text-2xl font-bold text-black">
-                正解人数：{results.filter(r => r.isCorrect).length}人
-              </p>
-              <p className="mb-2 text-xl md:text-2xl font-bold text-red-600 drop-shadow-lg">
-                与えたダメージ：{damage}
-              </p>
-            </>
           )}
+
           <div className="flex flex-col items-center">
             <div className="grid grid-cols-4 md:grid-cols-4 gap-1 md:gap-2 mb-2 justify-items-center">
               {orderedPlayers.map((p) => {
@@ -1083,14 +1135,17 @@ export default function QuizModePage() {
                       }`}
                     >
                       {phase === "result"
-                        ? result
-                          ? result.isCorrect
-                            ? "正解〇"
-                            : "誤答×"
-                          : "未回答"
+                        ? showDamageResult
+                          ? result
+                            ? result.isCorrect
+                              ? "正解〇"
+                              : "誤答×"
+                            : "未回答"
+                          : "　" // 表示させない場合は空文字
                         : result
                           ? "？"
-                          : "思考中"}
+                          : "思考中"
+                      }
                     </p>
 
                     {/* 吹き出し表示 */}
@@ -1118,6 +1173,40 @@ export default function QuizModePage() {
               })}
             </div>
           </div>
+  
+          {phase === "result" && (
+            <>
+              <div>
+                {showAnswerText && (
+                  <p className="mt-2 text-lg md:text-xl text-gray-700">
+                    正解は、、
+                  </p>
+                )}
+
+                {showAnswer && (
+                  <p className="mt-2 text-xl md:text-3xl text-gray-900 font-extrabold">
+                   「 {questions[currentIndex].quiz.displayAnswer}」
+                  </p>
+                )}
+
+                {showExplanation && (
+                  <p className="mt-2 mb-3 text-md md:text-xl text-gray-600">
+                    {questions[currentIndex].quiz.answerExplanation}
+                  </p>
+                )}
+              </div>
+              {showCorrectCount && (
+                <p className="mt-1 text-xl md:text-2xl font-bold text-black mt-4">
+                  正解人数：{results.filter(r => r.isCorrect).length}人
+                </p>
+              )}
+              {showDamageResult && (
+                <p className="mb-2 text-xl md:text-2xl font-bold text-red-600 drop-shadow-lg">
+                  与えたダメージ：{damage}
+                </p>
+              )}
+            </>
+          )}
 
           {questions[currentIndex]?.quiz && (
             <>
@@ -1150,18 +1239,6 @@ export default function QuizModePage() {
                       >
                       回答タイマー：{questionTimeLeft}秒
                     </p>
-                  )}
-
-                  {phase === "result" && (
-                    <div>
-                      <p className="mt-2 text-xl md:text-3xl text-gray-600 font-extrabold">
-                        答え：{questions[currentIndex].quiz.displayAnswer}
-                      </p>
-
-                      <p className="mt-2 mb-3 text-md md:text-xl text-gray-600">
-                        解説：{questions[currentIndex].quiz.answerExplanation}
-                      </p>
-                    </div>
                   )}
                 
                   {phase !== "result" && (
