@@ -820,6 +820,13 @@ export default function QuizModePage() {
   }, [phase, playerLives]);
 
   useEffect(() => {
+    if (phase !== "result") return;
+
+    setShowDamageResult(false);
+
+  }, [phase]);
+
+  useEffect(() => {
     if (allPlayersReady && !bothReady) {
       setShowStartButton(false);
 
