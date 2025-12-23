@@ -25,7 +25,7 @@ export default function NavButtons() {
     "px-3 md:px-5 py-1 md:py-2 border-2 border-black rounded-full font-bold shadow-sm transition-all cursor-pointer flex-none";
 
   return (
-    <div className="flex flex-wrap md:flex-nowrap justify-center gap-2 md:gap-4 md:mt-6 md:mb-3">
+    <div className="flex flex-wrap 2xl:flex-nowrap justify-center gap-2 md:gap-4 md:mt-6 md:mb-3">
       {/* 全て */}
       <Link href="/quizzes" onClick={() => setActiveUrl("/quizzes")}>
         <button
@@ -56,8 +56,8 @@ export default function NavButtons() {
       })}
 
       {/* 最後の3つのボタン */}
-      <div className="flex gap-2 md:gap-4 py-2 md:py-0 px-2 md:px-0
-                      overflow-x-auto md:overflow-visible
+      <div className="flex gap-2 md:gap-4 py-2 lg:py-0 px-2 lg:px-0
+                      overflow-x-auto lg:overflow-visible
                       whitespace-nowrap w-full md:w-auto">
         <Link href="/streak-challenge" onClick={() => setActiveUrl("/streak-challenge")}>
           <button

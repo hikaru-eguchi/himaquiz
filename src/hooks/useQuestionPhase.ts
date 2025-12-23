@@ -49,6 +49,12 @@ export function useQuestionPhase(
     const onQuestionStart = ({ deadline, index, }: { deadline: number; index: number; }) => {
       setPhase("question");
       setDeadline(deadline);
+      const initial = Math.max(
+        0,
+        Math.ceil((deadline - Date.now()) / 1000)
+      );
+      setQuestionTimeLeft(initial);
+      setTimeLeft(initial);
       setHasAnswered(false);
       setResults([]);
       setDamage(0);

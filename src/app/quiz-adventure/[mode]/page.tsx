@@ -310,6 +310,8 @@ export default function QuizModePage() {
   const [maxPlayers, setMaxPlayers] = useState(4);
   const [roomLocked, setRoomLocked] = useState(false);
   const [allPlayersDead, setAllPlayersDead] = useState(false);
+  const [battleKey, setBattleKey] = useState(0);
+
   const roomLockedRef = useRef(false);
   useEffect(() => {
     roomLockedRef.current = roomLocked;
@@ -395,6 +397,7 @@ export default function QuizModePage() {
   const submitAnswer = questionPhase?.submitAnswer ?? (() => {});
   const [displayedEnemyHP, setDisplayedEnemyHP] = useState(enemyHP);
   const [displayLives, setDisplayLives] = useState<Record<string, number>>({});
+  const enemyDefeatedAtRef = useRef<number | null>(null);
   
   const players: Player[] = rawPlayers.map((p) => ({
     socketId: p.socketId,
@@ -565,8 +568,25 @@ export default function QuizModePage() {
     if (!startAt) return;
 
     const tick = () => {
-      const elapsed = Math.floor((Date.now() - startAt) / 1000);
-      const remain = Math.max(0, totalTime - elapsed + 3 + getStageBonusTime(stageCount));
+      const now = Date.now();
+      const elapsed = Math.floor((now - startAt) / 1000);
+
+      // 敵撃破時刻を一度だけ記録
+      if (displayedEnemyHP === 0 && enemyDefeatedAtRef.current === null) {
+        enemyDefeatedAtRef.current = now;
+      }
+
+      // 敵撃破後に経過した秒数
+      const enemyDefeatedSeconds =
+        enemyDefeatedAtRef.current !== null
+          ? Math.floor((now - enemyDefeatedAtRef.current) / 1000)
+          : 0;
+
+      const baseRemain =
+        totalTime - elapsed + 3 + getStageBonusTime(stageCount);
+
+      const remain = Math.max(0, baseRemain + enemyDefeatedSeconds);
+
       setTimeLeft(remain);
     };
 
@@ -574,7 +594,13 @@ export default function QuizModePage() {
     const timer = setInterval(tick, 1000);
 
     return () => clearInterval(timer);
-  }, [startAt, totalTime]);
+  }, [startAt, totalTime, displayedEnemyHP]);
+
+  useEffect(() => {
+    if (displayedEnemyHP > 0) {
+      enemyDefeatedAtRef.current = null;
+    }
+  }, [displayedEnemyHP]);
 
   // ステージが変わるたびにタイマーを2分にリセット
   useEffect(() => {
@@ -726,7 +752,7 @@ export default function QuizModePage() {
 
       const timer = setTimeout(() => {
         setShowStageEntrance(false);
-      }, 2000); // 2秒表示
+      }, 3000); // 2秒表示
 
     return () => clearTimeout(timer);
   }, [stageCount,showStageEvent]); // stageCountが変わるたびに発火
@@ -808,6 +834,8 @@ export default function QuizModePage() {
     socket.on("rematch_start", ({ startAt }) => {
         console.log("[rematch_start]再戦開始通知", startAt);
 
+        setBattleKey(prev => prev + 1);
+
         // 状態をリセット
         setCorrectCount(0)
         handleRetry();           // 問題やスコアをリセット
@@ -851,8 +879,9 @@ export default function QuizModePage() {
   }, [socket]);
 
   const checkAnswer = () => {
+    if (userAnswer == null) return;
+
     const correctAnswer = questions[currentIndex].quiz?.answer;
-    const displayAnswer = questions[currentIndex].quiz?.displayAnswer;
 
     if (userAnswer === correctAnswer) {
       submitAnswer(true)
@@ -1005,7 +1034,7 @@ export default function QuizModePage() {
   });
 
   return (
-    <div className="container mx-auto p-8 text-center bg-gradient-to-b from-indigo-300 via-slate-300 to-sky-300">
+    <div className="container mx-auto p-8 text-center bg-gradient-to-b from-indigo-300 via-slate-300 to-sky-300" key={battleKey}>
       {countdown !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
           <motion.div
@@ -1074,6 +1103,9 @@ export default function QuizModePage() {
                         transition={{ duration: 0.8 }}
                         className="text-center"
                       >
+                        <p className="text-4xl md:text-6xl font-extrabold text-white mb-4 drop-shadow-lg">
+                          STAGE {stageCount} 
+                        </p>
                         <img
                           src={getEnemyForStage(stageCount).image}
                           alt={getEnemyForStage(stageCount).name}
@@ -1156,6 +1188,15 @@ export default function QuizModePage() {
                       : life === 2
                         ? "text-orange-400"
                         : "text-green-500";
+                
+                let borderColorClass = "border-gray-300"; // デフォルト（問題中）
+                if (phase === "result" && showDamageResult) {
+                  if (result?.isCorrect) {
+                    borderColorClass = "border-green-500";
+                  } else {
+                    borderColorClass = "border-red-500";
+                  }
+                }
 
                 return (
                   <div
@@ -1167,7 +1208,7 @@ export default function QuizModePage() {
                       rounded-lg
                       bg-white
                       border-4
-                      ${isMe ? "border-blue-500" : "border-pink-500"}
+                      ${borderColorClass}
                       shadow-md
                       flex flex-col items-center justify-center
                     `}
