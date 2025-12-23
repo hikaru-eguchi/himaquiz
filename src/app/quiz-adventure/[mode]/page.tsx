@@ -1093,18 +1093,18 @@ export default function QuizModePage() {
         <>
           {dungeonStart && (
             <>
-              <h2 className="text-5xl md:text-6xl font-extrabold mb-6 text-white drop-shadow-lg">
+              <h2 className="text-5xl md:text-6xl font-extrabold mb-4 text-white drop-shadow-lg">
                 STAGE {stageCount}
               </h2>
 
               <div className="flex flex-col items-center">
-                <p className={`w-[280px] md:w-[400px] text-2xl md:text-4xl font-extrabold mb-2 px-4 py-2 rounded-lg shadow-lg 
+                <p className={`w-[280px] md:w-[400px] text-2xl md:text-4xl font-extrabold mb-1 md:mb-2 px-4 py-2 rounded-lg shadow-lg 
                               ${timeLeft <= 30 ? 'bg-red-700 text-white animate-pulse' : 'bg-white text-black border-2 border-black'}`}>
                   制限時間: {Math.floor(timeLeft / 60)}分 {timeLeft % 60}秒
                 </p>
               </div>
 
-              <div className="mb-3 bg-white p-3 border-2 border-purple-200 rounded-xl mx-auto w-full max-w-md md:max-w-xl">
+              <div className="mb-1 md:mb-2 bg-white p-3 border-2 border-purple-200 rounded-xl mx-auto w-full max-w-md md:max-w-xl">
                 <p className="text-xl md:text-2xl text-center font-bold">
                   {displayedEnemyHP == 0
                     ? `${getEnemyForStage(stageCount).name}を倒した！`
@@ -1199,10 +1199,8 @@ export default function QuizModePage() {
             </>
           )}
 
-          <p className="text-gray-600">不正解の場合、ライフが1減少します。</p>
-
           <div className="flex flex-col items-center">
-            <div className="grid grid-cols-4 md:grid-cols-4 gap-1 md:gap-2 mb-2 justify-items-center">
+            <div className="grid grid-cols-4 md:grid-cols-4 gap-1 md:gap-2 mb-1 justify-items-center">
               {orderedPlayers.map((p) => {
                 const isMe = p.socketId === mySocketId;
                 const change = scoreChanges[p.socketId];
@@ -1212,11 +1210,11 @@ export default function QuizModePage() {
                   life <= 0
                     ? "text-red-700"
                     : life === 1
-                      ? "text-red-500"
-                      : life === 2
-                        ? "text-orange-400"
-                        : "text-green-500";
-                
+                    ? "text-red-500"
+                    : life === 2
+                    ? "text-orange-400"
+                    : "text-green-500";
+                    
                 let borderColorClass = "border-gray-300"; // デフォルト（問題中）
                 if (phase === "result" && showDamageResult) {
                   if (result === undefined) {
@@ -1227,13 +1225,13 @@ export default function QuizModePage() {
                     borderColorClass = "border-red-500";
                   }
                 }
-
+                
                 return (
                   <div
-                    key={p.socketId}
-                    className={`
+                  key={p.socketId}
+                  className={`
                       relative
-                      w-20 md:w-22
+                      w-17 md:w-22
                       aspect-square
                       rounded-lg
                       bg-white
@@ -1251,25 +1249,25 @@ export default function QuizModePage() {
                     <p
                       className={`text-lg md:text-xl font-bold mt-1 ${
                         phase === "result"
-                          ? result?.isCorrect
-                            ? "text-green-600"
-                            : "text-red-600"
-                          : result
-                            ? "text-gray-800"  // 回答済みだけど結果発表前
+                        ? result?.isCorrect
+                        ? "text-green-600"
+                        : "text-red-600"
+                        : result
+                        ? "text-gray-800"  // 回答済みだけど結果発表前
                             : lifeColor  // 回答待ち
                       }`}
                     >
                       {phase === "result"
                         ? showDamageResult
-                          ? result
-                            ? result.isCorrect
-                              ? "正解〇"
-                              : "誤答×"
-                            : "未回答"
+                        ? result
+                        ? result.isCorrect
+                        ? "正解〇"
+                        : "誤答×"
+                        : "未回答"
                           : "　" // 表示させない場合は空文字
                         : result
                           ? "？"
-                          : `ライフ:${life}`
+                          : `LP: ${life}`
                       }
                     </p>
 
@@ -1371,6 +1369,10 @@ export default function QuizModePage() {
               ) : (
                 <>
                   {phase !== "result" && (
+                    <p className="text-gray-600 mb-2">不正解の場合、ライフポイント（LP）が1減少します。</p>
+                  )}
+
+                  {phase !== "result" && (
                     <p
                       className={`text-xl md:text-3xl text-center mb-2 font-bold ${
                         questionTimeLeft <= 5 ? "text-red-500 animate-pulse" : "text-gray-700"
@@ -1391,8 +1393,8 @@ export default function QuizModePage() {
                   {phase === "question" && (
                     <>
                       {isDead ? (
-                        <p className="mt-4 text-xl md:text-2xl font-bold text-gray-800">
-                          ライフが0のため、回答できません
+                        <p className="mt-2 text-xl md:text-2xl font-bold text-gray-800">
+                          HPが0のため、回答できません
                         </p>
                       ) : canAnswer ? (
                         <button
@@ -1413,7 +1415,7 @@ export default function QuizModePage() {
             </>
           )}
 
-          <div className="flex flex-col items-center mt-3">
+          <div className="flex flex-col items-center mt-2 md:mt-3">
             {/* メッセージボタン */}
             <div className="text-center border border-black p-1 rounded-xl bg-white">
               {["よろしく！", "やったね✌", "まだいける！", "ありがとう！"].map((msg) => (
