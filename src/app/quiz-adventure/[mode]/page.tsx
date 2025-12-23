@@ -1104,7 +1104,7 @@ export default function QuizModePage() {
                 </p>
               </div>
 
-              <div className="mb-3 bg-white p-3 border-2 border-purple-300 rounded-xl mx-auto w-full max-w-md md:max-w-xl">
+              <div className="mb-3 bg-white p-3 border-2 border-purple-200 rounded-xl mx-auto w-full max-w-md md:max-w-xl">
                 <p className="text-xl md:text-2xl text-center font-bold">
                   {displayedEnemyHP == 0
                     ? `${getEnemyForStage(stageCount).name}を倒した！`
@@ -1233,7 +1233,7 @@ export default function QuizModePage() {
                     key={p.socketId}
                     className={`
                       relative
-                      w-17 md:w-22
+                      w-20 md:w-22
                       aspect-square
                       rounded-lg
                       bg-white
