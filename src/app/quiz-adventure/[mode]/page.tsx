@@ -1191,7 +1191,9 @@ export default function QuizModePage() {
                 
                 let borderColorClass = "border-gray-300"; // デフォルト（問題中）
                 if (phase === "result" && showDamageResult) {
-                  if (result?.isCorrect) {
+                  if (result === undefined) {
+                    borderColorClass = "border-gray-300"; // 未回答
+                  } else if (result.isCorrect) {
                     borderColorClass = "border-green-500";
                   } else {
                     borderColorClass = "border-red-500";
