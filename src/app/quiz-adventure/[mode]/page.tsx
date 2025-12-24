@@ -393,7 +393,7 @@ export default function QuizModePage() {
   const damage = questionPhase?.damage ?? 0;
   const canAnswer = questionPhase?.canAnswer ?? false;
   const currentIndex = questionPhase?.currentIndex ?? 0;
-  const questionTimeLeft = questionPhase?.questionTimeLeft ?? 15;
+  const questionTimeLeft = questionPhase?.questionTimeLeft ?? 20;
   const submitAnswer = questionPhase?.submitAnswer ?? (() => {});
   const [displayedEnemyHP, setDisplayedEnemyHP] = useState(enemyHP);
   const [displayLives, setDisplayLives] = useState<Record<string, number>>({});
