@@ -25,7 +25,7 @@ export default function NavButtons() {
     "px-3 md:px-5 py-1 md:py-2 border-2 border-black rounded-full font-bold shadow-sm transition-all cursor-pointer flex-none";
 
   return (
-    <div className="flex flex-wrap 2xl:flex-nowrap justify-center gap-2 md:gap-4 md:mt-6 md:mb-3">
+    <div className="flex flex-wrap justify-center gap-2 md:gap-4 md:mt-6 md:mb-3">
       {/* 全て */}
       <Link href="/quizzes" onClick={() => setActiveUrl("/quizzes")}>
         <button
@@ -56,9 +56,9 @@ export default function NavButtons() {
       })}
 
       {/* 最後の3つのボタン */}
-      <div className="flex gap-2 md:gap-4 py-2 lg:py-0 px-2 lg:px-0
+      <div className="flex justify-center gap-2 md:gap-4 py-2 lg:py-0 px-2 lg:px-0
                       overflow-x-auto lg:overflow-visible
-                      whitespace-nowrap w-full md:w-auto">
+                      whitespace-nowrap w-full">
         <Link href="/streak-challenge" onClick={() => setActiveUrl("/streak-challenge")}>
           <button
             className={`${baseStyle} bg-gradient-to-r from-red-500 to-orange-400 text-white shadow-xl ring-2 ring-orange-400 hover:scale-110 ${
@@ -116,6 +116,16 @@ export default function NavButtons() {
             }`}
           >
             協力ダンジョン
+          </button>
+        </Link>
+
+        <Link href="/quiz-dobon" onClick={() => setActiveUrl("/quiz-dobon")}>
+          <button
+            className={`${baseStyle} bg-gradient-to-r from-emerald-700 via-amber-800 to-stone-800 text-white shadow-xl ring-2 ring-stone-600 hover:scale-110 ${
+              activeUrl === "/quiz-dobon" ? activeStyle : ""
+            }`}
+          >
+            サバイバルクイズ
           </button>
         </Link>
       </div>

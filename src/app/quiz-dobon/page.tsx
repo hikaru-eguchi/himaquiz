@@ -15,19 +15,19 @@ export default function QuizMasterPage() {
   const handleDescriptionClick = () => setShowDescription((prev) => !prev);
 
   // ★ 入力された制限時間（クエリで渡す）
-  const [limitTime, setLimitTime] = useState<number | null>(2);
+  const [limitTime, setLimitTime] = useState<number | null>(5);
 
   // ★ PC用キャラ（全6枚）
   const allCharacters = [
-    "/images/dragon.png",
-    "/images/yuusya_game.png",
-    "/images/mimic.png",
+    "/images/quiz_man.png",
+    "/images/quiz.png",
+    "/images/quiz_woman.png",
   ];
 
   // ★ スマホ専用キャラ（2枚だけ）
   const mobileCharacters = [
-    "/images/dragon.png",
-    "/images/yuusya_game.png",
+    "/images/quiz.png",
+    "/images/quiz_woman.png",
   ];
 
   // ★ 画面サイズで画像を切り替え
@@ -54,7 +54,7 @@ export default function QuizMasterPage() {
 
   // ▼ 全てのクイズから出題（time をクエリに付ける）
   const handleRandomQuizStart = () => {
-    router.push(`/quiz-adventure/random?time=${limitTime}`);
+    router.push(`/quiz-dobon/random?time=${limitTime}`);
   };
 
   // ▼ あいことば対戦
@@ -64,7 +64,7 @@ export default function QuizMasterPage() {
   const [playerCount, setPlayerCount] = useState<number | null>(2);
 
   return (
-    <div className="container mx-auto px-4 py-8 text-center bg-gradient-to-b from-indigo-500 via-blue-400 to-sky-500">
+    <div className="container mx-auto px-4 py-8 text-center bg-gradient-to-b from-emerald-700 via-amber-800 to-stone-800">
       <h1
         className="text-5xl md:text-7xl font-extrabold mb-6 text-center"
         style={{
@@ -88,14 +88,14 @@ export default function QuizMasterPage() {
         }}
       >
         <span className="block md:hidden leading-tight">
-          協力<br />ダンジョン
+          サバイバル<br />クイズ
         </span>
-        <span className="hidden md:block">協力ダンジョン</span>
+        <span className="hidden md:block">サバイバルクイズ</span>
       </h1>
 
       <>
         <p className="text-md md:text-2xl font-semibold text-white mb-8">
-          仲間と力を合わせてクイズに挑戦！みんなで正解して強敵を倒そう！
+          3問間違えたら即脱落！君は最後まで生き残れるか！？
         </p>
 
         {/* ★ スマホは2枚、PCは3枚 */}
@@ -118,20 +118,20 @@ export default function QuizMasterPage() {
           <div>
             <button
               onClick={handleRandomQuizStart}
-              className="w-full md:w-80 px-6 py-2 md:px-8 md:py-4 bg-green-500 text-white rounded-full hover:bg-green-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
+              className="w-full md:w-80 px-6 py-2 md:px-8 md:py-4 bg-blue-500 text-white rounded-full hover:bg-blue-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
             >
-              オンラインでだれかと挑戦
+              オンラインでだれかと対戦
             </button>
-            <p className="text-sm text-gray-100 mt-1">※一定時間マッチしないとCPUとの挑戦になります</p>
+            <p className="text-sm text-gray-100 mt-1">※一定時間マッチしないとCPUとの対戦になります</p>
           </div>
           <div>
             <button
               onClick={() => setShowCodeInput(true)}
-              className="w-full md:w-80 px-6 py-2 md:px-8 md:py-4 bg-yellow-500 text-white rounded-full hover:bg-yellow-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
+              className="w-full md:w-80 px-6 py-2 md:px-8 md:py-4 bg-red-500 text-white rounded-full hover:bg-red-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
             >
-              知り合いと挑戦
+              知り合いと対戦
             </button>
-            <p className="text-sm text-gray-100 mt-1">※パーティメンバーは 2人〜8人でプレイできます。</p>
+            <p className="text-sm text-gray-100 mt-1">※2人〜8人でプレイできます。</p>
           </div>
         </div>
 
@@ -191,7 +191,7 @@ export default function QuizMasterPage() {
                   return;
                 }
                 router.push(
-                  `/quiz-adventure/code?time=${limitTime}&code=${battleCode}&count=${playerCount}`
+                  `/quiz-dobon/code?time=${limitTime}&code=${battleCode}&count=${playerCount}`
                 );
               }}
               className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded font-bold"
@@ -222,13 +222,11 @@ export default function QuizMasterPage() {
             ref={descriptionRef}
             className="text-gray-700 text-md md:text-lg text-center px-4 py-2"
           >
-            「協力ダンジョン」は、仲間とパーティを組み、クイズに挑みながらダンジョンを進んでいく冒険クイズゲームです。<br />
-            パーティの誰かがクイズに正解すれば敵に攻撃！正解する人数が多いほど、敵に与えるダメージもアップします。<br />
-            1ステージにつき、プレイヤーのライフは3です。3回間違えると、そのステージでは回答できなくなります。<br />
-            全員のライフがなくなるか、時間内に敵を倒せなければ、ゲームオーバーとなります。<br />
-            敵を倒すたびにステージが進行し、あなたのランク（称号）もどんどん昇格！<br />
-            仲間と力を合わせてクイズに正解し、ダンジョン制覇を目指しましょう！<br />
-            ※オンラインでパーティメンバーが見つからない場合は、CPU（コンピュータ）との挑戦になります。
+            「サバイバルクイズ」は、間違えずにクイズに正解し、最後まで生き残ることを目指すサバイバルクイズゲームです。<br />
+            1問の回答制限時間は20秒。3問間違えると即脱落！未回答でも不正解扱いになります。<br />
+            脱落後は誰が最後まで生き残るかを予想できます。予想が当たればポイント獲得！<br />
+            1位を目指して挑戦しよう！<br />
+            ※オンラインで対戦相手が見つからない場合は、CPU（コンピュータ）との対戦になります。
           </p>
         </div>
       </>

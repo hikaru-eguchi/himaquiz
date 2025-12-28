@@ -22,16 +22,23 @@ export const useBattle = (playerName: string) => {
   const [stageCount, setStageCount] = useState<number>(1);
   const [roomPlayers, setRoomPlayers] = useState<{ socketId: string; name: string }[]>([]);
   const [playerCount, setPlayerCount] = useState("0/4");
+  const [gameType, setGameType] = useState<"quiz" | "dungeon" | "dobon">("quiz");
   const sendMessage = (message: string) => {
     if (!socket || !roomCode) return;
     socket.emit("send_message", { roomCode, fromId: mySocketId, message });
   };
   const [playerLives, setPlayerLives] = useState<Record<string, number>>({});
   const [isGameOver, setIsGameOver] = useState(false);
+  const [gameSetScheduled, setGameSetScheduled] = useState(false);
 
   const [scoreChanges, setScoreChanges] = useState<Record<string, number | null>>(
     {}
   );
+
+  const [lastPlayerElimination, setLastPlayerElimination] = useState<{
+    eliminationGroups: string[][];
+    reason: string;
+  } | null>(null);
 
   const updateStartAt = (newStartAt: number) => {
     setStartAt(newStartAt);
@@ -67,6 +74,8 @@ export const useBattle = (playerName: string) => {
 
     s.on("rematch_start", ({ startAt, questionIds, players }: { startAt: number; questionIds: string[]; players: Player[] }) => {
       console.log("[rematch_start]", startAt);
+      setLastPlayerElimination(null);
+      setGameSetScheduled(false);
       setIsGameOver(false);
       setPlayers(players);
       setQuestionIds(questionIds);
@@ -153,7 +162,7 @@ export const useBattle = (playerName: string) => {
       current,
       max
     }: {
-      gameType: "quiz" | "dungeon";
+      gameType: "quiz" | "dungeon" | "dobon";
       players: { socketId: string; playerName: string }[];
       current: number;
       max: number;
@@ -162,7 +171,7 @@ export const useBattle = (playerName: string) => {
       setPlayerCount(`${current}/${max}`);
       console.log(`[update_room_count] ${current}/${max}`, players);
 
-      if (gameType === "dungeon") {
+      if (gameType === "dungeon" || gameType === "dobon") {
         setPlayers(players.map(p => ({
           socketId: p.socketId,
           name: p.playerName,
@@ -267,31 +276,55 @@ export const useBattle = (playerName: string) => {
     };
   }, [socket]);
 
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const onLastPlayerEliminated = ({ eliminationGroups, reason }: { eliminationGroups: string[][], reason: string }) => {
+      console.log("[last_player_eliminated]", eliminationGroups, reason);
+
+      // elimination 情報を state に保存
+      setLastPlayerElimination({ eliminationGroups, reason });
+
+      setIsGameOver(true);
+      setGameSetScheduled(true);
+    };
+
+    socket.on("last_player_eliminated", onLastPlayerEliminated);
+
+    return () => {
+      socket.off("last_player_eliminated", onLastPlayerEliminated);
+    };
+  }, [socket]);
+
+
   /* =========================
      参加処理
   ========================= */
-  const joinRandom = (options?: { maxPlayers?: number; gameType?: "quiz" | "dungeon" }, onJoined?: (code: string) => void) => {
+  const joinRandom = (options?: { maxPlayers?: number; gameType?: "quiz" | "dungeon" | "dobon" }, onJoined?: (code: string) => void) => {
     if (!socket) return;
     const maxPlayers = options?.maxPlayers ?? 2;
-    const gameType = options?.gameType ?? "quiz";
-    socket.emit("join_random", { playerName, maxPlayers, gameType });
+    const type = options?.gameType ?? "quiz";
+    setGameType(type)
+    socket.emit("join_random", { playerName, maxPlayers, gameType: type });
     socket.on("start_game", ({ roomCode: code }) => {
       setRoomCode(code);
       if (onJoined) onJoined(code);
     });
   };
 
-  const joinWithCode = (code: string, count: string, gameType: string) => {
+  const joinWithCode = (code: string, count: string, type: "quiz" | "dungeon" | "dobon") => {
     if (!socket) {
       console.warn("[useBattle] joinWithCode: socket 未接続");
       return;
     }
-    const roomKey = `${gameType}_${code}`;
+    setGameType(type);
+    const roomKey = `${type}_${code}`;
     socket.emit("join_with_code", {
       playerName,
       code: roomKey,
       count,
-      gameType,
+      gameType: type,
     });
   };
 
@@ -324,12 +357,13 @@ export const useBattle = (playerName: string) => {
       roomCode,
       socketId: socket.id,
       handicap: h,
+      gameType,
     });
   };
 
   const requestRematch = (roomCode: string) => {
     if (!socket) return;
-    socket.emit("request_rematch", { roomCode , handicap});
+    socket.emit("request_rematch", { roomCode , handicap, gameType,});
   };
 
   /* =========================
@@ -344,6 +378,7 @@ export const useBattle = (playerName: string) => {
     setBothReady(false);
     setStartAt(null);
     setScoreChanges({});
+    setLastPlayerElimination(null);
     // socket は残しておく場合もあるし、切断して再接続も可能
   };
 
@@ -373,5 +408,7 @@ export const useBattle = (playerName: string) => {
     stageCount,
     playerLives,
     isGameOver,
+    lastPlayerElimination,
+    gameSetScheduled,
   };
 };

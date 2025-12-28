@@ -344,6 +344,20 @@ export default async function HomePage({
               クイズに正解して、強敵を打ち倒そう！
             </p>
           </div>
+          {/* サバイバルクイズ */}
+          <div className="text-center max-w-[260px]">
+            <Link href="/quiz-dobon" className="w-full md:w-auto flex justify-center">
+              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-emerald-700 via-amber-800 to-stone-800 text-white hover:scale-110 transition-all">
+                サバイバルクイズ
+              </button>
+            </Link>
+            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
+              ３問間違えたら即脱落！
+            </p>
+            <p className="text-sm md:text-base text-gray-700 leading-tight">
+              君は最後まで生き残れるか！？
+            </p>
+          </div>
         </div>
       </div>
     </div>
