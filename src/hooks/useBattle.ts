@@ -19,6 +19,7 @@ export const useBattle = (playerName: string) => {
   const [handicap, setHandicap] = useState<number>(0);
   const [enemyHP, setEnemyHP] = useState<number>(0);
   const [maxHP, setMaxHP] = useState<number>(0);
+  const [isCritical, setIsCritical] = useState<boolean>(false);
   const [stageCount, setStageCount] = useState<number>(1);
   const [roomPlayers, setRoomPlayers] = useState<{ socketId: string; name: string }[]>([]);
   const [playerCount, setPlayerCount] = useState("0/4");
@@ -29,6 +30,7 @@ export const useBattle = (playerName: string) => {
   };
   const [playerLives, setPlayerLives] = useState<Record<string, number>>({});
   const [isGameOver, setIsGameOver] = useState(false);
+  const [isGameClear, setIsGameClear] = useState(false);
   const [gameSetScheduled, setGameSetScheduled] = useState(false);
 
   const [scoreChanges, setScoreChanges] = useState<Record<string, number | null>>(
@@ -77,6 +79,7 @@ export const useBattle = (playerName: string) => {
       setLastPlayerElimination(null);
       setGameSetScheduled(false);
       setIsGameOver(false);
+      setIsGameClear(false);
       setPlayers(players);
       setQuestionIds(questionIds);
       setStartAt(startAt);
@@ -96,6 +99,7 @@ export const useBattle = (playerName: string) => {
       console.log("mySocketId:", s.id);
 
       setIsGameOver(false);
+      setIsGameClear(false);
       setRoomCode(roomCode);
       setPlayers(players);
       setQuestionIds(questionIds);
@@ -106,6 +110,7 @@ export const useBattle = (playerName: string) => {
 
     s.on("start_game_with_handicap", ({ startAt, players, questionIds }) => {
       setIsGameOver(false);
+      setIsGameClear(false);
       setPlayers(players);
       setQuestionIds(questionIds);
       setStartAt(startAt);
@@ -190,12 +195,14 @@ export const useBattle = (playerName: string) => {
   useEffect(() => {
     if (!socket) return;
 
-    const onEnemyState = ({ enemyHP, maxHP }: {
+    const onEnemyState = ({ enemyHP, maxHP, isCritical}: {
       enemyHP: number;
       maxHP: number;
+      isCritical: boolean;
     }) => {
       setEnemyHP(enemyHP);
       setMaxHP(maxHP);
+      setIsCritical(isCritical);
     };
 
     socket.on("enemy_state", onEnemyState);
@@ -273,6 +280,22 @@ export const useBattle = (playerName: string) => {
 
     return () => {
       socket.off("game_over", onGameOver);
+    };
+  }, [socket]);
+
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const onGameClear = ({ reason }: { reason: string }) => {
+      console.log("[game_clear]", reason);
+      setIsGameClear(true);
+    };
+
+    socket.on("game_clear", onGameClear);
+
+    return () => {
+      socket.off("game_clear", onGameClear);
     };
   }, [socket]);
 
@@ -371,6 +394,7 @@ export const useBattle = (playerName: string) => {
   ========================= */
   const resetMatch = () => {
     setIsGameOver(false);
+    setIsGameClear(false);
     setRoomCode(null);
     setPlayers([]);
     setQuestionIds([]);
@@ -405,9 +429,11 @@ export const useBattle = (playerName: string) => {
     handicap,
     enemyHP,
     maxHP,
+    isCritical,
     stageCount,
     playerLives,
     isGameOver,
+    isGameClear,
     lastPlayerElimination,
     gameSetScheduled,
   };

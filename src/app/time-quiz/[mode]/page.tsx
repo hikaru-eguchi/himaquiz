@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useSearchParams, usePathname } from "next/navigation";
+import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import QuizQuestion from "../../components/QuizQuestion";
-import { QuizData } from "@/lib/articles";7
+import { QuizData } from "@/lib/articles";
 import { motion, AnimatePresence } from "framer-motion";
+import { createSupabaseBrowserClient } from "@/lib/supabaseClient";
+import { useSupabaseUser } from "../../../hooks/useSupabaseUser";
 
 interface ArticleData {
   id: string;
@@ -23,6 +25,15 @@ interface ArticleData {
   };
 }
 
+/**
+ * ★ 付与ポイント仕様（変更）
+ * score の 20分の1 を獲得ポイントとして付与する
+ * 例) score=0 => 0P, score=250 => 12P, score=260 => 13P
+ */
+function calcEarnedPointsFromScore(score: number) {
+  return Math.floor(score / 20);
+}
+
 // 正解数に応じて出すコメント
 const rankComments = [
   { threshold: 0, comment: "これからが始まり！まずは肩慣らしだね！" },
@@ -31,9 +42,9 @@ const rankComments = [
   { threshold: 800, comment: "賢者レベル到達！知識の風が君の味方をしている！" },
   { threshold: 1000, comment: "博識者の風格！どんな問題も冷静に捌いていく姿が見える！" },
   { threshold: 1300, comment: "クイズ研究家並みの洞察力！その分析力はガチで本物！" },
-  { threshold: 1500, comment: "クイズ学者級！知識量がもう一般人のそれじゃない…！" },
+  { threshold: 1500, comment: "クイズ学者級の知識量！もう一般人のそれじゃない…！" },
   { threshold: 1800, comment: "クイズ教授の域に到達！説明したら講義が開けるレベルだ！" },
-  { threshold: 2000, comment: "クイズ名人の実力！どんなクイズも楽しんで倒していく強さがある！" },
+  { threshold: 2000, comment: "クイズ名人の実力！どんなクイズも楽しんで倒していく強さ！" },
   { threshold: 2300, comment: "クイズ達人の風格！読みも早い、ひらめきも鋭い！完璧か！" },
   { threshold: 2500, comment: "クイズ仙人級！悟りを開き、問題の未来すら見えている…？" },
   { threshold: 2800, comment: "クイズ星人！地球の常識を超えた動きだ…異次元！" },
@@ -55,12 +66,33 @@ const rankComments = [
   { threshold: 7500, comment: "クイズ魔人！正解を食らい尽くす圧倒的存在感！" },
   { threshold: 8000, comment: "クイズ覇王！すべてを見通したかのような絶対的支配力だ！" },
   { threshold: 8500, comment: "オリンポスの支配者級！知識の神々が君を迎え入れたぞ…！" },
-  { threshold: 9000, comment: "レジェンドクイズマスター！伝説の名の通り、後世に語り継がれる強さ！" },
+  { threshold: 9000, comment: "レジェンドクイズマスター！伝説の名の通り、語り継がれる強さ！" },
   { threshold: 9500, comment: "究極クイズマスター！到達者ほぼゼロの究極領域！" },
-  { threshold: 10000, comment: "神（ゴッド）…！凄すぎて何も言えないよ！最高ランクに到達だ！" },
+  { threshold: 10000, comment: "神（ゴッド）…！凄すぎて何も言えないよ！最高ランクだ！" },
 ];
 
-const QuizResult = ({ correctCount, getTitle, titles , score }: { correctCount: number, getTitle: () => string, titles: { threshold: number, title: string }[], score: number; }) => {
+type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
+
+const QuizResult = ({
+  correctCount,
+  getTitle,
+  titles,
+  score,
+  earnedPoints,
+  isLoggedIn,
+  awardStatus,
+  onGoLogin,
+}: {
+  correctCount: number;
+  getTitle: () => string;
+  titles: { threshold: number; title: string }[];
+  score: number;
+
+  earnedPoints: number;
+  isLoggedIn: boolean;
+  awardStatus: AwardStatus;
+  onGoLogin: () => void;
+}) => {
   const [showScore, setShowScore] = useState(false);
   const [showText, setShowText] = useState(false);
   const [showRank, setShowRank] = useState(false);
@@ -80,18 +112,18 @@ const QuizResult = ({ correctCount, getTitle, titles , score }: { correctCount: 
     timers.push(setTimeout(() => setShowText(true), 1000));
     timers.push(setTimeout(() => setShowRank(true), 1500));
     timers.push(setTimeout(() => setShowButton(true), 1500));
-
     return () => timers.forEach(clearTimeout);
   }, []);
 
   return (
     <div className="text-center mt-6">
-      {showScore && <p className="text-3xl md:text-5xl mb-4 md:mb-6">正解数： {correctCount}問</p>}
       {showScore && (
-        <p className="text-3xl md:text-5xl mb-4 md:mb-6 text-blue-500 font-bold">
-          得点：{score} P
-        </p>
+        <>
+          <p className="text-3xl md:text-5xl mb-4 md:mb-6">正解数： {correctCount}問</p>
+          <p className="text-3xl md:text-5xl mb-4 md:mb-6 text-blue-500 font-bold">得点：{score} P</p>
+        </>
       )}
+
       {showText && <p className="text-xl md:text-2xl text-gray-600 mb-2">あなたの称号は…</p>}
 
       {showRank && (
@@ -108,16 +140,49 @@ const QuizResult = ({ correctCount, getTitle, titles , score }: { correctCount: 
           </div>
 
           {getRankComment() && (
-            <p className="text-lg md:text-2xl text-gray-800 mb-8 font-bold whitespace-pre-line">
-              {getRankComment()}
-            </p>
+            <p className="text-lg md:text-2xl text-gray-800 mb-8 font-bold whitespace-pre-line">{getRankComment()}</p>
           )}
+
+          {/* ★ 獲得ポイント表示（ログイン有無で文言変更） */}
+          <div className="mx-auto max-w-[520px] bg-white border-2 border-black rounded-xl p-4 shadow mt-2">
+            <p className="text-xl md:text-2xl font-extrabold text-gray-800">
+              今回の獲得ポイント： <span className="text-green-600">{earnedPoints}P</span>
+            </p>
+
+            {isLoggedIn ? (
+              <>
+                {awardStatus === "awarding" && (
+                  <p className="text-md md:text-xl text-gray-600 mt-2">ポイント反映中...</p>
+                )}
+                {awardStatus === "awarded" && (
+                  <p className="text-md md:text-xl text-green-700 font-bold mt-2">✅ ポイントを加算しました！</p>
+                )}
+                {awardStatus === "error" && (
+                  <p className="text-md md:text-xl text-red-600 font-bold mt-2">
+                    ❌ ポイント加算に失敗しました。時間をおいて再度お試しください。
+                  </p>
+                )}
+              </>
+            ) : (
+              <div className="mt-2">
+                <p className="text-md md:text-xl text-gray-700 font-bold">
+                  ※未ログインのため受け取れません。ログインすると次からポイントを受け取れます！
+                </p>
+                <button
+                  onClick={onGoLogin}
+                  className="mt-2 px-4 py-2 bg-blue-500 text-white border border-black rounded-lg font-bold hover:bg-blue-600 cursor-pointer"
+                >
+                  ログインする
+                </button>
+              </div>
+            )}
+          </div>
         </>
       )}
 
       {showButton && (
         <button
-          className="px-6 py-3 bg-green-500 text-white border border-black rounded-lg font-bold text-xl hover:bg-green-600 cursor-pointer"
+          className="px-6 py-3 bg-green-500 text-white border border-black rounded-lg font-bold text-xl hover:bg-green-600 cursor-pointer mt-3 md:mt-5"
           onClick={() => window.location.reload()}
         >
           もう一回挑戦する
@@ -128,11 +193,15 @@ const QuizResult = ({ correctCount, getTitle, titles , score }: { correctCount: 
 };
 
 export default function QuizModePage() {
+  const router = useRouter();
   const pathname = usePathname();
   const mode = pathname.split("/").pop() || "random";
   const searchParams = useSearchParams();
   const genre = searchParams?.get("genre") || "";
   const level = searchParams?.get("level") || "";
+
+  const supabase = createSupabaseBrowserClient();
+  const { user, loading: userLoading } = useSupabaseUser();
 
   const [questions, setQuestions] = useState<{ id: string; quiz: QuizData }[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -142,16 +211,20 @@ export default function QuizModePage() {
   const [showCorrectMessage, setShowCorrectMessage] = useState(false);
   const [flashMilestone, setFlashMilestone] = useState<string | null>(null);
   const [incorrectMessage, setIncorrectMessage] = useState<string | null>(null);
-  const timeParam = searchParams?.get("time") || "1"; // デフォルト1分
-  const totalTime = parseInt(timeParam) * 60; // 秒単位
+
+  const timeParam = searchParams?.get("time") || "1";
+  const totalTime = parseInt(timeParam) * 60;
   const [timeLeft, setTimeLeft] = useState(totalTime);
+
   const [score, setScore] = useState(0);
   const [wrongStreak, setWrongStreak] = useState(0);
   const wrongStreakRef = useRef(0);
   const [scoreChange, setScoreChange] = useState<number | null>(null);
 
-  const finishedRef = useRef(finished);
-  const showCorrectRef = useRef(showCorrectMessage);
+  // ★ リザルト用（付与ポイントは score から算出）
+  const [earnedPoints, setEarnedPoints] = useState(0);
+  const [awardStatus, setAwardStatus] = useState<AwardStatus>("idle");
+  const awardedOnceRef = useRef(false);
 
   const titles = [
     { threshold: 300, title: "優等生" },
@@ -188,9 +261,6 @@ export default function QuizModePage() {
     { threshold: 10000, title: "神（ゴッド）🌟" },
   ];
 
-  useEffect(() => { finishedRef.current = finished; }, [finished]);
-  useEffect(() => { showCorrectRef.current = showCorrectMessage; }, [showCorrectMessage]);
-
   useEffect(() => {
     const fetchArticles = async () => {
       try {
@@ -198,16 +268,12 @@ export default function QuizModePage() {
         const data: ArticleData[] = await res.json();
         let all: ArticleData[] = data;
 
-        if (mode === "genre" && genre) {
-          all = all.filter((a) => a.quiz?.genre === genre);
-        }
-        if (mode === "level" && level) {
-          all = all.filter((a) => a.quiz?.level === level);
-        }
+        if (mode === "genre" && genre) all = all.filter((a) => a.quiz?.genre === genre);
+        if (mode === "level" && level) all = all.filter((a) => a.quiz?.level === level);
 
         const quizQuestions: { id: string; quiz: QuizData }[] = all
-          .filter(a => a.quiz)
-          .map(a => ({
+          .filter((a) => a.quiz)
+          .map((a) => ({
             id: a.id,
             quiz: {
               title: a.title,
@@ -219,7 +285,7 @@ export default function QuizModePage() {
               level: a.quiz!.level,
               answerExplanation: a.quiz!.answerExplanation,
               trivia: a.quiz!.trivia,
-            }
+            },
           }));
 
         setQuestions(shuffleArray(quizQuestions));
@@ -233,12 +299,13 @@ export default function QuizModePage() {
 
   const shuffleArray = <T,>(arr: T[]) => [...arr].sort(() => Math.random() - 0.5);
 
+  // タイマー（0になったら強制終了）
   useEffect(() => {
     const timer = setInterval(() => {
-      setTimeLeft(t => {
+      setTimeLeft((t) => {
         if (t <= 1) {
           clearInterval(timer);
-          setFinished(true); // タイマー終了で強制終了
+          setFinished(true);
           return 0;
         }
         return t - 1;
@@ -250,65 +317,47 @@ export default function QuizModePage() {
   const checkAnswer = () => {
     const correctAnswer = questions[currentIndex].quiz?.answer;
     const displayAnswer = questions[currentIndex].quiz?.displayAnswer;
-    const level = questions[currentIndex].quiz?.level;
+    const quizLevel = questions[currentIndex].quiz?.level;
 
     if (userAnswer === correctAnswer) {
-      setCorrectCount(c => c + 1);
+      setCorrectCount((c) => c + 1);
+
       wrongStreakRef.current = 0;
       setWrongStreak(0);
 
-      // 難易度に応じて加点
-      setScore(prev => {
+      setScore((prev) => {
         let add = 0;
-        if (level === "かんたん") add = 50;
-        if (level === "ふつう") add = 100;
-        if (level === "難しい") add = 150;
-        setScoreChange(add); // +50, +100, +150
+        if (quizLevel === "かんたん") add = 50;
+        if (quizLevel === "ふつう") add = 100;
+        if (quizLevel === "難しい") add = 150;
+
+        setScoreChange(add);
         setTimeout(() => setScoreChange(null), 800);
         return prev + add;
       });
 
-      setCorrectCount(c => {
-        const newCount = c + 1;
-        return newCount;
-      });
-
       setShowCorrectMessage(true);
-
     } else {
       wrongStreakRef.current = wrongStreakRef.current + 1;
       const newStreak = wrongStreakRef.current;
       setWrongStreak(newStreak);
+
       if (newStreak >= 3) {
-        // ペナルティはここで一度だけ確実に行う
-        setScore(prev => {
+        setScore((prev) => {
           const newScore = Math.max(0, prev - 100);
           setScoreChange(-100);
           setTimeout(() => setScoreChange(null), 800);
           return newScore;
         });
-        // リセット
+
         wrongStreakRef.current = 0;
         setWrongStreak(0);
       }
+
       setIncorrectMessage(`ざんねん！\n答えは" ${displayAnswer} "でした！`);
     }
+
     setUserAnswer(null);
-  };
-
-  const nextQuestion = () => {
-    setShowCorrectMessage(false);
-
-    if (currentIndex + 1 >= questions.length) {
-      setFinished(true);
-    } else {
-      setCurrentIndex(i => i + 1);
-      setTimeLeft(60);
-    }
-  };
-
-  const finishQuiz = () => {
-    setFinished(true);
   };
 
   const getTitle = () => {
@@ -319,6 +368,91 @@ export default function QuizModePage() {
     return title;
   };
 
+  // ★ finished になったタイミングで「獲得ポイント計算(score/20)」→「ログインなら加算」
+  useEffect(() => {
+    if (!finished) return;
+
+    // 表示用ポイントは必ず計算
+    const earned = calcEarnedPointsFromScore(score);
+    setEarnedPoints(earned);
+
+    // 0PならDB処理はしない（表示だけ）
+    if (earned <= 0) {
+      setAwardStatus("idle");
+      return;
+    }
+
+    // 未ログインなら案内だけ
+    if (!userLoading && !user) {
+      setAwardStatus("need_login");
+      return;
+    }
+
+    // ログイン中なら付与（1回だけ）
+    if (!userLoading && user && !awardedOnceRef.current) {
+      awardedOnceRef.current = true;
+
+      const award = async () => {
+        try {
+          setAwardStatus("awarding");
+
+          // 現在ポイント取得
+          const { data: profile, error: fetchError } = await supabase
+            .from("profiles")
+            .select("points")
+            .eq("id", user.id)
+            .single();
+
+          if (fetchError) {
+            console.error("fetch points error:", fetchError);
+            setAwardStatus("error");
+            return;
+          }
+
+          const currentPoints = profile?.points ?? 0;
+          const newPoints = currentPoints + earned;
+
+          // 加算
+          const { error: updateError } = await supabase
+            .from("profiles")
+            .update({ points: newPoints })
+            .eq("id", user.id);
+
+          if (updateError) {
+            console.error("update points error:", updateError);
+            setAwardStatus("error");
+            return;
+          }
+
+          // ヘッダー等を即時更新
+          window.dispatchEvent(new Event("points:updated"));
+
+          // ログ（＋） ※失敗しても致命的にはしない
+          const { error: logError } = await supabase.from("user_point_logs").insert({
+            user_id: user.id,
+            change: earned,
+            reason: `制限時間クイズでポイント獲得（score ${score} → ${earned}P）`,
+          });
+
+          if (logError) {
+            console.log("insert user_point_logs error raw:", logError);
+            console.log("message:", (logError as any)?.message);
+            console.log("details:", (logError as any)?.details);
+            console.log("hint:", (logError as any)?.hint);
+            console.log("code:", (logError as any)?.code);
+          }
+
+          setAwardStatus("awarded");
+        } catch (e) {
+          console.error("award points error:", e);
+          setAwardStatus("error");
+        }
+      };
+
+      award();
+    }
+  }, [finished, score, user, userLoading, supabase]);
+
   if (questions.length === 0) return <p></p>;
 
   return (
@@ -328,12 +462,12 @@ export default function QuizModePage() {
           <h2 className="text-5xl md:text-6xl font-extrabold mb-6 text-black drop-shadow-lg">
             第 {currentIndex + 1} 問
           </h2>
-            
+
           <div className="flex flex-col">
             <p
               className={`
                 w-[280px] md:w-[400px] mx-auto text-2xl md:text-4xl font-extrabold mb-2 px-4 py-2 rounded-lg inline-block shadow-lg
-                ${timeLeft <= 30 ? 'bg-red-700 text-white animate-pulse' : ' text-black bg-white border-2 border-black'}
+                ${timeLeft <= 30 ? "bg-red-700 text-white animate-pulse" : " text-black bg-white border-2 border-black"}
                 transition-colors duration-300
               `}
             >
@@ -358,7 +492,9 @@ export default function QuizModePage() {
                     animate={{ opacity: 0, y: -20 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 2, ease: "easeOut" }}
-                    className={`absolute left-1/2 -translate-x-1/2 -top-3 font-bold text-2xl md:text-4xl ${scoreChange > 0 ? 'text-green-500' : 'text-red-500'}`}
+                    className={`absolute left-1/2 -translate-x-1/2 -top-3 font-bold text-2xl md:text-4xl ${
+                      scoreChange > 0 ? "text-green-500" : "text-red-500"
+                    }`}
                   >
                     {scoreChange > 0 ? `+${scoreChange}` : `${scoreChange}`}
                   </motion.div>
@@ -381,6 +517,7 @@ export default function QuizModePage() {
                       {incorrectMessage}
                     </p>
                   )}
+
                   {(() => {
                     const currentQuiz = questions[currentIndex].quiz;
                     const answerExplanation = currentQuiz?.answerExplanation;
@@ -413,9 +550,8 @@ export default function QuizModePage() {
                           setShowCorrectMessage(false);
                           setIncorrectMessage(null);
                           if (currentIndex + 1 < questions.length) {
-                            setCurrentIndex(i => i + 1);
+                            setCurrentIndex((i) => i + 1);
                           } else {
-                            // 問題が終わったら最初からでも良い
                             setCurrentIndex(0);
                           }
                         }}
@@ -429,11 +565,7 @@ export default function QuizModePage() {
 
               {!showCorrectMessage && !incorrectMessage && (
                 <>
-                  <QuizQuestion
-                    quiz={questions[currentIndex].quiz}
-                    userAnswer={userAnswer}
-                    setUserAnswer={setUserAnswer}
-                  />
+                  <QuizQuestion quiz={questions[currentIndex].quiz} userAnswer={userAnswer} setUserAnswer={setUserAnswer} />
                   <button
                     className="px-5 py-3 md:px-6 md:py-3 border border-black bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-4 hover:bg-blue-600 cursor-pointer"
                     onClick={checkAnswer}
@@ -447,14 +579,22 @@ export default function QuizModePage() {
           )}
 
           {flashMilestone && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50
-                            text-yellow-400 text-5xl md:text-7xl font-extrabold animate-pulse">
+            <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 text-yellow-400 text-5xl md:text-7xl font-extrabold animate-pulse">
               {flashMilestone}
             </div>
           )}
         </>
       ) : (
-        <QuizResult correctCount={correctCount} getTitle={getTitle} titles={titles} score={score}/>
+        <QuizResult
+          correctCount={correctCount}
+          getTitle={getTitle}
+          titles={titles}
+          score={score}
+          earnedPoints={earnedPoints}
+          isLoggedIn={!!user}
+          awardStatus={awardStatus}
+          onGoLogin={() => router.push("/user/login")}
+        />
       )}
     </div>
   );

@@ -1,13 +1,16 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useSearchParams, usePathname } from "next/navigation";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import QuizQuestion from "../../components/QuizQuestion";
 import { QuizData } from "@/lib/articles";
 import { motion, AnimatePresence } from "framer-motion";
 import { useBattle } from "../../../hooks/useBattle";
 import { useQuestionPhase } from "../../../hooks/useQuestionPhase";
+import { createSupabaseBrowserClient } from "@/lib/supabaseClient";
+import { useSupabaseUser } from "../../../hooks/useSupabaseUser";
 
+type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
 
 interface ArticleData {
   id: string;
@@ -44,6 +47,14 @@ interface QuizResultProps {
   players: Player[];
   predictedWinner: string | null;
   hasPredicted: boolean;
+  basePoints: number;
+  firstBonusPoints: number;
+  predictionBonusPoints: number;
+  earnedPoints: number;
+  isLoggedIn: boolean;
+  awardStatus: AwardStatus;
+  onGoLogin: () => void;
+  isCodeMatch: boolean;
 }
 
 const QuizResult = ({
@@ -59,6 +70,14 @@ const QuizResult = ({
   players,
   predictedWinner,
   hasPredicted,
+  basePoints,
+  firstBonusPoints,
+  predictionBonusPoints,
+  earnedPoints,
+  isLoggedIn,
+  awardStatus,
+  onGoLogin,
+  isCodeMatch,
 }: QuizResultProps) => {
   const [showText1, setShowText1] = useState(false);
   const [showText2, setShowText2] = useState(false);
@@ -191,6 +210,65 @@ const QuizResult = ({
         </div>
       )}
 
+      {showButton && (
+        <div className="mx-auto max-w-[520px] bg-white border-2 border-black rounded-xl p-4 shadow mt-6">
+          {isCodeMatch ? (
+            <p className="text-xl md:text-2xl font-extrabold text-gray-800">
+              合言葉マッチのためポイントは加算されません
+            </p>
+          ) : (
+            <>
+              <div className="mb-2 text-lg md:text-xl text-gray-700 font-bold">
+                <p className="text-blue-500">正解数ポイント：{basePoints}P（{correctCount}問 × 5P）</p>
+                {firstBonusPoints > 0 && (
+                  <p className="text-yellow-500">1位ボーナス✨：{firstBonusPoints}P</p>
+                )}
+
+                {predictionBonusPoints > 0 && (
+                  <p className="text-pink-500">予想的中ボーナス🎉：{predictionBonusPoints}P</p>
+                )}
+              </div>
+
+              <p className="text-xl md:text-2xl font-extrabold text-gray-800">
+                今回の獲得ポイント： <span className="text-green-600">{earnedPoints}P</span>
+              </p>
+
+              {isLoggedIn ? (
+                <>
+                  {awardStatus === "awarding" && (
+                    <p className="text-md md:text-xl text-gray-600 mt-2">
+                      ポイント反映中...
+                    </p>
+                  )}
+                  {awardStatus === "awarded" && (
+                    <p className="text-md md:text-xl text-green-700 font-bold mt-2">
+                      ✅ ポイントを加算しました！
+                    </p>
+                  )}
+                  {awardStatus === "error" && (
+                    <p className="text-md md:text-xl text-red-600 font-bold mt-2">
+                      ❌ ポイント加算に失敗しました。時間をおいて再度お試しください。
+                    </p>
+                  )}
+                </>
+              ) : (
+                <div className="mt-2">
+                  <p className="text-md md:text-xl text-gray-700 font-bold">
+                    ※未ログインのため受け取れません。ログインすると次からポイントを受け取れます！
+                  </p>
+                  <button
+                    onClick={onGoLogin}
+                    className="mt-2 px-4 py-2 bg-blue-500 text-white border border-black rounded-lg font-bold hover:bg-blue-600 cursor-pointer"
+                  >
+                    ログインする
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
+
       {/* ============================
           🔥 リトライボタン
       ============================ */}
@@ -273,6 +351,17 @@ export default function QuizModePage() {
   const level = searchParams?.get("level") || "";
   const timeParam = searchParams?.get("time") || "5";
   const totalTime = parseInt(timeParam) * 60;
+  const router = useRouter();
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+  const { user, loading: userLoading } = useSupabaseUser();
+
+  const [awardStatus, setAwardStatus] = useState<AwardStatus>("idle");
+  const awardedOnceRef = useRef(false);
+
+  const [earnedPoints, setEarnedPoints] = useState(0);
+  const [basePoints, setBasePoints] = useState(0);
+  const [firstBonusPoints, setFirstBonusPoints] = useState(0);
+  const [predictionBonusPoints, setPredictionBonusPoints] = useState(0);
 
   const [questions, setQuestions] = useState<{ id: string; quiz: QuizData }[]>([]);
   const [correctCount, setCorrectCount] = useState(0);
@@ -324,24 +413,6 @@ export default function QuizModePage() {
   const [predictedWinner, setPredictedWinner] = useState<string | null>(null);
   const [hasPredicted, setHasPredicted] = useState(false);
 
-  const getStageBonusTime = (stage: number) => {
-    if (stage < 4) return 0;
-    if (stage < 5) return 30;
-    if (stage < 6) return 45;
-    if (stage < 7) return 60;
-    if (stage < 8) return 75;
-    if (stage < 9) return 90;
-    if (stage < 10) return 105;
-    if (stage < 11) return 120;
-    if (stage < 12) return 135;
-    if (stage < 13) return 150;
-    if (stage < 14) return 165;
-    if (stage < 15) return 180;
-    if (stage < 16) return 195;
-    if (stage < 17) return 210;
-    return 225;
-  };
-
   const titles = [
     { threshold: 2, title: "クイズ戦士" },
     { threshold: 5, title: "謎解きファイター" },
@@ -384,6 +455,11 @@ export default function QuizModePage() {
     roomCode
   );
 
+  const groups = lastPlayerElimination?.eliminationGroups ?? [];
+  const winnerGroup = groups.length ? groups[groups.length - 1] : [];
+  const isSoloWinner = winnerGroup.length === 1;          // 単独勝者か
+  const amIWinner = winnerGroup.includes(mySocketId);     // 自分が勝者か
+  const firstBonus = (isSoloWinner && amIWinner) ? 300 : 0;
   const phase = questionPhase?.phase ?? "question";
   const results = questionPhase?.results ?? [];
   const canAnswer = questionPhase?.canAnswer ?? false;
@@ -481,6 +557,12 @@ export default function QuizModePage() {
     setPredictedWinner(null);
     setHasPredicted(false);
     setUserAnswer(null);
+    awardedOnceRef.current = false;
+    setAwardStatus("idle");
+    setEarnedPoints(0);
+    setBasePoints(0);
+    setFirstBonusPoints(0);
+    setPredictionBonusPoints(0);
   };
 
   const handleNewMatch = () => {
@@ -505,6 +587,12 @@ export default function QuizModePage() {
     setAllPlayersDead(false);
     setPredictedWinner(null);
     setHasPredicted(false);
+    awardedOnceRef.current = false;
+    setAwardStatus("idle");
+    setEarnedPoints(0);
+    setBasePoints(0);
+    setFirstBonusPoints(0);
+    setPredictionBonusPoints(0);
 
     setReadyToStart(false);
 
@@ -816,7 +904,116 @@ export default function QuizModePage() {
       clearTimeout(finishTimer);
     };
   }, [gameSetScheduled]);
+  
+  useEffect(() => {
+    if (!finished) return;
+    
+    // 合言葉マッチは付与しない（必要なら pathname/mode の条件はあなたの仕様に合わせて）
+    const isCodeMatch = mode === "code";
+    if (isCodeMatch) {
+      setBasePoints(0);
+      setFirstBonusPoints(0);
+      setEarnedPoints(0);
+      setAwardStatus("idle");
+      return;
+    }
+    
+    // 勝者情報がまだ来てないなら待つ（1位ボーナス/予想的中に必要）
+    if (!lastPlayerElimination) return;
 
+    const base = correctCount * 5;
+
+    const groups = lastPlayerElimination?.eliminationGroups ?? [];
+    const winnerGroup = groups.length ? groups[groups.length - 1] : [];
+    const isSoloWinner = winnerGroup.length === 1;
+    const amIWinner = winnerGroup.includes(mySocketId);
+    const firstBonus = (isSoloWinner && amIWinner) ? 300 : 0;
+
+    // 予想的中ボーナス +100（予想していないなら0）
+    const predictionHit =
+      hasPredicted &&
+      predictedWinner &&
+      winnerGroup.includes(predictedWinner);
+
+    const predictionBonus = predictionHit ? 100 : 0;
+
+    const earned = base + firstBonus + predictionBonus;
+
+    setBasePoints(base);
+    setFirstBonusPoints(firstBonus);
+    setPredictionBonusPoints(predictionBonus);
+    setEarnedPoints(earned);
+
+    if (earned <= 0) {
+      setAwardStatus("idle");
+      return;
+    }
+
+    // 未ログインなら案内だけ
+    if (!userLoading && !user) {
+      setAwardStatus("need_login");
+      return;
+    }
+
+    // ログイン中なら付与（1回だけ）
+    if (!userLoading && user && !awardedOnceRef.current) {
+      awardedOnceRef.current = true;
+
+      const award = async () => {
+        try {
+          setAwardStatus("awarding");
+
+          const { data: profile, error: fetchError } = await supabase
+            .from("profiles")
+            .select("points")
+            .eq("id", user.id)
+            .single();
+
+          if (fetchError) {
+            console.error("fetch points error:", fetchError);
+            setAwardStatus("error");
+            return;
+          }
+
+          const currentPoints = profile?.points ?? 0;
+          const newPoints = currentPoints + earned;
+
+          const { error: updateError } = await supabase
+            .from("profiles")
+            .update({ points: newPoints })
+            .eq("id", user.id);
+
+          if (updateError) {
+            console.error("update points error:", updateError);
+            setAwardStatus("error");
+            return;
+          }
+
+          window.dispatchEvent(new Event("points:updated"));
+
+          const reason =
+            `サバイバルクイズ獲得: 正解${correctCount}問=${base}P` +
+            (firstBonus ? ` / 1位ボーナス${firstBonus}P` : "") +
+            (predictionBonus ? ` / 予想的中${predictionBonus}P` : "");
+
+          const { error: logError } = await supabase.from("user_point_logs").insert({
+            user_id: user.id,
+            change: earned,
+            reason,
+          });
+
+          if (logError) console.log("insert user_point_logs error raw:", logError);
+
+          setAwardStatus("awarded");
+        } catch (e) {
+          console.error("award points error:", e);
+          setAwardStatus("error");
+        }
+      };
+
+      award();
+    }
+  }, [finished, mode, correctCount, lastPlayerElimination, mySocketId, hasPredicted, predictedWinner, user, userLoading, supabase]);
 
   useEffect(() => {
     if (!socket) return;
@@ -1357,7 +1554,7 @@ export default function QuizModePage() {
           <div className="flex flex-col items-center mt-2 md:mt-3">
             {/* メッセージボタン */}
             <div className="text-center border border-black p-1 rounded-xl bg-white">
-              {["よろしく！", "やったね✌", "負けないぞ！", "ありがとう！"].map((msg) => (
+              {["よろしく👋", "やったね✌", "負けないぞ✊", "ありがとう❤"].map((msg) => (
                 <button
                   key={msg}
                   onClick={() => sendMessage(msg)}
@@ -1383,6 +1580,14 @@ export default function QuizModePage() {
           players={players}
           predictedWinner={predictedWinner}
           hasPredicted={hasPredicted}
+          basePoints={basePoints}
+          firstBonusPoints={firstBonusPoints}
+          predictionBonusPoints={predictionBonusPoints}
+          earnedPoints={earnedPoints}
+          isLoggedIn={!!user}
+          awardStatus={awardStatus}
+          onGoLogin={() => router.push("/user/login")}
+          isCodeMatch={mode === "code"}
         />
       )}
     </div>

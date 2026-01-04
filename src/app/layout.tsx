@@ -4,16 +4,17 @@ import Link from "next/link";
 import "./globals.css";
 import NavButtons from "./components/NavButtons";
 import Script from "next/script";
+import HeaderMenu from "./components/HeaderMenu";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const yomogi = Yomogi({ weight: "400", subsets: ["latin"], variable: "--font-yomogi" });
 
 export const metadata: Metadata = {
   title: {
-    default: "頭を鍛える暇つぶしクイズ「ひまQ」 - 空き時間で頭を鍛える脳トレクイズ",
-    template: "%s | 頭を鍛える暇つぶしクイズ「ひまQ」 - 空き時間で頭を鍛える脳トレクイズ",
+    default: "みんなで遊べる暇つぶしクイズ「ひまQ」 - 空き時間で頭を鍛える脳トレクイズ",
+    template: "%s | みんなで遊べる暇つぶしクイズ「ひまQ」 - 空き時間で頭を鍛える脳トレクイズ",
   },
-  description: "頭を鍛える暇つぶし！脳トレクイズや面白クイズで、ちょっとした空き時間に脳を鍛えよう。無料で遊べる『ひまQ』で脳力アップ！記憶力・思考力を鍛えよう。",
+  description: "みんなで遊べる暇つぶしクイズ！脳トレクイズや面白クイズで、ちょっとした空き時間に脳を鍛えよう。無料で遊べる『ひまQ』で脳力アップ！記憶力・思考力を鍛えよう。",
   metadataBase: new URL("https://www.hima-quiz.com"),
   icons: {
     icon: "/favicon.ico",
@@ -48,6 +49,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
 
       <body className={`${inter.variable} ${yomogi.variable} font-sans bg-[#abe4fb]`}>
+        <HeaderMenu />
         <div className="flex flex-col min-h-screen">
           {/* ===== HEADER ===== */}
           <header className="py-3 text-center shadow-md bg-yellow-300">
@@ -83,7 +85,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     <span className="block text-5xl md:text-7xl mt-2">ひまQ</span>
                   </h1>
                   <p className="text-black/90 mt-3 md:mt-4 mb-1 md:mb-0 md:text-xl tracking-wide font-bold">
-                    頭を鍛える暇つぶしクイズ！
+                    みんなで遊べる暇つぶしクイズ！
                   </p>
                 </Link>
               </div>

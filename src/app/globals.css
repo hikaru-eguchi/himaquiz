@@ -518,16 +518,16 @@ footer {
     }
     30% {
       transform: translate(-70px, -100px) rotate(50deg);
-      width: 120px;
+      width: 180px;
       opacity: 1;
     }
     60% {
       transform: translate(0px, 0px) rotate(30deg); /* 中央あたり */
-      width: 200px;
+      width: 250px;
     }
     80% {
       transform: translate(0px, 100px) rotate(20deg);
-      width: 140px;
+      width: 180px;
     }
     100% {
       transform: translate(0px, 200px) rotate(10deg); /* 下まで */

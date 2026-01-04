@@ -1,30 +1,41 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useSearchParams, usePathname } from "next/navigation";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import QuizQuestion from "../../components/QuizQuestion";
 import { QuizData } from "@/lib/articles";
 import { motion, AnimatePresence } from "framer-motion";
 import { useBattle } from "../../../hooks/useBattle";
 import { useQuestionPhase } from "../../../hooks/useQuestionPhase";
+import { createSupabaseBrowserClient } from "@/lib/supabaseClient";
+import { useSupabaseUser } from "../../../hooks/useSupabaseUser";
+
+type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
 
 // 敵情報
 const enemies = [
-  { id: "slime", name: "スライム", image: "/images/slime.png", hp: 100, attack: 50, description: "ぷるぷるして弱そうに見えるが油断は禁物。" },
-  { id: "goblin", name: "ゴブリン", image: "/images/goblin.png", hp: 220, attack: 100, description: "素早く群れで襲いかかる小型のモンスター。" },
-  { id: "mimic", name: "ミミック", image: "/images/mimic.png", hp: 350, attack: 200, description: "宝箱に化けるトリッキーな敵。油断すると噛まれる！" },
-  { id: "berserker", name: "バーサーカー", image: "/images/berserker.png", hp: 500, attack: 400, description: "理性を失った狂戦士。攻撃力が非常に高い。" },
-  { id: "fenikkusu", name: "フェニックス", image: "/images/fenikkusu.png", hp: 1000, attack: 650, description: "不死鳥の炎を操る神秘的な生物。燃え盛る翼で攻撃。" },
-  { id: "dragon", name: "ドラゴン", image: "/images/dragon.png", hp: 2000, attack: 800, description: "火を吹く巨大竜。圧倒的な力を誇る古代の王者。" },
-  { id: "blackdragon", name: "ブラックドラゴン", image: "/images/blackdragon.png", hp: 3500, attack: 1000, description: "闇の力を宿す黒竜。魔法攻撃も強力。" },
-  { id: "leviathan", name: "リヴァイアサン", image: "/images/leviathan.png", hp: 5000, attack: 1500, description: "海の深淵から現れる巨大モンスター。水流で圧倒する。" },
-  { id: "poseidon", name: "ポセイドン", image: "/images/poseidon.png", hp: 7000, attack: 2000, description: "海の神。雷と津波で敵を蹴散らす力を持つ。" },
-  { id: "gundarimyouou", name: "軍荼利明王（ぐんだりみょうおう）", image: "/images/gundarimyouou.png", hp: 8500, attack: 3000, description: "仏教の怒りの守護神。恐怖の炎で全てを焼き尽くす。" },
-  { id: "hades", name: "ハデス", image: "/images/hades.png", hp: 10000, attack: 4000, description: "冥界の支配者。死者の力を操り、強大な攻撃を仕掛ける。" },
-  { id: "zeus", name: "ゼウス", image: "/images/zeus.png", hp: 12000, attack: 5000, description: "天空の王。雷霆を操る全知全能の神。" },
-  { id: "ordin", name: "オーディン", image: "/images/ordin.png", hp: 15000, attack: 8000, description: "知恵と戦の神。魔法と剣技を極めた伝説の戦士。" },
-  { id: "yuusya_game", name: "初代クイズマスターの最強勇者", image: "/images/yuusya_game.png", hp: 20000, attack: 20000, description: "全てのクイズと戦闘を制した伝説の勇者。前人未到の強さを誇る。" },
-  { id: "quizou", name: "クイズ王", image: "/images/quiz_man.png", hp: 35000, attack: 35000, description: "クイズの王様。クイズ界の支配者。" },
+  { id: "slime", name: "スライム", image: "/images/スライム_2.png", hp: 100, attack: 50, description: "ぷるぷるして弱そうに見えるが油断は禁物。" },
+  { id: "goblin", name: "ゴブリン", image: "/images/ゴブリン_2.png", hp: 220, attack: 100, description: "素早く群れで襲いかかる小型のモンスター。" },
+  { id: "skeleton", name: "スケルトン", image: "/images/スケルトン_2.png", hp: 350, attack: 200, description: "朽ちた骨から生まれた剣と盾を操る不気味な戦士。" },
+  { id: "mimic", name: "ミミック", image: "/images/ミミック_2.png", hp: 500, attack: 400, description: "宝箱に化けるトリッキーな敵。油断すると噛まれる！" },
+  { id: "lizardman", name: "リザードマン", image: "/images/リザードマン_2.png", hp: 750, attack: 500, description: "鱗に覆われた戦士。高い身体能力と鋭い爪で攻撃してくる。" },
+  { id: "golem", name: "ゴーレム", image: "/images/ゴーレム_2.png", hp: 1000, attack: 650, description: "岩と魔力で作られた巨人。圧倒的な防御力を誇る。" },
+  { id: "cerberus", name: "ケルベロス", image: "/images/ケルベロス_2.png", hp: 1200, attack: 800, description: "冥界を守る三つ首の魔獣。素早い連続攻撃が脅威。" },
+  { id: "berserker", name: "バーサーカー", image: "/images/バーサーカー_2.png", hp: 1500, attack: 1000, description: "理性を失った狂戦士。攻撃力が非常に高い。" },
+  { id: "dragon", name: "ドラゴン", image: "/images/ドラゴン_2.png", hp: 1800, attack: 1200, description: "火を吹く巨大竜。圧倒的な力を誇る古代の王者。" },
+  { id: "fenikkusu", name: "フェニックス", image: "/images/フェニックス_2.png", hp: 2000, attack: 1500, description: "不死鳥の炎を操る神秘的な生物。燃え盛る翼で攻撃。" },
+  { id: "leviathan", name: "リヴァイアサン", image: "/images/リヴァイアサン_2.png", hp: 2500, attack: 1800, description: "海の深淵から現れる巨大モンスター。水流で圧倒する。" },
+  { id: "blackdragon", name: "ブラックドラゴン", image: "/images/ブラックドラゴン_2.png", hp: 3000, attack: 2000, description: "闇の力を宿す黒竜。魔法攻撃も強力。" },
+  { id: "kingdemon", name: "キングデーモン", image: "/images/キングデーモン_2.png", hp: 3500, attack: 2500, description: "魔界を統べる悪魔の王。圧倒的な魔力と威圧感を放つ。" },
+  { id: "kinghydra", name: "キングヒドラ", image: "/images/キングヒドラ_2.png", hp: 4000, attack: 3000, description: "複数の首を持つ巨大魔獣。倒しても再生する恐怖の存在。" },
+  { id: "ordin", name: "オーディン", image: "/images/オーディン_2.png", hp: 5000, attack: 4000, description: "知恵と戦の神。魔法と剣技を極めた伝説の戦士。" },
+  { id: "poseidon", name: "ポセイドン", image: "/images/ポセイドン_2.png", hp: 6000, attack: 5000, description: "海の神。雷と津波で敵を蹴散らす力を持つ。" },
+  { id: "hades", name: "ハデス", image: "/images/ハデス_2.png", hp: 7000, attack: 6000, description: "冥界の支配者。死者の力を操り、強大な攻撃を仕掛ける。" },
+  { id: "zeus", name: "ゼウス", image: "/images/ゼウス_2.png", hp: 8000, attack: 7000, description: "天空の王。雷霆を操る全知全能の神。" },
+  { id: "gundarimyouou", name: "軍荼利明王（ぐんだりみょうおう）", image: "/images/軍荼利明王_2.png", hp: 9000, attack: 8000, description: "仏教の怒りの守護神。恐怖の炎で全てを焼き尽くす。" },
+  { id: "maou", name: "魔王", image: "/images/魔王_2.png", hp: 10000, attack: 10000, description: "世界を闇に包もうとする存在。圧倒的な魔力を秘める。" },
+  { id: "yuusya_game", name: "クイズマスターの最強勇者", image: "/images/勇者_2_1.png", hp: 20000, attack: 20000, description: "全てのクイズと戦闘を制した伝説の勇者。前人未到の強さを誇る。" },
+  { id: "quizou", name: "クイズ王", image: "/images/王様_2.png", hp: 30000, attack: 30000, description: "クイズの王様。クイズ界の支配者。" },
 ];
 
 // ステージに応じて敵を取得する
@@ -45,7 +56,15 @@ const getEnemyForStage = (stage: number) => {
   if (stage < 14) return enemies[12];
   if (stage < 15) return enemies[13];
   if (stage < 16) return enemies[14];
-  return enemies[14];
+  if (stage < 17) return enemies[15];
+  if (stage < 18) return enemies[16];
+  if (stage < 19) return enemies[17];
+  if (stage < 20) return enemies[18];
+  if (stage < 21) return enemies[19];
+  if (stage < 22) return enemies[20];
+  if (stage < 23) return enemies[21];
+  if (stage < 24) return enemies[22];
+  return enemies[22];
 };
 
 interface ArticleData {
@@ -81,26 +100,33 @@ interface QuizResultProps {
   rematchRequested : boolean;
   handleNewMatch: () => void;
   handleRematch: () => void;
+  basePoints: number;
+  stageBonusPoints: number;
+  earnedPoints: number;
+  isLoggedIn: boolean;
+  awardStatus: AwardStatus;
+  onGoLogin: () => void;
+  isCodeMatch: boolean;
 }
 
 // 正解数に応じて出すコメント
 const rankComments = [
   { threshold: 0, comment: "ここから冒険の始まりだ！ゆっくり進んでいこう！" },
-  { threshold: 2, comment: "クイズ戦士に昇格！戦場に立つ準備は万端だ！" },
-  { threshold: 5, comment: "謎解きファイター！試練に立ち向かう力がついてきた！" },
-  { threshold: 7, comment: "頭脳の騎士！君の知識が冒険の武器になる！" },
-  { threshold: 10, comment: "ひらめきハンター！まるで答えが見えているかのような閃きだ！" },
-  { threshold: 15, comment: "真理の探究者！知識の深みを極め、迷宮を読み解く力がある！" },
-  { threshold: 20, comment: "知恵の勇者！知識と勇気を兼ね備えた英雄だ！" },
-  { threshold: 25, comment: "クイズ大賢者！君の選択はすべて正解へ導かれている…！" },
-  { threshold: 30, comment: "答えの覇者！あらゆる難問をねじ伏せる圧倒的なパワー！" },
-  { threshold: 35, comment: "クイズ超越者！もう次元が違う…これは人間離れしている！" },
-  { threshold: 40, comment: "フロアマスター！あらゆるステージを制覇する者の風格だ！" },
-  { threshold: 45, comment: "グランドマスター！歴戦の賢者のような威厳がある！" },
-  { threshold: 50, comment: "クイズマスター！最強の中の最強…殿堂入りレベル！" },
-  { threshold: 65, comment: "レジェンドクイズマスター！伝説に語り継がれる存在だ…！" },
-  { threshold: 80, comment: "クイズ王…！ついにクイズマスターを倒した！🎉君はクイズ界の王者だ！！" },
-  { threshold: 100, comment: "クイズ神…！ついにクイズ王を倒した！🎉🎉一番すごい称号に到達だ！✨" },
+  { threshold: 5, comment: "クイズ戦士に昇格！戦場に立つ準備は万端だ！" },
+  { threshold: 10, comment: "謎解きファイター！試練に立ち向かう力がついてきた！" },
+  { threshold: 15, comment: "頭脳の騎士！君の知識が冒険の武器になる！" },
+  { threshold: 20, comment: "ひらめきハンター！まるで答えが見えているかのような閃きだ！" },
+  { threshold: 25, comment: "真理の探究者！知識の深みを極め、迷宮を読み解く力がある！" },
+  { threshold: 30, comment: "知恵の勇者！知識と勇気を兼ね備えた英雄だ！" },
+  { threshold: 40, comment: "クイズ大賢者！君の選択はすべて正解へ導かれている…！" },
+  { threshold: 50, comment: "答えの覇者！あらゆる難問をねじ伏せる圧倒的なパワー！" },
+  { threshold: 60, comment: "クイズ超越者！もう次元が違う…これは人間離れしている！" },
+  { threshold: 70, comment: "フロアマスター！あらゆるステージを制覇する者の風格だ！" },
+  { threshold: 80, comment: "グランドマスター！歴戦の賢者のような威厳がある！" },
+  { threshold: 100, comment: "クイズマスター！最強の中の最強…殿堂入りレベル！" },
+  { threshold: 120, comment: "レジェンドクイズマスター！伝説に語り継がれる存在だ…！" },
+  { threshold: 150, comment: "クイズ王…！ついにクイズマスターを倒した！🎉君はクイズ界の王者だ！！" },
+  { threshold: 200, comment: "クイズ神…！ついにクイズ王を倒した！🎉🎉一番すごい称号に到達だ！✨" },
 ];
 
 const QuizResult = ({
@@ -114,6 +140,13 @@ const QuizResult = ({
   rematchRequested,
   handleNewMatch,
   handleRematch,
+  basePoints,
+  stageBonusPoints,
+  earnedPoints,
+  isLoggedIn,
+  awardStatus,
+  onGoLogin,
+  isCodeMatch,
 }: QuizResultProps) => {
   const [showScore, setShowScore] = useState(false);
   const [showText, setShowText] = useState(false);
@@ -137,7 +170,6 @@ const QuizResult = ({
     return () => timers.forEach(clearTimeout);
   }, []);
 
-
   return (
     <motion.div
       className={`text-center mt-6 p-8 rounded-lg`}
@@ -153,7 +185,7 @@ const QuizResult = ({
           </p>
 
           <p className="text-3xl md:text-5xl font-bold mb-2 md:mb-6">
-            {stageCount} ステージまで到達！
+            ステージ {stageCount} までクリア！
           </p>
         </>
       )}
@@ -183,6 +215,59 @@ const QuizResult = ({
             </p>
           )}
         </>
+      )}
+
+      {showButton && (
+        <div className="mx-auto max-w-[520px] bg-white border-2 border-black rounded-xl p-4 shadow mt-6">
+          {isCodeMatch ? (
+            <p className="text-xl md:text-2xl font-extrabold text-gray-800">
+              合言葉マッチのためポイントは加算されません
+            </p>
+          ) : (
+            <>
+              <div className="mb-2 text-lg md:text-xl text-gray-700 font-bold">
+                <p className="text-blue-500">正解数ポイント：{basePoints}P（{correctCount}問 × 5P）</p>
+                <p className="text-yellow-500">ステージクリアボーナス：{stageBonusPoints}P（STAGE {stageCount}）</p>
+              </div>
+
+              <p className="text-xl md:text-2xl font-extrabold text-gray-800">
+                今回の獲得ポイント： <span className="text-green-600">{earnedPoints}P</span>
+              </p>
+
+              {isLoggedIn ? (
+                <>
+                  {awardStatus === "awarding" && (
+                    <p className="text-md md:text-xl text-gray-600 mt-2">
+                      ポイント反映中...
+                    </p>
+                  )}
+                  {awardStatus === "awarded" && (
+                    <p className="text-md md:text-xl text-green-700 font-bold mt-2">
+                      ✅ ポイントを加算しました！
+                    </p>
+                  )}
+                  {awardStatus === "error" && (
+                    <p className="text-md md:text-xl text-red-600 font-bold mt-2">
+                      ❌ ポイント加算に失敗しました。時間をおいて再度お試しください。
+                    </p>
+                  )}
+                </>
+              ) : (
+                <div className="mt-2">
+                  <p className="text-md md:text-xl text-gray-700 font-bold">
+                    ※未ログインのため受け取れません。ログインすると次からポイントを受け取れます！
+                  </p>
+                  <button
+                    onClick={onGoLogin}
+                    className="mt-2 px-4 py-2 bg-blue-500 text-white border border-black rounded-lg font-bold hover:bg-blue-600 cursor-pointer"
+                  >
+                    ログインする
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       )}
 
       {/* ============================
@@ -267,6 +352,16 @@ export default function QuizModePage() {
   const level = searchParams?.get("level") || "";
   const timeParam = searchParams?.get("time") || "2";
   const totalTime = parseInt(timeParam) * 60;
+  const router = useRouter();
+
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+  const { user, loading: userLoading } = useSupabaseUser();
+
+  const [earnedPoints, setEarnedPoints] = useState(0);
+  const [basePoints, setBasePoints] = useState(0);
+  const [stageBonusPoints, setStageBonusPoints] = useState(0);
+  const [awardStatus, setAwardStatus] = useState<AwardStatus>("idle");
+  const awardedOnceRef = useRef(false);
 
   const [questions, setQuestions] = useState<{ id: string; quiz: QuizData }[]>([]);
   const [correctCount, setCorrectCount] = useState(0);
@@ -310,6 +405,7 @@ export default function QuizModePage() {
   const [maxPlayers, setMaxPlayers] = useState(4);
   const [roomLocked, setRoomLocked] = useState(false);
   const [allPlayersDead, setAllPlayersDead] = useState(false);
+  const [allGameClear, setAllGameClear] = useState(false);
   const [battleKey, setBattleKey] = useState(0);
 
   const roomLockedRef = useRef(false);
@@ -320,37 +416,72 @@ export default function QuizModePage() {
   const getStageBonusTime = (stage: number) => {
     if (stage < 4) return 0;
     if (stage < 5) return 30;
-    if (stage < 6) return 45;
-    if (stage < 7) return 60;
-    if (stage < 8) return 75;
-    if (stage < 9) return 90;
-    if (stage < 10) return 105;
-    if (stage < 11) return 120;
-    if (stage < 12) return 135;
-    if (stage < 13) return 150;
-    if (stage < 14) return 165;
-    if (stage < 15) return 180;
-    if (stage < 16) return 195;
-    if (stage < 17) return 210;
-    return 225;
+    if (stage < 6) return 60;
+    if (stage < 7) return 90;
+    if (stage < 8) return 120;
+    if (stage < 9) return 150;
+    if (stage < 10) return 180;
+    if (stage < 11) return 240;
+    if (stage < 12) return 360;
+    if (stage < 13) return 420;
+    if (stage < 14) return 480;
+    if (stage < 15) return 600;
+    if (stage < 16) return 720;
+    if (stage < 17) return 840;
+    if (stage < 18) return 960;
+    if (stage < 19) return 1140;
+    if (stage < 20) return 1320;
+    if (stage < 21) return 1500;
+    if (stage < 22) return 1860;
+    if (stage < 23) return 2220;
+    return 2580;
+  };
+
+  const calcStageBonus = (stage: number) => {
+    const table: Record<number, number> = {
+      1: 5,
+      2: 10,
+      3: 15,
+      4: 20,
+      5: 25,
+      6: 50,
+      7: 80,
+      8: 100,
+      9: 125,
+      10: 150,
+      11: 200,
+      12: 250,
+      13: 300,
+      14: 400,
+      15: 500,
+      16: 600,
+      17: 700,
+      18: 800,
+      19: 1000,
+      20: 1500,
+      21: 1800,
+      22: 2000,
+      23: 3000,
+    };
+    return table[Math.min(stage, 23)] ?? 0;
   };
 
   const titles = [
-    { threshold: 2, title: "クイズ戦士" },
-    { threshold: 5, title: "謎解きファイター" },
-    { threshold: 7, title: "頭脳の騎士" },
-    { threshold: 10, title: "ひらめきハンター" },
-    { threshold: 15, title: "真理の探究者" },
-    { threshold: 20, title: "知恵の勇者 🛡️" },
-    { threshold: 25, title: "クイズ大賢者 ⭐" },
-    { threshold: 30, title: "答えの覇者 🌀" },
-    { threshold: 35, title: "クイズ超越者 🌌" },
-    { threshold: 40, title: "フロアマスター 🏆" },
-    { threshold: 45, title: "グランドマスター 🏆" },
-    { threshold: 50, title: "クイズマスター 🏆" },
-    { threshold: 65, title: "レジェンドクイズマスター 🌟" },
-    { threshold: 80, title: "✨クイズ王👑" },
-    { threshold: 100, title: "💫クイズ神💫" },
+    { threshold: 5, title: "クイズ戦士" },
+    { threshold: 10, title: "謎解きファイター" },
+    { threshold: 15, title: "頭脳の騎士" },
+    { threshold: 20, title: "ひらめきハンター" },
+    { threshold: 25, title: "真理の探究者" },
+    { threshold: 30, title: "知恵の勇者 🛡️" },
+    { threshold: 40, title: "クイズ大賢者 ⭐" },
+    { threshold: 50, title: "答えの覇者 🌀" },
+    { threshold: 60, title: "クイズ超越者 🌌" },
+    { threshold: 70, title: "フロアマスター 🏆" },
+    { threshold: 80, title: "グランドマスター 🏆" },
+    { threshold: 100, title: "クイズマスター 🏆" },
+    { threshold: 120, title: "レジェンドクイズマスター 🌟" },
+    { threshold: 150, title: "✨クイズ王👑" },
+    { threshold: 200, title: "💫クイズ神💫" },
   ];
 
   const getTitle = () => {
@@ -378,9 +509,11 @@ export default function QuizModePage() {
     socket,
     enemyHP,
     maxHP,
+    isCritical,
     stageCount,
     playerLives,
     isGameOver,
+    isGameClear,
   } = useBattle(playerName);
 
   const questionPhase = useQuestionPhase(
@@ -483,6 +616,8 @@ export default function QuizModePage() {
     setScoreChanges({});
     setIncorrectMessage(null);
     setShowCorrectMessage(false);
+    awardedOnceRef.current = false;
+    setAwardStatus("idle");
   };
 
   const handleNewMatch = () => {
@@ -503,6 +638,8 @@ export default function QuizModePage() {
     setScoreChanges({});
     setIncorrectMessage(null);
     setShowCorrectMessage(false);
+    awardedOnceRef.current = false;
+    setAwardStatus("idle");
 
     setReadyToStart(false);
 
@@ -647,6 +784,22 @@ export default function QuizModePage() {
       clearTimeout(finishTimer);
     };
   }, [phase, isGameOver]);
+
+  useEffect(() => {
+    if (!isGameClear) return;
+
+    const deadTimer  = setTimeout(() => {
+      setAllGameClear(true);
+    }, 6000);
+
+    const finishTimer  = setTimeout(() => {
+      setFinished(true);
+    }, 12000); // ← 正解発表演出のあと
+
+    return () => {
+      clearTimeout(finishTimer);
+    };
+  }, [phase, isGameClear]);
 
   useEffect(() => {
     if (!bothReady) return;
@@ -836,6 +989,102 @@ export default function QuizModePage() {
   }, [allPlayersReady, bothReady]);
 
   useEffect(() => {
+    if (!finished) return;
+
+    const isCodeMatch = mode === "code";
+    if (isCodeMatch) {
+      setBasePoints(0);
+      setStageBonusPoints(0);
+      setEarnedPoints(0);
+      setAwardStatus("idle");
+      return;
+    }
+
+    const base = correctCount * 5;               // ✅ 1問5P
+    const bonus = calcStageBonus(stageCount);   // ✅ ステージボーナス
+    const earned = base + bonus;
+
+    setBasePoints(base);
+    setStageBonusPoints(bonus);
+    setEarnedPoints(earned);
+
+    // 0PならDB処理なし
+    if (earned <= 0) {
+      setAwardStatus("idle");
+      return;
+    }
+
+    // 未ログインなら案内だけ
+    if (!userLoading && !user) {
+      setAwardStatus("need_login");
+      return;
+    }
+
+    // ログイン中なら付与（1回だけ）
+    if (!userLoading && user && !awardedOnceRef.current) {
+      awardedOnceRef.current = true;
+
+      const award = async () => {
+        try {
+          setAwardStatus("awarding");
+
+          console.log("[award] start", { earned, userId: user.id });
+
+          const { data: profile, error: fetchError } = await supabase
+            .from("profiles")
+            .select("points")
+            .eq("id", user.id)
+            .single();
+
+          if (fetchError) {
+            console.error("fetch points error:", fetchError);
+            setAwardStatus("error");
+            return;
+          }
+
+          console.log("[award] fetched", { profile, fetchError });
+
+          const currentPoints = profile?.points ?? 0;
+          const newPoints = currentPoints + earned;
+
+          const { error: updateError } = await supabase
+            .from("profiles")
+            .update({ points: newPoints })
+            .eq("id", user.id);
+
+          if (updateError) {
+            console.error("update points error:", updateError);
+            setAwardStatus("error");
+            return;
+          }
+
+          console.log("[award] updated", { updateError });
+
+          window.dispatchEvent(new Event("points:updated"));
+
+          // ログ（失敗しても致命的ではない）
+          const { error: logError } = await supabase.from("user_point_logs").insert({
+            user_id: user.id,
+            change: earned,
+            reason: `協力ダンジョンでポイント獲得（正解:${correctCount}問=${base}P / ステージ:${stageCount}=${bonus}P）`,
+          });
+
+          console.log("[award] logged", { logError });
+
+          if (logError) console.log("insert user_point_logs error raw:", logError);
+
+          setAwardStatus("awarded");
+        } catch (e) {
+          console.error("award points error:", e);
+          setAwardStatus("error");
+        }
+      };
+
+      award();
+    }
+  }, [finished, mode, correctCount, stageCount, user, userLoading]);
+
+  useEffect(() => {
     if (!socket) return;
 
     socket.on("both_rematch_ready", () => {
@@ -868,6 +1117,7 @@ export default function QuizModePage() {
         setTimeLeft(totalTime);
         setDisplayLives({});
         setAllPlayersDead(false);
+        setAllGameClear(false);
 
         // 新しいゲーム開始
         updateStartAt(startAt);
@@ -1150,16 +1400,38 @@ export default function QuizModePage() {
                     )}
                     {/* ダメージ数字ポップ */}
                     {showDamage && lastDamage > 0 && (
-                      <motion.div
-                        key={lastDamage} // damage ごとにアニメーション更新
-                        initial={{ opacity: 0, y: 20, scale: 0.8 }}
-                        animate={{ opacity: 1, y: -20, scale: 1.2 }}
-                        exit={{ opacity: 0, y: -40, scale: 0.8 }}
-                        transition={{ duration: 0.6, ease: "easeOut" }}
-                        className="absolute -top-2 text-3xl md:text-4xl font-extrabold text-red-600 drop-shadow-lg"
-                      >
-                        -{lastDamage}
-                      </motion.div>
+                      <div className="absolute -top-8 flex flex-col items-center">
+                        {isCritical && (
+                          <p
+                            className="text-3xl md:text-4xl font-extrabold text-yellow-400 mb-5"
+                            style={{
+                              textShadow: `
+                                0 0 2px #000,
+                                1px 0 0 #000,
+                                -1px 0 0 #000,
+                                0 1px 0 #000,
+                                0 -1px 0 #000,
+                                1px 1px 0 #000,
+                                -1px 1px 0 #000,
+                                1px -1px 0 #000,
+                                -1px -1px 0 #000
+                              `,
+                            }}
+                          >
+                            会心の一撃！！
+                          </p>
+                        )}
+                        <motion.div
+                          key={lastDamage}
+                          initial={{ opacity: 0, y: 20, scale: 0.8 }}
+                          animate={{ opacity: 1, y: -20, scale: 1.2 }}
+                          exit={{ opacity: 0, y: -40, scale: 0.8 }}
+                          transition={{ duration: 0.6, ease: "easeOut" }}
+                          className="text-3xl md:text-4xl font-extrabold text-red-600 drop-shadow-lg"
+                        >
+                          -{lastDamage}
+                        </motion.div>
+                      </div>
                     )}
 
                     {/* 敵画像（HP減少時に揺れる） */}
@@ -1168,7 +1440,7 @@ export default function QuizModePage() {
                         key={getEnemyForStage(stageCount).id} // 敵ごとにユニークに
                         src={getEnemyForStage(stageCount).image}
                         alt={getEnemyForStage(stageCount).name}
-                        className="w-24 h-24 md:w-32 md:h-32"
+                        className="w-40 h-40 md:w-60 md:h-60"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1, x: [0, -6, 6, -4, 4, 0] }} // HP減少時の揺れも反映
                         exit={{ opacity: 0 }}
@@ -1314,8 +1586,22 @@ export default function QuizModePage() {
               パーティが全滅した…
             </p>
           )}
+
+          {isGameClear && allGameClear &&  (
+            <p className="
+              mt-10 mb-15
+              text-3xl md:text-5xl
+              font-extrabold
+              tracking-wider
+              text-yellow-500
+              drop-shadow-lg
+              animate-pulse
+            ">
+              全ステージクリア✨
+            </p>
+          )}
   
-          {phase === "result" && !allPlayersDead &&(
+          {phase === "result" && !allPlayersDead && !allGameClear &&(
             <>
               <div>
                 {showAnswerText && (
@@ -1422,7 +1708,7 @@ export default function QuizModePage() {
           <div className="flex flex-col items-center mt-2 md:mt-3">
             {/* メッセージボタン */}
             <div className="text-center border border-black p-1 rounded-xl bg-white">
-              {["よろしく！", "やったね✌", "まだいける！", "ありがとう！"].map((msg) => (
+              {["よろしく👋", "やったね✌", "まだいける✊", "ありがとう❤"].map((msg) => (
                 <button
                   key={msg}
                   onClick={() => sendMessage(msg)}
@@ -1446,6 +1732,13 @@ export default function QuizModePage() {
           rematchRequested={rematchRequested}
           handleNewMatch={handleNewMatch}
           handleRematch={handleRematch}
+          basePoints={basePoints}
+          stageBonusPoints={stageBonusPoints}
+          earnedPoints={earnedPoints}
+          isLoggedIn={!!user}
+          awardStatus={awardStatus}
+          onGoLogin={() => router.push("/user/login")}
+          isCodeMatch={mode === "code"}
         />
       )}
     </div>

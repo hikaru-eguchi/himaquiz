@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useSearchParams, usePathname } from "next/navigation";
+import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import QuizQuestion from "../../components/QuizQuestion";
 import { QuizData } from "@/lib/articles";
+import { createSupabaseBrowserClient } from "@/lib/supabaseClient";
+import { useSupabaseUser } from "../../../hooks/useSupabaseUser";
 
 interface ArticleData {
   id: string;
@@ -20,6 +22,23 @@ interface ArticleData {
     answerExplanation?: string;
     trivia?: string;
   };
+}
+
+/**
+ * 3問ごとにUP（5点）
+ * 1〜3問目: 5P
+ * 4〜6問目: 10P
+ * 7〜9問目: 15P
+ * 10〜12問目: 20P ...
+ */
+function calcQuizEarnedPoints(correctCount: number) {
+  let total = 0;
+  for (let i = 1; i <= correctCount; i++) {
+    const tier = Math.floor((i - 1) / 3); // 0,1,2...
+    const per = 5 * (tier + 1); // 5,10,15...
+    total += per;
+  }
+  return total;
 }
 
 // 正解数に応じて出すコメント
@@ -59,7 +78,25 @@ const rankComments = [
   { threshold: 100, comment: "神（ゴッド）…！凄すぎて何も言えないよ！最高ランクに到達だ！" },
 ];
 
-const QuizResult = ({ correctCount, getTitle, titles }: { correctCount: number, getTitle: () => string, titles: { threshold: number, title: string }[] }) => {
+type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
+
+const QuizResult = ({
+  correctCount,
+  earnedPoints,
+  isLoggedIn,
+  awardStatus,
+  getTitle,
+  titles,
+  onGoLogin,
+}: {
+  correctCount: number;
+  earnedPoints: number;
+  isLoggedIn: boolean;
+  awardStatus: AwardStatus;
+  getTitle: () => string;
+  titles: { threshold: number; title: string }[];
+  onGoLogin: () => void;
+}) => {
   const [showScore, setShowScore] = useState(false);
   const [showText, setShowText] = useState(false);
   const [showRank, setShowRank] = useState(false);
@@ -79,25 +116,45 @@ const QuizResult = ({ correctCount, getTitle, titles }: { correctCount: number, 
     timers.push(setTimeout(() => setShowText(true), 1000));
     timers.push(setTimeout(() => setShowRank(true), 1500));
     timers.push(setTimeout(() => setShowButton(true), 1500));
-
     return () => timers.forEach(clearTimeout);
   }, []);
 
   return (
     <div className="text-center mt-6">
-      {showScore && <p className="text-3xl md:text-5xl mb-4 md:mb-6">連続正解数： {correctCount}問</p>}
-      {showText && <p className="text-xl md:text-2xl text-gray-600 mb-2">あなたの称号は…</p>}
+      {showScore && (
+        <p className="text-3xl md:text-5xl mb-4 md:mb-6">
+          連続正解数： {correctCount}問
+        </p>
+      )}
+
+      {showText && (
+        <p className="text-xl md:text-2xl text-gray-600 mb-2 mt-6">
+          あなたの称号は…
+        </p>
+      )}
 
       {showRank && (
         <>
           <div className="flex flex-col md:flex-row items-center justify-center mb-10 gap-4 md:gap-10">
-            <img src="/images/quiz.png" alt="クイズ" className="w-0 h-0 md:w-36 md:h-55 ml-15" />
+            <img
+              src="/images/quiz.png"
+              alt="クイズ"
+              className="w-0 h-0 md:w-36 md:h-55 ml-15"
+            />
             <p className="text-4xl md:text-6xl font-bold text-blue-600 drop-shadow-lg text-center animate-pulse">
               {getTitle()}
             </p>
             <div className="flex flex-row md:flex-row items-center justify-center gap-8">
-              <img src="/images/quiz.png" alt="クイズ" className="w-20 h-30 md:w-0 md:h-0" />
-              <img src="/images/quiz_woman.png" alt="クイズ" className="w-22 h-25 md:w-38 md:h-40" />
+              <img
+                src="/images/quiz.png"
+                alt="クイズ"
+                className="w-20 h-30 md:w-0 md:h-0"
+              />
+              <img
+                src="/images/quiz_woman.png"
+                alt="クイズ"
+                className="w-22 h-25 md:w-38 md:h-40"
+              />
             </div>
           </div>
 
@@ -108,10 +165,52 @@ const QuizResult = ({ correctCount, getTitle, titles }: { correctCount: number, 
           )}
         </>
       )}
+      
+      {/* ★ 獲得ポイント表示（ログイン有無で文言変更） */}
+      {showRank && (
+        <div className="mx-auto max-w-[520px] bg-white border-2 border-black rounded-xl p-4 shadow mt-2">
+          <p className="text-xl md:text-2xl font-extrabold text-gray-800">
+            今回の獲得ポイント：{" "}
+            <span className="text-green-600">{earnedPoints}P</span>
+          </p>
+
+          {isLoggedIn ? (
+            <>
+              {awardStatus === "awarding" && (
+                <p className="text-md md:text-xl text-gray-600 mt-2">
+                  ポイント反映中...
+                </p>
+              )}
+              {awardStatus === "awarded" && (
+                <p className="text-md md:text-xl text-green-700 font-bold mt-2">
+                  ✅ ポイントを加算しました！
+                </p>
+              )}
+              {awardStatus === "error" && (
+                <p className="text-md md:text-xl text-red-600 font-bold mt-2">
+                  ❌ ポイント加算に失敗しました。時間をおいて再度お試しください。
+                </p>
+              )}
+            </>
+          ) : (
+            <div className="mt-2">
+              <p className="text-md md:text-xl text-gray-700 font-bold">
+                ※未ログインのため受け取れません。ログインすると次からポイントを受け取れます！
+              </p>
+              <button
+                onClick={onGoLogin}
+                className="mt-2 px-4 py-2 bg-blue-500 text-white border border-black rounded-lg font-bold hover:bg-blue-600 cursor-pointer"
+              >
+                ログインする
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {showButton && (
         <button
-          className="px-6 py-3 bg-green-500 text-white border border-black rounded-lg font-bold text-xl hover:bg-green-600 cursor-pointer"
+          className="px-6 py-3 bg-green-500 text-white border border-black rounded-lg font-bold text-xl hover:bg-green-600 cursor-pointer mt-3 md:mt-5"
           onClick={() => window.location.reload()}
         >
           もう一回挑戦する
@@ -123,12 +222,18 @@ const QuizResult = ({ correctCount, getTitle, titles }: { correctCount: number, 
 
 export default function QuizModePage() {
   const pathname = usePathname();
+  const router = useRouter();
   const mode = pathname.split("/").pop() || "random";
   const searchParams = useSearchParams();
   const genre = searchParams?.get("genre") || "";
   const level = searchParams?.get("level") || "";
 
-  const [questions, setQuestions] = useState<{ id: string; quiz: QuizData }[]>([]);
+  const supabase = createSupabaseBrowserClient();
+  const { user, loading: userLoading } = useSupabaseUser();
+
+  const [questions, setQuestions] = useState<{ id: string; quiz: QuizData }[]>(
+    []
+  );
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userAnswer, setUserAnswer] = useState<number | null>(null);
   const [correctCount, setCorrectCount] = useState(0);
@@ -137,6 +242,11 @@ export default function QuizModePage() {
   const [flashMilestone, setFlashMilestone] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState(60);
   const [incorrectMessage, setIncorrectMessage] = useState<string | null>(null);
+
+  // ★ リザルト用：獲得ポイントと付与状態
+  const [earnedPoints, setEarnedPoints] = useState(0);
+  const [awardStatus, setAwardStatus] = useState<AwardStatus>("idle");
+  const awardedOnceRef = useRef(false); // 二重加算防止
 
   const finishedRef = useRef(finished);
   const showCorrectRef = useRef(showCorrectMessage);
@@ -176,8 +286,12 @@ export default function QuizModePage() {
     { threshold: 100, title: "神（ゴッド）🌟" },
   ];
 
-  useEffect(() => { finishedRef.current = finished; }, [finished]);
-  useEffect(() => { showCorrectRef.current = showCorrectMessage; }, [showCorrectMessage]);
+  useEffect(() => {
+    finishedRef.current = finished;
+  }, [finished]);
+  useEffect(() => {
+    showCorrectRef.current = showCorrectMessage;
+  }, [showCorrectMessage]);
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -194,8 +308,8 @@ export default function QuizModePage() {
         }
 
         const quizQuestions: { id: string; quiz: QuizData }[] = all
-          .filter(a => a.quiz)
-          .map(a => ({
+          .filter((a) => a.quiz)
+          .map((a) => ({
             id: a.id,
             quiz: {
               title: a.title,
@@ -207,7 +321,7 @@ export default function QuizModePage() {
               level: a.quiz!.level,
               answerExplanation: a.quiz!.answerExplanation,
               trivia: a.quiz!.trivia,
-            }
+            },
           }));
 
         setQuestions(shuffleArray(quizQuestions));
@@ -242,7 +356,7 @@ export default function QuizModePage() {
     const displayAnswer = questions[currentIndex].quiz?.displayAnswer;
 
     if (userAnswer === correctAnswer) {
-      setCorrectCount(c => {
+      setCorrectCount((c) => {
         const newCount = c + 1;
 
         if (newCount % 10 === 0) {
@@ -254,7 +368,6 @@ export default function QuizModePage() {
       });
 
       setShowCorrectMessage(true);
-
     } else {
       setIncorrectMessage(`ざんねん！\n答えは" ${displayAnswer} "でした！`);
     }
@@ -268,7 +381,7 @@ export default function QuizModePage() {
     if (currentIndex + 1 >= questions.length) {
       setFinished(true);
     } else {
-      setCurrentIndex(i => i + 1);
+      setCurrentIndex((i) => i + 1);
       setTimeLeft(60);
     }
   };
@@ -284,6 +397,91 @@ export default function QuizModePage() {
     });
     return title;
   };
+
+  // ★ finished になったタイミングで「獲得ポイント計算」→「ログインなら加算」
+  useEffect(() => {
+    if (!finished) return;
+
+    // リザルト表示用の獲得Pは必ず計算して表示
+    const earned = calcQuizEarnedPoints(correctCount);
+    setEarnedPoints(earned);
+
+    // 0PならDB処理はしない（表示だけ）
+    if (earned <= 0) {
+      // ログイン状態に関わらず「付与なし」で終了
+      setAwardStatus("idle"); // ここは表示したい文言に合わせてOK
+      return;
+    }
+
+    // 未ログインなら案内だけ
+    if (!userLoading && !user) {
+      setAwardStatus("need_login");
+      return;
+    }
+
+    // ログイン中なら付与（1回だけ）
+    if (!userLoading && user && !awardedOnceRef.current) {
+      awardedOnceRef.current = true;
+
+      const award = async () => {
+        try {
+          setAwardStatus("awarding");
+
+          // 現在ポイント取得
+          const { data: profile, error: fetchError } = await supabase
+            .from("profiles")
+            .select("points")
+            .eq("id", user.id)
+            .single();
+
+          if (fetchError) {
+            console.error("fetch points error:", fetchError);
+            setAwardStatus("error");
+            return;
+          }
+
+          const currentPoints = profile?.points ?? 0;
+          const newPoints = currentPoints + earned;
+
+          // 加算
+          const { error: updateError } = await supabase
+            .from("profiles")
+            .update({ points: newPoints })
+            .eq("id", user.id);
+
+          if (updateError) {
+            console.error("update points error:", updateError);
+            setAwardStatus("error");
+            return;
+          }
+
+          window.dispatchEvent(new Event("points:updated"));
+
+          // ログ（＋）
+          const { error: logError } = await supabase.from("user_point_logs").insert({
+            user_id: user.id,
+            change: earned,
+            reason: `連続正解チャレンジでポイント獲得（連続正解数 ${correctCount}問）`,
+          });
+
+          if (logError) {
+            console.log("insert user_point_logs error raw:", logError);
+            console.log("message:", (logError as any)?.message);
+            console.log("details:", (logError as any)?.details);
+            console.log("hint:", (logError as any)?.hint);
+            console.log("code:", (logError as any)?.code);
+          }
+
+          setAwardStatus("awarded");
+        } catch (e) {
+          console.error("award points error:", e);
+          setAwardStatus("error");
+        }
+      };
+
+      award();
+    }
+  }, [finished, correctCount, user, userLoading, supabase]);
 
   if (questions.length === 0) return <p></p>;
 
@@ -315,6 +513,7 @@ export default function QuizModePage() {
                       {incorrectMessage}
                     </p>
                   )}
+
                   {(() => {
                     const currentQuiz = questions[currentIndex].quiz;
                     const answerExplanation = currentQuiz?.answerExplanation;
@@ -325,7 +524,9 @@ export default function QuizModePage() {
                         {answerExplanation && (
                           <div className="mt-5 md:mt-15 text-center">
                             <p className="text-xl md:text-2xl font-bold text-blue-600">解説📖</p>
-                            <p className="mt-1 md:mt-2 text-lg md:text-xl text-gray-700">{answerExplanation}</p>
+                            <p className="mt-1 md:mt-2 text-lg md:text-xl text-gray-700">
+                              {answerExplanation}
+                            </p>
                           </div>
                         )}
 
@@ -380,14 +581,21 @@ export default function QuizModePage() {
           )}
 
           {flashMilestone && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50
-                            text-yellow-400 text-5xl md:text-7xl font-extrabold animate-pulse">
+            <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 text-yellow-400 text-5xl md:text-7xl font-extrabold animate-pulse">
               {flashMilestone}
             </div>
           )}
         </>
       ) : (
-        <QuizResult correctCount={correctCount} getTitle={getTitle} titles={titles} />
+        <QuizResult
+          correctCount={correctCount}
+          earnedPoints={earnedPoints}
+          isLoggedIn={!!user}
+          awardStatus={awardStatus}
+          getTitle={getTitle}
+          titles={titles}
+          onGoLogin={() => router.push("/user/login")}
+        />
       )}
     </div>
   );

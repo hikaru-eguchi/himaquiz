@@ -5,9 +5,9 @@ import matter from 'gray-matter';
 import QuizMDXWrapper from "@/app/components/QuizMDXWrapper";
 
 export const metadata = {
-  title: "頭を鍛える暇つぶしクイズ｜ひまQ",
+  title: "みんなで遊べる暇つぶしクイズ｜ひまQ",
   description:
-    "ひまQでは、頭を鍛える暇つぶしクイズを多数掲載。脳トレクイズや面白クイズで、ちょっとした空き時間に脳を鍛えよう。",
+    "ひまQでは、みんなで遊べる暇つぶしクイズを多数掲載。脳トレクイズや面白クイズで、ちょっとした空き時間に脳を鍛えよう。",
 };
 
 // ===== 型定義 =====
@@ -143,7 +143,7 @@ export default async function HomePage({
     <div className="container mx-auto px-4 py-2 sm:py-8">
 
       <p className="text-center text-lg md:text-xl font-extrabold text-gray-800 leading-relaxed -mt-2 mb-6">
-        頭を鍛える暇つぶし！『ひまQ』は、暇つぶししながら頭を鍛えられる脳トレ＆面白クイズが満載。空き時間に脳力をアップしよう！
+        みんなで遊べる暇つぶしクイズ！『ひまQ』は、暇つぶししながら頭を鍛えられる脳トレ＆面白クイズが満載。空き時間に脳力をアップしよう！
       </p>
 
       <h1
@@ -154,7 +154,7 @@ export default async function HomePage({
           WebkitTextFillColor: "transparent",
         }}
       >
-        頭を鍛える暇つぶしクイズ｜脳トレ＆面白問題が満載！
+        みんなで遊べる暇つぶしクイズ｜脳トレ＆面白問題が満載！
       </h1>
 
       {/* 今日のクイズ表示 */}
@@ -186,7 +186,7 @@ export default async function HomePage({
         </p>
 
       <div className="max-w-[700px] mx-auto border-2 border-black rounded-xl m-5 p-5 bg-gradient-to-b from-blue-0 via-blue-50 to-blue-100">
-        <p className="text-2xl md:text-3xl font-bold mb-2 text-center leading-tight drop-shadow-xl text-blue-500">
+        <p className="text-2xl md:text-4xl font-extrabold mb-2 text-center leading-tight drop-shadow-xl text-blue-500">
           📚ジャンルから選ぶ📚
         </p>
         <p className="text-lg md:text-xl mb-2 text-center leading-tight mb-4">
@@ -214,7 +214,7 @@ export default async function HomePage({
       </div>
 
       <div className="max-w-[700px] mx-auto border-2 border-black rounded-xl m-5 p-5 bg-gradient-to-b from-yellow-0 via-yellow-50 to-yellow-100">
-        <p className="text-2xl md:text-3xl font-bold mb-2 text-center leading-tight drop-shadow-xl text-yellow-500">
+        <p className="text-2xl md:text-4xl font-extrabold mb-2 text-center leading-tight drop-shadow-xl text-yellow-500">
           ⭐難易度から選ぶ⭐
         </p>
         <p className="text-lg md:text-xl mb-2 text-center leading-tight mb-4">
@@ -242,7 +242,7 @@ export default async function HomePage({
       </div>
 
       <div className="max-w-[700px] mx-auto border-2 border-black rounded-xl m-5 p-5 bg-gradient-to-b from-purple-0 via-purple-100 to-purple-200">
-        <p className="text-2xl md:text-3xl font-bold mb-2 text-center leading-tight drop-shadow-xl text-purple-500">
+        <p className="text-2xl md:text-4xl font-extrabold mb-2 text-center leading-tight drop-shadow-xl text-purple-500">
           🎮ゲームで遊ぶ🎮
         </p>
         <p className="text-lg md:text-xl mb-2 text-center leading-tight mb-4">
@@ -291,25 +291,11 @@ export default async function HomePage({
               君は深層まで進めるか！？
             </p>
           </div>
-          {/* クイズガチャ */}
-          <div className="text-center max-w-[260px]">
-            <Link href="/quiz-gacha" className="w-full md:w-auto flex justify-center">
-              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-br from-red-400 via-sky-400 to-green-400 text-white hover:scale-110 transition-all">
-                クイズガチャ
-              </button>
-            </Link>
-            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
-              クイズに正解してガチャにチャレンジ！
-            </p>
-            <p className="text-sm md:text-base text-gray-700 leading-tight">
-              超レアキャラを引き当てよう！
-            </p>
-          </div>
         </div>
       </div>
 
       <div className="max-w-[700px] mx-auto border-2 border-black rounded-xl m-5 p-5 bg-gradient-to-b from-sky-0 via-sky-100 to-sky-200">
-        <p className="text-2xl md:text-3xl font-bold mb-2 text-center leading-tight drop-shadow-xl text-sky-500">
+        <p className="text-2xl md:text-4xl font-extrabold mb-2 text-center leading-tight drop-shadow-xl text-sky-500">
           🌐だれかと遊ぶ🌐
         </p>
         <p className="text-lg md:text-xl mb-2 text-center leading-tight mb-4">
@@ -356,6 +342,31 @@ export default async function HomePage({
             </p>
             <p className="text-sm md:text-base text-gray-700 leading-tight">
               君は最後まで生き残れるか！？
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-[700px] mx-auto border-2 border rounded-xl m-5 p-5 bg-gradient-to-br from-pink-300 via-yellow-200 to-blue-300 shadow-xl shadow-yellow-200/40">
+        <p className="text-2xl md:text-4xl font-extrabold mb-2 text-center leading-tight drop-shadow-xl">
+          🎰ガチャコーナー🎰
+        </p>
+        <p className="text-lg md:text-xl mb-2 text-center leading-tight mb-4">
+          クイズなどで集めたポイントでガチャを回そう！
+        </p>
+        <div className="flex justify-center gap-3 md:gap-5 flex-wrap">
+          {/* クイズガチャ */}
+          <div className="text-center max-w-[260px]">
+            <Link href="/quiz-gacha" className="w-full md:w-auto flex justify-center">
+              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-br from-red-400 via-sky-400 to-green-400 text-white hover:scale-110 transition-all">
+                クイズガチャ
+              </button>
+            </Link>
+            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
+              ポイントでガチャにチャレンジ！
+            </p>
+            <p className="text-sm md:text-base text-gray-700 leading-tight">
+              超レアキャラを引き当てよう！
             </p>
           </div>
         </div>
