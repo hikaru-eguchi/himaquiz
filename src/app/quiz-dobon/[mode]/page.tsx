@@ -262,6 +262,9 @@ const QuizResult = ({
                   >
                     ログインする
                   </button>
+                  <p className="text-md md:text-xl text-gray-700 font-bold mt-2">
+                    ログインなしでも、引き続き遊べます👇
+                  </p>
                 </div>
               )}
             </>

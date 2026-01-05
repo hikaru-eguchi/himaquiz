@@ -40,6 +40,7 @@ const QuizGacha = ({
   const [showOpen, setShowOpen] = useState(false);
   const [showEffect, setShowEffect] = useState(false);
   const [showResult, setShowResult] = useState(false);
+  const [capsuleSet, setCapsuleSet] = useState<1 | 2 | 3>(1);
   const [selectedHistory, setSelectedHistory] =
     useState<null | { name: string; image: string; rarity: Rarity; no: string }>(
       null
@@ -92,11 +93,13 @@ const QuizGacha = ({
   useEffect(() => {
     if (!gachaResult) return;
 
+    setCapsuleSet((Math.floor(Math.random() * 3) + 1) as 1 | 2 | 3);
+
     if (isUltraRare) {
-      const t1 = setTimeout(() => setShowOpen(true), 500);
-      const t2 = setTimeout(() => setShowDark(true), 1200);
-      const t3 = setTimeout(() => setShowFlash(true), 2500);
-      const t4 = setTimeout(() => setShowResult(true), 2800);
+      const t1 = setTimeout(() => setShowOpen(true), 1300);
+      const t2 = setTimeout(() => setShowDark(true), 2300);
+      const t3 = setTimeout(() => setShowFlash(true), 3500);
+      const t4 = setTimeout(() => setShowResult(true), 4000);
 
       return () => {
         clearTimeout(t1);
@@ -109,8 +112,8 @@ const QuizGacha = ({
         setShowResult(false);
       };
     } else {
-      const t1 = setTimeout(() => setShowOpen(true), 500);
-      const t2 = setTimeout(() => setShowResult(true), 1100);
+      const t1 = setTimeout(() => setShowOpen(true), 1200);
+      const t2 = setTimeout(() => setShowResult(true), 2200);
 
       return () => {
         clearTimeout(t1);
@@ -126,7 +129,7 @@ const QuizGacha = ({
   return (
     <div className="text-center">
       <div className="flex flex-col items-center justify-center gap-4 mb-10">
-        <img src="/images/gacha.png" className="w-50 h-60 md:w-80 md:h-100" />
+        <img src="/images/gacha.png" className="w-60 h-60 md:w-100 md:h-100" />
         <div className="flex flex-col items-center justify-between w-full mx-auto">
           <div className="bg-white border border-black px-4 py-2 rounded shadow">
             <p className="text-xl md:text-2xl font-bold text-gray-800">
@@ -258,26 +261,34 @@ const QuizGacha = ({
       <AnimatePresence>
         {gachaResult && (
           <motion.div
-            className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center"
+            className={`fixed inset-0 z-50 flex flex-col items-center justify-center transition-colors duration-300 ${
+              showResult ? "bg-white" : "bg-black"
+            }`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
             {!showOpen && (
               <motion.img
-                src="/images/gacha_close.png"
-                initial={{ y: "-100vw" }}
-                animate={{ y: 0 }}
-                transition={{ duration: 0.5 }}
+                src={`/images/gacha_close${capsuleSet === 1 ? "" : capsuleSet}.png`}
+                initial={{ y: "-120vh" }}
+                animate={{ y: 0 , scale: 0.6}}
+                transition={{
+                  duration: 1.2,          // ← 落下をゆっくり
+                  ease: "easeOut",        // ← 重力感が出る
+                }}
               />
             )}
 
             {showOpen && !showResult && (
               <motion.img
-                src="/images/gacha_open.png"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ duration: 0.5 }}
+                src={`/images/gacha_open${capsuleSet === 1 ? "" : capsuleSet}.png`}
+                initial={{ scale: 0.6}}
+                animate={{ scale: 1}}
+                transition={{
+                  duration: 0.8,
+                  ease: "easeOut",
+                }}
               />
             )}
 
@@ -414,7 +425,6 @@ export default function QuizMasterPage() {
     if (userLoading) return;
 
     if (!user) {
-      router.push("/user/login");
       return;
     }
 
@@ -606,6 +616,45 @@ export default function QuizMasterPage() {
     }
   };
 
+  if (!userLoading && !user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-red-300 via-blue-200 to-green-200">
+        <div className="min-h-screen flex items-center justify-center px-4">
+          <div className="bg-white/90 backdrop-blur p-6 md:p-10 rounded-2xl border-2 border-black shadow-xl text-center max-w-xl w-full">
+
+            <p className="mt-4 text-lg md:text-2xl font-bold text-gray-800">
+              このページはログインすると遊べるよ！
+            </p>
+
+            <p className="mt-2 text-sm md:text-lg text-gray-700 leading-relaxed">
+              ログインすると、ポイントや入手キャラが保存されて<br />
+              「マイキャラ図鑑」でも確認できるようになります。
+            </p>
+
+            <div className="mt-6 flex flex-col md:flex-row gap-3 justify-center">
+              <button
+                onClick={() => router.push("/user/login")}
+                className="px-6 py-3 rounded-lg font-bold text-white bg-blue-500 hover:bg-blue-600 border-2 border-black shadow"
+              >
+                ログインして遊ぶ
+              </button>
+              <button
+                onClick={() => router.push("/user/signup")}
+                className="px-6 py-3 rounded-lg font-bold text-white bg-green-500 hover:bg-green-600 border-2 border-black shadow"
+              >
+                新規ユーザー登録
+              </button>
+            </div>
+
+            <p className="mt-4 text-xs md:text-sm text-gray-600">
+              ※ログイン後にこのページへ戻るとガチャを回せます
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (userLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -623,14 +672,23 @@ export default function QuizMasterPage() {
     <div className="min-h-screen bg-gradient-to-b from-red-300 via-blue-200 to-green-200">
       <div className="container mx-auto px-4 py-6 text-center">
         <>
-          <p
+          {/* タイトル */}
+          <h1
             className="
-              text-3xl md:text-5xl font-extrabold mb-3
+              text-5xl md:text-7xl font-extrabold tracking-widest mb-4
               text-white
               drop-shadow-[0_0_10px_rgba(0,0,0,0.9)]
             "
           >
-            ポイントでガチャにチャレンジ！超レアキャラを引き当てよう！
+            クイズガチャ
+          </h1>
+          <p
+            className="
+              text-2xl md:text-4xl font-extrabold mb-3
+              text-white
+            "
+          >
+            ポイントでガチャにチャレンジ！レアキャラを引き当てよう！
           </p>
           <p className="text-md md:text-xl text-white mb-2">
             ※当たったキャラはメニューの「マイキャラ図鑑」で確認できます
@@ -657,11 +715,11 @@ export default function QuizMasterPage() {
               ref={descriptionRef}
               className="text-gray-700 text-md md:text-lg text-center px-4 py-2"
             >
-              「クイズガチャ」は、クイズなどで集めたポイントでガチャを回して楽しめるゲームです。
+              「クイズガチャ」は、クイズゲームで集めたポイントでガチャを回して楽しめるゲームです。
               <br />
               ガチャは 1回100P で回せます。
               <br />
-              ガチャから登場するキャラは全25体、52種類！
+              ガチャから登場するキャラは全部で52種類！クイズダンジョンや協力ダンジョンに出てくるキャラが登場します。
               <br />
               ポイントを集めて、全キャラコンプリートを目指そう！
               <br />

@@ -97,7 +97,7 @@ const CharacterSelect = ({ onSelect }: { onSelect: (characterId: string) => void
             }`}
             onClick={() => onSelect(char.id)}
           >
-            <img src={char.image} alt={char.name} className="w-25 h-30 md:w-40 md:h-50 mb-4 mx-auto" />
+            <img src={char.image} alt={char.name} className="w-35 h-35 md:w-50 md:h-50 mx-auto" />
             <p className="text-xl font-bold">{char.name}</p>
             <p className="text-sm text-gray-900 mt-1">{char.description}</p>
             <div className="border border-gray-400 p-2 mt-2 bg-white">
@@ -288,6 +288,9 @@ const QuizResult = ({
                 >
                   ログインする
                 </button>
+                <p className="text-md md:text-xl text-gray-700 font-bold mt-2">
+                  ログインなしでも、引き続き遊べます👇
+                </p>
               </div>
             )}
           </div>
