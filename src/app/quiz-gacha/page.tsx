@@ -18,6 +18,7 @@ const QuizGacha = ({
   setGachaResult,
   history,
   setHistory,
+  rolling,
 }: {
   points: number;
   rollGacha: () => void;
@@ -36,11 +37,45 @@ const QuizGacha = ({
       { name: string; image: string; rarity: Rarity; no: string }[]
     >
   >;
+  rolling: boolean;
 }) => {
   const [showOpen, setShowOpen] = useState(false);
   const [showEffect, setShowEffect] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [capsuleSet, setCapsuleSet] = useState<1 | 2 | 3>(1);
+  type Phase = "idle" | "drop" | "ready" | "openingHold" | "opening" | "result";
+  const [phase, setPhase] = useState<Phase>("idle");
+  const handleOpen = () => {
+    if (!gachaResult) return;
+    if (phase !== "ready") return;
+
+    // 連打防止：すぐ待機から抜ける
+    setPhase("openingHold");
+
+    // ① 一瞬「閉じ」で止める（ゆらゆら停止）
+    const HOLD_MS = 500;
+
+    setTimeout(() => {
+      // ② ぱかっ（開く画像へ）
+      setPhase("opening");
+      setShowOpen(true);
+
+      if (isUltraRare) {
+        setTimeout(() => setShowDark(true), 900);
+        setTimeout(() => setShowFlash(true), 2000);
+        setTimeout(() => {
+          setShowResult(true);
+          setPhase("result");
+        }, 2600);
+      } else {
+        setTimeout(() => {
+          setShowResult(true);
+          setPhase("result");
+        }, 900);
+      }
+    }, HOLD_MS);
+  };
+
   const [selectedHistory, setSelectedHistory] =
     useState<null | { name: string; image: string; rarity: Rarity; no: string }>(
       null
@@ -77,7 +112,6 @@ const QuizGacha = ({
   };
 
   const ULTRA_RARES = {
-    超レア: true,
     激レア: true,
     超激レア: true,
     神レア: true,
@@ -95,36 +129,24 @@ const QuizGacha = ({
 
     setCapsuleSet((Math.floor(Math.random() * 3) + 1) as 1 | 2 | 3);
 
-    if (isUltraRare) {
-      const t1 = setTimeout(() => setShowOpen(true), 1300);
-      const t2 = setTimeout(() => setShowDark(true), 2300);
-      const t3 = setTimeout(() => setShowFlash(true), 3500);
-      const t4 = setTimeout(() => setShowResult(true), 4000);
+    // 状態リセット
+    setShowOpen(false);
+    setShowDark(false);
+    setShowFlash(false);
+    setShowResult(false);
 
-      return () => {
-        clearTimeout(t1);
-        clearTimeout(t2);
-        clearTimeout(t3);
-        clearTimeout(t4);
-        setShowOpen(false);
-        setShowDark(false);
-        setShowFlash(false);
-        setShowResult(false);
-      };
-    } else {
-      const t1 = setTimeout(() => setShowOpen(true), 1200);
-      const t2 = setTimeout(() => setShowResult(true), 2200);
+    // まず落下
+    setPhase("drop");
 
-      return () => {
-        clearTimeout(t1);
-        clearTimeout(t2);
-        setShowOpen(false);
-        setShowResult(false);
-      };
-    }
-  }, [gachaResult, isUltraRare]);
+    // 落下アニメ(1.2s)が終わったら「待機」
+    const t = setTimeout(() => {
+      setPhase("ready");
+    }, 1200);
 
-  const canRoll = points >= 100;
+    return () => clearTimeout(t);
+  }, [gachaResult]);
+
+  const canRoll = points >= 100 && !rolling;
 
   return (
     <div className="text-center">
@@ -150,10 +172,10 @@ const QuizGacha = ({
           onClick={rollGacha}
           disabled={!canRoll}
         >
-          100Pでガチャを回す🎰
+          {rolling ? "抽選中..." : "100Pでガチャを回す🎰"}
         </button>
 
-        {!canRoll && (
+        {points < 100 && (
           <p className="text-xl text-red-500 font-bold animate-pulse">
             ポイントが足りないよ！
           </p>
@@ -262,33 +284,68 @@ const QuizGacha = ({
         {gachaResult && (
           <motion.div
             className={`fixed inset-0 z-50 flex flex-col items-center justify-center transition-colors duration-300 ${
-              showResult ? "bg-white" : "bg-black"
+              phase === "result" ? "bg-white" : "bg-black"
             }`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            {!showOpen && (
+            {(phase === "drop") && (
               <motion.img
                 src={`/images/gacha_close${capsuleSet === 1 ? "" : capsuleSet}.png`}
-                initial={{ y: "-120vh" }}
-                animate={{ y: 0 , scale: 0.6}}
-                transition={{
-                  duration: 1.2,          // ← 落下をゆっくり
-                  ease: "easeOut",        // ← 重力感が出る
-                }}
+                className="w-70 h-70 md:w-150 md:h-150 z-50 cursor-pointer select-none"
+                initial={{ y: "-120vh", scale: 0.6 }}
+                animate={{ y: 0, scale: 0.6 }}
+                transition={{ duration: 1.2, ease: "easeOut" }}
               />
             )}
 
-            {showOpen && !showResult && (
+            {(phase === "ready") && (
+              <div className="relative z-50 flex flex-col items-center">
+                <motion.p
+                  className="mb-4 text-white font-extrabold text-4xl md:text-6xl drop-shadow"
+                  animate={{ opacity: [0.2, 1, 0.2] }}
+                  transition={{ duration: 1.0, repeat: Infinity }}
+                >
+                  タップで開封！
+                </motion.p>
+
+                <motion.img
+                  src={`/images/gacha_close${capsuleSet === 1 ? "" : capsuleSet}.png`}
+                  className="w-70 h-70 md:w-150 md:h-150 z-50 cursor-pointer select-none"
+                  onClick={handleOpen}
+                  initial={{ scale: 0.6 }}
+                  animate={{
+                    rotate: [-3, 3, -3],
+                    y: [0, -6, 0],
+                    scale: 0.6,
+                  }}
+                  transition={{
+                    duration: 1.2,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                />
+              </div>
+            )}
+
+            {phase === "openingHold" && (
+              <motion.img
+                src={`/images/gacha_close${capsuleSet === 1 ? "" : capsuleSet}.png`}
+                className="w-70 h-70 md:w-150 md:h-150 z-50 cursor-pointer select-none"
+                initial={{ scale: 0.6, y: 0 }}
+                animate={{ scale: 0.6, y: 6 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+              />
+            )}
+
+            {(phase === "opening") && (
               <motion.img
                 src={`/images/gacha_open${capsuleSet === 1 ? "" : capsuleSet}.png`}
-                initial={{ scale: 0.6}}
-                animate={{ scale: 1}}
-                transition={{
-                  duration: 0.8,
-                  ease: "easeOut",
-                }}
+                className="z-50"
+                initial={{ scale: 0.55 }}
+                animate={{ scale: 0.7 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
               />
             )}
 
@@ -384,6 +441,7 @@ const QuizGacha = ({
                   setShowEffect(false);
                   setShowResult(false);
                   setGachaResult(null);
+                  setPhase("idle");
                 }}
               >
                 閉じる
@@ -408,6 +466,7 @@ export default function QuizMasterPage() {
 
   const descriptionRef = useRef<HTMLParagraphElement>(null);
 
+  const [rolling, setRolling] = useState(false);
   // DB から読むポイント
   const [points, setPoints] = useState(0);
   const [gachaResult, setGachaResult] = useState<null | {
@@ -452,167 +511,188 @@ export default function QuizMasterPage() {
     weight: number;
     no: string;
   }[] = [
-    { name: "スライム", image: "/images/スライム_1.png", rarity: "ノーマル", weight: 7.5, no: "1" },
-    { name: "スライム【フェアリー】", image: "/images/スライム_2.png", rarity: "ノーマル", weight: 7.5, no: "2" },
-    { name: "ゴブリン", image: "/images/ゴブリン_1.png", rarity: "ノーマル", weight: 7.5, no: "3" },
-    { name: "ゴブリン【フェアリー】", image: "/images/ゴブリン_2.png", rarity: "ノーマル", weight: 7.5, no: "4" },
-    { name: "スケルトン", image: "/images/スケルトン_1.png", rarity: "レア", weight: 4.3, no: "5" },
-    { name: "スケルトン【フェアリー】", image: "/images/スケルトン_2.png", rarity: "レア", weight: 4.3, no: "6" },
-    { name: "ミミック", image: "/images/ミミック_1.png", rarity: "レア", weight: 4.3, no: "7" },
-    { name: "ミミック【フェアリー】", image: "/images/ミミック_2.png", rarity: "レア", weight: 4.3, no: "8" },
-    { name: "リザードマン", image: "/images/リザードマン_1.png", rarity: "レア", weight: 4.3, no: "9" },
-    { name: "リザードマン【フェアリー】", image: "/images/リザードマン_2.png", rarity: "レア", weight: 4.3, no: "10" },
-    { name: "ゴーレム", image: "/images/ゴーレム_1.png", rarity: "超レア", weight: 3.3, no: "11" },
-    { name: "ゴーレム【フェアリー】", image: "/images/ゴーレム_2.png", rarity: "超レア", weight: 3.3, no: "12" },
-    { name: "ケルベロス", image: "/images/ケルベロス_1.png", rarity: "超レア", weight: 3.3, no: "13" },
-    { name: "ケルベロス【フェアリー】", image: "/images/ケルベロス_2.png", rarity: "超レア", weight: 3.3, no: "14" },
-    { name: "バーサーカー", image: "/images/バーサーカー_1.png", rarity: "超レア", weight: 3.3, no: "15" },
-    { name: "バーサーカー【フェアリー】", image: "/images/バーサーカー_2.png", rarity: "超レア", weight: 3.3, no: "16" },
-    { name: "キングスライム", image: "/images/キングスライム_1.png", rarity: "激レア", weight: 2.25, no: "17" },
-    { name: "キングスライム【フェアリー】", image: "/images/キングスライム_2.png", rarity: "激レア", weight: 2.25, no: "18" },
-    { name: "ドラゴン", image: "/images/ドラゴン_1.png", rarity: "激レア", weight: 2.25, no: "19" },
-    { name: "ドラゴン【フェアリー】", image: "/images/ドラゴン_2.png", rarity: "激レア", weight: 2.25, no: "20" },
-    { name: "フェニックス", image: "/images/フェニックス_1.png", rarity: "激レア", weight: 2.25, no: "21" },
-    { name: "フェニックス【フェアリー】", image: "/images/フェニックス_2.png", rarity: "激レア", weight: 2.25, no: "22" },
-    { name: "リヴァイアサン", image: "/images/リヴァイアサン_1.png", rarity: "激レア", weight: 2.25, no: "23" },
-    { name: "リヴァイアサン【フェアリー】", image: "/images/リヴァイアサン_2.png", rarity: "激レア", weight: 2.25, no: "24" },
-    { name: "ブラックドラゴン", image: "/images/ブラックドラゴン_1.png", rarity: "超激レア", weight: 0.96, no: "25" },
-    { name: "ブラックドラゴン【フェアリー】", image: "/images/ブラックドラゴン_2.png", rarity: "超激レア", weight: 0.96, no: "26" },
-    { name: "キングデーモン", image: "/images/キングデーモン_1.png", rarity: "超激レア", weight: 0.96, no: "27" },
-    { name: "キングデーモン【フェアリー】", image: "/images/キングデーモン_2.png", rarity: "超激レア", weight: 0.96, no: "28" },
-    { name: "キングヒドラ", image: "/images/キングヒドラ_1.png", rarity: "超激レア", weight: 0.96, no: "29" },
-    { name: "キングヒドラ【フェアリー】", image: "/images/キングヒドラ_2.png", rarity: "超激レア", weight: 0.96, no: "30" },
-    { name: "オーディン", image: "/images/オーディン_1.png", rarity: "神レア", weight: 0.01, no: "31" },
-    { name: "オーディン【フェアリー】", image: "/images/オーディン_2.png", rarity: "神レア", weight: 0.01, no: "32" },
-    { name: "ポセイドン", image: "/images/ポセイドン_1.png", rarity: "神レア", weight: 0.01, no: "33" },
-    { name: "ポセイドン【フェアリー】", image: "/images/ポセイドン_2.png", rarity: "神レア", weight: 0.01, no: "34" },
-    { name: "ハデス", image: "/images/ハデス_1.png", rarity: "神レア", weight: 0.01, no: "35" },
-    { name: "ハデス【フェアリー】", image: "/images/ハデス_2.png", rarity: "神レア", weight: 0.01, no: "36" },
-    { name: "ゼウス", image: "/images/ゼウス_1.png", rarity: "神レア", weight: 0.01, no: "37" },
-    { name: "ゼウス【フェアリー】", image: "/images/ゼウス_2.png", rarity: "神レア", weight: 0.01, no: "38" },
-    { name: "軍荼利明王（ぐんだりみょうおう）", image: "/images/軍荼利明王_1.png", rarity: "神レア", weight: 0.01, no: "39" },
-    { name: "軍荼利明王（ぐんだりみょうおう）【フェアリー】", image: "/images/軍荼利明王_2.png", rarity: "神レア", weight: 0.01, no: "40" },
-    { name: "魔王", image: "/images/魔王_1.png", rarity: "神レア", weight: 0.01, no: "41" },
-    { name: "魔王【フェアリー】", image: "/images/魔王_2.png", rarity: "神レア", weight: 0.01, no: "42" },
-    { name: "クイズマスターの最強勇者", image: "/images/勇者1_1.png", rarity: "神レア", weight: 0.01, no: "43" },
-    { name: "クイズマスターの最強勇者【フェアリー】", image: "/images/勇者1_2.png", rarity: "神レア", weight: 0.01, no: "44" },
-    { name: "クイズマスターの最強勇者【プレミア】", image: "/images/勇者1_3.png", rarity: "神レア", weight: 0.01, no: "45" },
-    { name: "クイズ王", image: "/images/王様_1.png", rarity: "神レア", weight: 0.01, no: "46" },
-    { name: "クイズ王【フェアリー】", image: "/images/王様_2.png", rarity: "神レア", weight: 0.01, no: "47" },
-    { name: "ゴールデンキングスライム", image: "/images/ゴールデンキングスライム_1.png", rarity: "シークレット", weight: 0.01, no: "48" },
-    { name: "ゴールデンキングスライム【フェアリー】", image: "/images/ゴールデンキングスライム_2.png", rarity: "シークレット", weight: 0.01, no: "49" },
-    { name: "伝説の勇者", image: "/images/勇者2_1.png", rarity: "シークレット", weight: 0.005, no: "50" },
-    { name: "伝説の勇者【フェアリー】", image: "/images/勇者2_2.png", rarity: "シークレット", weight: 0.005, no: "51" },
-    { name: "伝説の勇者【プレミア】", image: "/images/勇者2_3.png", rarity: "シークレット", weight: 0.005, no: "52" },
+    { name: "ダンジョンの剣士", image: "/images/ダンジョンの剣士_1.png", rarity: "ノーマル", weight: 7.1, no: "1" },
+    { name: "ダンジョンの武闘家", image: "/images/ダンジョンの武闘家_1.png", rarity: "ノーマル", weight: 7.1, no: "2" },
+    { name: "ダンジョンの魔法使い", image: "/images/ダンジョンの魔法使い_1.png", rarity: "ノーマル", weight: 7.1, no: "3" },
+    { name: "スライム", image: "/images/スライム_1.png", rarity: "ノーマル", weight: 7.1, no: "4" },
+    { name: "スライム【フェアリー】", image: "/images/スライム_2.png", rarity: "ノーマル", weight: 7.1, no: "5" },
+    { name: "ゴブリン", image: "/images/ゴブリン_1.png", rarity: "ノーマル", weight: 7.1, no: "6" },
+    { name: "ゴブリン【フェアリー】", image: "/images/ゴブリン_2.png", rarity: "ノーマル", weight: 7.1, no: "7" },
+    { name: "スケルトン", image: "/images/スケルトン_1.png", rarity: "レア", weight: 4.1, no: "8" },
+    { name: "スケルトン【フェアリー】", image: "/images/スケルトン_2.png", rarity: "レア", weight: 4.1, no: "9" },
+    { name: "ミミック", image: "/images/ミミック_1.png", rarity: "レア", weight: 4.1, no: "10" },
+    { name: "ミミック【フェアリー】", image: "/images/ミミック_2.png", rarity: "レア", weight: 4.1, no: "11" },
+    { name: "リザードマン", image: "/images/リザードマン_1.png", rarity: "レア", weight: 4.1, no: "12" },
+    { name: "リザードマン【フェアリー】", image: "/images/リザードマン_2.png", rarity: "レア", weight: 4.1, no: "13" },
+    { name: "ゴーレム", image: "/images/ゴーレム_1.png", rarity: "超レア", weight: 1.6, no: "14" },
+    { name: "ゴーレム【フェアリー】", image: "/images/ゴーレム_2.png", rarity: "超レア", weight: 1.6, no: "15" },
+    { name: "ケルベロス", image: "/images/ケルベロス_1.png", rarity: "超レア", weight: 1.6, no: "16" },
+    { name: "ケルベロス【フェアリー】", image: "/images/ケルベロス_2.png", rarity: "超レア", weight: 1.6, no: "17" },
+    { name: "バーサーカー", image: "/images/バーサーカー_1.png", rarity: "超レア", weight: 1.6, no: "18" },
+    { name: "バーサーカー【フェアリー】", image: "/images/バーサーカー_2.png", rarity: "超レア", weight: 1.6, no: "19" },
+    { name: "キングスライム", image: "/images/キングスライム_1.png", rarity: "激レア", weight: 0.875, no: "20" },
+    { name: "キングスライム【フェアリー】", image: "/images/キングスライム_2.png", rarity: "激レア", weight: 0.875, no: "21" },
+    { name: "ドラゴン", image: "/images/ドラゴン_1.png", rarity: "激レア", weight: 0.875, no: "22" },
+    { name: "ドラゴン【フェアリー】", image: "/images/ドラゴン_2.png", rarity: "激レア", weight: 0.875, no: "23" },
+    { name: "フェニックス", image: "/images/フェニックス_1.png", rarity: "激レア", weight: 0.875, no: "24" },
+    { name: "フェニックス【フェアリー】", image: "/images/フェニックス_2.png", rarity: "激レア", weight: 0.875, no: "25" },
+    { name: "リヴァイアサン", image: "/images/リヴァイアサン_1.png", rarity: "激レア", weight: 0.875, no: "26" },
+    { name: "リヴァイアサン【フェアリー】", image: "/images/リヴァイアサン_2.png", rarity: "激レア", weight: 0.875, no: "27" },
+    { name: "ブラックドラゴン", image: "/images/ブラックドラゴン_1.png", rarity: "超激レア", weight: 0.99, no: "28" },
+    { name: "ブラックドラゴン【フェアリー】", image: "/images/ブラックドラゴン_2.png", rarity: "超激レア", weight: 0.99, no: "29" },
+    { name: "キングデーモン", image: "/images/キングデーモン_1.png", rarity: "超激レア", weight: 0.99, no: "30" },
+    { name: "キングデーモン【フェアリー】", image: "/images/キングデーモン_2.png", rarity: "超激レア", weight: 0.99, no: "31" },
+    { name: "キングヒドラ", image: "/images/キングヒドラ_1.png", rarity: "超激レア", weight: 0.99, no: "32" },
+    { name: "キングヒドラ【フェアリー】", image: "/images/キングヒドラ_2.png", rarity: "超激レア", weight: 0.99, no: "33" },
+    { name: "オーディン", image: "/images/オーディン_1.png", rarity: "神レア", weight: 0.1, no: "34" },
+    { name: "オーディン【フェアリー】", image: "/images/オーディン_2.png", rarity: "神レア", weight: 0.1, no: "35" },
+    { name: "ポセイドン", image: "/images/ポセイドン_1.png", rarity: "神レア", weight: 0.1, no: "36" },
+    { name: "ポセイドン【フェアリー】", image: "/images/ポセイドン_2.png", rarity: "神レア", weight: 0.1, no: "37" },
+    { name: "ハデス", image: "/images/ハデス_1.png", rarity: "神レア", weight: 0.1, no: "38" },
+    { name: "ハデス【フェアリー】", image: "/images/ハデス_2.png", rarity: "神レア", weight: 0.1, no: "39" },
+    { name: "ゼウス", image: "/images/ゼウス_1.png", rarity: "神レア", weight: 0.1, no: "40" },
+    { name: "ゼウス【フェアリー】", image: "/images/ゼウス_2.png", rarity: "神レア", weight: 0.1, no: "41" },
+    { name: "軍荼利明王（ぐんだりみょうおう）", image: "/images/軍荼利明王_1.png", rarity: "神レア", weight: 0.1, no: "42" },
+    { name: "軍荼利明王（ぐんだりみょうおう）【フェアリー】", image: "/images/軍荼利明王_2.png", rarity: "神レア", weight: 0.1, no: "43" },
+    { name: "魔王", image: "/images/魔王_1.png", rarity: "神レア", weight: 0.1, no: "44" },
+    { name: "魔王【フェアリー】", image: "/images/魔王_2.png", rarity: "神レア", weight: 0.1, no: "45" },
+    { name: "クイズマスターの最強勇者", image: "/images/勇者1_1.png", rarity: "神レア", weight: 0.1, no: "46" },
+    { name: "クイズマスターの最強勇者【フェアリー】", image: "/images/勇者1_2.png", rarity: "神レア", weight: 0.1, no: "47" },
+    { name: "クイズマスターの最強勇者【プレミア】", image: "/images/勇者1_3.png", rarity: "神レア", weight: 0.1, no: "48" },
+    { name: "クイズ王", image: "/images/王様_1.png", rarity: "神レア", weight: 0.1, no: "49" },
+    { name: "クイズ王【フェアリー】", image: "/images/王様_2.png", rarity: "神レア", weight: 0.1, no: "50" },
+    { name: "ダンジョンの最強の剣士", image: "/images/ダンジョンの剣士_2.png", rarity: "神レア", weight: 0.1, no: "51" },
+    { name: "ダンジョンの最強の武闘家", image: "/images/ダンジョンの武闘家_2.png", rarity: "神レア", weight: 0.1, no: "52" },
+    { name: "ダンジョンの最強の魔法使い", image: "/images/ダンジョンの魔法使い_2.png", rarity: "神レア", weight: 0.1, no: "53" },
+    { name: "ゴールデンキングスライム", image: "/images/ゴールデンキングスライム_1.png", rarity: "シークレット", weight: 0.01, no: "54" },
+    { name: "ゴールデンキングスライム【フェアリー】", image: "/images/ゴールデンキングスライム_2.png", rarity: "シークレット", weight: 0.01, no: "55" },
+    { name: "伝説の勇者", image: "/images/勇者2_1.png", rarity: "シークレット", weight: 0.01, no: "56" },
+    { name: "伝説の勇者【フェアリー】", image: "/images/勇者2_2.png", rarity: "シークレット", weight: 0.01, no: "57" },
+    { name: "伝説の勇者【プレミア】", image: "/images/勇者2_3.png", rarity: "シークレット", weight: 0.01, no: "58" },
   ];
 
   // ★ 修正: プロフィールの points を減らしてログを書き込んでからガチャ抽選
   const rollGacha = async () => {
-    if (!user) {
-      alert("ログインしてからガチャを回してね！");
-      return;
-    }
+    if (rolling) return;
+    setRolling(true);
 
-    // 最新ポイントを DB から取得
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("points")
-      .eq("id", user.id)
-      .single();
+    // 3秒は必ず押せないようにする
+    const unlockTimer = setTimeout(() => {
+      setRolling(false);
+    }, 3000);
 
-    if (profileError) {
-      console.error("get profile points error:", profileError);
-      alert("ポイントの取得に失敗しました。時間をおいてもう一度試してください。");
-      return;
-    }
-
-    const currentPoints = profile?.points ?? 0;
-    if (currentPoints < 100) {
-      alert("ポイントが足りません！（100P以上必要です）");
-      return;
-    }
-
-    const newPoints = currentPoints - 100;
-
-    // プロフィールのポイントを更新
-    const { data: updatedProfile, error: updateError } = await supabase
-      .from("profiles")
-      .update({ points: newPoints })
-      .eq("id", user.id)
-      .select("points")
-      .single();
-
-    if (updateError) {
-      console.error("update points error:", updateError);
-      alert("ポイントの更新に失敗しました。時間をおいてもう一度試してください。");
-      return;
-    }
-
-    // state も更新
-    setPoints(updatedProfile?.points ?? newPoints);
-
-    window.dispatchEvent(new Event("points:updated"));
-
-    // ポイントログを記録（-100）
-    const { error: logError } = await supabase.from("user_point_logs").insert({
-      user_id: user.id,
-      change: -100,
-      reason: "ガチャでポイント消費",
-    });
-
-    if (logError) {
-      console.error("insert user_point_logs error:", logError);
-      // ログ失敗は致命的ではないのでアラートまでは出さないでもOK
-    }
-
-    // ここからガチャ抽選処理
-    const totalWeight = gachaCharacters.reduce(
-      (sum, c) => sum + c.weight,
-      0
-    );
-    let random = Math.random() * totalWeight;
-
-    for (const char of gachaCharacters) {
-      if (random < char.weight) {
-        setGachaResult(char);
-        setTimeout(() => {
-          setHistory((prev) => [...prev, char]);
-        }, 2000);
-
-        // キャラ取得ログ
-        try {
-          const { data: characterRow, error: findError } = await supabase
-            .from("characters")
-            .select("id")
-            .eq("no", char.no)
-            .maybeSingle();
-
-          if (findError) {
-            console.error("character lookup error:", findError);
-            return;
-          }
-          if (!characterRow) {
-            console.error("character not found for no:", char.no);
-            return;
-          }
-
-          const { error: insertError } = await supabase
-            .from("user_characters")
-            .insert({
-              user_id: user.id,
-              character_id: characterRow.id,
-            });
-
-          if (insertError) {
-            console.error("user_characters insert error:", insertError);
-          }
-        } catch (e) {
-          console.error("save gacha result error:", e);
-        }
-
+    try {
+      if (!user) {
+        alert("ログインしてからガチャを回してね！");
         return;
       }
-      random -= char.weight;
+
+      // 最新ポイントを DB から取得
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("points")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError) {
+        console.error("get profile points error:", profileError);
+        alert("ポイントの取得に失敗しました。時間をおいてもう一度試してください。");
+        return;
+      }
+
+      const currentPoints = profile?.points ?? 0;
+      if (currentPoints < 100) {
+        alert("ポイントが足りません！（100P以上必要です）");
+        return;
+      }
+
+      const newPoints = currentPoints - 100;
+
+      // プロフィールのポイントを更新
+      const { data: updatedProfile, error: updateError } = await supabase
+        .from("profiles")
+        .update({ points: newPoints })
+        .eq("id", user.id)
+        .select("points")
+        .single();
+
+      if (updateError) {
+        console.error("update points error:", updateError);
+        alert("ポイントの更新に失敗しました。時間をおいてもう一度試してください。");
+        return;
+      }
+
+      // state も更新
+      setPoints(updatedProfile?.points ?? newPoints);
+
+      window.dispatchEvent(new Event("points:updated"));
+
+      // ポイントログを記録（-100）
+      const { error: logError } = await supabase.from("user_point_logs").insert({
+        user_id: user.id,
+        change: -100,
+        reason: "ガチャでポイント消費",
+      });
+
+      if (logError) {
+        console.error("insert user_point_logs error:", logError);
+        // ログ失敗は致命的ではないのでアラートまでは出さないでもOK
+      }
+
+      // ここからガチャ抽選処理
+      const totalWeight = gachaCharacters.reduce(
+        (sum, c) => sum + c.weight,
+        0
+      );
+      let random = Math.random() * totalWeight;
+
+      for (const char of gachaCharacters) {
+        if (random < char.weight) {
+          setGachaResult(char);
+          setTimeout(() => {
+            setHistory((prev) => [...prev, char]);
+          }, 2000);
+
+          // キャラ取得ログ
+          try {
+            const { data: characterRow, error: findError } = await supabase
+              .from("characters")
+              .select("id")
+              .eq("no", char.no)
+              .maybeSingle();
+
+            if (findError) {
+              console.error("character lookup error:", findError);
+              return;
+            }
+            if (!characterRow) {
+              console.error("character not found for no:", char.no);
+              return;
+            }
+
+            const { error: insertError } = await supabase
+              .from("user_characters")
+              .insert({
+                user_id: user.id,
+                character_id: characterRow.id,
+              });
+
+            if (insertError) {
+              console.error("user_characters insert error:", insertError);
+            }
+          } catch (e) {
+            console.error("save gacha result error:", e);
+          }
+
+          return;
+        }
+        random -= char.weight;
+      }
+    } finally {
+      // 3秒固定ロックを優先するため、ここでは解除しない
+      // （失敗時に早く解除したいなら、ここで clearTimeout & setRolling(false) に変える）
+      // 今回は「必ず3秒押せない」が要件なのでこのまま。
+      // ただしコンポーネントがアンマウントされる可能性があるなら cleanup を入れるのが理想。
     }
   };
 
@@ -634,13 +714,13 @@ export default function QuizMasterPage() {
             <div className="mt-6 flex flex-col md:flex-row gap-3 justify-center">
               <button
                 onClick={() => router.push("/user/login")}
-                className="px-6 py-3 rounded-lg font-bold text-white bg-blue-500 hover:bg-blue-600 border-2 border-black shadow"
+                className="px-6 py-3 rounded-lg font-bold text-white bg-blue-500 hover:bg-blue-600 shadow"
               >
                 ログインして遊ぶ
               </button>
               <button
                 onClick={() => router.push("/user/signup")}
-                className="px-6 py-3 rounded-lg font-bold text-white bg-green-500 hover:bg-green-600 border-2 border-black shadow"
+                className="px-6 py-3 rounded-lg font-bold text-white bg-green-500 hover:bg-green-600 shadow"
               >
                 新規ユーザー登録
               </button>
@@ -680,7 +760,10 @@ export default function QuizMasterPage() {
               drop-shadow-[0_0_10px_rgba(0,0,0,0.9)]
             "
           >
-            クイズガチャ
+            <span className="block md:hidden leading-tight">
+              クイズ<br />ガチャ
+            </span>
+            <span className="hidden md:block">クイズガチャ</span>
           </h1>
           <p
             className="
@@ -719,26 +802,26 @@ export default function QuizMasterPage() {
               <br />
               ガチャは 1回100P で回せます。
               <br />
-              ガチャから登場するキャラは全部で52種類！クイズダンジョンや協力ダンジョンに出てくるキャラが登場します。
+              ガチャから登場するキャラは全部で58種類！クイズダンジョンや協力ダンジョンに出てくるキャラが登場します。
               <br />
               ポイントを集めて、全キャラコンプリートを目指そう！
               <br />
               <br />
               ＜キャラ出現率＞
               <br />
-              ノーマル　全2体・4種類　出現率：7.5%　全体の30%
+              ノーマル　全7種類　出現率：約7%　全体の50%
               <br />
-              レア　全3体・6種類　出現率：約4%　全体の26%
+              レア　全6種類　出現率：約4%　全体の25%
               <br />
-              超レア　全3体・6種類　出現率：約3%　全体の20%
+              超レア　全6種類　出現率：約1.6%　全体の10%
               <br />
-              激レア　全4体・8種類　出現率：約2%　全体の18%
+              激レア　全8種類　出現率：約0.87%　全体の7%
               <br />
-              超激レア　全3体・6種類　出現率：約1%　全体の約6%
+              超激レア　全6種類　出現率：約1%　全体の約6%
               <br />
-              神レア　全8体・17種類　出現率：0.01%　全体の0.17%
+              神レア　全20種類　出現率：0.1%　全体の2%
               <br />
-              シークレット　全2体・5種類　出現率：0.005%　全体の約0.025%
+              シークレット　全5種類　出現率：0.01%　全体の約0.05%
               <br />
             </p>
           </div>
@@ -754,6 +837,7 @@ export default function QuizMasterPage() {
           setGachaResult={setGachaResult}
           history={history}
           setHistory={setHistory}
+          rolling={rolling}
         />
       </div>
     </div>

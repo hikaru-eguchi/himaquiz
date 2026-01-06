@@ -2,20 +2,24 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createSupabaseBrowserClient } from "@/lib/supabaseClient";
+
+type ApiResponse =
+  | { ok: true }
+  | { ok: false; code?: "LOCKED" | "INVALID"; message: string; remainingSec?: number; hint?: string };
 
 export default function LoginPage() {
-  const supabase = createSupabaseBrowserClient();
   const router = useRouter();
 
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [hint, setHint] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
+    setHint(null);
     setLoading(true);
 
     try {
@@ -25,25 +29,29 @@ export default function LoginPage() {
         return;
       }
 
-      const authEmail = `${userId}@hima-quiz.com`;
-
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: authEmail,
-        password,
+      // ✅ サーバー(API)経由でログイン＆待機判定（Cookieセットされる）
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, password }),
       });
 
-      if (signInError) {
-        console.error(signInError);
-        setError("ユーザーIDまたはパスワードが正しくありません。");
+      const json = (await res.json()) as ApiResponse;
+
+      if (!json.ok) {
+        setError(json.message);
+        if (json.hint) setHint(json.hint);
         setLoading(false);
         return;
       }
 
-      // ログイン成功
-      router.push("/"); // トップページへ（ルートに合わせて変えてOK）
+      // ✅ setSession不要：サーバーがSet-Cookieしている前提
+      router.push("/");
+      router.refresh(); // Server Component等の表示更新を確実に走らせる
+      setTimeout(() => window.dispatchEvent(new Event("auth:changed")), 0);
     } catch (err: any) {
       console.error(err);
-      setError(err.message ?? "ログインに失敗しました");
+      setError(err?.message ?? "ログインに失敗しました");
     } finally {
       setLoading(false);
     }
@@ -52,6 +60,7 @@ export default function LoginPage() {
   return (
     <div className="max-w-md mx-auto p-4">
       <h1 className="text-2xl md:text-4xl font-bold mb-4 md:mb-6 text-center">ログイン</h1>
+
       <form onSubmit={handleSubmit} className="space-y-3">
         <div>
           <label className="block text-md md:text-xl font-medium">ユーザーID</label>
@@ -75,6 +84,7 @@ export default function LoginPage() {
           />
         </div>
 
+        {hint && <p className="text-blue-700 text-sm md:text-base">{hint}</p>}
         {error && <p className="text-red-500 text-md md:text-xl">{error}</p>}
 
         <button
@@ -95,13 +105,11 @@ export default function LoginPage() {
           パスワードをお忘れの方はこちら
         </button>
 
-        <div className="text-sm md:text-base text-gray-600 mt-6">
-          まだユーザー登録がお済みでない方はこちら👇
-        </div>
+        <div className="text-sm md:text-base text-gray-600 mt-6">まだユーザー登録がお済みでない方はこちら👇</div>
 
         <button
           type="button"
-          onClick={() => router.push("/user/signup")} // ★ここをあなたの新規登録ページのパスに
+          onClick={() => router.push("/user/signup")}
           className="inline-block px-4 py-2 bg-green-500 text-white rounded-md text-sm md:text-base font-semibold hover:bg-green-600 cursor-pointer"
         >
           新規ユーザー登録

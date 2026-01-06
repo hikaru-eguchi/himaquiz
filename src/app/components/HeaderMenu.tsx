@@ -1,96 +1,100 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { createSupabaseBrowserClient } from "@/lib/supabaseClient";
+import { useRouter } from "next/navigation";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export default function HeaderMenu() {
-  const supabase = createSupabaseBrowserClient();
+  const router = useRouter();
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [username, setUsername] = useState<string | null>(null);
   const [points, setPoints] = useState<number | null>(null); // 所持ポイント
 
+  const fetchProfile = async (uid: string) => {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("username, points")
+      .eq("id", uid)
+      .single();
+
+    setUsername(profile?.username ?? null);
+    setPoints(profile?.points ?? 0);
+  };
+
   // ===== セッション監視（初回 & ログイン状態変化）=====
   useEffect(() => {
+    let alive = true;
+
     const fetchUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      const currentUser = data.user ?? null;
+      const { data } = await supabase.auth.getSession();
+      const currentUser = data.session?.user ?? null;
+
+      if (!alive) return;
+
       setUser(currentUser);
-
-      if (currentUser) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("username, points")
-          .eq("id", currentUser.id)
-          .single();
-
-        setUsername(profile?.username ?? null);
-        setPoints(profile?.points ?? 0);
-      } else {
+      if (currentUser) await fetchProfile(currentUser.id);
+      else {
         setUsername(null);
         setPoints(null);
       }
     };
 
+    // 初回
     fetchUser();
 
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        const currentUser = session?.user ?? null;
-        setUser(currentUser);
+    // Supabase の auth イベント（※Cookie方式では即時発火しないことがある）
+    const { data: listener } = supabase.auth.onAuthStateChange(async () => {
+      await fetchUser();
+    });
 
-        if (currentUser) {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("username, points")
-            .eq("id", currentUser.id)
-            .single();
+    // ★ 追加：ログインAPI成功後に投げるカスタムイベント
+    const onAuthChanged = () => setTimeout(() => fetchUser(), 0);
+    window.addEventListener("auth:changed", onAuthChanged);
 
-          setUsername(profile?.username ?? null);
-          setPoints(profile?.points ?? 0);
-        } else {
-          setUsername(null);
-          setPoints(null);
-        }
-      }
-    );
+    // フォーカス復帰でも更新
+    const onFocus = () => fetchUser();
+    window.addEventListener("focus", onFocus);
 
-    return () => listener.subscription.unsubscribe();
+    return () => {
+      alive = false;
+      listener.subscription.unsubscribe();
+      window.removeEventListener("auth:changed", onAuthChanged);
+      window.removeEventListener("focus", onFocus);
+    };
   }, [supabase]);
 
-  // ===== ★ 追加：ポイント更新イベント監視 =====
   useEffect(() => {
     const refreshPoints = async () => {
-      const { data } = await supabase.auth.getUser();
-      const currentUser = data.user ?? null;
+      const { data } = await supabase.auth.getSession();
+      const currentUser = data.session?.user ?? null;
       setUser(currentUser);
 
-      if (currentUser) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("username, points")
-          .eq("id", currentUser.id)
-          .single();
-
-        setUsername(profile?.username ?? null);
-        setPoints(profile?.points ?? 0);
-      }
+      if (currentUser) await fetchProfile(currentUser.id);
     };
 
     const handler = () => refreshPoints();
     window.addEventListener("points:updated", handler);
-
     return () => window.removeEventListener("points:updated", handler);
   }, [supabase]);
 
-  // ===== ログアウト =====
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    // ✅ サーバーでCookie削除
+    await fetch("/api/auth/logout", { method: "POST" });
+
     setOpen(false);
     setUser(null);
     setUsername(null);
     setPoints(null);
+
+    // ✅ 画面遷移＆Server Component再描画
+    router.push("/");
+    router.refresh();
+
+    // ✅ fetchUserが走ってもCookieが消えてるので復活しない
+    window.dispatchEvent(new Event("auth:changed"));
   };
 
   return (

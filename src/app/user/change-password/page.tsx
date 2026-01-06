@@ -16,6 +16,23 @@ export default function ChangePasswordPage() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
+  // ✅ SignUp と同じ強度チェック
+  const validatePassword = (password: string): string | null => {
+    if (password.length < 12) {
+      return "パスワードは12文字以上にしてください。";
+    }
+    if (!/[A-Z]/.test(password)) {
+      return "英大文字を1文字以上含めてください。";
+    }
+    if (!/[a-z]/.test(password)) {
+      return "英小文字を1文字以上含めてください。";
+    }
+    if (!/[0-9]/.test(password)) {
+      return "数字を1文字以上含めてください。";
+    }
+    return null;
+  };
+
   // 未ログインならログイン画面へ飛ばす
   useEffect(() => {
     if (userLoading) return;
@@ -31,8 +48,10 @@ export default function ChangePasswordPage() {
 
     if (!user) return;
 
-    if (newPassword.length < 6) {
-      setError("パスワードは6文字以上で入力してください。");
+    // ✅ 6文字チェックは削除して、12文字ルールに置き換え
+    const passwordError = validatePassword(newPassword);
+    if (passwordError) {
+      setError(passwordError);
       return;
     }
 
@@ -43,43 +62,33 @@ export default function ChangePasswordPage() {
 
     setSaving(true);
 
-    const TIMEOUT_MS = 5000; // 5秒で UI 側は諦める用
+    const TIMEOUT_MS = 5000;
 
     try {
-      // ① まず現在のセッション（アクセストークン）を取得
-      const { data: sessionData, error: sessionError } =
-        await supabase.auth.getSession();
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
 
       if (sessionError || !sessionData.session) {
         console.error("getSession error:", sessionError);
-        setError(
-          "ログイン情報の取得に失敗しました。いったんログインし直してからお試しください。"
-        );
+        setError("ログイン情報の取得に失敗しました。いったんログインし直してからお試しください。");
         return;
       }
 
       const accessToken = sessionData.session.access_token;
 
-      // ② Supabase の REST API に直でパスワード更新を投げる Promise
-      const updatePromise = fetch(
-        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/user`,
-        {
-          method: "PUT", // PATCH でも可
-          headers: {
-            "Content-Type": "application/json",
-            apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string,
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({ password: newPassword }),
-        }
-      );
+      const updatePromise = fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/user`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string,
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ password: newPassword }),
+      });
 
-      // ③ 5秒タイムアウト用 Promise
       const timeoutPromise = new Promise<"timeout">((resolve) => {
         setTimeout(() => resolve("timeout"), TIMEOUT_MS);
       });
 
-      // ④ どっちが先に終わるか競争
       const result = await Promise.race([updatePromise, timeoutPromise]);
 
       if (result === "timeout") {
@@ -91,18 +100,15 @@ export default function ChangePasswordPage() {
         return;
       }
 
-      // result は Response 型
       const res = result as Response;
 
       if (!res.ok) {
-        // エラー内容を見てメッセージ出し分け
         let json: any = null;
         try {
           json = await res.json();
         } catch (_) {}
 
-        const rawMsg =
-          json?.error_description || json?.message || json?.error || "";
+        const rawMsg = json?.error_description || json?.message || json?.error || "";
 
         if (
           typeof rawMsg === "string" &&
@@ -117,10 +123,7 @@ export default function ChangePasswordPage() {
         return;
       }
 
-      // ここまで来たら成功
-      setMessage(
-        "パスワードを更新しました。\n次回から新しいパスワードでログインできます。"
-      );
+      setMessage("パスワードを更新しました。\n次回から新しいパスワードでログインできます。");
       setNewPassword("");
       setNewPasswordConfirm("");
     } catch (err: any) {
@@ -136,7 +139,6 @@ export default function ChangePasswordPage() {
   }
 
   if (!user) {
-    // リダイレクト中の一瞬用
     return null;
   }
 
@@ -152,37 +154,32 @@ export default function ChangePasswordPage() {
           </button>
         </div>
 
-        <h1 className="text-2xl md:text-4xl font-extrabold text-center mt-4">
-          パスワード変更
-        </h1>
+        <h1 className="text-2xl md:text-4xl font-extrabold text-center mt-4">パスワード変更</h1>
       </div>
 
       <p className="text-sm md:text-base text-gray-700 mb-4">
         新しいパスワードを入力してください。
+        <br />
+        12文字以上・英大文字・英小文字・数字をすべて含めてください。
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-3">
         <div>
-          <label className="block text-md md:text-xl font-medium">
-            新しいパスワード
-          </label>
+          <label className="block text-md md:text-xl font-medium">新しいパスワード</label>
           <input
             className="border rounded w-full p-2"
             type="password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             required
-            minLength={6}
           />
           <p className="text-xs text-gray-500 mt-1">
-            6文字以上で入力してください。
+            12文字以上・英大文字・英小文字・数字をすべて含めてください
           </p>
         </div>
 
         <div>
-          <label className="block text-md md:text-xl font-medium">
-            新しいパスワード（確認）
-          </label>
+          <label className="block text-md md:text-xl font-medium">新しいパスワード（確認）</label>
           <input
             className="border rounded w-full p-2"
             type="password"
@@ -193,11 +190,7 @@ export default function ChangePasswordPage() {
         </div>
 
         {error && <p className="text-red-500 text-sm md:text-base">{error}</p>}
-        {message && (
-          <p className="text-green-600 text-sm md:text-base whitespace-pre-wrap">
-            {message}
-          </p>
-        )}
+        {message && <p className="text-green-600 text-sm md:text-base whitespace-pre-wrap">{message}</p>}
 
         <button
           type="submit"

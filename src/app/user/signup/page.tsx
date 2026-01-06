@@ -15,6 +15,23 @@ export default function SignUpPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
+  
+  // パスワード強度チェック関数
+  const validatePassword = (password: string): string | null => {
+    if (password.length < 12) {
+      return "パスワードは12文字以上にしてください。";
+    }
+    if (!/[A-Z]/.test(password)) {
+      return "英大文字を1文字以上含めてください。";
+    }
+    if (!/[a-z]/.test(password)) {
+      return "英小文字を1文字以上含めてください。";
+    }
+    if (!/[0-9]/.test(password)) {
+      return "数字を1文字以上含めてください。";
+    }
+    return null;
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -25,6 +42,14 @@ export default function SignUpPage() {
       // 0. ユーザーIDに「@」が入っていたら弾く（擬似メールに使うので）
       if (userId.includes("@")) {
         setError("ユーザーIDに「@」は使えません。");
+        setLoading(false);
+        return;
+      }
+
+      // パスワード強度チェック
+      const passwordError = validatePassword(password);
+      if (passwordError) {
+        setError(passwordError);
         setLoading(false);
         return;
       }
@@ -102,8 +127,8 @@ export default function SignUpPage() {
   if (isRegistered) {
     return (
       <div className="max-w-md mx-auto p-4 space-y-4">
-        <h1 className="text-xl font-bold text-center">ユーザー登録が完了しました！</h1>
-        <p className="text-center">
+        <h1 className="text-2xl md:text-3xl font-bold text-center">ユーザー登録が完了しました！</h1>
+        <p className="text-center text-md md:text-xl">
           登録が完了しました。<br />
           下記のボタンからログインしてください。
         </p>
@@ -160,8 +185,10 @@ export default function SignUpPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            minLength={6}
           />
+          <p className="text-sm md:text-md text-gray-500 mt-1">
+            12文字以上・英大文字・英小文字・数字をすべて含めてください
+          </p>
         </div>
 
         <div>
