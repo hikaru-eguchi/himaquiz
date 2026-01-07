@@ -85,7 +85,12 @@ export default function SignUpPage() {
 
       if (signUpError) {
         console.error(signUpError);
-        setError("ユーザー作成に失敗しました。");
+        const msg = (signUpError as any).message ?? "";
+        if (msg.includes("User already registered")) {
+          setError("このユーザーIDはすでに使用されています。");
+        } else {
+          setError("ユーザー作成に失敗しました。");
+        }
         setLoading(false);
         return;
       }
@@ -129,15 +134,8 @@ export default function SignUpPage() {
       <div className="max-w-md mx-auto p-4 space-y-4">
         <h1 className="text-2xl md:text-3xl font-bold text-center">ユーザー登録が完了しました！</h1>
         <p className="text-center text-md md:text-xl">
-          登録が完了しました。<br />
-          下記のボタンからログインしてください。
+          登録した内容でログインしていますので、引き続き当サイトをお楽しみください。
         </p>
-        <button
-          onClick={() => router.push("/user/login")} // ルートに合わせて変更してOK（/login など）
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
-        >
-          ログイン画面へ
-        </button>
       </div>
     );
   }

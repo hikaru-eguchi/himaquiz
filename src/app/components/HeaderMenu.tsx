@@ -133,6 +133,13 @@ export default function HeaderMenu() {
           {!user && (
             <>
               <Link
+                href="/"
+                className="bg-gray-800 text-white py-2 px-4 rounded text-center hover:bg-gray-900"
+                onClick={() => setOpen(false)}
+              >
+                トップページへ
+              </Link>
+              <Link
                 href="/user/login"
                 className="bg-blue-500 text-white py-2 px-4 rounded text-center hover:bg-blue-600"
                 onClick={() => setOpen(false)}
@@ -153,6 +160,13 @@ export default function HeaderMenu() {
           {/* ログイン後メニュー */}
           {user && (
             <>
+              <Link
+                href="/"
+                className="bg-gray-800 text-white py-2 px-4 rounded text-center hover:bg-gray-900"
+                onClick={() => setOpen(false)}
+              >
+                トップページへ
+              </Link>
               <Link
                 href="/user/mypage"
                 className="bg-blue-500 text-white py-2 px-4 rounded text-center hover:bg-blue-600"
