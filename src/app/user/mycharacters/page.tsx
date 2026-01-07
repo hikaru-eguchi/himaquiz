@@ -357,7 +357,7 @@ export default function MyCharactersPage() {
                   animate={{ scale: 1 }}
                   exit={{ scale: 0 }}
                   transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                  onClick={(e) => e.stopPropagation()}
+                  // onClick={(e) => e.stopPropagation()}
                 >
                   {/* No */}
                   <p className="text-lg md:text-2xl text-gray-700 mb-1 md:mb-2">
