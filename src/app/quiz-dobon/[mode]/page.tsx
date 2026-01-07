@@ -51,6 +51,7 @@ interface QuizResultProps {
   firstBonusPoints: number;
   predictionBonusPoints: number;
   earnedPoints: number;
+  earnedExp: number;
   isLoggedIn: boolean;
   awardStatus: AwardStatus;
   onGoLogin: () => void;
@@ -74,6 +75,7 @@ const QuizResult = ({
   firstBonusPoints,
   predictionBonusPoints,
   earnedPoints,
+  earnedExp,
   isLoggedIn,
   awardStatus,
   onGoLogin,
@@ -230,7 +232,10 @@ const QuizResult = ({
               </div>
 
               <p className="text-xl md:text-2xl font-extrabold text-gray-800">
-                今回の獲得ポイント： <span className="text-green-600">{earnedPoints}P</span>
+                今回の獲得ポイント： <span className="text-green-600">{earnedPoints} P</span>
+              </p>
+              <p className="text-xl md:text-2xl font-extrabold text-gray-800 mt-2">
+                今回の獲得経験値： <span className="text-purple-600">{earnedExp} EXP</span>
               </p>
 
               {isLoggedIn ? (
@@ -362,6 +367,7 @@ export default function QuizModePage() {
   const awardedOnceRef = useRef(false);
 
   const [earnedPoints, setEarnedPoints] = useState(0);
+  const [earnedExp, setEarnedExp] = useState(0);
   const [basePoints, setBasePoints] = useState(0);
   const [firstBonusPoints, setFirstBonusPoints] = useState(0);
   const [predictionBonusPoints, setPredictionBonusPoints] = useState(0);
@@ -566,6 +572,7 @@ export default function QuizModePage() {
     setBasePoints(0);
     setFirstBonusPoints(0);
     setPredictionBonusPoints(0);
+    setEarnedExp(0);
   };
 
   const handleNewMatch = () => {
@@ -596,6 +603,7 @@ export default function QuizModePage() {
     setBasePoints(0);
     setFirstBonusPoints(0);
     setPredictionBonusPoints(0);
+    setEarnedExp(0);
 
     setReadyToStart(false);
 
@@ -942,12 +950,15 @@ export default function QuizModePage() {
 
     const earned = base + firstBonus + predictionBonus;
 
+    const expEarned = correctCount * 20;
+
     setBasePoints(base);
     setFirstBonusPoints(firstBonus);
     setPredictionBonusPoints(predictionBonus);
     setEarnedPoints(earned);
+    setEarnedExp(expEarned);
 
-    if (earned <= 0) {
+    if (earned <= 0 && expEarned <= 0) {
       setAwardStatus("idle");
       return;
     }
@@ -966,46 +977,54 @@ export default function QuizModePage() {
         try {
           setAwardStatus("awarding");
 
-          const { data: profile, error: fetchError } = await supabase
-            .from("profiles")
-            .select("points")
-            .eq("id", user.id)
-            .single();
+          // ★ RPCで points/exp 同時加算（レベル再計算もできる）
+          const { data, error } = await supabase.rpc("add_points_and_exp", {
+            p_user_id: user.id,
+            p_points: earned,
+            p_exp: expEarned,
+          });
 
-          if (fetchError) {
-            console.error("fetch points error:", fetchError);
+          if (error) {
+            console.error("add_points_and_exp error:", error);
             setAwardStatus("error");
             return;
           }
 
-          const currentPoints = profile?.points ?? 0;
-          const newPoints = currentPoints + earned;
-
-          const { error: updateError } = await supabase
-            .from("profiles")
-            .update({ points: newPoints })
-            .eq("id", user.id);
-
-          if (updateError) {
-            console.error("update points error:", updateError);
-            setAwardStatus("error");
-            return;
-          }
+          const row = Array.isArray(data) ? data[0] : data;
+          const oldLevel = row?.old_level ?? 1;
+          const newLevel = row?.new_level ?? 1;
 
           window.dispatchEvent(new Event("points:updated"));
+          window.dispatchEvent(
+            new CustomEvent("profile:updated", {
+              detail: { oldLevel, newLevel },
+            })
+          );
 
-          const reason =
+          const reasonPoint =
             `サバイバルクイズ獲得: 正解${correctCount}問=${base}P` +
             (firstBonus ? ` / 1位ボーナス${firstBonus}P` : "") +
             (predictionBonus ? ` / 予想的中${predictionBonus}P` : "");
 
-          const { error: logError } = await supabase.from("user_point_logs").insert({
-            user_id: user.id,
-            change: earned,
-            reason,
-          });
+          // ポイントログ
+          if (earned > 0) {
+            const { error: logError } = await supabase.from("user_point_logs").insert({
+              user_id: user.id,
+              change: earned,
+              reason: reasonPoint,
+            });
+            if (logError) console.log("insert user_point_logs error raw:", logError);
+          }
 
-          if (logError) console.log("insert user_point_logs error raw:", logError);
+          // EXPログ
+          if (expEarned > 0) {
+            const { error: logError2 } = await supabase.from("user_exp_logs").insert({
+              user_id: user.id,
+              change: expEarned,
+              reason: `サバイバルクイズEXP獲得: 正解${correctCount}問 → ${expEarned}EXP`,
+            });
+            if (logError2) console.log("insert user_exp_logs error raw:", logError2);
+          }
 
           setAwardStatus("awarded");
         } catch (e) {
@@ -1587,6 +1606,7 @@ export default function QuizModePage() {
           firstBonusPoints={firstBonusPoints}
           predictionBonusPoints={predictionBonusPoints}
           earnedPoints={earnedPoints}
+          earnedExp={earnedExp}
           isLoggedIn={!!user}
           awardStatus={awardStatus}
           onGoLogin={() => router.push("/user/login")}

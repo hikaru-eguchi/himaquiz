@@ -41,6 +41,11 @@ function calcQuizEarnedPoints(correctCount: number) {
   return total;
 }
 
+// EXPは「正解数 × 20」
+function calcEarnedExp(correctCount: number) {
+  return correctCount * 20;
+}
+
 // 正解数に応じて出すコメント
 const rankComments = [
   { threshold: 0, comment: "これからが始まり！まずは肩慣らしだね！" },
@@ -83,6 +88,7 @@ type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
 const QuizResult = ({
   correctCount,
   earnedPoints,
+  earnedExp,
   isLoggedIn,
   awardStatus,
   getTitle,
@@ -91,6 +97,7 @@ const QuizResult = ({
 }: {
   correctCount: number;
   earnedPoints: number;
+  earnedExp: number;
   isLoggedIn: boolean;
   awardStatus: AwardStatus;
   getTitle: () => string;
@@ -171,7 +178,10 @@ const QuizResult = ({
         <div className="mx-auto max-w-[520px] bg-white border-2 border-black rounded-xl p-4 shadow mt-2">
           <p className="text-xl md:text-2xl font-extrabold text-gray-800">
             今回の獲得ポイント：{" "}
-            <span className="text-green-600">{earnedPoints}P</span>
+            <span className="text-green-600">{earnedPoints} P</span>
+          </p>
+          <p className="text-xl md:text-2xl font-extrabold text-gray-800 mt-2">
+            今回の獲得経験値： <span className="text-purple-600">{earnedExp} EXP</span>
           </p>
 
           {isLoggedIn ? (
@@ -248,6 +258,7 @@ export default function QuizModePage() {
 
   // ★ リザルト用：獲得ポイントと付与状態
   const [earnedPoints, setEarnedPoints] = useState(0);
+  const [earnedExp, setEarnedExp] = useState(0);
   const [awardStatus, setAwardStatus] = useState<AwardStatus>("idle");
   const awardedOnceRef = useRef(false); // 二重加算防止
 
@@ -406,13 +417,15 @@ export default function QuizModePage() {
     if (!finished) return;
 
     // リザルト表示用の獲得Pは必ず計算して表示
-    const earned = calcQuizEarnedPoints(correctCount);
-    setEarnedPoints(earned);
+    const pointsEarned = calcQuizEarnedPoints(correctCount);
+    const expEarned = calcEarnedExp(correctCount);
 
-    // 0PならDB処理はしない（表示だけ）
-    if (earned <= 0) {
-      // ログイン状態に関わらず「付与なし」で終了
-      setAwardStatus("idle"); // ここは表示したい文言に合わせてOK
+    setEarnedPoints(pointsEarned);
+    setEarnedExp(expEarned);
+
+    // どっちも0ならDB更新しない
+    if (pointsEarned <= 0 && expEarned <= 0) {
+      setAwardStatus("idle");
       return;
     }
 
@@ -430,54 +443,51 @@ export default function QuizModePage() {
         try {
           setAwardStatus("awarding");
 
-          // 現在ポイント取得
-          const { data: profile, error: fetchError } = await supabase
-            .from("profiles")
-            .select("points")
-            .eq("id", user.id)
-            .single();
-
-          if (fetchError) {
-            console.error("fetch points error:", fetchError);
-            setAwardStatus("error");
-            return;
-          }
-
-          const currentPoints = profile?.points ?? 0;
-          const newPoints = currentPoints + earned;
-
-          // 加算
-          const { error: updateError } = await supabase
-            .from("profiles")
-            .update({ points: newPoints })
-            .eq("id", user.id);
-
-          if (updateError) {
-            console.error("update points error:", updateError);
-            setAwardStatus("error");
-            return;
-          }
-
-          window.dispatchEvent(new Event("points:updated"));
-
-          // ログ（＋）
-          const { error: logError } = await supabase.from("user_point_logs").insert({
-            user_id: user.id,
-            change: earned,
-            reason: `連続正解チャレンジでポイント獲得（連続正解数 ${correctCount}問）`,
+          const { data, error } = await supabase.rpc("add_points_and_exp", {
+            p_user_id: user.id,
+            p_points: pointsEarned,
+            p_exp: expEarned,
           });
 
-          if (logError) {
-            console.log("insert user_point_logs error raw:", logError);
-            console.log("message:", (logError as any)?.message);
-            console.log("details:", (logError as any)?.details);
-            console.log("hint:", (logError as any)?.hint);
-            console.log("code:", (logError as any)?.code);
+          if (error) {
+            console.error("add_points_and_exp error:", error);
+            setAwardStatus("error");
+            return;
           }
+
+          const row = Array.isArray(data) ? data[0] : data;
+          const oldLevel = row?.old_level ?? 1;
+          const newLevel = row?.new_level ?? 1;
+
+          // ヘッダー等更新
+          window.dispatchEvent(new Event("points:updated"));
+
+          // レベルアップ演出
+          window.dispatchEvent(
+            new CustomEvent("profile:updated", {
+              detail: { oldLevel, newLevel },
+            })
+          );
+
+          // ログ（ポイント）
+          const { error: logError } = await supabase.from("user_point_logs").insert({
+            user_id: user.id,
+            change: pointsEarned,
+            reason: `連続正解チャレンジでポイント獲得（連続正解数 ${correctCount}問）`,
+          });
+          if (logError) console.log("insert user_point_logs error:", logError);
+
+          // ログ（EXP）※テーブルあるなら。無いならこのブロックは削除でOK
+          const { error: expLogError } = await supabase.from("user_exp_logs").insert({
+            user_id: user.id,
+            change: expEarned,
+            reason: `連続正解チャレンジでEXP獲得（連続正解数 ${correctCount}問）`,
+          });
+          if (expLogError) console.log("insert user_exp_logs error:", expLogError);
 
           setAwardStatus("awarded");
         } catch (e) {
-          console.error("award points error:", e);
+          console.error("award points/exp error:", e);
           setAwardStatus("error");
         }
       };
@@ -593,6 +603,7 @@ export default function QuizModePage() {
         <QuizResult
           correctCount={correctCount}
           earnedPoints={earnedPoints}
+          earnedExp={earnedExp}
           isLoggedIn={!!user}
           awardStatus={awardStatus}
           getTitle={getTitle}

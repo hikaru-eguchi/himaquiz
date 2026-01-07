@@ -103,6 +103,7 @@ interface QuizResultProps {
   basePoints: number;
   stageBonusPoints: number;
   earnedPoints: number;
+  earnedExp: number;
   isLoggedIn: boolean;
   awardStatus: AwardStatus;
   onGoLogin: () => void;
@@ -143,6 +144,7 @@ const QuizResult = ({
   basePoints,
   stageBonusPoints,
   earnedPoints,
+  earnedExp,
   isLoggedIn,
   awardStatus,
   onGoLogin,
@@ -226,7 +228,10 @@ const QuizResult = ({
               </div>
 
               <p className="text-xl md:text-2xl font-extrabold text-gray-800">
-                今回の獲得ポイント： <span className="text-green-600">{earnedPoints}P</span>
+                今回の獲得ポイント： <span className="text-green-600">{earnedPoints} P</span>
+              </p>
+              <p className="text-xl md:text-2xl font-extrabold text-gray-800 mt-2">
+                今回の獲得経験値： <span className="text-purple-600">{earnedExp} EXP</span>
               </p>
 
               {isLoggedIn ? (
@@ -357,6 +362,7 @@ export default function QuizModePage() {
   const [earnedPoints, setEarnedPoints] = useState(0);
   const [basePoints, setBasePoints] = useState(0);
   const [stageBonusPoints, setStageBonusPoints] = useState(0);
+  const [earnedExp, setEarnedExp] = useState(0);
   const [awardStatus, setAwardStatus] = useState<AwardStatus>("idle");
   const awardedOnceRef = useRef(false);
 
@@ -615,6 +621,10 @@ export default function QuizModePage() {
     setShowCorrectMessage(false);
     awardedOnceRef.current = false;
     setAwardStatus("idle");
+    setEarnedPoints(0);
+    setBasePoints(0);
+    setStageBonusPoints(0);
+    setEarnedExp(0);
   };
 
   const handleNewMatch = () => {
@@ -637,6 +647,10 @@ export default function QuizModePage() {
     setShowCorrectMessage(false);
     awardedOnceRef.current = false;
     setAwardStatus("idle");
+    setEarnedPoints(0);
+    setBasePoints(0);
+    setStageBonusPoints(0);
+    setEarnedExp(0);
 
     setReadyToStart(false);
 
@@ -996,8 +1010,11 @@ export default function QuizModePage() {
     setStageBonusPoints(bonus);
     setEarnedPoints(earned);
 
-    // 0PならDB処理なし
-    if (earned <= 0) {
+    const expEarned = correctCount * 20;
+    setEarnedExp(expEarned);
+
+    // pointsもexpも0ならDB処理なし
+    if (earned <= 0 && expEarned <= 0) {
       setAwardStatus("idle");
       return;
     }
@@ -1016,54 +1033,55 @@ export default function QuizModePage() {
         try {
           setAwardStatus("awarding");
 
-          console.log("[award] start", { earned, userId: user.id });
-
-          const { data: profile, error: fetchError } = await supabase
-            .from("profiles")
-            .select("points")
-            .eq("id", user.id)
-            .single();
-
-          if (fetchError) {
-            console.error("fetch points error:", fetchError);
-            setAwardStatus("error");
-            return;
-          }
-
-          console.log("[award] fetched", { profile, fetchError });
-
-          const currentPoints = profile?.points ?? 0;
-          const newPoints = currentPoints + earned;
-
-          const { error: updateError } = await supabase
-            .from("profiles")
-            .update({ points: newPoints })
-            .eq("id", user.id);
-
-          if (updateError) {
-            console.error("update points error:", updateError);
-            setAwardStatus("error");
-            return;
-          }
-
-          console.log("[award] updated", { updateError });
-
-          window.dispatchEvent(new Event("points:updated"));
-
-          // ログ（失敗しても致命的ではない）
-          const { error: logError } = await supabase.from("user_point_logs").insert({
-            user_id: user.id,
-            change: earned,
-            reason: `協力ダンジョンでポイント獲得（正解:${correctCount}問=${base}P / ステージ:${stageCount}=${bonus}P）`,
+          // ★ points と exp を同時加算（level再計算もここで）
+          const { data, error } = await supabase.rpc("add_points_and_exp", {
+            p_user_id: user.id,
+            p_points: earned,
+            p_exp: expEarned,
           });
 
-          console.log("[award] logged", { logError });
+          if (error) {
+            console.error("add_points_and_exp error:", error);
+            setAwardStatus("error");
+            return;
+          }
 
-          if (logError) console.log("insert user_point_logs error raw:", logError);
+          const row = Array.isArray(data) ? data[0] : data;
+          const oldLevel = row?.old_level ?? 1;
+          const newLevel = row?.new_level ?? 1;
+
+          // ヘッダー更新
+          window.dispatchEvent(new Event("points:updated"));
+
+          // レベルアップ演出（必要なら）
+          window.dispatchEvent(
+            new CustomEvent("profile:updated", {
+              detail: { oldLevel, newLevel },
+            })
+          );
+
+          // ログ（失敗しても致命的ではない）
+          if (earned > 0) {
+            const { error: logError } = await supabase.from("user_point_logs").insert({
+              user_id: user.id,
+              change: earned,
+              reason: `協力ダンジョンでポイント獲得（正解:${correctCount}問=${base}P / ステージ:${stageCount}=${bonus}P）`,
+            });
+            if (logError) console.log("insert user_point_logs error raw:", logError);
+          }
+
+          if (expEarned > 0) {
+            const { error: logError2 } = await supabase.from("user_exp_logs").insert({
+              user_id: user.id,
+              change: expEarned,
+              reason: `協力ダンジョンでEXP獲得（正解:${correctCount}問 → ${expEarned}EXP）`,
+            });
+            if (logError2) console.log("insert user_exp_logs error raw:", logError2);
+          }
 
           setAwardStatus("awarded");
         } catch (e) {
-          console.error("award points error:", e);
+          console.error("award points/exp error:", e);
           setAwardStatus("error");
         }
       };
@@ -1349,7 +1367,7 @@ export default function QuizModePage() {
               <div className="mb-1 md:mb-2 bg-white p-3 border-2 border-purple-200 rounded-xl mx-auto w-full max-w-md md:max-w-xl">
                 <p className="text-xl md:text-2xl text-center font-bold">
                   {displayedEnemyHP == 0
-                    ? `${getEnemyForStage(stageCount).name}を倒した！`
+                    ? `${getEnemyForStage(stageCount).name}を倒した！🎉`
                     : `${getEnemyForStage(stageCount).name}が現れた！`}
                 </p>
 
@@ -1499,11 +1517,15 @@ export default function QuizModePage() {
                       rounded-lg
                       shadow-md
                       flex flex-col items-center justify-center
-                      ${isOut ? outBoxClass : `bg-white border-4 ${borderColorClass}`}
+                      ${
+                        isOut
+                          ? "bg-gray-500 border-4 border-gray-700" // ★ 脱落したらグレー背景
+                          : `bg-white border-4 ${borderColorClass}` // 通常
+                      }
                     `}
                   >
                     {/* 名前 */}
-                    <p className={`font-bold text-lg md:text-xl text-center ${isOut ? "text-red-700" : "text-gray-800"}`}>
+                    <p className={`font-bold text-lg md:text-xl text-center ${isOut ? "text-white" : "text-gray-800"}`}>
                       {p.playerName.length > 5 ? p.playerName.slice(0, 5) + "..." : p.playerName}
                     </p>
 
@@ -1513,7 +1535,7 @@ export default function QuizModePage() {
                         text-lg md:text-xl font-bold mt-1
                         ${
                           isOut
-                            ? "text-red-600" // ← 脱落時は赤文字
+                            ? "text-red-400" // ← 脱落時は赤文字
                             : phase === "result"
                             ? result?.isCorrect
                               ? "text-green-600"
@@ -1727,6 +1749,7 @@ export default function QuizModePage() {
           basePoints={basePoints}
           stageBonusPoints={stageBonusPoints}
           earnedPoints={earnedPoints}
+          earnedExp={earnedExp}
           isLoggedIn={!!user}
           awardStatus={awardStatus}
           onGoLogin={() => router.push("/user/login")}

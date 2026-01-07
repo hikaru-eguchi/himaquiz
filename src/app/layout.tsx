@@ -5,6 +5,7 @@ import "./globals.css";
 import NavButtons from "./components/NavButtons";
 import Script from "next/script";
 import HeaderMenu from "./components/HeaderMenu";
+import { LevelUpToast } from "./components/LevelUpToast";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const yomogi = Yomogi({ weight: "400", subsets: ["latin"], variable: "--font-yomogi" });
@@ -49,6 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
 
       <body className={`${inter.variable} ${yomogi.variable} font-sans bg-[#abe4fb]`}>
+        <LevelUpToast />
         <HeaderMenu />
         <div className="flex flex-col min-h-screen">
           {/* ===== HEADER ===== */}

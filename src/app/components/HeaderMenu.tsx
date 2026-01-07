@@ -12,16 +12,38 @@ export default function HeaderMenu() {
   const [user, setUser] = useState<any>(null);
   const [username, setUsername] = useState<string | null>(null);
   const [points, setPoints] = useState<number | null>(null); // 所持ポイント
+  const [avatarUrl, setAvatarUrl] = useState<string>("/images/初期アイコン.png");
+  const [level, setLevel] = useState<number | null>(null);
+  const [exp, setExp] = useState<number | null>(null);
 
   const fetchProfile = async (uid: string) => {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("username, points")
+      .select("username, points, level, exp, avatar_character_id")
       .eq("id", uid)
       .single();
 
     setUsername(profile?.username ?? null);
     setPoints(profile?.points ?? 0);
+    setLevel(profile?.level ?? 1);
+    setExp(profile?.exp ?? 0);
+
+    // avatar_character_id があれば、そのキャラ画像を取りに行く
+    if (profile?.avatar_character_id) {
+      const { data: ch } = await supabase
+        .from("characters")
+        .select("image_url")
+        .eq("id", profile.avatar_character_id)
+        .single();
+
+      const url = ch?.image_url
+        ? ch.image_url.startsWith("/") ? ch.image_url : `/${ch.image_url}`
+        : "/images/初期アイコン.png";
+
+      setAvatarUrl(url);
+    } else {
+      setAvatarUrl("/images/初期アイコン.png");
+    }
   };
 
   // ===== セッション監視（初回 & ログイン状態変化）=====
@@ -121,8 +143,18 @@ export default function HeaderMenu() {
           {/* ログイン済み：ユーザー名＆ポイント */}
           {user && (
             <div className="text-center text-lg font-bold text-gray-700 pb-2 border-b space-y-1">
+              <div className="flex justify-center">
+                <img
+                  src={avatarUrl}
+                  alt="icon"
+                  className="w-30 h-30 rounded-md border-3 border-gray-400 bg-white object-contain"
+                />
+              </div>
               <div>{username ? `${username} さん` : "ユーザー"}</div>
-              <div className="text-sm text-gray-600">
+              <div className="text-sm px-2 py-0.5 rounded text-green-600">
+                ユーザーレベル：Lv.{level ?? 1}
+              </div>
+              <div className="text-sm text-blue-500">
                 所持ポイント：
                 <span className="font-extrabold"> {points ?? 0}</span> P
               </div>

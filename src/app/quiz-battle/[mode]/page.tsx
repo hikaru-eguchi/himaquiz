@@ -45,6 +45,7 @@ interface QuizResultProps {
   handleNewMatch: () => void;
   handleRematch: () => void;
   earnedPoints: number;
+  earnedExp: number;
   isLoggedIn: boolean;
   awardStatus: AwardStatus;
   onGoLogin: () => void;
@@ -63,6 +64,7 @@ const QuizResult = ({
   handleNewMatch,
   handleRematch,
   earnedPoints,
+  earnedExp,
   isLoggedIn,
   awardStatus,
   onGoLogin,
@@ -218,7 +220,10 @@ const QuizResult = ({
 
                 <p className="text-xl md:text-2xl font-extrabold text-gray-800">
                   今回の獲得ポイント：{" "}
-                  <span className="text-green-600">{earnedPoints}P</span>
+                  <span className="text-green-600">{earnedPoints} P</span>
+                </p>
+                <p className="text-xl md:text-2xl font-extrabold text-gray-800 mt-2">
+                  今回の獲得経験値： <span className="text-purple-600">{earnedExp} EXP</span>
                 </p>
 
                 {isLoggedIn ? (
@@ -351,6 +356,7 @@ export default function QuizModePage() {
 
   // ★ リザルト用：獲得ポイントと付与状態（二重加算防止）
   const [earnedPoints, setEarnedPoints] = useState(0);
+  const [earnedExp, setEarnedExp] = useState(0);
   const [awardStatus, setAwardStatus] = useState<AwardStatus>("idle");
   const awardedOnceRef = useRef(false);
 
@@ -453,6 +459,8 @@ export default function QuizModePage() {
     setUserAnswer(null);
     setIncorrectMessage(null);
     setShowCorrectMessage(false);
+    setEarnedPoints(0);
+    setEarnedExp(0);
   };
 
   const handleNewMatch = () => {
@@ -472,6 +480,8 @@ export default function QuizModePage() {
     setUserAnswer(null);
     setIncorrectMessage(null);
     setShowCorrectMessage(false);
+    setEarnedPoints(0);
+    setEarnedExp(0);
 
     setReadyToStart(false);
 
@@ -751,6 +761,7 @@ export default function QuizModePage() {
     // 合言葉マッチならポイント付与しない
     if (mode === "code") {
       setEarnedPoints(0);
+      setEarnedExp(0);
       setAwardStatus("idle");
       return;
     }
@@ -765,8 +776,11 @@ export default function QuizModePage() {
     const earned = Math.floor(myScore / 5) + (isWin ? 300 : 0);
     setEarnedPoints(earned);
 
-    // 0PならDB処理はしない（表示だけ）
-    if (earned <= 0) {
+    const expEarned = correctCount * 20;
+    setEarnedExp(expEarned);
+
+    // 両方0ならDB処理しない（表示だけ）
+    if (earned <= 0 && expEarned <= 0) {
       setAwardStatus("idle");
       return;
     }
@@ -785,51 +799,55 @@ export default function QuizModePage() {
         try {
           setAwardStatus("awarding");
 
-          // 現在ポイント取得
-          const { data: profile, error: fetchError } = await supabase
-            .from("profiles")
-            .select("points")
-            .eq("id", user.id)
-            .single();
-
-          if (fetchError) {
-            console.error("fetch points error:", fetchError);
-            setAwardStatus("error");
-            return;
-          }
-
-          const currentPoints = profile?.points ?? 0;
-          const newPoints = currentPoints + earned;
-
-          // 加算
-          const { error: updateError } = await supabase
-            .from("profiles")
-            .update({ points: newPoints })
-            .eq("id", user.id);
-
-          if (updateError) {
-            console.error("update points error:", updateError);
-            setAwardStatus("error");
-            return;
-          }
-
-          // ヘッダー等を即時更新
-          window.dispatchEvent(new Event("points:updated"));
-
-          // ログ（＋） ※失敗しても致命的ではない
-          const { error: logError } = await supabase.from("user_point_logs").insert({
-            user_id: user.id,
-            change: earned,
-            reason: `クイズバトルでポイント獲得（自分:${myScore} 相手:${opponentScore} ${isWin ? "勝利ボーナス+50" : ""}）`,
+          // ★ RPCで points と exp を同時加算＆level再計算
+          const { data, error } = await supabase.rpc("add_points_and_exp", {
+            p_user_id: user.id,
+            p_points: earned,
+            p_exp: expEarned,
           });
 
-          if (logError) {
-            console.log("insert user_point_logs error raw:", logError);
+          if (error) {
+            console.error("add_points_and_exp error:", error);
+            setAwardStatus("error");
+            return;
+          }
+
+          const row = Array.isArray(data) ? data[0] : data;
+          const oldLevel = row?.old_level ?? 1;
+          const newLevel = row?.new_level ?? 1;
+
+          // ヘッダー等更新
+          window.dispatchEvent(new Event("points:updated"));
+
+          // レベルアップ演出
+          window.dispatchEvent(
+            new CustomEvent("profile:updated", {
+              detail: { oldLevel, newLevel },
+            })
+          );
+
+          // ログ（＋） ※失敗しても致命的ではない
+          if (earned > 0) {
+            const { error: logError } = await supabase.from("user_point_logs").insert({
+              user_id: user.id,
+              change: earned,
+              reason: `クイズバトルでポイント獲得（自分:${myScore} 相手:${opponentScore} ${isWin ? "勝利ボーナス+300" : ""}）`,
+            });
+            if (logError) console.log("insert user_point_logs error raw:", logError);
+          }
+
+          if (expEarned > 0) {
+            const { error: logError2 } = await supabase.from("user_exp_logs").insert({
+              user_id: user.id,
+              change: expEarned,
+              reason: `クイズバトルでEXP獲得（正解${correctCount}問 → ${expEarned}EXP）`,
+            });
+            if (logError2) console.log("insert user_exp_logs error raw:", logError2);
           }
 
           setAwardStatus("awarded");
         } catch (e) {
-          console.error("award points error:", e);
+          console.error("award points/exp error:", e);
           setAwardStatus("error");
         }
       };
@@ -1200,6 +1218,7 @@ export default function QuizModePage() {
           handleNewMatch={handleNewMatch}
           handleRematch={handleRematch}
           earnedPoints={earnedPoints}
+          earnedExp={earnedExp}
           isLoggedIn={!!user}
           awardStatus={awardStatus}
           onGoLogin={() => router.push("/user/login")}

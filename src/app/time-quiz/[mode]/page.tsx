@@ -81,6 +81,7 @@ const QuizResult = ({
   isLoggedIn,
   awardStatus,
   onGoLogin,
+  earnedExp,
 }: {
   correctCount: number;
   getTitle: () => string;
@@ -91,6 +92,7 @@ const QuizResult = ({
   isLoggedIn: boolean;
   awardStatus: AwardStatus;
   onGoLogin: () => void;
+  earnedExp: number;
 }) => {
   const [showScore, setShowScore] = useState(false);
   const [showText, setShowText] = useState(false);
@@ -145,7 +147,10 @@ const QuizResult = ({
           {/* ★ 獲得ポイント表示（ログイン有無で文言変更） */}
           <div className="mx-auto max-w-[520px] bg-white border-2 border-black rounded-xl p-4 shadow mt-2">
             <p className="text-xl md:text-2xl font-extrabold text-gray-800">
-              今回の獲得ポイント： <span className="text-green-600">{earnedPoints}P</span>
+              今回の獲得ポイント： <span className="text-green-600">{earnedPoints} P</span>
+            </p>
+            <p className="text-xl md:text-2xl font-extrabold text-gray-800 mt-2">
+              今回の獲得経験値： <span className="text-purple-600">{earnedExp} EXP</span>
             </p>
 
             {isLoggedIn ? (
@@ -225,6 +230,7 @@ export default function QuizModePage() {
 
   // ★ リザルト用（付与ポイントは score から算出）
   const [earnedPoints, setEarnedPoints] = useState(0);
+  const [earnedExp, setEarnedExp] = useState(0);
   const [awardStatus, setAwardStatus] = useState<AwardStatus>("idle");
   const awardedOnceRef = useRef(false);
 
@@ -370,13 +376,16 @@ export default function QuizModePage() {
     return title;
   };
 
-  // ★ finished になったタイミングで「獲得ポイント計算(score/20)」→「ログインなら加算」
+  // ★ finished になったタイミングで「獲得ポイント計算(score/5)」→「ログインなら加算」
   useEffect(() => {
     if (!finished) return;
 
     // 表示用ポイントは必ず計算
     const earned = calcEarnedPointsFromScore(score);
     setEarnedPoints(earned);
+
+    const expEarned = correctCount * 20; // ★ ポイント分EXPも加算
+    setEarnedExp(expEarned);
 
     // 0PならDB処理はしない（表示だけ）
     if (earned <= 0) {
@@ -398,36 +407,32 @@ export default function QuizModePage() {
         try {
           setAwardStatus("awarding");
 
-          // 現在ポイント取得
-          const { data: profile, error: fetchError } = await supabase
-            .from("profiles")
-            .select("points")
-            .eq("id", user.id)
-            .single();
+          // RPCで points と exp を同時加算＆level再計算
+          const { data, error } = await supabase.rpc("add_points_and_exp", {
+            p_user_id: user.id,
+            p_points: earned,
+            p_exp: expEarned,
+          });
 
-          if (fetchError) {
-            console.error("fetch points error:", fetchError);
+          if (error) {
+            console.error("add_points_and_exp error:", error);
             setAwardStatus("error");
             return;
           }
 
-          const currentPoints = profile?.points ?? 0;
-          const newPoints = currentPoints + earned;
+          const row = Array.isArray(data) ? data[0] : data;
+          const oldLevel = row?.old_level ?? 1;
+          const newLevel = row?.new_level ?? 1;
 
-          // 加算
-          const { error: updateError } = await supabase
-            .from("profiles")
-            .update({ points: newPoints })
-            .eq("id", user.id);
-
-          if (updateError) {
-            console.error("update points error:", updateError);
-            setAwardStatus("error");
-            return;
-          }
-
-          // ヘッダー等を即時更新
+          // ヘッダー等を即時更新（ポイント表示）
           window.dispatchEvent(new Event("points:updated"));
+
+          // レベルアップ演出（LevelUpToastがこれを監視してる）
+          window.dispatchEvent(
+            new CustomEvent("profile:updated", {
+              detail: { oldLevel, newLevel },
+            })
+          );
 
           // ログ（＋） ※失敗しても致命的にはしない
           const { error: logError } = await supabase.from("user_point_logs").insert({
@@ -435,18 +440,18 @@ export default function QuizModePage() {
             change: earned,
             reason: `制限時間クイズでポイント獲得（score ${score} → ${earned}P）`,
           });
+          if (logError) console.log("insert user_point_logs error:", logError);
 
-          if (logError) {
-            console.log("insert user_point_logs error raw:", logError);
-            console.log("message:", (logError as any)?.message);
-            console.log("details:", (logError as any)?.details);
-            console.log("hint:", (logError as any)?.hint);
-            console.log("code:", (logError as any)?.code);
-          }
+          const { error: logError2 } = await supabase.from("user_exp_logs").insert({
+            user_id: user.id,
+            change: earned,
+            reason: `制限時間クイズでEXP獲得（score ${score} → ${earned}EXP）`,
+          });
+          if (logError2) console.log("insert user_exp_logs error:", logError2);
 
           setAwardStatus("awarded");
         } catch (e) {
-          console.error("award points error:", e);
+          console.error("award points/exp error:", e);
           setAwardStatus("error");
         }
       };
@@ -593,6 +598,7 @@ export default function QuizModePage() {
           titles={titles}
           score={score}
           earnedPoints={earnedPoints}
+          earnedExp={earnedExp}
           isLoggedIn={!!user}
           awardStatus={awardStatus}
           onGoLogin={() => router.push("/user/login")}

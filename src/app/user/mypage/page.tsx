@@ -10,6 +10,9 @@ type Profile = {
   user_id: string | null;
   recovery_email: string | null;
   points: number | null;
+  level: number | null;
+  exp: number | null;
+  avatar_character_id: string | null;
 };
 
 export default function MyPage() {
@@ -18,6 +21,7 @@ export default function MyPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const [avatarUrl, setAvatarUrl] = useState<string>("/images/初期アイコン.png");
 
   useEffect(() => {
     if (userLoading) return;
@@ -33,14 +37,33 @@ export default function MyPage() {
       try {
         const { data, error } = await supabase
           .from("profiles")
-          .select("username, user_id, recovery_email, points")
+          .select("username, user_id, recovery_email, points, level, exp, avatar_character_id")
           .eq("id", user.id)
           .single();
 
         if (error) {
           console.error("fetchProfile error:", error);
         } else {
-          setProfile(data as Profile);
+          const p = data as Profile;
+          setProfile(p);
+
+          // ✅ アイコンURLを作る
+          if (!p.avatar_character_id) {
+            setAvatarUrl("/images/初期アイコン.png");
+          } else {
+            const { data: ch, error: chErr } = await supabase
+              .from("characters")
+              .select("image_url")
+              .eq("id", p.avatar_character_id)
+              .single();
+
+            if (chErr || !ch?.image_url) {
+              setAvatarUrl("/images/初期アイコン.png");
+            } else {
+              const url = ch.image_url.startsWith("/") ? ch.image_url : `/${ch.image_url}`;
+              setAvatarUrl(url);
+            }
+          }
         }
       } catch (err) {
         console.error("fetchProfile exception:", err);
@@ -57,6 +80,27 @@ export default function MyPage() {
   if (loading) return <p>プロフィール読み込み中...</p>;
 
   const totalPoints = profile?.points ?? 0;
+
+  const level = profile?.level ?? 1;
+  const exp = profile?.exp ?? 0;
+
+  // 次レベルに到達するための「累積」必要EXP
+  const nextLevelTotalExp = (level * (level + 1) / 2) * 100;
+
+  // 現レベル開始時点の累積EXP
+  const currentLevelStartExp = ((level - 1) * level / 2) * 100;
+
+  // 現レベル内での必要量（例：Lv3なら 300）
+  const needThisLevel = nextLevelTotalExp - currentLevelStartExp;
+
+  // 現レベル内での獲得量
+  const gainedThisLevel = Math.max(0, exp - currentLevelStartExp);
+
+  // 次のレベルまで残り
+  const expToNext = Math.max(0, nextLevelTotalExp - exp);
+
+  // ゲージ(0〜100)
+  const expPercent = Math.min(100, Math.floor((gainedThisLevel / needThisLevel) * 100));
 
   return (
     <div className="max-w-md mx-auto p-4 space-y-4">
@@ -81,8 +125,48 @@ export default function MyPage() {
         </p>
 
         <p>
+          <span className="font-medium text-md md:text-xl">
+            アイコン：
+          </span>
+          <span className="text-sm text-gray-600">
+            {profile?.avatar_character_id ? "設定中" : "初期アイコン"}
+          </span>
+        </p>
+        <div className="flex items-center gap-3">
+          <img
+            src={avatarUrl}
+            alt="icon"
+            className="w-40 h-40 md:w-50 md:h-50 border-3 border-gray-400 rounded-md bg-white object-contain"
+          />
+        </div>
+
+        <p>
+          <span className="font-medium text-md md:text-xl">現在のユーザーレベル：</span>
+          <span className="font-medium text-md md:text-xl text-green-600">Lv.{profile?.level ?? 1}</span>
+        </p>
+
+        <div className="space-y-2">
+          <p className="text-sm md:text-base text-gray-700 font-bold">
+            次のレベルまで <span className="text-green-700">{expToNext}</span> EXP
+          </p>
+
+          {/* ゲージ */}
+          <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden border">
+            <div
+              className="h-4 bg-green-500"
+              style={{ width: `${expPercent}%` }}
+            />
+          </div>
+
+          {/* 数字 */}
+          <p className="text-sm md:text-md text-gray-600">
+            {gainedThisLevel} / {needThisLevel} 
+          </p>
+        </div>
+
+        <p>
           <span className="font-medium text-md md:text-xl">現在の所持ポイント：</span>
-          <span className="text-blue-600 font-bold">{totalPoints} pt</span>
+          <span className="text-blue-500 font-bold text-md md:text-xl">{totalPoints} pt</span>
         </p>
       </div>
 

@@ -17,6 +17,7 @@ export default function ProfileEditPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [avatarCharacterId, setAvatarCharacterId] = useState<string | null>(null);
 
   useEffect(() => {
     if (userLoading) return;
@@ -28,7 +29,7 @@ export default function ProfileEditPage() {
     const fetchProfile = async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("username, user_id, recovery_email")
+        .select("username, user_id, recovery_email, avatar_character_id")
         .eq("id", user.id)
         .single();
 
@@ -37,12 +38,52 @@ export default function ProfileEditPage() {
         setUserId(data.user_id ?? "");
         setOriginalUserId(data.user_id ?? "");
         setRecoveryEmail(data.recovery_email ?? "");
+        setAvatarCharacterId(data.avatar_character_id ?? null);
       }
       setLoading(false);
     };
 
     fetchProfile();
   }, [user, userLoading, supabase, router]);
+
+  type OwnedChar = {
+    id: string;
+    name: string;
+    image_url: string | null;
+    rarity: string | null;
+  };
+
+  const [ownedChars, setOwnedChars] = useState<OwnedChar[]>([]);
+
+  useEffect(() => {
+    if (userLoading) return;
+    if (!user) return;
+
+    const fetchOwned = async () => {
+      // user_characters から所持キャラIDを取り、characters を引く
+      const { data: rows, error } = await supabase
+        .from("user_characters")
+        .select("character_id")
+        .eq("user_id", user.id);
+
+      if (error) return;
+
+      const ids = (rows ?? []).map(r => r.character_id);
+      if (ids.length === 0) {
+        setOwnedChars([]);
+        return;
+      }
+
+      const { data: chars } = await supabase
+        .from("characters")
+        .select("id, name, image_url, rarity")
+        .in("id", ids);
+
+      setOwnedChars((chars ?? []) as OwnedChar[]);
+    };
+
+    fetchOwned();
+  }, [user, userLoading, supabase]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -114,6 +155,7 @@ export default function ProfileEditPage() {
           username,
           user_id: userId,
           recovery_email: recoveryEmail || null,
+          avatar_character_id: avatarCharacterId,
         })
         .eq("id", user.id);
 
@@ -123,6 +165,9 @@ export default function ProfileEditPage() {
         setSaving(false);
         return;
       }
+
+      window.dispatchEvent(new Event("auth:changed"));
+      window.dispatchEvent(new Event("points:updated"));
 
       router.push("/user/mypage");
     } catch (err: any) {
@@ -187,6 +232,60 @@ export default function ProfileEditPage() {
             onChange={(e) => setRecoveryEmail(e.target.value)}
             placeholder="パスワードを忘れたときのためのメールアドレス"
           />
+        </div>
+
+        <div className="border rounded p-3">
+          <p className="text-md md:text-xl font-medium mb-2">アイコン</p>
+
+          {/* 現在の選択 */}
+          <div className="flex items-center gap-3 mb-3">
+            <img
+              src={
+                avatarCharacterId
+                  ? (ownedChars.find(c => c.id === avatarCharacterId)?.image_url?.startsWith("/")
+                      ? ownedChars.find(c => c.id === avatarCharacterId)?.image_url!
+                      : `/${ownedChars.find(c => c.id === avatarCharacterId)?.image_url}`
+                    ) ?? "/images/初期アイコン.png"
+                  : "/images/初期アイコン.png"
+              }
+              className="w-40 md:w-50 h-40 md:h-50 border-3 border-gray-400 rounded-md bg-white object-contain"
+              alt="selected icon"
+            />
+            <button
+              type="button"
+              onClick={() => setAvatarCharacterId(null)}
+              className="px-3 py-2 rounded bg-gray-200 hover:bg-gray-300"
+            >
+              初期アイコンにする
+            </button>
+          </div>
+
+          {/* 所持キャラから選択 */}
+          {ownedChars.length === 0 ? (
+            <p className="text-sm text-gray-600">まだ所持キャラがいません（ガチャでゲットできます）</p>
+          ) : (
+            <div className="grid grid-cols-5 gap-2">
+              {ownedChars.map(ch => {
+                const url = ch.image_url
+                  ? ch.image_url.startsWith("/") ? ch.image_url : `/${ch.image_url}`
+                  : "/images/初期アイコン.png";
+
+                const selected = avatarCharacterId === ch.id;
+
+                return (
+                  <button
+                    key={ch.id}
+                    type="button"
+                    onClick={() => setAvatarCharacterId(ch.id)}
+                    className={`p-1 rounded border ${selected ? "border-blue-600 ring-2 ring-blue-300" : "border-gray-300"}`}
+                    title={ch.name}
+                  >
+                    <img src={url} alt={ch.name} className="w-full aspect-square object-contain" />
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {error && <p className="text-red-500 text-md md:text-xl">{error}</p>}
