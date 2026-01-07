@@ -148,6 +148,8 @@ const QuizGacha = ({
 
   const canRoll = points >= 100 && !rolling;
 
+  const showRainbowBg = !!gachaResult && !isUltraRare && phase !== "result";
+
   return (
     <div className="text-center">
       <div className="flex flex-col items-center justify-center gap-4 mb-10">
@@ -284,7 +286,7 @@ const QuizGacha = ({
         {gachaResult && (
           <motion.div
             className={`fixed inset-0 z-50 flex flex-col items-center justify-center transition-colors duration-300 ${
-              phase === "result" ? "bg-white" : "bg-black"
+              phase === "result" ? "bg-white" : "bg-white"
             }`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -307,6 +309,18 @@ const QuizGacha = ({
               }
             }}
           >
+            {/* ★通常当たり(ウルトラ以外)の時は、落下〜待機〜開封中の背景を虹にする */}
+            {showRainbowBg && (
+              <div
+                className="fixed inset-0 z-0"
+                style={{
+                  background:
+                    "radial-gradient(circle at 30% 30%, #ff00ff, #00ffff, #ffff00, #ff0000)",
+                  filter: "blur(120px)",
+                  opacity: 0.55,
+                }}
+              />
+            )}
             {(phase === "drop") && (
               <motion.img
                 src={`/images/gacha_close${capsuleSet === 1 ? "" : capsuleSet}.png`}
@@ -320,9 +334,14 @@ const QuizGacha = ({
             {(phase === "ready") && (
               <div className="relative z-50 flex flex-col items-center">
                 <motion.p
-                  className="mb-4 text-white font-extrabold text-4xl md:text-6xl drop-shadow"
-                  animate={{ opacity: [0.2, 1, 0.2] }}
-                  transition={{ duration: 1.0, repeat: Infinity }}
+                  className="mb-4 font-extrabold text-4xl md:text-6xl text-white"
+                  style={{
+                    textShadow: `
+                      0 0 12px rgba(255,215,0,0.8)
+                    `,
+                  }}
+                  animate={{ opacity: [0.4, 1, 0.4] }}
+                  transition={{ duration: 1, repeat: Infinity }}
                 >
                   タップで開封！
                 </motion.p>
