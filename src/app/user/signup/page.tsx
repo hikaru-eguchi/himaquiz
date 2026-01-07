@@ -136,6 +136,12 @@ export default function SignUpPage() {
         <p className="text-center text-md md:text-xl">
           登録した内容でログインしていますので、引き続き当サイトをお楽しみください。
         </p>
+        <button
+          onClick={() => router.push("/")} // ルートに合わせて変更してOK（/login など）
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+        >
+          トップページへ
+        </button>
       </div>
     );
   }
