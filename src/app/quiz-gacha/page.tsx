@@ -148,7 +148,7 @@ const QuizGacha = ({
 
   const canRoll = points >= 100 && !rolling;
 
-  const showRainbowBg = !!gachaResult && !isUltraRare && phase !== "result";
+  const showRainbowBg = !!gachaResult && phase !== "result";
 
   return (
     <div className="text-center">
@@ -309,7 +309,7 @@ const QuizGacha = ({
               }
             }}
           >
-            {/* ★通常当たり(ウルトラ以外)の時は、落下〜待機〜開封中の背景を虹にする */}
+            {/* 落下〜待機〜開封中の背景を虹にする */}
             {showRainbowBg && (
               <div
                 className="fixed inset-0 z-0"
