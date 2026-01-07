@@ -31,7 +31,7 @@ export function DailyLoginBonusModal() {
       // data は returns table なので配列で返ることが多い
       const row = Array.isArray(data) ? data[0] : data;
       if (row?.awarded) {
-        setAdded(row.added_points ?? 200);
+        setAdded(row.added_points ?? 500);
         setOpen(true);
 
         // 既存のポイント表示を更新してるならイベント発火
