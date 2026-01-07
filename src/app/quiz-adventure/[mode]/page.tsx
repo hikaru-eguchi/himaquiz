@@ -1482,75 +1482,79 @@ export default function QuizModePage() {
             <div className="grid grid-cols-4 md:grid-cols-4 gap-1 md:gap-2 mb-1 justify-items-center">
               {orderedPlayers.map((p) => {
                 const isMe = p.socketId === mySocketId;
-                const change = scoreChanges[p.socketId];
-                const result = results.find(r => r.socketId === p.socketId); // ← 結果取得
+                const result = results.find(r => r.socketId === p.socketId);
                 const life = displayLives[p.socketId] ?? 3;
-                const lifeColor =
-                  life <= 0
-                    ? "text-red-700"
-                    : life === 1
-                    ? "text-red-500"
-                    : life === 2
-                    ? "text-orange-400"
-                    : "text-green-500";
-                    
-                let borderColorClass = "border-gray-300"; // デフォルト（問題中）
+
+                const isOut = life <= 0;
+
+                // ① 枠色：通常は結果に応じて、脱落は赤系に固定
+                let borderColorClass = "border-gray-300";
                 if (phase === "result" && showDamageResult) {
-                  if (result === undefined) {
-                    borderColorClass = "border-gray-300"; // 未回答
-                  } else if (result.isCorrect) {
-                    borderColorClass = "border-green-500";
-                  } else {
-                    borderColorClass = "border-red-500";
-                  }
+                  if (result === undefined) borderColorClass = "border-gray-300";
+                  else if (result.isCorrect) borderColorClass = "border-green-500";
+                  else borderColorClass = "border-red-500";
                 }
-                
+
+                // ② 脱落時の見た目（背景＋枠）
+                const outBoxClass = "bg-red-50 border-4 border-red-600";
+
+                // ③ LPの文字色（脱落時は赤文字で「戦闘×」）
+                const lifeColor =
+                  life === 1 ? "text-red-500" :
+                  life === 2 ? "text-orange-400" :
+                  "text-green-500";
+
                 return (
                   <div
-                  key={p.socketId}
-                  className={`
+                    key={p.socketId}
+                    className={`
                       relative
                       w-17 md:w-22
                       aspect-square
                       rounded-lg
-                      bg-white
-                      border-4
-                      ${borderColorClass}
                       shadow-md
                       flex flex-col items-center justify-center
+                      ${isOut ? outBoxClass : `bg-white border-4 ${borderColorClass}`}
                     `}
                   >
-                    <p className="font-bold text-gray-800 text-lg md:text-xl text-center">
+                    {/* 名前 */}
+                    <p className={`font-bold text-lg md:text-xl text-center ${isOut ? "text-red-700" : "text-gray-800"}`}>
                       {p.playerName.length > 5 ? p.playerName.slice(0, 5) + "..." : p.playerName}
                     </p>
 
-                    {/* 結果表示 */}
+                    {/* 表示（LP or 結果 or 戦闘×） */}
                     <p
-                      className={`text-lg md:text-xl font-bold mt-1 ${
-                        phase === "result"
-                        ? result?.isCorrect
-                        ? "text-green-600"
-                        : "text-red-600"
-                        : result
-                        ? "text-gray-800"  // 回答済みだけど結果発表前
-                            : lifeColor  // 回答待ち
-                      }`}
+                      className={`
+                        text-lg md:text-xl font-bold mt-1
+                        ${
+                          isOut
+                            ? "text-red-600" // ← 脱落時は赤文字
+                            : phase === "result"
+                            ? result?.isCorrect
+                              ? "text-green-600"
+                              : "text-red-600"
+                            : result
+                            ? "text-gray-800" // 回答済み（結果前）
+                            : lifeColor // 回答待ち（LP色）
+                        }
+                      `}
                     >
-                      {phase === "result"
+                      {isOut
+                        ? "戦闘×"
+                        : phase === "result"
                         ? showDamageResult
-                        ? result
-                        ? result.isCorrect
-                        ? "正解〇"
-                        : "誤答×"
-                        : "未回答"
-                          : "　" // 表示させない場合は空文字
+                          ? result
+                            ? result.isCorrect
+                              ? "正解〇"
+                              : "誤答×"
+                            : "未回答"
+                          : "　"
                         : result
-                          ? "？"
-                          : `LP: ${life}`
-                      }
+                        ? "？"
+                        : `LP: ${life}`}
                     </p>
 
-                    {/* 吹き出し表示 */}
+                    {/* 吹き出し表示（そのまま） */}
                     <div className="absolute -bottom-1 w-20 md:w-28">
                       {visibleMessages
                         .filter(m => m.fromId === p.socketId)

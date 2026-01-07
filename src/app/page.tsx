@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 import QuizMDXWrapper from "@/app/components/QuizMDXWrapper";
+import { DailyLoginBonusModal } from "../app/components/DailyLoginBonusModal";
 
 export const metadata = {
   title: "みんなで遊べる暇つぶしクイズ｜ひまQ",
@@ -141,6 +142,7 @@ export default async function HomePage({
 
   return (
     <div className="container mx-auto px-4 py-2 sm:py-8">
+      <DailyLoginBonusModal />
 
       <p className="text-center text-lg md:text-xl font-extrabold text-gray-800 leading-relaxed -mt-2 mb-6">
         みんなで遊べる暇つぶしクイズ！『ひまQ』は、暇つぶししながら頭を鍛えられる脳トレ＆面白クイズが満載。空き時間に脳力をアップしよう！

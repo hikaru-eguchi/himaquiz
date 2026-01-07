@@ -12,10 +12,12 @@ type Character = {
   image_url: string | null;
   rarity: string | null;
   no: string | null;
+  description: string | null;
 };
 
 type CharacterWithOwned = Character & {
   owned: boolean;
+  ownedCount: number;
 };
 
 const HATENA_IMAGE = "/images/hatena_card.png";
@@ -82,7 +84,7 @@ export default function MyCharactersPage() {
         // ① 全キャラを取得
         const { data: allCharacters, error: charError } = await supabase
           .from("characters")
-          .select("id, name, image_url, rarity, no");
+          .select("id, name, image_url, rarity, no, description");
 
         if (charError) {
           console.error("characters fetch error:", charError);
@@ -100,7 +102,7 @@ export default function MyCharactersPage() {
         // ② 自分が当てたキャラID一覧を取得
         const { data: ownedRows, error: ownedError } = await supabase
           .from("user_characters")
-          .select("character_id")
+          .select("character_id, count")
           .eq("user_id", user.id);
 
         if (ownedError) {
@@ -110,17 +112,22 @@ export default function MyCharactersPage() {
           return;
         }
 
-        const ownedSet = new Set<string>(
-          (ownedRows ?? []).map((row: { character_id: string }) => row.character_id)
+        const ownedMap = new Map<string, number>(
+          (ownedRows ?? []).map((row: { character_id: string; count: number }) => [
+            row.character_id,
+            row.count ?? 1,
+          ])
         );
 
         // ③ 所持フラグを付けてマージ
-        const merged: CharacterWithOwned[] = (allCharacters as Character[]).map(
-          (c) => ({
+        const merged: CharacterWithOwned[] = (allCharacters as Character[]).map((c) => {
+          const cnt = ownedMap.get(c.id) ?? 0;
+          return {
             ...c,
-            owned: ownedSet.has(c.id),
-          })
-        );
+            owned: cnt > 0,
+            ownedCount: cnt,
+          };
+        });
 
         // ④ No順でソート
         merged.sort((a, b) => {
@@ -157,10 +164,17 @@ export default function MyCharactersPage() {
     <div className="max-w-5xl mx-auto px-4 py-6 md:py-10 bg-gradient-to-r from-pink-300 via-purple-200 via-blue-200 to-green-300 rounded-xl">
       {/* タイトル */}
       <div className="text-center mb-6 md:mb-10">
-        <h1 className="text-3xl md:text-5xl font-extrabold tracking-wide">
+        <h1
+          className="
+            text-3xl md:text-5xl font-extrabold tracking-wide
+            drop-shadow-[0_4px_0_rgba(255,255,255,0.8)]
+            text-transparent bg-clip-text
+            bg-black
+          "
+        >
           マイキャラ図鑑
         </h1>
-        <p className="mt-2 md:mt-3 text-sm md:text-lg text-gray-600">
+        <p className="mt-2 md:mt-3 text-sm md:text-lg text-gray-700 drop-shadow-sm">
           ガチャで当てたキャラがここにコレクションされていくよ！
         </p>
       </div>
@@ -242,15 +256,11 @@ export default function MyCharactersPage() {
                       <p className="text-[10px] md:text-sm font-bold truncate max-w-[80px] md:max-w-[120px]">
                         {isOwned ? ch.name : "？？？？？？"}
                       </p>
-                      <p
-                        className={`text-[10px] md:text-xs mt-0.5 ${
-                          ch.rarity && rarityText[ch.rarity]
-                            ? rarityText[ch.rarity]
-                            : "text-gray-500"
-                        }`}
-                      >
-                        {isOwned ? ch.rarity ?? "" : ""}
-                      </p>
+                      {isOwned && (
+                        <p className="text-[10px] md:text-xs mt-0.5 font-extrabold text-gray-700">
+                          {ch.rarity ?? ""}
+                        </p>
+                      )}
                       {isOwned && starCount > 0 && (
                         <p className="text-[10px] md:text-xs text-yellow-400 mt-0.5">
                           {"★".repeat(starCount)}
@@ -360,6 +370,17 @@ export default function MyCharactersPage() {
                   >
                     {isOwnedSelected ? selectedCharacter.name : "？？？？？？"}
                   </p>
+                  {/* 説明文（キャラ名の下） */}
+                  {isOwnedSelected && (
+                    <p
+                      className={`
+                        mt-3 md:mt-4 text-sm md:text-base text-center whitespace-pre-line drop-shadow
+                        text-white
+                      `}
+                    >
+                      {selectedCharacter.description ?? "（説明文がまだありません）"}
+                    </p>
+                  )}
                   {/* レアリティ */}
                   <p
                     className={`
@@ -389,6 +410,13 @@ export default function MyCharactersPage() {
                           ? rarityToStarCount[selectedCharacter.rarity]
                           : 1
                       )}
+                    </p>
+                  )}
+
+                  {/* 当たった回数（★の下） */}
+                  {isOwnedSelected && (
+                    <p className="mt-3 md:mt-4 text-sm md:text-base font-bold text-white drop-shadow bg-gray-700 p-2 rounded-full">
+                      当たった数：{selectedCharacter.ownedCount}
                     </p>
                   )}
 

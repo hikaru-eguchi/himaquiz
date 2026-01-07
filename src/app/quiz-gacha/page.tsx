@@ -670,15 +670,13 @@ export default function QuizMasterPage() {
               return;
             }
 
-            const { error: insertError } = await supabase
-              .from("user_characters")
-              .insert({
-                user_id: user.id,
-                character_id: characterRow.id,
-              });
+            const { error: rpcError } = await supabase.rpc("increment_user_character", {
+              p_user_id: user.id,
+              p_character_id: characterRow.id,
+            });
 
-            if (insertError) {
-              console.error("user_characters insert error:", insertError);
+            if (rpcError) {
+              console.error("increment_user_character rpc error:", rpcError);
             }
           } catch (e) {
             console.error("save gacha result error:", e);
@@ -771,10 +769,10 @@ export default function QuizMasterPage() {
               text-white
             "
           >
-            ポイントでガチャにチャレンジ！レアキャラを引き当てよう！
+            ポイントを使ってガチャを回そう！超レアキャラが飛び出すかも…！？
           </p>
           <p className="text-md md:text-xl text-white mb-2">
-            ※当たったキャラはメニューの「マイキャラ図鑑」で確認できます
+            ※当たったキャラは右上メニューの「マイキャラ図鑑」で確認できます
           </p>
 
           {/* 説明ボタン */}
@@ -798,13 +796,17 @@ export default function QuizMasterPage() {
               ref={descriptionRef}
               className="text-gray-700 text-md md:text-lg text-center px-4 py-2"
             >
-              「クイズガチャ」は、クイズゲームで集めたポイントでガチャを回して楽しめるゲームです。
+              「クイズガチャ」は、ポイントを使ってガチャに挑戦し、さまざまなキャラクターを手に入れるゲームです。
               <br />
               ガチャは 1回100P で回せます。
               <br />
+              ポイントは、各クイズゲーム（「連続正解チャレンジ」「制限時間クイズ」「クイズダンジョン」「クイズバトル」「協力ダンジョン」「サバイバルクイズ」）で集めることができます。
+              <br />
               ガチャから登場するキャラは全部で58種類！クイズダンジョンや協力ダンジョンに出てくるキャラが登場します。
               <br />
-              ポイントを集めて、全キャラコンプリートを目指そう！
+              当たったキャラは右上のメニューにある「マイキャラ図鑑」で確認することができます。
+              <br />
+              超レアキャラを当てて、全キャラコンプリートを目指そう！
               <br />
               <br />
               ＜キャラ出現率＞
