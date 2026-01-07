@@ -924,13 +924,13 @@ export default function QuizModePage() {
     // 勝者情報がまだ来てないなら待つ（1位ボーナス/予想的中に必要）
     if (!lastPlayerElimination) return;
 
-    const base = correctCount * 5;
+    const base = correctCount * 20;
 
     const groups = lastPlayerElimination?.eliminationGroups ?? [];
     const winnerGroup = groups.length ? groups[groups.length - 1] : [];
     const isSoloWinner = winnerGroup.length === 1;
     const amIWinner = winnerGroup.includes(mySocketId);
-    const firstBonus = (isSoloWinner && amIWinner) ? 300 : 0;
+    const firstBonus = (isSoloWinner && amIWinner) ? 500 : 0;
 
     // 予想的中ボーナス +100（予想していないなら0）
     const predictionHit =
@@ -938,7 +938,7 @@ export default function QuizModePage() {
       predictedWinner &&
       winnerGroup.includes(predictedWinner);
 
-    const predictionBonus = predictionHit ? 100 : 0;
+    const predictionBonus = predictionHit ? 150 : 0;
 
     const earned = base + firstBonus + predictionBonus;
 

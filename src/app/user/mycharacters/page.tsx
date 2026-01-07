@@ -158,6 +158,11 @@ export default function MyCharactersPage() {
 
   if (!user) return null;
 
+  const totalCount = characters.length;
+  const ownedCount = characters.filter((c) => c.owned).length;
+  const completionRate =
+    totalCount > 0 ? Math.round((ownedCount / totalCount) * 1000) / 10 : 0; // 小数1桁
+
   const isOwnedSelected = !!selectedCharacter?.owned;
 
   return (
@@ -273,6 +278,15 @@ export default function MyCharactersPage() {
             </div>
           )}
 
+          {/* --- コレクション数 --- */}
+          <div className="mt-8 md:mt-12 text-center">
+            <div className="inline-block bg-white/80 border border-black rounded-xl p-2 md:p-3 shadow">
+              <p className="text-lg md:text-2xl font-extrabold text-gray-800 whitespace-nowrap">
+                コレクション数：{ownedCount} / {totalCount}
+              </p>
+            </div>
+          </div>
+
           {/* --- モーダル（拡大表示） --- */}
           <AnimatePresence>
             {selectedCharacter && (
@@ -358,7 +372,7 @@ export default function MyCharactersPage() {
                           : `/${selectedCharacter.image_url}`
                         : HATENA_IMAGE
                     }
-                    className="w-40 h-40 md:w-64 md:h-64 rounded mb-4 drop-shadow-lg"
+                    className="w-52 h-52 md:w-70 md:h-70 rounded mb-4 drop-shadow-lg"
                     alt={isOwnedSelected ? selectedCharacter.name : "？？？？？？"}
                   />
                   {/* 名前 */}
@@ -428,12 +442,12 @@ export default function MyCharactersPage() {
                     </p>
                   )}
 
-                  <button
+                  {/* <button
                     className="mt-4 md:mt-6 px-6 py-2 md:py-3 bg-blue-500 text-white rounded-lg font-bold shadow-md hover:bg-blue-600 cursor-pointer"
                     onClick={() => setSelectedCharacter(null)}
                   >
                     閉じる
-                  </button>
+                  </button> */}
                 </motion.div>
               </motion.div>
             )}

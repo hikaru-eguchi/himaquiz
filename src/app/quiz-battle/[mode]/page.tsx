@@ -762,7 +762,7 @@ export default function QuizModePage() {
     const isWin = myScore > opponentScore;
 
     // 表示用ポイント（得点の20分の1 + 勝利ボーナス）
-    const earned = Math.floor(myScore / 20) + (isWin ? 50 : 0);
+    const earned = Math.floor(myScore / 5) + (isWin ? 300 : 0);
     setEarnedPoints(earned);
 
     // 0PならDB処理はしない（表示だけ）

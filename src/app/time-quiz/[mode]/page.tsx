@@ -27,11 +27,10 @@ interface ArticleData {
 
 /**
  * ★ 付与ポイント仕様（変更）
- * score の 20分の1 を獲得ポイントとして付与する
- * 例) score=0 => 0P, score=250 => 12P, score=260 => 13P
+ * score の 5分の1 を獲得ポイントとして付与する
  */
 function calcEarnedPointsFromScore(score: number) {
-  return Math.floor(score / 20);
+  return Math.floor(score / 5);
 }
 
 // 正解数に応じて出すコメント

@@ -195,16 +195,16 @@ const QuizResult = ({
       {showRank && (
         <>
           <div className="flex flex-col md:flex-row items-center justify-center mb-10 gap-4 md:gap-10">
-            <img src="/images/yuusya_game.png" alt="勇者" className="w-0 h-0 md:w-50 md:h-60" />
+            <img src="/images/yuusya_game.png" alt="勇者" className="w-0 h-0 md:w-50 md:h-50" />
             <p
               className={`text-4xl md:text-6xl font-bold drop-shadow-lg text-center animate-pulse text-blue-600
               }`}
             >
               {getTitle()}
             </p>
-            <div className="flex flex-row md:flex-row items-center justify-center gap-8">
-              <img src="/images/yuusya_game.png" alt="勇者" className="w-20 h-25 md:w-0 md:h-0" />
-              <img src="/images/dragon.png" alt="ドラゴン" className="w-20 h-18 md:w-50 md:h-45" />
+            <div className="flex flex-row md:flex-row items-center justify-center gap-4 md:gap-8">
+              <img src="/images/yuusya_game.png" alt="勇者" className="w-30 h-30 md:w-0 md:h-0" />
+              <img src="/images/dragon.png" alt="ドラゴン" className="w-30 h-30 md:w-50 md:h-50" />
             </div>
           </div>
 
@@ -219,14 +219,9 @@ const QuizResult = ({
 
       {showButton && (
         <div className="mx-auto max-w-[520px] bg-white border-2 border-black rounded-xl p-4 shadow mt-6">
-          {isCodeMatch ? (
-            <p className="text-xl md:text-2xl font-extrabold text-gray-800">
-              合言葉マッチのためポイントは加算されません
-            </p>
-          ) : (
             <>
               <div className="mb-2 text-lg md:text-xl text-gray-700 font-bold">
-                <p className="text-blue-500">正解数ポイント：{basePoints}P（{correctCount}問 × 5P）</p>
+                <p className="text-blue-500">正解数ポイント：{basePoints}P（{correctCount}問 × 20P）</p>
                 <p className="text-yellow-500">ステージクリアボーナス：{stageBonusPoints}P（STAGE {stageCount}）</p>
               </div>
 
@@ -269,7 +264,6 @@ const QuizResult = ({
                 </div>
               )}
             </>
-          )}
         </div>
       )}
 
@@ -442,29 +436,29 @@ export default function QuizModePage() {
 
   const calcStageBonus = (stage: number) => {
     const table: Record<number, number> = {
-      1: 5,
-      2: 10,
-      3: 15,
-      4: 20,
-      5: 25,
-      6: 50,
-      7: 80,
-      8: 100,
-      9: 125,
-      10: 150,
-      11: 200,
-      12: 250,
-      13: 300,
-      14: 400,
-      15: 500,
-      16: 600,
-      17: 700,
-      18: 800,
-      19: 1000,
-      20: 1500,
-      21: 1800,
-      22: 2000,
-      23: 3000,
+      1: 10,
+      2: 50,
+      3: 100,
+      4: 200,
+      5: 300,
+      6: 400,
+      7: 500,
+      8: 600,
+      9: 700,
+      10: 850,
+      11: 1000,
+      12: 1200,
+      13: 1500,
+      14: 2000,
+      15: 3500,
+      16: 5000,
+      17: 6500,
+      18: 7000,
+      19: 8000,
+      20: 10000,
+      21: 15000,
+      22: 20000,
+      23: 30000,
     };
     return table[Math.min(stage, 23)] ?? 0;
   };
@@ -994,16 +988,7 @@ export default function QuizModePage() {
   useEffect(() => {
     if (!finished) return;
 
-    const isCodeMatch = mode === "code";
-    if (isCodeMatch) {
-      setBasePoints(0);
-      setStageBonusPoints(0);
-      setEarnedPoints(0);
-      setAwardStatus("idle");
-      return;
-    }
-
-    const base = correctCount * 5;               // ✅ 1問5P
+    const base = correctCount * 20;               // ✅ 1問20P
     const bonus = calcStageBonus(stageCount);   // ✅ ステージボーナス
     const earned = base + bonus;
 

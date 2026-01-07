@@ -11,29 +11,29 @@ import { useSupabaseUser } from "../../../hooks/useSupabaseUser";
 // ポイント仕様（ステージ到達に応じて付与）
 // =====================
 const stagePointMap: Record<number, number> = {
-  1: 5,
-  2: 10,
-  3: 15,
-  4: 20,
-  5: 30,
-  6: 50,
-  7: 80,
-  8: 100,
-  9: 150,
-  10: 200,
-  11: 300,
-  12: 400,
-  13: 500,
-  14: 600,
-  15: 700,
-  16: 800,
-  17: 900,
-  18: 1000,
-  19: 1200,
-  20: 1500,
-  21: 1800,
-  22: 2000,
-  23: 3000,
+  1: 10,
+  2: 50,
+  3: 100,
+  4: 200,
+  5: 300,
+  6: 400,
+  7: 500,
+  8: 600,
+  9: 700,
+  10: 850,
+  11: 1000,
+  12: 1200,
+  13: 1500,
+  14: 2000,
+  15: 3500,
+  16: 5000,
+  17: 6500,
+  18: 7000,
+  19: 8000,
+  20: 10000,
+  21: 15000,
+  22: 20000,
+  23: 30000,
 };
 
 function calcEarnedPointsByClearedStage(clearedStage: number) {
@@ -237,7 +237,7 @@ const QuizResult = ({
       {showRank && (
         <>
           <div className="flex flex-col md:flex-row items-center justify-center mb-10 gap-4 md:gap-10">
-            <img src="/images/yuusya_game.png" alt="勇者" className="w-0 h-0 md:w-50 md:h-60" />
+            <img src="/images/yuusya_game.png" alt="勇者" className="w-0 h-0 md:w-50 md:h-50" />
             <p
               className={`text-4xl md:text-6xl font-bold drop-shadow-lg text-center animate-pulse ${
                 isFinalStage ? "final-title text-yellow-300" : "text-blue-600"
@@ -245,9 +245,9 @@ const QuizResult = ({
             >
               {getTitle()}
             </p>
-            <div className="flex flex-row md:flex-row items-center justify-center gap-8">
-              <img src="/images/yuusya_game.png" alt="勇者" className="w-20 h-25 md:w-0 md:h-0" />
-              <img src="/images/dragon.png" alt="ドラゴン" className="w-20 h-18 md:w-50 md:h-45" />
+            <div className="flex flex-row md:flex-row items-center justify-center gap-4 md:gap-8">
+              <img src="/images/yuusya_game.png" alt="勇者" className="w-30 h-30 md:w-0 md:h-0" />
+              <img src="/images/dragon.png" alt="ドラゴン" className="w-30 h-30 md:w-50 md:h-50" />
             </div>
           </div>
 
