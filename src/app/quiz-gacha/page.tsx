@@ -289,6 +289,23 @@ const QuizGacha = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            onClick={() => {
+              // 「待機中」だけ、どこを押しても開封
+              if (phase === "ready") {
+                handleOpen();
+                return;
+              }
+
+              // 結果表示中：どこ押しても閉じる
+              if (phase === "result") {
+                setShowOpen(false);
+                setShowEffect(false);
+                setShowResult(false);
+                setGachaResult(null);
+                setPhase("idle");
+                return;
+              }
+            }}
           >
             {(phase === "drop") && (
               <motion.img
@@ -313,7 +330,6 @@ const QuizGacha = ({
                 <motion.img
                   src={`/images/gacha_close${capsuleSet === 1 ? "" : capsuleSet}.png`}
                   className="w-70 h-70 md:w-150 md:h-150 z-50 cursor-pointer select-none"
-                  onClick={handleOpen}
                   initial={{ scale: 0.6 }}
                   animate={{
                     rotate: [-3, 3, -3],
@@ -405,6 +421,7 @@ const QuizGacha = ({
                 <motion.div
                   initial={{ opacity: 0, scale: 0.3, y: 80 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
+                  onClick={(e) => e.stopPropagation()}
                   transition={{
                     duration: isUltraRare ? 1.5 : 0.5,
                     ease: "easeOut",
@@ -431,21 +448,6 @@ const QuizGacha = ({
                   </p>
                 </motion.div>
               </>
-            )}
-
-            {showResult && (
-              <button
-                className="mt-6 px-6 py-3 bg-blue-500 text-white rounded-lg font-bold z-50"
-                onClick={() => {
-                  setShowOpen(false);
-                  setShowEffect(false);
-                  setShowResult(false);
-                  setGachaResult(null);
-                  setPhase("idle");
-                }}
-              >
-                閉じる
-              </button>
             )}
           </motion.div>
         )}
@@ -511,59 +513,59 @@ export default function QuizMasterPage() {
     weight: number;
     no: string;
   }[] = [
-    { name: "ダンジョンの剣士", image: "/images/ダンジョンの剣士_1.png", rarity: "ノーマル", weight: 7.1, no: "1" },
-    { name: "ダンジョンの武闘家", image: "/images/ダンジョンの武闘家_1.png", rarity: "ノーマル", weight: 7.1, no: "2" },
-    { name: "ダンジョンの魔法使い", image: "/images/ダンジョンの魔法使い_1.png", rarity: "ノーマル", weight: 7.1, no: "3" },
-    { name: "スライム", image: "/images/スライム_1.png", rarity: "ノーマル", weight: 7.1, no: "4" },
-    { name: "スライム【フェアリー】", image: "/images/スライム_2.png", rarity: "ノーマル", weight: 7.1, no: "5" },
-    { name: "ゴブリン", image: "/images/ゴブリン_1.png", rarity: "ノーマル", weight: 7.1, no: "6" },
-    { name: "ゴブリン【フェアリー】", image: "/images/ゴブリン_2.png", rarity: "ノーマル", weight: 7.1, no: "7" },
-    { name: "スケルトン", image: "/images/スケルトン_1.png", rarity: "レア", weight: 4.1, no: "8" },
-    { name: "スケルトン【フェアリー】", image: "/images/スケルトン_2.png", rarity: "レア", weight: 4.1, no: "9" },
-    { name: "ミミック", image: "/images/ミミック_1.png", rarity: "レア", weight: 4.1, no: "10" },
-    { name: "ミミック【フェアリー】", image: "/images/ミミック_2.png", rarity: "レア", weight: 4.1, no: "11" },
-    { name: "リザードマン", image: "/images/リザードマン_1.png", rarity: "レア", weight: 4.1, no: "12" },
-    { name: "リザードマン【フェアリー】", image: "/images/リザードマン_2.png", rarity: "レア", weight: 4.1, no: "13" },
-    { name: "ゴーレム", image: "/images/ゴーレム_1.png", rarity: "超レア", weight: 1.6, no: "14" },
-    { name: "ゴーレム【フェアリー】", image: "/images/ゴーレム_2.png", rarity: "超レア", weight: 1.6, no: "15" },
-    { name: "ケルベロス", image: "/images/ケルベロス_1.png", rarity: "超レア", weight: 1.6, no: "16" },
-    { name: "ケルベロス【フェアリー】", image: "/images/ケルベロス_2.png", rarity: "超レア", weight: 1.6, no: "17" },
-    { name: "バーサーカー", image: "/images/バーサーカー_1.png", rarity: "超レア", weight: 1.6, no: "18" },
-    { name: "バーサーカー【フェアリー】", image: "/images/バーサーカー_2.png", rarity: "超レア", weight: 1.6, no: "19" },
-    { name: "キングスライム", image: "/images/キングスライム_1.png", rarity: "激レア", weight: 0.875, no: "20" },
-    { name: "キングスライム【フェアリー】", image: "/images/キングスライム_2.png", rarity: "激レア", weight: 0.875, no: "21" },
-    { name: "ドラゴン", image: "/images/ドラゴン_1.png", rarity: "激レア", weight: 0.875, no: "22" },
-    { name: "ドラゴン【フェアリー】", image: "/images/ドラゴン_2.png", rarity: "激レア", weight: 0.875, no: "23" },
-    { name: "フェニックス", image: "/images/フェニックス_1.png", rarity: "激レア", weight: 0.875, no: "24" },
-    { name: "フェニックス【フェアリー】", image: "/images/フェニックス_2.png", rarity: "激レア", weight: 0.875, no: "25" },
-    { name: "リヴァイアサン", image: "/images/リヴァイアサン_1.png", rarity: "激レア", weight: 0.875, no: "26" },
-    { name: "リヴァイアサン【フェアリー】", image: "/images/リヴァイアサン_2.png", rarity: "激レア", weight: 0.875, no: "27" },
-    { name: "ブラックドラゴン", image: "/images/ブラックドラゴン_1.png", rarity: "超激レア", weight: 0.99, no: "28" },
-    { name: "ブラックドラゴン【フェアリー】", image: "/images/ブラックドラゴン_2.png", rarity: "超激レア", weight: 0.99, no: "29" },
-    { name: "キングデーモン", image: "/images/キングデーモン_1.png", rarity: "超激レア", weight: 0.99, no: "30" },
-    { name: "キングデーモン【フェアリー】", image: "/images/キングデーモン_2.png", rarity: "超激レア", weight: 0.99, no: "31" },
-    { name: "キングヒドラ", image: "/images/キングヒドラ_1.png", rarity: "超激レア", weight: 0.99, no: "32" },
-    { name: "キングヒドラ【フェアリー】", image: "/images/キングヒドラ_2.png", rarity: "超激レア", weight: 0.99, no: "33" },
-    { name: "オーディン", image: "/images/オーディン_1.png", rarity: "神レア", weight: 0.1, no: "34" },
-    { name: "オーディン【フェアリー】", image: "/images/オーディン_2.png", rarity: "神レア", weight: 0.1, no: "35" },
-    { name: "ポセイドン", image: "/images/ポセイドン_1.png", rarity: "神レア", weight: 0.1, no: "36" },
-    { name: "ポセイドン【フェアリー】", image: "/images/ポセイドン_2.png", rarity: "神レア", weight: 0.1, no: "37" },
-    { name: "ハデス", image: "/images/ハデス_1.png", rarity: "神レア", weight: 0.1, no: "38" },
-    { name: "ハデス【フェアリー】", image: "/images/ハデス_2.png", rarity: "神レア", weight: 0.1, no: "39" },
-    { name: "ゼウス", image: "/images/ゼウス_1.png", rarity: "神レア", weight: 0.1, no: "40" },
-    { name: "ゼウス【フェアリー】", image: "/images/ゼウス_2.png", rarity: "神レア", weight: 0.1, no: "41" },
-    { name: "軍荼利明王（ぐんだりみょうおう）", image: "/images/軍荼利明王_1.png", rarity: "神レア", weight: 0.1, no: "42" },
-    { name: "軍荼利明王（ぐんだりみょうおう）【フェアリー】", image: "/images/軍荼利明王_2.png", rarity: "神レア", weight: 0.1, no: "43" },
-    { name: "魔王", image: "/images/魔王_1.png", rarity: "神レア", weight: 0.1, no: "44" },
-    { name: "魔王【フェアリー】", image: "/images/魔王_2.png", rarity: "神レア", weight: 0.1, no: "45" },
-    { name: "クイズマスターの最強勇者", image: "/images/勇者1_1.png", rarity: "神レア", weight: 0.1, no: "46" },
-    { name: "クイズマスターの最強勇者【フェアリー】", image: "/images/勇者1_2.png", rarity: "神レア", weight: 0.1, no: "47" },
-    { name: "クイズマスターの最強勇者【プレミア】", image: "/images/勇者1_3.png", rarity: "神レア", weight: 0.1, no: "48" },
-    { name: "クイズ王", image: "/images/王様_1.png", rarity: "神レア", weight: 0.1, no: "49" },
-    { name: "クイズ王【フェアリー】", image: "/images/王様_2.png", rarity: "神レア", weight: 0.1, no: "50" },
-    { name: "ダンジョンの最強の剣士", image: "/images/ダンジョンの剣士_2.png", rarity: "神レア", weight: 0.1, no: "51" },
-    { name: "ダンジョンの最強の武闘家", image: "/images/ダンジョンの武闘家_2.png", rarity: "神レア", weight: 0.1, no: "52" },
-    { name: "ダンジョンの最強の魔法使い", image: "/images/ダンジョンの魔法使い_2.png", rarity: "神レア", weight: 0.1, no: "53" },
+    { name: "ダンジョンの剣士", image: "/images/ダンジョンの剣士_1.png", rarity: "ノーマル", weight: 4.2857, no: "1" },
+    { name: "ダンジョンの武闘家", image: "/images/ダンジョンの武闘家_1.png", rarity: "ノーマル", weight: 4.2857, no: "2" },
+    { name: "ダンジョンの魔法使い", image: "/images/ダンジョンの魔法使い_1.png", rarity: "ノーマル", weight: 4.2857, no: "3" },
+    { name: "スライム", image: "/images/スライム_1.png", rarity: "ノーマル", weight: 4.2857, no: "4" },
+    { name: "スライム【フェアリー】", image: "/images/スライム_2.png", rarity: "ノーマル", weight: 4.2857, no: "5" },
+    { name: "ゴブリン", image: "/images/ゴブリン_1.png", rarity: "ノーマル", weight: 4.2857, no: "6" },
+    { name: "ゴブリン【フェアリー】", image: "/images/ゴブリン_2.png", rarity: "ノーマル", weight: 4.2857, no: "7" },
+    { name: "スケルトン", image: "/images/スケルトン_1.png", rarity: "レア", weight: 3.3333, no: "8" },
+    { name: "スケルトン【フェアリー】", image: "/images/スケルトン_2.png", rarity: "レア", weight: 3.3333, no: "9" },
+    { name: "ミミック", image: "/images/ミミック_1.png", rarity: "レア", weight: 3.3333, no: "10" },
+    { name: "ミミック【フェアリー】", image: "/images/ミミック_2.png", rarity: "レア", weight: 3.3333, no: "11" },
+    { name: "リザードマン", image: "/images/リザードマン_1.png", rarity: "レア", weight: 3.3333, no: "12" },
+    { name: "リザードマン【フェアリー】", image: "/images/リザードマン_2.png", rarity: "レア", weight: 3.3333, no: "13" },
+    { name: "ゴーレム", image: "/images/ゴーレム_1.png", rarity: "超レア", weight: 3.0, no: "14" },
+    { name: "ゴーレム【フェアリー】", image: "/images/ゴーレム_2.png", rarity: "超レア", weight: 3.0, no: "15" },
+    { name: "ケルベロス", image: "/images/ケルベロス_1.png", rarity: "超レア", weight: 3.0, no: "16" },
+    { name: "ケルベロス【フェアリー】", image: "/images/ケルベロス_2.png", rarity: "超レア", weight: 3.0, no: "17" },
+    { name: "バーサーカー", image: "/images/バーサーカー_1.png", rarity: "超レア", weight: 3.0, no: "18" },
+    { name: "バーサーカー【フェアリー】", image: "/images/バーサーカー_2.png", rarity: "超レア", weight: 3.0, no: "19" },
+    { name: "キングスライム", image: "/images/キングスライム_1.png", rarity: "激レア", weight: 2.2438, no: "20" },
+    { name: "キングスライム【フェアリー】", image: "/images/キングスライム_2.png", rarity: "激レア", weight: 2.2438, no: "21" },
+    { name: "ドラゴン", image: "/images/ドラゴン_1.png", rarity: "激レア", weight: 2.2438, no: "22" },
+    { name: "ドラゴン【フェアリー】", image: "/images/ドラゴン_2.png", rarity: "激レア", weight: 2.2438, no: "23" },
+    { name: "フェニックス", image: "/images/フェニックス_1.png", rarity: "激レア", weight: 2.2438, no: "24" },
+    { name: "フェニックス【フェアリー】", image: "/images/フェニックス_2.png", rarity: "激レア", weight: 2.2438, no: "25" },
+    { name: "リヴァイアサン", image: "/images/リヴァイアサン_1.png", rarity: "激レア", weight: 2.2438, no: "26" },
+    { name: "リヴァイアサン【フェアリー】", image: "/images/リヴァイアサン_2.png", rarity: "激レア", weight: 2.2438, no: "27" },
+    { name: "ブラックドラゴン", image: "/images/ブラックドラゴン_1.png", rarity: "超激レア", weight: 1.6667, no: "28" },
+    { name: "ブラックドラゴン【フェアリー】", image: "/images/ブラックドラゴン_2.png", rarity: "超激レア", weight: 1.6667, no: "29" },
+    { name: "キングデーモン", image: "/images/キングデーモン_1.png", rarity: "超激レア", weight: 1.6667, no: "30" },
+    { name: "キングデーモン【フェアリー】", image: "/images/キングデーモン_2.png", rarity: "超激レア", weight: 1.6667, no: "31" },
+    { name: "キングヒドラ", image: "/images/キングヒドラ_1.png", rarity: "超激レア", weight: 1.6667, no: "32" },
+    { name: "キングヒドラ【フェアリー】", image: "/images/キングヒドラ_2.png", rarity: "超激レア", weight: 1.6667, no: "33" },
+    { name: "オーディン", image: "/images/オーディン_1.png", rarity: "神レア", weight: 0.2, no: "34" },
+    { name: "オーディン【フェアリー】", image: "/images/オーディン_2.png", rarity: "神レア", weight: 0.2, no: "35" },
+    { name: "ポセイドン", image: "/images/ポセイドン_1.png", rarity: "神レア", weight: 0.2, no: "36" },
+    { name: "ポセイドン【フェアリー】", image: "/images/ポセイドン_2.png", rarity: "神レア", weight: 0.2, no: "37" },
+    { name: "ハデス", image: "/images/ハデス_1.png", rarity: "神レア", weight: 0.2, no: "38" },
+    { name: "ハデス【フェアリー】", image: "/images/ハデス_2.png", rarity: "神レア", weight: 0.2, no: "39" },
+    { name: "ゼウス", image: "/images/ゼウス_1.png", rarity: "神レア", weight: 0.2, no: "40" },
+    { name: "ゼウス【フェアリー】", image: "/images/ゼウス_2.png", rarity: "神レア", weight: 0.2, no: "41" },
+    { name: "軍荼利明王（ぐんだりみょうおう）", image: "/images/軍荼利明王_1.png", rarity: "神レア", weight: 0.2, no: "42" },
+    { name: "軍荼利明王（ぐんだりみょうおう）【フェアリー】", image: "/images/軍荼利明王_2.png", rarity: "神レア", weight: 0.2, no: "43" },
+    { name: "魔王", image: "/images/魔王_1.png", rarity: "神レア", weight: 0.2, no: "44" },
+    { name: "魔王【フェアリー】", image: "/images/魔王_2.png", rarity: "神レア", weight: 0.2, no: "45" },
+    { name: "クイズマスターの最強勇者", image: "/images/勇者1_1.png", rarity: "神レア", weight: 0.2, no: "46" },
+    { name: "クイズマスターの最強勇者【フェアリー】", image: "/images/勇者1_2.png", rarity: "神レア", weight: 0.2, no: "47" },
+    { name: "クイズマスターの最強勇者【プレミア】", image: "/images/勇者1_3.png", rarity: "神レア", weight: 0.2, no: "48" },
+    { name: "クイズ王", image: "/images/王様_1.png", rarity: "神レア", weight: 0.2, no: "49" },
+    { name: "クイズ王【フェアリー】", image: "/images/王様_2.png", rarity: "神レア", weight: 0.2, no: "50" },
+    { name: "ダンジョンの最強の剣士", image: "/images/ダンジョンの剣士_2.png", rarity: "神レア", weight: 0.2, no: "51" },
+    { name: "ダンジョンの最強の武闘家", image: "/images/ダンジョンの武闘家_2.png", rarity: "神レア", weight: 0.2, no: "52" },
+    { name: "ダンジョンの最強の魔法使い", image: "/images/ダンジョンの魔法使い_2.png", rarity: "神レア", weight: 0.2, no: "53" },
     { name: "ゴールデンキングスライム", image: "/images/ゴールデンキングスライム_1.png", rarity: "シークレット", weight: 0.01, no: "54" },
     { name: "ゴールデンキングスライム【フェアリー】", image: "/images/ゴールデンキングスライム_2.png", rarity: "シークレット", weight: 0.01, no: "55" },
     { name: "伝説の勇者", image: "/images/勇者2_1.png", rarity: "シークレット", weight: 0.01, no: "56" },
@@ -811,19 +813,19 @@ export default function QuizMasterPage() {
               <br />
               ＜キャラ出現率＞
               <br />
-              ノーマル　全7種類　出現率：約7%　全体の50%
+              ノーマル　全7種類　出現率：約4.2857%　全体の30%
               <br />
-              レア　全6種類　出現率：約4%　全体の25%
+              レア　全6種類　出現率：約3.3333%　全体の20%
               <br />
-              超レア　全6種類　出現率：約1.6%　全体の10%
+              超レア　全6種類　出現率：3.0%　全体の18%
               <br />
-              激レア　全8種類　出現率：約0.87%　全体の7%
+              激レア　全8種類　出現率：約2.2438%　全体の17.95%
               <br />
-              超激レア　全6種類　出現率：約1%　全体の約6%
+              超激レア　全6種類　出現率：約1.6667%　全体の10%
               <br />
-              神レア　全20種類　出現率：0.1%　全体の2%
+              神レア　全20種類　出現率：0.2%　全体の4%
               <br />
-              シークレット　全5種類　出現率：0.01%　全体の約0.05%
+              シークレット　全5種類　出現率：0.01%　全体の0.05%
               <br />
             </p>
           </div>

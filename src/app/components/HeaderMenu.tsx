@@ -168,6 +168,13 @@ export default function HeaderMenu() {
                 トップページへ
               </Link>
               <Link
+                href="/quiz-gacha"
+                className="bg-gradient-to-r from-red-500 via-sky-500 to-green-500 text-white py-2 px-4 rounded text-center hover:opacity-90"
+                onClick={() => setOpen(false)}
+              >
+                クイズガチャ🎰
+              </Link>
+              <Link
                 href="/user/mypage"
                 className="bg-blue-500 text-white py-2 px-4 rounded text-center hover:bg-blue-600"
                 onClick={() => setOpen(false)}
@@ -184,7 +191,7 @@ export default function HeaderMenu() {
                 "
                 onClick={() => setOpen(false)}
               >
-                マイキャラ図鑑
+                マイキャラ図鑑📖
               </Link>
 
               <button

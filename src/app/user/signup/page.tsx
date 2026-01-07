@@ -149,7 +149,7 @@ export default function SignUpPage() {
   // ✅ 通常の登録フォーム
   return (
     <div className="max-w-md mx-auto p-4">
-      <h1 className="text-2xl md:text-4xl font-bold mb-4 md:mb-6 text-center">新規ユーザー登録</h1>
+      <h1 className="text-2xl md:text-4xl font-bold mb-4 md:mb-6 text-center">新規ユーザー登録（無料）</h1>
 
       <form onSubmit={handleSubmit} className="space-y-3">
         <div>
