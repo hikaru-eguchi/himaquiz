@@ -1,14 +1,17 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { createSupabaseBrowserClient } from "@/lib/supabaseClient";
+import type { Session } from "@supabase/supabase-js";
 
 type ApiResponse =
-  | { ok: true }
+  | { ok: true; session: Session }
   | { ok: false; code?: "LOCKED" | "INVALID"; message: string; remainingSec?: number; hint?: string };
 
 export default function LoginPage() {
   const router = useRouter();
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
 
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
@@ -45,7 +48,6 @@ export default function LoginPage() {
         return;
       }
 
-      // ✅ setSession不要：サーバーがSet-Cookieしている前提
       router.push("/");
       router.refresh(); // Server Component等の表示更新を確実に走らせる
       setTimeout(() => window.dispatchEvent(new Event("auth:changed")), 0);

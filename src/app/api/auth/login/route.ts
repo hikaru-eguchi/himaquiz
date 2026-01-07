@@ -112,8 +112,11 @@ export async function POST(req: Request) {
         { onConflict: "user_id,ip" }
       );
 
-    // ✅ sessionを返さない（Cookieが入ってるのでこれでOK）
-    return NextResponse.json({ ok: true }, { status: 200 });
+    // ✅ sessionを返す（クライアントがsetSessionできるように）
+    return NextResponse.json(
+      { ok: true, session: data.session },
+      { status: 200 }
+    );
   } catch (e) {
     console.error(e);
     return NextResponse.json({ ok: false, message: "サーバーエラーが発生しました。" }, { status: 500 });
