@@ -212,7 +212,7 @@ const QuizResult = ({
                 {/* ✅ 勝利ボーナス表示（合言葉マッチではここに来ない） */}
                 {isWin && (
                   <p className="text-md md:text-xl font-bold text-yellow-600 mb-1">
-                    勝利ボーナス 50P✨
+                    勝利ボーナス 300P✨
                   </p>
                 )}
 
@@ -758,10 +758,10 @@ export default function QuizModePage() {
     const myScore = me?.score ?? 0;
     const opponentScore = opponent?.score ?? 0;
 
-    // 勝利時ボーナス +50
+    // 勝利時ボーナス +300
     const isWin = myScore > opponentScore;
 
-    // 表示用ポイント（得点の20分の1 + 勝利ボーナス）
+    // 表示用ポイント（得点の5分の1 + 勝利ボーナス）
     const earned = Math.floor(myScore / 5) + (isWin ? 300 : 0);
     setEarnedPoints(earned);
 

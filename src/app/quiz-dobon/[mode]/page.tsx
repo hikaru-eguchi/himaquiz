@@ -932,7 +932,7 @@ export default function QuizModePage() {
     const amIWinner = winnerGroup.includes(mySocketId);
     const firstBonus = (isSoloWinner && amIWinner) ? 500 : 0;
 
-    // 予想的中ボーナス +100（予想していないなら0）
+    // 予想的中ボーナス +150（予想していないなら0）
     const predictionHit =
       hasPredicted &&
       predictedWinner &&
