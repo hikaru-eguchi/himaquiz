@@ -421,7 +421,6 @@ const QuizGacha = ({
                 <motion.div
                   initial={{ opacity: 0, scale: 0.3, y: 80 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
-                  onClick={(e) => e.stopPropagation()}
                   transition={{
                     duration: isUltraRare ? 1.5 : 0.5,
                     ease: "easeOut",
