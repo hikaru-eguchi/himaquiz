@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function HeaderMenu() {
   const router = useRouter();
@@ -15,6 +16,7 @@ export default function HeaderMenu() {
   const [avatarUrl, setAvatarUrl] = useState<string>("/images/初期アイコン.png");
   const [level, setLevel] = useState<number | null>(null);
   const [exp, setExp] = useState<number | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const fetchProfile = async (uid: string) => {
     const { data: profile } = await supabase
@@ -103,6 +105,10 @@ export default function HeaderMenu() {
   }, [supabase]);
 
   const handleLogout = async () => {
+    // 先に閉じる
+    setConfirmOpen(false);
+    setOpen(false);
+
     // ✅ サーバーでCookie削除
     await fetch("/api/auth/logout", { method: "POST" });
 
@@ -147,14 +153,14 @@ export default function HeaderMenu() {
                 <img
                   src={avatarUrl}
                   alt="icon"
-                  className="w-30 h-30 rounded-md border-3 border-gray-400 bg-white object-contain"
+                  className="w-24 h-24 rounded-full border-3 border-gray-400 bg-white object-contain"
                 />
               </div>
-              <div>{username ? `${username} さん` : "ユーザー"}</div>
-              <div className="text-sm px-2 py-0.5 rounded text-green-600">
-                ユーザーレベル：Lv.{level ?? 1}
+              <div className="text-xl mt-2">{username ? `${username} さん` : "ユーザー"}</div>
+              <div className="text-md px-2 py-0.5 rounded text-amber-500">
+                ユーザーレベル： Lv. {level ?? 1}
               </div>
-              <div className="text-sm text-blue-500">
+              <div className="text-md text-blue-500">
                 所持ポイント：
                 <span className="font-extrabold"> {points ?? 0}</span> P
               </div>
@@ -206,18 +212,11 @@ export default function HeaderMenu() {
               >
                 クイズガチャ🎰
               </Link>
-              <Link
-                href="/user/mypage"
-                className="bg-blue-500 text-white py-2 px-4 rounded text-center hover:bg-blue-600"
-                onClick={() => setOpen(false)}
-              >
-                マイプロフィール
-              </Link>
 
               <Link
                 href="/user/mycharacters"
                 className="
-                  bg-gradient-to-r from-pink-400 via-purple-300 via-blue-300 to-green-400
+                  bg-gradient-to-r from-pink-500 via-purple-400 via-blue-300 to-green-400
                   text-white py-2 px-4 rounded text-center shadow-md
                   hover:opacity-90 transition
                 "
@@ -226,8 +225,16 @@ export default function HeaderMenu() {
                 マイキャラ図鑑📖
               </Link>
 
+              <Link
+                href="/user/mypage"
+                className="bg-blue-500 text-white py-2 px-4 rounded text-center hover:bg-blue-600"
+                onClick={() => setOpen(false)}
+              >
+                マイプロフィール
+              </Link>
+
               <button
-                onClick={handleLogout}
+                onClick={() => setConfirmOpen(true)}
                 className="bg-red-500 text-white py-2 px-4 rounded text-center hover:bg-red-600 cursor-pointer"
               >
                 ログアウト
@@ -244,6 +251,61 @@ export default function HeaderMenu() {
           onClick={() => setOpen(false)}
         />
       )}
+
+      <AnimatePresence>
+        {confirmOpen && (
+          <motion.div
+            className="fixed inset-0 z-[60] flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setConfirmOpen(false)}
+          >
+            {/* 背景 */}
+            <div className="absolute inset-0 bg-black/50" />
+
+            {/* 本体 */}
+            <motion.div
+              className="relative w-[92%] max-w-sm md:max-w-md rounded-2xl bg-white p-5 shadow-xl"
+              initial={{ scale: 0.95, y: 10, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.97, y: 10, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 380, damping: 28 }}
+              onClick={(e) => e.stopPropagation()} // 外側クリックで閉じる、内側は閉じない
+            >
+              <div className="text-xl md:text-3xl font-extrabold text-gray-900 text-center">
+                ⚠ 本当にログアウトしますか？
+              </div>
+
+              <div className="mt-2 text-md md:text-xl text-gray-600 leading-relaxed text-center">
+                ポイントは保持されます。
+                <br />
+                いつでも再ログインできます。
+              </div>
+
+              <div className="mt-5 flex gap-3">
+                <button
+                  onClick={() => setConfirmOpen(false)}
+                  className="flex-1 rounded-xl bg-gray-200 py-2 font-bold text-gray-700 hover:bg-gray-300"
+                >
+                  キャンセル
+                </button>
+
+                <button
+                  onClick={async () => {
+                    setConfirmOpen(false);
+                    await handleLogout();
+                  }}
+                  className="flex-1 rounded-xl bg-red-500 py-2 font-bold text-white hover:bg-red-600"
+                >
+                  ログアウトする
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </>
   );
 }

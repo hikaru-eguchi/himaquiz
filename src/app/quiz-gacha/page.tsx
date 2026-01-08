@@ -53,7 +53,7 @@ const QuizGacha = ({
     setPhase("openingHold");
 
     // ① 一瞬「閉じ」で止める（ゆらゆら停止）
-    const HOLD_MS = 500;
+    const HOLD_MS = 100;
 
     setTimeout(() => {
       // ② ぱかっ（開く画像へ）

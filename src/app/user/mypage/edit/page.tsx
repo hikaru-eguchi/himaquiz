@@ -248,7 +248,7 @@ export default function ProfileEditPage() {
                     ) ?? "/images/初期アイコン.png"
                   : "/images/初期アイコン.png"
               }
-              className="w-40 md:w-50 h-40 md:h-50 border-3 border-gray-400 rounded-md bg-white object-contain"
+              className="w-30 md:w-40 h-30 md:h-40 border-3 border-gray-400 rounded-full bg-white object-contain"
               alt="selected icon"
             />
             <button
@@ -264,7 +264,7 @@ export default function ProfileEditPage() {
           {ownedChars.length === 0 ? (
             <p className="text-sm text-gray-600">まだ所持キャラがいません（ガチャでゲットできます）</p>
           ) : (
-            <div className="grid grid-cols-5 gap-2">
+            <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
               {ownedChars.map(ch => {
                 const url = ch.image_url
                   ? ch.image_url.startsWith("/") ? ch.image_url : `/${ch.image_url}`
@@ -277,7 +277,7 @@ export default function ProfileEditPage() {
                     key={ch.id}
                     type="button"
                     onClick={() => setAvatarCharacterId(ch.id)}
-                    className={`p-1 rounded border ${selected ? "border-blue-600 ring-2 ring-blue-300" : "border-gray-300"}`}
+                    className={`p-1 rounded border ${selected ? "border-blue-600 ring-4 ring-blue-400" : "border-gray-400"}`}
                     title={ch.name}
                   >
                     <img src={url} alt={ch.name} className="w-full aspect-square object-contain" />

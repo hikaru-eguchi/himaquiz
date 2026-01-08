@@ -132,17 +132,17 @@ export default function MyPage() {
             {profile?.avatar_character_id ? "設定中" : "初期アイコン"}
           </span>
         </p>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-center gap-3">
           <img
             src={avatarUrl}
             alt="icon"
-            className="w-40 h-40 md:w-50 md:h-50 border-3 border-gray-400 rounded-md bg-white object-contain"
+            className="w-30 h-30 md:w-40 md:h-40 border-3 border-gray-400 rounded-full bg-white object-contain"
           />
         </div>
 
         <p>
           <span className="font-medium text-md md:text-xl">現在のユーザーレベル：</span>
-          <span className="font-medium text-md md:text-xl text-green-600">Lv.{profile?.level ?? 1}</span>
+          <span className="font-medium text-md md:text-xl text-amber-500">Lv.{profile?.level ?? 1}</span>
         </p>
 
         <div className="space-y-2">
