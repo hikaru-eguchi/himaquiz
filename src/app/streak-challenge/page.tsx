@@ -90,6 +90,9 @@ export default function QuizMasterPage() {
       </h1>
 
       <>
+        <p className="text-md md:text-2xl font-semibold text-gray-800 mb-1 md:mb-2">
+          ＜1人で遊べるクイズゲーム＞
+        </p>
         <p className="text-md md:text-2xl font-semibold text-gray-800 mb-8">
           間違えたらゲームオーバー！何問連続で正解できるか挑戦だ！友達や家族とスコアを競おう！
         </p>

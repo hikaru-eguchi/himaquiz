@@ -93,6 +93,9 @@ export default function QuizMasterPage() {
       </h1>
 
       <>
+        <p className="text-md md:text-2xl font-semibold text-white mb-1 md:mb-2">
+          ＜2人対戦クイズゲーム＞
+        </p>
         <p className="text-md md:text-2xl font-semibold text-white mb-8">
           どれだけ高得点を狙えるか誰かと対戦！相手よりもハイスコアを目指そう！
         </p>

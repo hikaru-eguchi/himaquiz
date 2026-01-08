@@ -86,12 +86,15 @@ export default function QuizMasterPage() {
       </h1>
 
       <>
+        <p className="text-md md:text-2xl font-semibold text-gray-800 mb-1 md:mb-2">
+          ＜1人で遊べるクイズゲーム＞
+        </p>
         <p className="text-md md:text-2xl font-semibold text-gray-800 mb-8">
           クイズで進む冒険ダンジョン！君はどこまで到達できる？最強の称号「クイズマスター」を手に入れろ！
         </p>
 
         {/* ★ スマホは2枚、PCは6枚を順番に登場 */}
-        <div className="flex justify-center gap-2 md:gap-4 mb-8">
+        <div className="flex justify-center md:gap-4 mb-8">
           {characters.map((src, index) => (
             <img
               key={index}
