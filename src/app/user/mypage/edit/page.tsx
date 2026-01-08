@@ -248,7 +248,7 @@ export default function ProfileEditPage() {
                     ) ?? "/images/初期アイコン.png"
                   : "/images/初期アイコン.png"
               }
-              className="w-30 md:w-40 h-30 md:h-40 border-3 border-gray-400 rounded-full bg-white object-contain"
+              className="w-30 md:w-40 h-30 md:h-40 border-2 border-white shadow-lg rounded-full bg-white object-contain"
               alt="selected icon"
             />
             <button

@@ -136,7 +136,7 @@ export default function MyPage() {
           <img
             src={avatarUrl}
             alt="icon"
-            className="w-30 h-30 md:w-40 md:h-40 border-3 border-gray-400 rounded-full bg-white object-contain"
+            className="w-30 h-30 md:w-40 md:h-40 border-2 border-white shadow-lg rounded-full bg-white object-contain"
           />
         </div>
 

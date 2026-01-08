@@ -153,7 +153,7 @@ export default function HeaderMenu() {
                 <img
                   src={avatarUrl}
                   alt="icon"
-                  className="w-24 h-24 rounded-full border-3 border-gray-400 bg-white object-contain"
+                  className="w-24 h-24 md:w-28 md:h-28 rounded-full border-2 border-white bg-white object-contain shadow-lg"
                 />
               </div>
               <div className="text-xl mt-2">{username ? `${username} さん` : "ユーザー"}</div>
