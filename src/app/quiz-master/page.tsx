@@ -86,7 +86,7 @@ export default function QuizMasterPage() {
       </h1>
 
       <>
-        <p className="text-md md:text-2xl font-semibold text-gray-800 mb-1 md:mb-2">
+        <p className="text-md md:text-2xl font-semibold text-gray-800 mb-2 md:mb-4">
           ＜1人で遊べるクイズゲーム＞
         </p>
         <p className="text-md md:text-2xl font-semibold text-gray-800 mb-8">

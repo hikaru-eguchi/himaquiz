@@ -1,12 +1,15 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import QuizQuestion from "../../components/QuizQuestion";
 import { QuizData } from "@/lib/articles";
 import { motion, AnimatePresence } from "framer-motion";
 import { createSupabaseBrowserClient } from "@/lib/supabaseClient";
 import { useSupabaseUser } from "../../../hooks/useSupabaseUser";
+import { submitGameResult, calcTitle } from "@/lib/gameResults";
+import { buildResultModalPayload } from "@/lib/resultMessages";
+import { useResultModal } from "../../components/ResultModalProvider";
 
 interface ArticleData {
   id: string;
@@ -207,7 +210,7 @@ export default function QuizModePage() {
   const genre = searchParams?.get("genre") || "";
   const level = searchParams?.get("level") || "";
 
-  const supabase = createSupabaseBrowserClient();
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const { user, loading: userLoading } = useSupabaseUser();
 
   const [questions, setQuestions] = useState<{ id: string; quiz: QuizData }[]>([]);
@@ -233,6 +236,9 @@ export default function QuizModePage() {
   const [earnedExp, setEarnedExp] = useState(0);
   const [awardStatus, setAwardStatus] = useState<AwardStatus>("idle");
   const awardedOnceRef = useRef(false);
+
+  const sentRef = useRef(false);
+  const { pushModal } = useResultModal();
 
   const titles = [
     { threshold: 300, title: "優等生" },
@@ -444,8 +450,8 @@ export default function QuizModePage() {
 
           const { error: logError2 } = await supabase.from("user_exp_logs").insert({
             user_id: user.id,
-            change: earned,
-            reason: `制限時間クイズでEXP獲得（score ${score} → ${earned}EXP）`,
+            change: expEarned,
+            reason: `制限時間クイズでEXP獲得（score ${score} → ${expEarned}EXP）`,
           });
           if (logError2) console.log("insert user_exp_logs error:", logError2);
 
@@ -459,6 +465,37 @@ export default function QuizModePage() {
       award();
     }
   }, [finished, score, user, userLoading, supabase]);
+
+  // ★ 成績/称号（timed）を保存して、新記録 or 新称号ならモーダル表示
+  useEffect(() => {
+    if (!finished) return;
+    if (sentRef.current) return;
+    sentRef.current = true;
+
+    // ログインしてないなら送らない（任意）
+    if (!userLoading && !user) return;
+
+    (async () => {
+      try {
+        // scoreが確定してから称号判定
+        const title = calcTitle(titles, score); // titles = timedTitles
+
+        const res = await submitGameResult(supabase, {
+          game: "timed",
+          score: score,       // totalScore ではなく score
+          title: title,       // nullでもOK
+          writeLog: true,
+        });
+
+        const modal = buildResultModalPayload("timed", res);
+        if (modal) pushModal(modal);
+      } catch (e) {
+        console.error("[timed] submitGameResult error:", e);
+        // 成績保存が失敗してもゲーム進行は止めない
+      }
+    })();
+  }, [finished, userLoading, user, score, supabase, pushModal]);
+
 
   if (questions.length === 0) return <p></p>;
 

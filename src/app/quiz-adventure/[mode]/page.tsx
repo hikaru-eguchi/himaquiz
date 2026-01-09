@@ -9,6 +9,9 @@ import { useBattle } from "../../../hooks/useBattle";
 import { useQuestionPhase } from "../../../hooks/useQuestionPhase";
 import { createSupabaseBrowserClient } from "@/lib/supabaseClient";
 import { useSupabaseUser } from "../../../hooks/useSupabaseUser";
+import { submitGameResult, calcTitle } from "@/lib/gameResults";
+import { buildResultModalPayload } from "@/lib/resultMessages";
+import { useResultModal } from "../../components/ResultModalProvider";
 
 type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
 
@@ -365,6 +368,8 @@ export default function QuizModePage() {
   const [earnedExp, setEarnedExp] = useState(0);
   const [awardStatus, setAwardStatus] = useState<AwardStatus>("idle");
   const awardedOnceRef = useRef(false);
+  const sentRef = useRef(false); // ★ 成績保存 二重送信防止
+  const { pushModal } = useResultModal();
 
   const [questions, setQuestions] = useState<{ id: string; quiz: QuizData }[]>([]);
   const [correctCount, setCorrectCount] = useState(0);
@@ -625,6 +630,7 @@ export default function QuizModePage() {
     setBasePoints(0);
     setStageBonusPoints(0);
     setEarnedExp(0);
+    sentRef.current = false;
   };
 
   const handleNewMatch = () => {
@@ -651,6 +657,7 @@ export default function QuizModePage() {
     setBasePoints(0);
     setStageBonusPoints(0);
     setEarnedExp(0);
+    sentRef.current = false;
 
     setReadyToStart(false);
 
@@ -1089,6 +1096,56 @@ export default function QuizModePage() {
       award();
     }
   }, [finished, mode, correctCount, stageCount, user, userLoading]);
+
+  useEffect(() => {
+    if (!finished) return;
+
+    // 未ログインなら保存しない（仕様に合わせる）
+    if (!userLoading && !user) return;
+
+    if (sentRef.current) return;
+    sentRef.current = true;
+
+    (async () => {
+      try {
+        // 例：スコアは「正解数」or「獲得ポイント」どっちでもOK
+        // 個人的には "正解数" をスコアにするのがブレにくい
+        const score = correctCount;
+
+        // 最高到達ステージ
+        const stage = stageCount;
+
+        // 称号：正解数ベースで計算（今の getTitle と合わせる）
+        const title = calcTitle(titles, correctCount);
+
+        const res = await submitGameResult(supabase, {
+          game: "coop_dungeon",
+          score,
+          stage,
+          title,
+          writeLog: true,
+          // extra は今は不要なら入れない（入れるときだけでOK）
+          // extra: { stageCount, correctCount, isGameClear }
+        });
+
+        // モーダル出したいなら（battleと同じ仕組み）
+        const modal = buildResultModalPayload("coop_dungeon", res);
+        if (modal) pushModal(modal);
+      } catch (e) {
+        console.error("[coop_dungeon] submitGameResult error:", e);
+      }
+    })();
+  }, [
+    finished,
+    user,
+    userLoading,
+    supabase,
+    correctCount,
+    stageCount,
+    isGameClear,
+    titles,
+    pushModal,
+  ]);
 
   useEffect(() => {
     if (!socket) return;

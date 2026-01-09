@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import QuizQuestion from "../../components/QuizQuestion";
 import { QuizData } from "@/lib/articles";
@@ -8,6 +8,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useBattle } from "../../../hooks/useBattle";
 import { createSupabaseBrowserClient } from "@/lib/supabaseClient";
 import { useSupabaseUser } from "../../../hooks/useSupabaseUser";
+import { submitGameResult } from "@/lib/gameResults";
+import { buildResultModalPayload } from "@/lib/resultMessages";
+import { useResultModal } from "../../components/ResultModalProvider";
+
 
 type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
 
@@ -351,7 +355,7 @@ export default function QuizModePage() {
   const router = useRouter();
 
   // ★ Supabase & ユーザー
-  const supabase = createSupabaseBrowserClient();
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const { user, loading: userLoading } = useSupabaseUser();
 
   // ★ リザルト用：獲得ポイントと付与状態（二重加算防止）
@@ -359,6 +363,8 @@ export default function QuizModePage() {
   const [earnedExp, setEarnedExp] = useState(0);
   const [awardStatus, setAwardStatus] = useState<AwardStatus>("idle");
   const awardedOnceRef = useRef(false);
+  const { pushModal } = useResultModal();
+  const sentRef = useRef(false); // ★ 成績保存 二重送信防止
 
   const [questions, setQuestions] = useState<{ id: string; quiz: QuizData }[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -461,6 +467,9 @@ export default function QuizModePage() {
     setShowCorrectMessage(false);
     setEarnedPoints(0);
     setEarnedExp(0);
+    awardedOnceRef.current = false;
+    setAwardStatus("idle");
+    sentRef.current = false;
   };
 
   const handleNewMatch = () => {
@@ -482,6 +491,9 @@ export default function QuizModePage() {
     setShowCorrectMessage(false);
     setEarnedPoints(0);
     setEarnedExp(0);
+    awardedOnceRef.current = false;
+    setAwardStatus("idle");
+    sentRef.current = false;
 
     setReadyToStart(false);
 
@@ -854,7 +866,44 @@ export default function QuizModePage() {
 
       award();
     }
-  }, [finished, me?.score, opponent?.score, user, userLoading, supabase, mode]);
+  }, [finished, me?.score, opponent?.score, correctCount, user, userLoading, supabase, mode]);
+
+  useEffect(() => {
+    if (!finished) return;
+
+    // 合言葉マッチは保存しない（ポイント付与と揃える）
+    if (mode === "code") return;
+
+    // 未ログインなら保存しない（仕様でOK）
+    if (!userLoading && !user) return;
+
+    // スコアがまだ確定してないなら待つ
+    if (!me || !opponent) return;
+
+    if (sentRef.current) return;
+    sentRef.current = true;
+
+    (async () => {
+      try {
+        const score = me.score; // ★ 最終スコア
+        const won = me.score > opponent.score;
+        const firstPlace = won; 
+
+        const res = await submitGameResult(supabase, {
+          game: "battle", // ←あなたの識別子に合わせて（例: quiz / battle / quiz2p 等）
+          score,
+          won,
+          firstPlace,
+          writeLog: true,
+        });
+
+        const modal = buildResultModalPayload("battle", res);
+        if (modal) pushModal(modal);
+      } catch (e) {
+        console.error("[quiz_battle] submitGameResult error:", e);
+      }
+    })();
+  }, [finished, mode, user, userLoading, me, opponent, supabase, pushModal]);
 
   const nextQuestion = () => {
     setShowCorrectMessage(false);

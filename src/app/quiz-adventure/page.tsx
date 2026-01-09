@@ -94,7 +94,7 @@ export default function QuizMasterPage() {
       </h1>
 
       <>
-        <p className="text-md md:text-2xl font-semibold text-white mb-1 md:mb-2">
+        <p className="text-md md:text-2xl font-semibold text-white mb-2 md:mb-4">
           ＜みんなで遊べるクイズゲーム＞
         </p>
         <p className="text-md md:text-2xl font-semibold text-white mb-8">

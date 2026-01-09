@@ -11,7 +11,7 @@ export function DailyLoginBonusModal() {
   const [open, setOpen] = useState(false);
   const [added, setAdded] = useState(0);
 
-  // 連打・再レンダー対策
+  // 二重実行防止
   const calledRef = useRef(false);
 
   useEffect(() => {
@@ -28,13 +28,11 @@ export function DailyLoginBonusModal() {
         return;
       }
 
-      // data は returns table なので配列で返ることが多い
       const row = Array.isArray(data) ? data[0] : data;
       if (row?.awarded) {
         setAdded(row.added_points ?? 500);
         setOpen(true);
 
-        // 既存のポイント表示を更新してるならイベント発火
         window.dispatchEvent(new Event("points:updated"));
       }
     };
@@ -45,8 +43,17 @@ export function DailyLoginBonusModal() {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60">
-      <div className="bg-white rounded-2xl p-6 w-[320px] md:w-[420px] shadow-2xl text-center">
+    // ▼ 画面全体（背景＋カード）を押したら閉じる
+    <div
+      className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60"
+      onClick={() => setOpen(false)}
+    >
+      <div
+        className="
+          bg-white rounded-2xl p-6 w-[320px] md:w-[420px]
+          shadow-2xl text-center cursor-pointer
+        "
+      >
         <p
           className="
             text-2xl md:text-4xl font-extrabold mb-2
@@ -56,17 +63,18 @@ export function DailyLoginBonusModal() {
         >
           🎁 デイリーボーナス！
         </p>
+
         <p className="text-md md:text-xl text-gray-600 mb-2">
           今日のログインありがとう！
         </p>
-        <p className="text-xl md:text-3xl font-bold text-green-600 mb-4">+{added}P</p>
 
-        <button
-          onClick={() => setOpen(false)}
-          className="px-6 py-2 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600"
-        >
-          閉じる
-        </button>
+        <p className="text-xl md:text-3xl font-bold text-green-600 mb-4">
+          +{added}P
+        </p>
+
+        <p className="text-sm text-gray-500">
+          ※ 画面をタップすると閉じます
+        </p>
       </div>
     </div>
   );

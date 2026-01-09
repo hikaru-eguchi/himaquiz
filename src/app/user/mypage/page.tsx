@@ -109,27 +109,32 @@ export default function MyPage() {
       <div className="border rounded p-3 space-y-2">
         <p>
           <span className="font-medium text-md md:text-xl">ユーザー名：</span>
-          {profile?.username ?? "(未設定)"}
+          <span className="text-md md:text-xl">{profile?.username ?? "(未設定)"}</span>
         </p>
 
         <p>
           <span className="font-medium text-md md:text-xl">ユーザーID：</span>
-          {profile?.user_id ?? "(未設定)"}
+          <span className="text-md md:text-xl">{profile?.user_id ?? "(未設定)"}</span>
         </p>
 
         <p>
           <span className="font-medium text-md md:text-xl">
             復旧用メールアドレス：
           </span>
-          {profile?.recovery_email ?? "(未設定)"}
+          <span className="text-md md:text-xl">{profile?.recovery_email ?? "(未設定)"}</span>
         </p>
 
         <p>
           <span className="font-medium text-md md:text-xl">
             アイコン：
           </span>
-          <span className="text-sm text-gray-600">
+          <span className="text-md md:text-xl">
             {profile?.avatar_character_id ? "設定中" : "初期アイコン"}
+          </span>
+        </p>
+        <p>
+          <span className="text-sm md:text-md">
+            ※「クイズガチャ」で当たったキャラを設定できます
           </span>
         </p>
         <div className="flex items-center justify-center gap-3">
@@ -181,7 +186,21 @@ export default function MyPage() {
         onClick={() => router.push("/user/mypage/points-history")}
         className="w-full bg-blue-500 text-white py-2 rounded cursor-pointer"
       >
-        ポイント履歴を見る
+        ポイント履歴
+      </button>
+
+      <button
+        onClick={() => router.push("/user/mypage/records")}
+        className="w-full bg-green-500 text-white py-2 rounded cursor-pointer"
+      >
+        プレイ記録
+      </button>
+
+      <button
+        onClick={() => router.push("/user/mypage/titles")}
+        className="w-full bg-purple-500 text-white py-2 rounded cursor-pointer"
+      >
+        称号コレクション
       </button>
 
       <button

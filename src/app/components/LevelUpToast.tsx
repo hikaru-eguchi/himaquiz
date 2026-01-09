@@ -18,7 +18,6 @@ export function LevelUpToast() {
         setFromLv(oldLevel);
         setToLv(newLevel);
         setOpen(true);
-        setTimeout(() => setOpen(false), 4000);
       }
     };
 
@@ -29,11 +28,13 @@ export function LevelUpToast() {
   return (
     <AnimatePresence>
       {open && (
+        // ▼ 背景＋カード、どこを押しても閉じる
         <motion.div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          onClick={() => setOpen(false)}
         >
           {/* 光る背景 */}
           <motion.div
@@ -45,7 +46,12 @@ export function LevelUpToast() {
 
           {/* メインカード */}
           <motion.div
-            className="relative bg-gradient-to-br from-white to-yellow-50 rounded-3xl p-8 w-96 text-center shadow-[0_0_40px_rgba(255,215,0,0.6)]"
+            className="
+              relative bg-gradient-to-br from-white to-yellow-50
+              rounded-3xl p-8 w-96 text-center
+              shadow-[0_0_40px_rgba(255,215,0,0.6)]
+              cursor-pointer
+            "
             initial={{ scale: 0.5, rotate: -8, opacity: 0 }}
             animate={{ scale: 1, rotate: 0, opacity: 1 }}
             exit={{ scale: 0.5, rotate: 8, opacity: 0 }}
@@ -81,6 +87,11 @@ export function LevelUpToast() {
               ユーザーレベルが上がったよ！
               <br />
               おめでとう！！🎉✨
+            </p>
+
+            {/* 補足 */}
+            <p className="mt-4 text-sm text-gray-500">
+              ※ 画面をタップすると閉じます
             </p>
           </motion.div>
         </motion.div>

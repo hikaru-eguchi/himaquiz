@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState, FormEvent } from "react";
+import { useEffect, useState, FormEvent, useMemo } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabaseClient";
 import { useSupabaseUser } from "../../../../hooks/useSupabaseUser";
 import { useRouter } from "next/navigation";
 
 export default function ProfileEditPage() {
-  const supabase = createSupabaseBrowserClient();
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const { user, loading: userLoading } = useSupabaseUser();
   const router = useRouter();
 
@@ -264,7 +264,7 @@ export default function ProfileEditPage() {
           {ownedChars.length === 0 ? (
             <p className="text-sm text-gray-600">まだ所持キャラがいません（ガチャでゲットできます）</p>
           ) : (
-            <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
+            <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
               {ownedChars.map(ch => {
                 const url = ch.image_url
                   ? ch.image_url.startsWith("/") ? ch.image_url : `/${ch.image_url}`

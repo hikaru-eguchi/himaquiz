@@ -1,11 +1,14 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import QuizQuestion from "../../components/QuizQuestion";
 import { QuizData } from "@/lib/articles";
 import { createSupabaseBrowserClient } from "@/lib/supabaseClient";
 import { useSupabaseUser } from "../../../hooks/useSupabaseUser";
+import { submitGameResult, calcTitle } from "@/lib/gameResults";
+import { buildResultModalPayload } from "@/lib/resultMessages";
+import { useResultModal } from "../../components/ResultModalProvider";
 
 // =====================
 // ポイント仕様（ステージ到達に応じて付与）
@@ -324,7 +327,7 @@ export default function QuizModePage() {
   const genre = searchParams?.get("genre") || "";
 
   // ★ 追加：Supabase & ユーザー
-  const supabase = createSupabaseBrowserClient();
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const { user, loading: userLoading } = useSupabaseUser();
 
   const [character, setCharacter] = useState<string | null>(null); // 選択したキャラクター
@@ -367,6 +370,8 @@ export default function QuizModePage() {
   const [earnedExp, setEarnedExp] = useState(0);
   const [awardStatus, setAwardStatus] = useState<AwardStatus>("idle");
   const awardedOnceRef = useRef(false);
+  const sentRef = useRef(false); // ★ 成績保存の二重送信防止
+  const { pushModal } = useResultModal();
 
   const finishedRef = useRef(finished);
   const showCorrectRef = useRef(showCorrectMessage);
@@ -1171,6 +1176,38 @@ export default function QuizModePage() {
       award();
     }
   }, [finished, correctCount, user, userLoading, supabase]);
+
+  // ★ クイズダンジョン：成績(到達ステージ)＆称号を保存 → 新記録/新称号ならモーダル
+  useEffect(() => {
+    if (!finished) return;
+    if (sentRef.current) return;
+    sentRef.current = true;
+
+    // 未ログインなら送らない（任意）
+    if (!userLoading && !user) return;
+
+    (async () => {
+      try {
+        // 到達ステージ（= 倒した数 = correctCount）
+        const clearedStage = correctCount;
+
+        // ステージに応じた称号を計算
+        const title = calcTitle(titles, clearedStage);
+
+        const res = await submitGameResult(supabase, {
+          game: "dungeon",      // ← あなたのDB設計に合わせた識別子
+          stage: clearedStage,  // ← “最高到達ステージ” を score に入れる
+          title,
+          writeLog: true,
+        });
+
+        const modal = buildResultModalPayload("dungeon", res);
+        if (modal) pushModal(modal);
+      } catch (e) {
+        console.error("[dungeon] submitGameResult error:", e);
+      }
+    })();
+  }, [finished, userLoading, user, correctCount, titles, supabase, pushModal]);
 
   // キャラクター選択前は CharacterSelect を表示
   if (!character) {

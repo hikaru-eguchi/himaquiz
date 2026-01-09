@@ -6,6 +6,7 @@ import NavButtons from "./components/NavButtons";
 import Script from "next/script";
 import HeaderMenu from "./components/HeaderMenu";
 import { LevelUpToast } from "./components/LevelUpToast";
+import ResultModalProvider from "./components/ResultModalProvider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const yomogi = Yomogi({ weight: "400", subsets: ["latin"], variable: "--font-yomogi" });
@@ -99,7 +100,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
           {/* ===== MAIN ===== */}
           <main className="flex-grow container mx-auto px-6 py-3 mt-6 bg-white rounded-3xl shadow-xl overflow-auto">
-            {children}
+            <ResultModalProvider>
+              {children}
+            </ResultModalProvider>
           </main>
 
           {/* ===== FOOTER ===== */}

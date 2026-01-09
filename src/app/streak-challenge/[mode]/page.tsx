@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import QuizQuestion from "../../components/QuizQuestion";
 import { QuizData } from "@/lib/articles";
 import { createSupabaseBrowserClient } from "@/lib/supabaseClient";
 import { useSupabaseUser } from "../../../hooks/useSupabaseUser";
+import { submitGameResult, calcTitle } from "@/lib/gameResults";
+import { buildResultModalPayload } from "@/lib/resultMessages";
+import { useResultModal } from "../../components/ResultModalProvider";
 
 interface ArticleData {
   id: string;
@@ -241,7 +244,7 @@ export default function QuizModePage() {
   const genre = searchParams?.get("genre") || "";
   const level = searchParams?.get("level") || "";
 
-  const supabase = createSupabaseBrowserClient();
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const { user, loading: userLoading } = useSupabaseUser();
 
   const [questions, setQuestions] = useState<{ id: string; quiz: QuizData }[]>(
@@ -261,6 +264,8 @@ export default function QuizModePage() {
   const [earnedExp, setEarnedExp] = useState(0);
   const [awardStatus, setAwardStatus] = useState<AwardStatus>("idle");
   const awardedOnceRef = useRef(false); // 二重加算防止
+  const sentRef = useRef(false);        // ★ 成績/称号送信用（二重送信防止）
+  const { pushModal } = useResultModal();
 
   const finishedRef = useRef(finished);
   const showCorrectRef = useRef(showCorrectMessage);
@@ -495,6 +500,39 @@ export default function QuizModePage() {
       award();
     }
   }, [finished, correctCount, user, userLoading, supabase]);
+
+  // ★ 連続正解チャレンジ：成績(最高連続正解数)＆称号を保存 → 新記録/新称号ならモーダル
+  useEffect(() => {
+    if (!finished) return;
+    if (sentRef.current) return;
+    sentRef.current = true;
+
+    // 未ログインなら保存しない（任意）
+    if (!userLoading && !user) return;
+
+    (async () => {
+      try {
+        // 連続正解数から称号を計算
+        const title = calcTitle(titles, correctCount);
+
+        const res = await submitGameResult(supabase, {
+          game: "streak",       // ← 連続正解チャレンジ用の識別子（あなたの設計に合わせて）
+          streak: correctCount, // ✅ 連続正解数は streak で送る
+          score: 0,
+          stage: 0,
+          title,
+          writeLog: true,
+        });
+
+        // 新記録 or 新称号 のときだけモーダルを出す
+        const modal = buildResultModalPayload("streak", res);
+        if (modal) pushModal(modal);
+      } catch (e) {
+        console.error("[streak] submitGameResult error:", e);
+        // 成績保存が失敗してもゲームは止めない
+      }
+    })();
+  }, [finished, userLoading, user, correctCount, titles, supabase, pushModal]);
 
   if (questions.length === 0) return <p></p>;
 

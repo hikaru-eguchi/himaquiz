@@ -9,6 +9,9 @@ import { useBattle } from "../../../hooks/useBattle";
 import { useQuestionPhase } from "../../../hooks/useQuestionPhase";
 import { createSupabaseBrowserClient } from "@/lib/supabaseClient";
 import { useSupabaseUser } from "../../../hooks/useSupabaseUser";
+import { submitGameResult, calcTitle } from "@/lib/gameResults";
+import { buildResultModalPayload } from "@/lib/resultMessages";
+import { useResultModal } from "../../components/ResultModalProvider";
 
 type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
 
@@ -221,7 +224,7 @@ const QuizResult = ({
           ) : (
             <>
               <div className="mb-2 text-lg md:text-xl text-gray-700 font-bold">
-                <p className="text-blue-500">正解数ポイント：{basePoints}P（{correctCount}問 × 5P）</p>
+                <p className="text-blue-500">正解数ポイント：{basePoints}P（{correctCount}問 × 20P）</p>
                 {firstBonusPoints > 0 && (
                   <p className="text-yellow-500">1位ボーナス✨：{firstBonusPoints}P</p>
                 )}
@@ -365,6 +368,8 @@ export default function QuizModePage() {
 
   const [awardStatus, setAwardStatus] = useState<AwardStatus>("idle");
   const awardedOnceRef = useRef(false);
+  const { pushModal } = useResultModal();
+  const sentRef = useRef(false); // ★ 成績保存の二重送信防止
 
   const [earnedPoints, setEarnedPoints] = useState(0);
   const [earnedExp, setEarnedExp] = useState(0);
@@ -573,6 +578,7 @@ export default function QuizModePage() {
     setFirstBonusPoints(0);
     setPredictionBonusPoints(0);
     setEarnedExp(0);
+    sentRef.current = false;
   };
 
   const handleNewMatch = () => {
@@ -604,6 +610,7 @@ export default function QuizModePage() {
     setFirstBonusPoints(0);
     setPredictionBonusPoints(0);
     setEarnedExp(0);
+    sentRef.current = false;
 
     setReadyToStart(false);
 
@@ -622,6 +629,7 @@ export default function QuizModePage() {
 
     // ★ 再戦準備の前に false に戻す
     setBothReadyState(false);
+    sentRef.current = false;
 
     setRematchRequested(true); // 自分が再戦希望を出した状態
     console.log("sending send_ready"); 
@@ -1036,6 +1044,57 @@ export default function QuizModePage() {
       award();
     }
   }, [finished, mode, correctCount, lastPlayerElimination, mySocketId, hasPredicted, predictedWinner, user, userLoading, supabase]);
+
+  useEffect(() => {
+    if (!finished) return;
+
+    // 合言葉マッチは保存しないならここでreturn（仕様に合わせて）
+    const isCodeMatch = mode === "code";
+    if (isCodeMatch) return;
+
+    // 未ログインなら保存しない（任意：ランキング機能をログイン必須にする場合）
+    if (!userLoading && !user) return;
+
+    // 勝敗情報が欲しいなら lastPlayerElimination を待つ（称号に順位を使うなら必須）
+    if (!lastPlayerElimination) return;
+
+    if (sentRef.current) return;
+    sentRef.current = true;
+
+    (async () => {
+      try {
+        const score = correctCount; // サバイバルは「正解数」がスコアでOK
+
+        const isFirstPlace = amIWinner;
+
+        const res = await submitGameResult(supabase, {
+          game: "survival", // ← あなたのDB識別子に合わせる（例: dobon / survival）
+          score: correctCount,
+          title: null, 
+          firstPlace: isFirstPlace,
+          writeLog: true,
+          // ここに必要なら extra で順位なども（あなたの実装次第）
+        });
+
+        const modal = buildResultModalPayload("survival", res);
+        if (modal) pushModal(modal);
+      } catch (e) {
+        console.error("[survival] submitGameResult error:", e);
+        // 失敗してもゲーム体験は壊さない方針でOK
+      }
+    })();
+  }, [
+    finished,
+    mode,
+    correctCount,
+    titles,
+    user,
+    userLoading,
+    supabase,
+    pushModal,
+    lastPlayerElimination,
+    mySocketId,
+  ]);
 
   useEffect(() => {
     if (!socket) return;
