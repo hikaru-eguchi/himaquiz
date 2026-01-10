@@ -69,7 +69,7 @@ export default async function WeeklyRankingCard({
 
           // 高さ（差は上に伸びる＝下揃え）
           const podiumH =
-            rank === 1 ? "h-40 md:h-44" : rank === 2 ? "h-36 md:h-40" : "h-32 md:h-36";
+            rank === 1 ? "h-48 md:h-52" : rank === 2 ? "h-44 md:h-48" : "h-40 md:h-44";
 
           const ring =
             rank === 1

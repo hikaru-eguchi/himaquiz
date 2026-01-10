@@ -187,7 +187,7 @@ export default async function HomePage({
       <WeeklyRankingSection />
       
         <p className="text-xl md:text-2xl mb-2 text-center leading-tight mt-5 mb-5">
-          楽しいクイズはこちらから👇
+          楽しいクイズはこちら👇
         </p>
 
       <div className="max-w-[700px] mx-auto border-2 border-black rounded-xl m-5 p-5 bg-gradient-to-b from-blue-0 via-blue-50 to-blue-100">
