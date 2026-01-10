@@ -8,7 +8,7 @@ import { DailyLoginBonusModal } from "../app/components/DailyLoginBonusModal";
 export const metadata = {
   title: "みんなで遊べる暇つぶしクイズ｜ひまQ",
   description:
-    "ひまQでは、みんなで遊べる暇つぶしクイズを多数掲載。脳トレクイズや面白クイズで、ちょっとした空き時間に脳を鍛えよう。",
+    "ひまQは、空き時間にみんなで盛り上がれる暇つぶしクイズサイト。友達や家族とワイワイ楽しめるクイズが無料で遊べます。",
 };
 
 // ===== 型定義 =====
@@ -144,8 +144,8 @@ export default async function HomePage({
     <div className="container mx-auto px-4 py-2 sm:py-8">
       <DailyLoginBonusModal />
 
-      <p className="text-center text-lg md:text-xl font-extrabold text-gray-800 leading-relaxed -mt-2 mb-6">
-        みんなで遊べる暇つぶしクイズ！『ひまQ』は、暇つぶししながら頭を鍛えられる脳トレ＆面白クイズが満載。空き時間に脳力をアップしよう！
+      <p className="text-center text-md md:text-xl font-extrabold text-gray-800 leading-relaxed -mt-2 mb-6">
+        みんなで遊べる暇つぶしクイズ『ひまQ』は、暇つぶしにぴったりな、ひとりでも、みんなでも盛り上がれるクイズが満載です。
       </p>
 
       <h1
@@ -156,7 +156,7 @@ export default async function HomePage({
           WebkitTextFillColor: "transparent",
         }}
       >
-        みんなで遊べる暇つぶしクイズ｜脳トレ＆面白問題が満載！
+        みんなで遊べる暇つぶしクイズ
       </h1>
 
       {/* 今日のクイズ表示 */}

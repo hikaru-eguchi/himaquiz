@@ -7,9 +7,9 @@ import Pagination from "@/app/components/Pagination";
 import LevelFilterButtons from "@/app/components/LevelFilterButtons";
 
 export const metadata = {
-  title: "心理系クイズ｜ひまQ",
+  title: "心理系クイズで暇つぶし｜ひまQ",
   description:
-    "ひまQでは、頭を鍛える心理系クイズを多数掲載。脳トレクイズや面白クイズで、ちょっとした空き時間に脳を鍛えよう。",
+    "ひまQの心理系クイズは、性格や考え方が分かる楽しい問題が中心。空き時間にみんなで遊んで盛り上がれる暇つぶしクイズです。",
 };
 
 interface ArticleMeta {
@@ -84,8 +84,8 @@ export default async function TriviaAllPage({
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <p className="text-center text-lg md:text-xl font-extrabold text-gray-800 leading-relaxed -mt-2 mb-6">
-        頭を鍛える暇つぶし！『ひまQ』は、暇つぶししながら頭を鍛えられる脳トレ＆面白クイズが満載。空き時間に脳力をアップしよう！
+      <p className="text-center text-md md:text-xl font-extrabold text-gray-800 leading-relaxed -mt-2 mb-6">
+        みんなで遊べる暇つぶしクイズ『ひまQ』は、暇つぶしにぴったりな、ひとりでも、みんなでも盛り上がれるクイズが満載です。
       </p>
 
       {/* 難易度ボタン */}
@@ -94,7 +94,7 @@ export default async function TriviaAllPage({
       </div>
 
       <h1 className="text-3xl font-bold mb-2 text-center text-pink-600 leading-tight">
-        心理系の暇つぶしクイズ｜性格がわかる脳トレクイズ！
+        心理系の楽しい暇つぶしクイズ
       </h1>
 
       <p className="text-center text-xl md:text-2xl font-extrabold mb-6">

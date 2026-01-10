@@ -13,13 +13,13 @@ const yomogi = Yomogi({ weight: "400", subsets: ["latin"], variable: "--font-yom
 
 export const metadata: Metadata = {
   title: {
-    default: "みんなで遊べる暇つぶしクイズ「ひまQ」 - 空き時間で頭を鍛える脳トレクイズ",
-    template: "%s | みんなで遊べる暇つぶしクイズ「ひまQ」 - 空き時間で頭を鍛える脳トレクイズ",
+    default: "みんなで遊べる暇つぶしクイズ「ひまQ」 - 空き時間にみんなで楽しめるクイズゲーム",
+    template: "%s | みんなで遊べる暇つぶしクイズ「ひまQ」 - 空き時間にみんなで楽しめるクイズゲーム",
   },
-  description: "みんなで遊べる暇つぶしクイズ！脳トレクイズや面白クイズで、ちょっとした空き時間に脳を鍛えよう。無料で遊べる『ひまQ』で脳力アップ！記憶力・思考力を鍛えよう。",
+  description: "みんなで遊べる暇つぶしクイズ『ひまQ』。空き時間にサクッと遊んで、みんなで盛り上がれるクイズが満載！無料で楽しめるクイズゲームです。",
   metadataBase: new URL("https://www.hima-quiz.com"),
   icons: {
-    icon: "/favicon.ico",
+    icon: "/favicon-v2.ico",
   },
 };
 
@@ -30,7 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ja">
       <head>
-        <link rel="icon" href="/favicon.ico?v=3" />
+        <link rel="icon" href="/favicon-v2.ico?v=3" />
         <meta name="google-adsense-account" content="ca-pub-9009696291438240" />
 
         {/* Googleタグ（gtag.js）を読み込み */}
@@ -57,7 +57,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {/* ===== HEADER ===== */}
           <header className="py-3 text-center shadow-md bg-yellow-300">
             <div className="flex items-center justify-center gap-4 md:mr-20">
-              <img src="/images/quiz.png" alt="脳トレクイズで暇つぶし" className="w-0 md:w-20 h-auto" />
+              <img src="/images/quiz.png" alt="みんなで遊べる暇つぶしクイズ" className="w-0 md:w-20 h-auto" />
               <div>
                 <Link href="/" className="no-underline group inline-block">
                   <h1
@@ -84,11 +84,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                       `,
                     }}
                   >
-                    暇つぶしクイズで遊ぶなら
+                    空き時間にみんなで楽しむなら
                     <span className="block text-5xl md:text-7xl mt-2">ひまQ</span>
                   </h1>
                   <p className="text-black/90 mt-3 md:mt-4 mb-1 md:mb-0 md:text-xl tracking-wide font-bold">
-                    みんなで遊べる暇つぶしクイズ！
+                    みんなで盛り上がる暇つぶしクイズ！
                   </p>
                 </Link>
               </div>

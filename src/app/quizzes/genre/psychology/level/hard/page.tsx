@@ -7,9 +7,9 @@ import Pagination from "@/app/components/Pagination";
 import LevelFilterButtons from "@/app/components/LevelFilterButtons";
 
 export const metadata = {
-  title: "心理学に基づく本格心理クイズ（むずかしい）｜暇つぶし脳トレ｜ひまQ",
+  title: "心理学ベースの本格心理クイズ（むずかしい）｜ひまQ",
   description:
-    "心理学の考え方を取り入れた分析系クイズを多数収録。暇つぶししながら深く心理を読み解く力が鍛えられます。",
+    "ひまQの本格心理クイズ（むずかしい編）は、心理学の考え方を取り入れた分析系問題が中心。空き時間にじっくり考えて楽しみたい人向けの暇つぶしクイズです。",
 };
 
 interface ArticleMeta {
@@ -90,8 +90,8 @@ export default async function KnowledgeEasyPage({
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <p className="text-center text-lg md:text-xl font-extrabold text-gray-800 leading-relaxed -mt-2 mb-6">
-        頭を鍛える暇つぶし！『ひまQ』は、暇つぶししながら頭を鍛えられる脳トレ＆面白クイズが満載。空き時間に脳力をアップしよう！
+      <p className="text-center text-md md:text-xl font-extrabold text-gray-800 leading-relaxed -mt-2 mb-6">
+        みんなで遊べる暇つぶしクイズ『ひまQ』は、暇つぶしにぴったりな、ひとりでも、みんなでも盛り上がれるクイズが満載です。
       </p>
 
       {/* 難易度ボタン */}
@@ -100,7 +100,7 @@ export default async function KnowledgeEasyPage({
       </div>
 
       <h1 className="text-3xl font-bold mb-2 text-center text-pink-600 leading-tight">
-        難しいレベルの心理系の暇つぶしクイズ｜性格がわかる脳トレクイズ！
+        難しいレベルの心理系クイズ
       </h1>
 
       {/* ★ クイズ数表示（中央） */}

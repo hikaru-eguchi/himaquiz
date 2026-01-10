@@ -8,7 +8,7 @@ import LevelFilterButtons from "@/app/components/LevelFilterButtons";
 export const metadata = {
   title: "みんなで遊べる暇つぶしクイズ｜ひまQ",
   description:
-    "ひまQでは、みんなで遊べる暇つぶしクイズを多数掲載。脳トレクイズや面白クイズで、ちょっとした空き時間に脳を鍛えよう。",
+    "ひまQは、空き時間にみんなで盛り上がれる暇つぶしクイズサイト。友達や家族とワイワイ楽しめるクイズが無料で遊べます。",
 };
 
 interface ArticleMeta {
@@ -84,8 +84,8 @@ export default async function QuizzesPage({ searchParams }: PageProps) {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <p className="text-center text-lg md:text-xl font-extrabold text-gray-800 leading-relaxed -mt-2 mb-6">
-        みんなで遊べる暇つぶしクイズ！『ひまQ』は、暇つぶししながら頭を鍛えられる脳トレ＆面白クイズが満載。空き時間に脳力をアップしよう！
+      <p className="text-center text-md md:text-xl font-extrabold text-gray-800 leading-relaxed -mt-2 mb-6">
+        みんなで遊べる暇つぶしクイズ『ひまQ』は、暇つぶしにぴったりな、ひとりでも、みんなでも盛り上がれるクイズが満載です。
       </p>
 
       {/* 難易度ボタン */}
@@ -94,7 +94,7 @@ export default async function QuizzesPage({ searchParams }: PageProps) {
       </div>
 
       <h1 className="text-3xl font-bold mb-2 text-center leading-tight">
-        みんなで遊べる暇つぶしクイズ一覧｜脳トレ＆面白問題が満載！
+        みんなで遊べる暇つぶしクイズ一覧
       </h1>
 
       {/* ★ クイズ数表示（中央） */}

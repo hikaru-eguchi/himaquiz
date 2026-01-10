@@ -7,9 +7,9 @@ import Pagination from "@/app/components/Pagination";
 import LevelFilterButtons from "@/app/components/LevelFilterButtons";
 
 export const metadata = {
-  title: "上級者向け難しいクイズ｜本気の暇つぶし脳トレ｜ひまQ",
+  title: "上級者向け・難しいクイズ｜ひまQ",
   description:
-    "ひまQのむずかしいクイズは、上級者でも悩む高難度問題を収録。暇つぶしとは思えないレベルの脳トレクイズで、頭をフル回転して挑戦しよう。",
+    "ひまQのむずかしいクイズは、上級者でも手ごたえを感じる高難度問題が中心。暇つぶしのつもりが本気になる、挑戦しがいのあるクイズです。",
 };
 
 interface ArticleMeta {
@@ -87,8 +87,8 @@ export default async function EasyLevelPage({ searchParams }: PageProps) {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <p className="text-center text-lg md:text-xl font-extrabold text-gray-800 leading-relaxed -mt-2 mb-6">
-        頭を鍛える暇つぶし！『ひまQ』は、暇つぶししながら頭を鍛えられる脳トレ＆面白クイズが満載。空き時間に脳力をアップしよう！
+      <p className="text-center text-md md:text-xl font-extrabold text-gray-800 leading-relaxed -mt-2 mb-6">
+        みんなで遊べる暇つぶしクイズ『ひまQ』は、暇つぶしにぴったりな、ひとりでも、みんなでも盛り上がれるクイズが満載です。
       </p>
 
       {/* 難易度ボタン */}
@@ -97,7 +97,7 @@ export default async function EasyLevelPage({ searchParams }: PageProps) {
       </div>
 
       <h1 className="text-3xl font-bold mb-2 text-center">
-        難しいレベルの暇つぶしクイズ｜上級者向け脳トレ問題！
+        難しいレベルの暇つぶしクイズ
       </h1>
 
       {/* クイズ数 */}

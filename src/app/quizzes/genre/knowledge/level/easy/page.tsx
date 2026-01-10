@@ -7,9 +7,9 @@ import Pagination from "@/app/components/Pagination";
 import LevelFilterButtons from "@/app/components/LevelFilterButtons";
 
 export const metadata = {
-  title: "暇つぶしに最適な知識系クイズ（かんたん）｜ひまQ",
+  title: "かんたん知識系クイズで暇つぶし｜ひまQ",
   description:
-    "ひまQの知識系クイズ（かんたん編）は、暇つぶしにサクッと楽しめる脳トレ問題を多数掲載。初心者でも解きやすい問題で、空き時間に頭をリフレッシュ。",
+    "ひまQの知識系クイズ（かんたん編）は、初心者でも気軽に楽しめるやさしい問題が中心。空き時間にサクッと遊べる暇つぶしクイズです。",
 };
 
 interface ArticleMeta {
@@ -90,8 +90,8 @@ export default async function KnowledgeEasyPage({
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <p className="text-center text-lg md:text-xl font-extrabold text-gray-800 leading-relaxed -mt-2 mb-6">
-        頭を鍛える暇つぶし！『ひまQ』は、暇つぶししながら頭を鍛えられる脳トレ＆面白クイズが満載。空き時間に脳力をアップしよう！
+      <p className="text-center text-md md:text-xl font-extrabold text-gray-800 leading-relaxed -mt-2 mb-6">
+        みんなで遊べる暇つぶしクイズ『ひまQ』は、暇つぶしにぴったりな、ひとりでも、みんなでも盛り上がれるクイズが満載です。
       </p>
 
       {/* 難易度ボタン */}
@@ -100,7 +100,7 @@ export default async function KnowledgeEasyPage({
       </div>
 
       <h1 className="text-3xl font-bold mb-2 text-center text-blue-600 leading-tight">
-        かんたんレベルの知識系の暇つぶしクイズ｜学べる脳トレ問題集！
+        かんたんレベルの知識系クイズ
       </h1>
 
       {/* ★ クイズ数表示（中央） */}
