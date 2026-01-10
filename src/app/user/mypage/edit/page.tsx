@@ -29,7 +29,7 @@ export default function ProfileEditPage() {
     const fetchProfile = async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("username, user_id, recovery_email, avatar_character_id")
+        .select("username, user_id, recovery_email, avatar_character_id, avatar_url")
         .eq("id", user.id)
         .single();
 
@@ -149,6 +149,14 @@ export default function ProfileEditPage() {
       }
 
       // 3. profiles の更新
+      const selectedAvatarUrl =
+        avatarCharacterId
+          ? (ownedChars.find(c => c.id === avatarCharacterId)?.image_url ?? "/images/初期アイコン.png")
+          : "/images/初期アイコン.png";
+
+      const normalizedAvatarUrl =
+        selectedAvatarUrl.startsWith("/") ? selectedAvatarUrl : `/${selectedAvatarUrl}`;
+
       const { error: updateError } = await supabase
         .from("profiles")
         .update({
@@ -156,11 +164,18 @@ export default function ProfileEditPage() {
           user_id: userId,
           recovery_email: recoveryEmail || null,
           avatar_character_id: avatarCharacterId,
+          avatar_url: normalizedAvatarUrl, // ★追加
         })
         .eq("id", user.id);
 
       if (updateError) {
-        console.error(updateError);
+        console.error("updateError:", updateError);
+        // ここが重要：message / code / details を直接見る
+        console.error("message:", (updateError as any).message);
+        console.error("code:", (updateError as any).code);
+        console.error("details:", (updateError as any).details);
+        console.error("hint:", (updateError as any).hint);
+
         setError("プロフィールの更新に失敗しました。");
         setSaving(false);
         return;
@@ -179,6 +194,17 @@ export default function ProfileEditPage() {
   };
 
   if (userLoading || loading) return <p>読み込み中...</p>;
+
+  const selectedChar = avatarCharacterId
+    ? ownedChars.find(c => c.id === avatarCharacterId)
+    : undefined;
+
+  const selectedUrlRaw = selectedChar?.image_url;
+
+  const selectedUrl =
+    typeof selectedUrlRaw === "string" && selectedUrlRaw.length > 0
+      ? (selectedUrlRaw.startsWith("/") ? selectedUrlRaw : `/${selectedUrlRaw}`)
+      : "/images/初期アイコン.png";
 
   return (
     <div className="max-w-md mx-auto p-4 space-y-4">
@@ -240,14 +266,7 @@ export default function ProfileEditPage() {
           {/* 現在の選択 */}
           <div className="flex items-center gap-3 mb-3">
             <img
-              src={
-                avatarCharacterId
-                  ? (ownedChars.find(c => c.id === avatarCharacterId)?.image_url?.startsWith("/")
-                      ? ownedChars.find(c => c.id === avatarCharacterId)?.image_url!
-                      : `/${ownedChars.find(c => c.id === avatarCharacterId)?.image_url}`
-                    ) ?? "/images/初期アイコン.png"
-                  : "/images/初期アイコン.png"
-              }
+              src={selectedUrl}
               className="w-30 md:w-40 h-30 md:h-40 border-2 border-white shadow-lg rounded-full bg-white object-contain"
               alt="selected icon"
             />

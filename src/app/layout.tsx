@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   description: "みんなで遊べる暇つぶしクイズ『ひまQ』。空き時間にサクッと遊んで、みんなで盛り上がれるクイズが満載！無料で楽しめるクイズゲームです。",
   metadataBase: new URL("https://www.hima-quiz.com"),
   icons: {
-    icon: "/favicon-v2.ico",
+    icon: "/favicon.ico",
   },
 };
 
@@ -30,7 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ja">
       <head>
-        <link rel="icon" href="/favicon-v2.ico?v=3" />
+        <link rel="icon" href="/favicon.ico?v=3" />
         <meta name="google-adsense-account" content="ca-pub-9009696291438240" />
 
         {/* Googleタグ（gtag.js）を読み込み */}

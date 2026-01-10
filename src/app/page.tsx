@@ -4,6 +4,7 @@ import path from 'path';
 import matter from 'gray-matter';
 import QuizMDXWrapper from "@/app/components/QuizMDXWrapper";
 import { DailyLoginBonusModal } from "../app/components/DailyLoginBonusModal";
+import WeeklyRankingSection from "@/app/components/WeeklyRankingSection";
 
 export const metadata = {
   title: "みんなで遊べる暇つぶしクイズ｜ひまQ",
@@ -182,9 +183,11 @@ export default async function HomePage({
           <QuizMDXWrapper quiz={randomQuizArticle.quiz} />
         )}
       </div>
+
+      <WeeklyRankingSection />
       
         <p className="text-xl md:text-2xl mb-2 text-center leading-tight mt-5 mb-5">
-          他のクイズはこちら👇
+          楽しいクイズはこちらから👇
         </p>
 
       <div className="max-w-[700px] mx-auto border-2 border-black rounded-xl m-5 p-5 bg-gradient-to-b from-blue-0 via-blue-50 to-blue-100">

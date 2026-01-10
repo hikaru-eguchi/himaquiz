@@ -9,6 +9,7 @@ import { useSupabaseUser } from "../../../hooks/useSupabaseUser";
 import { submitGameResult, calcTitle } from "@/lib/gameResults";
 import { buildResultModalPayload } from "@/lib/resultMessages";
 import { useResultModal } from "../../components/ResultModalProvider";
+import { getWeekStartJST } from "@/lib/week";
 
 // =====================
 // ポイント仕様（ステージ到達に応じて付与）
@@ -1188,6 +1189,24 @@ export default function QuizModePage() {
 
     (async () => {
       try {
+        const weekStart = getWeekStartJST();
+
+        // ✅ 週間ランキングに反映したい値を決める
+        // score: 今回獲得ポイントを加算、correct: 正解数、play: 1回、best_streak: max更新
+        const { error: weeklyErr } = await supabase.rpc("upsert_weekly_stats", {
+          p_user_id: user!.id,
+          p_week_start: weekStart,
+          p_score_add: 0,
+          p_correct_add: correctCount,
+          p_play_add: 1,
+          p_best_streak: 0,
+        });
+
+        if (weeklyErr) {
+          console.log("upsert_weekly_stats error:", weeklyErr);
+          // ランキング保存失敗してもゲームは止めない
+        }
+
         // 到達ステージ（= 倒した数 = correctCount）
         const clearedStage = correctCount;
 
