@@ -17,6 +17,7 @@ export default function HeaderMenu() {
   const [level, setLevel] = useState<number | null>(null);
   const [exp, setExp] = useState<number | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [avatarPreviewOpen, setAvatarPreviewOpen] = useState(false);
 
   const fetchProfile = async (uid: string) => {
     const { data: profile } = await supabase
@@ -154,6 +155,7 @@ export default function HeaderMenu() {
                   src={avatarUrl}
                   alt="icon"
                   className="w-24 h-24 md:w-28 md:h-28 rounded-full border-2 border-white bg-white object-contain shadow-lg"
+                  onClick={() => !confirmOpen && setAvatarPreviewOpen(true)}
                 />
               </div>
               <div className="text-xl mt-2">{username ? `${username} さん` : "ユーザー"}</div>
@@ -302,6 +304,29 @@ export default function HeaderMenu() {
                 </button>
               </div>
             </motion.div>
+          </motion.div>
+        )}
+        {avatarPreviewOpen && (
+          <motion.div
+            className="fixed inset-0 z-[70] flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setAvatarPreviewOpen(false)} // どこ押しても閉じる
+          >
+            {/* 背景 */}
+            <div className="absolute inset-0 bg-black/60" />
+
+            {/* 画像（拡大） */}
+            <motion.img
+              src={avatarUrl}
+              alt="avatar preview"
+              className="relative w-[70vw] max-w-[420px] aspect-square rounded-full bg-white shadow-2xl object-contain"
+              initial={{ scale: 0.92, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.96, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 380, damping: 28 }}
+            />
           </motion.div>
         )}
       </AnimatePresence>
