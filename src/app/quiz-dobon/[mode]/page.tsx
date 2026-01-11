@@ -13,6 +13,7 @@ import { submitGameResult, calcTitle } from "@/lib/gameResults";
 import { buildResultModalPayload } from "@/lib/resultMessages";
 import { useResultModal } from "../../components/ResultModalProvider";
 import { getWeekStartJST } from "@/lib/week";
+import { openXShare, buildTopUrl } from "@/lib/shareX";
 
 type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
 
@@ -60,6 +61,7 @@ interface QuizResultProps {
   awardStatus: AwardStatus;
   onGoLogin: () => void;
   isCodeMatch: boolean;
+  onShareX: () => void;
 }
 
 const QuizResult = ({
@@ -84,6 +86,7 @@ const QuizResult = ({
   awardStatus,
   onGoLogin,
   isCodeMatch,
+  onShareX,
 }: QuizResultProps) => {
   const [showText1, setShowText1] = useState(false);
   const [showText2, setShowText2] = useState(false);
@@ -309,6 +312,13 @@ const QuizResult = ({
             <div className="flex flex-col md:flex-row justify-center items-center gap-4 mt-6">
               <div className="flex flex-col md:flex-row gap-4">
                 <button
+                  className="px-6 py-3 bg-black text-white border border-black rounded-lg font-bold text-xl hover:opacity-80 cursor-pointer"
+                  onClick={onShareX}
+                >
+                  Xで結果をシェア
+                </button>
+
+                <button
                   onClick={handleRematch}
                   className="
                     w-full md:w-auto
@@ -338,7 +348,6 @@ const QuizResult = ({
                   別の人とマッチする
                 </button>
               </div>
-              
             </div>
             {/* 対戦相手待ちメッセージを下に隔離 */}
             {rematchRequested && !rematchAvailable && (
@@ -1346,6 +1355,21 @@ export default function QuizModePage() {
     return 0;
   });
 
+  // Xシェア機能
+  const handleShareX = () => {
+    const text = [
+      "【ひまQ｜サバイバルクイズ☠️】",
+      `正解数：${correctCount}問`,
+      `順位：${myRankState}位`,
+      `獲得：${earnedPoints}P / ${earnedExp}EXP`,
+      "",
+      "👇ひまQ（みんなで遊べるクイズ）",
+      "#ひまQ #クイズ #クイズゲーム",
+    ].join("\n");
+
+    openXShare({ text, url: buildTopUrl() }); // ✅トップへ
+  };
+
   return (
     <div className="container mx-auto p-8 text-center bg-gradient-to-b from-stone-400 via-amber-100 to-stone-400" key={battleKey}>
       {countdown !== null && (
@@ -1689,6 +1713,7 @@ export default function QuizModePage() {
           awardStatus={awardStatus}
           onGoLogin={() => router.push("/user/login")}
           isCodeMatch={mode === "code"}
+          onShareX={handleShareX}
         />
       )}
     </div>

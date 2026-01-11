@@ -10,6 +10,7 @@ import { submitGameResult, calcTitle } from "@/lib/gameResults";
 import { buildResultModalPayload } from "@/lib/resultMessages";
 import { useResultModal } from "../../components/ResultModalProvider";
 import { getWeekStartJST } from "@/lib/week";
+import { openXShare, buildTopUrl } from "@/lib/shareX";
 
 interface ArticleData {
   id: string;
@@ -98,6 +99,7 @@ const QuizResult = ({
   getTitle,
   titles,
   onGoLogin,
+  onShareX,
 }: {
   correctCount: number;
   earnedPoints: number;
@@ -107,6 +109,7 @@ const QuizResult = ({
   getTitle: () => string;
   titles: { threshold: number; title: string }[];
   onGoLogin: () => void;
+  onShareX: () => void;
 }) => {
   const [showScore, setShowScore] = useState(false);
   const [showText, setShowText] = useState(false);
@@ -226,12 +229,23 @@ const QuizResult = ({
       )}
 
       {showButton && (
-        <button
-          className="px-6 py-3 bg-green-500 text-white border border-black rounded-lg font-bold text-xl hover:bg-green-600 cursor-pointer mt-3 md:mt-5"
-          onClick={() => window.location.reload()}
-        >
-          もう一回挑戦する
-        </button>
+        <div className="flex flex-col md:flex-row justify-center items-center gap-4 mt-6">
+          <div className="flex flex-col md:flex-row gap-4">
+            <button
+              className="px-6 py-3 bg-black text-white border border-black rounded-lg font-bold text-xl hover:opacity-80 cursor-pointer"
+              onClick={onShareX}
+            >
+              Xで結果をシェア
+            </button>
+
+            <button
+              className="px-6 py-3 bg-green-500 text-white border border-black rounded-lg font-bold text-xl hover:bg-green-600 cursor-pointer"
+              onClick={() => window.location.reload()}
+            >
+              もう一回挑戦する
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
@@ -555,6 +569,21 @@ export default function QuizModePage() {
 
   if (questions.length === 0) return <p></p>;
 
+  // Xシェア機能
+  const handleShareX = () => {
+    const text = [
+      "【ひまQ｜連続正解チャレンジ🔥】",
+      `連続正解数：${correctCount}問`,
+      `称号：${getTitle()}`,
+      `獲得：${earnedPoints}P / ${earnedExp}EXP`,
+      "",
+      "👇ひまQ（みんなで遊べるクイズ）",
+      "#ひまQ #クイズ #クイズゲーム",
+    ].join("\n");
+
+    openXShare({ text, url: buildTopUrl() }); // ✅トップへ
+  };
+
   return (
     <div className="container mx-auto p-8 text-center bg-gradient-to-b from-yellow-50 via-yellow-100 to-yellow-200">
       {!finished ? (
@@ -666,6 +695,7 @@ export default function QuizModePage() {
           getTitle={getTitle}
           titles={titles}
           onGoLogin={() => router.push("/user/login")}
+          onShareX={handleShareX}
         />
       )}
     </div>

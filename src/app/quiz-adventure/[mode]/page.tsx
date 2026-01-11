@@ -13,6 +13,7 @@ import { submitGameResult, calcTitle } from "@/lib/gameResults";
 import { buildResultModalPayload } from "@/lib/resultMessages";
 import { useResultModal } from "../../components/ResultModalProvider";
 import { getWeekStartJST } from "@/lib/week";
+import { openXShare, buildTopUrl } from "@/lib/shareX";
 
 type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
 
@@ -112,6 +113,7 @@ interface QuizResultProps {
   awardStatus: AwardStatus;
   onGoLogin: () => void;
   isCodeMatch: boolean;
+  onShareX: () => void;
 }
 
 // 正解数に応じて出すコメント
@@ -153,6 +155,7 @@ const QuizResult = ({
   awardStatus,
   onGoLogin,
   isCodeMatch,
+  onShareX,
 }: QuizResultProps) => {
   const [showScore, setShowScore] = useState(false);
   const [showText, setShowText] = useState(false);
@@ -303,6 +306,13 @@ const QuizResult = ({
           <div className="flex flex-col">
             <div className="flex flex-col md:flex-row justify-center items-center gap-4 mt-6">
               <div className="flex flex-col md:flex-row gap-4">
+                <button
+                  className="px-6 py-3 bg-black text-white border border-black rounded-lg font-bold text-xl hover:opacity-80 cursor-pointer"
+                  onClick={onShareX}
+                >
+                  Xで結果をシェア
+                </button>
+
                 <button
                   onClick={handleRematch}
                   className="
@@ -1395,6 +1405,21 @@ export default function QuizModePage() {
     return 0;
   });
 
+  // Xシェア機能
+  const handleShareX = () => {
+    const text = [
+      "【ひまQ｜協力ダンジョン⚔】",
+      `クリアステージ：ステージ${correctCount}`,
+      `称号：${getTitle()}`,
+      `獲得：${earnedPoints}P / ${earnedExp}EXP`,
+      "",
+      "👇ひまQ（みんなで遊べるクイズ）",
+      "#ひまQ #クイズ #クイズゲーム",
+    ].join("\n");
+
+    openXShare({ text, url: buildTopUrl() }); // ✅トップへ
+  };
+
   return (
     <div className="container mx-auto p-8 text-center bg-gradient-to-b from-indigo-300 via-slate-300 to-sky-300" key={battleKey}>
       {countdown !== null && (
@@ -1830,6 +1855,7 @@ export default function QuizModePage() {
           awardStatus={awardStatus}
           onGoLogin={() => router.push("/user/login")}
           isCodeMatch={mode === "code"}
+          onShareX={handleShareX}
         />
       )}
     </div>
