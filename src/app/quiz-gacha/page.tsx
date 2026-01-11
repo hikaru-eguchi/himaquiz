@@ -186,7 +186,10 @@ const QuizGacha = ({
 
       {/* 入手キャラ履歴 */}
       <div className="mt-6 border-t pt-4">
-        <h2 className="text-xl md:text-2xl font-bold mb-2">入手キャラ</h2>
+        <h2 className="text-xl md:text-2xl font-bold mb-1">今回の入手キャラ</h2>
+        <p className="text-sm md:text-md text-gray-600 mb-5">
+          （前回までの入手キャラは、メニューの「マイキャラ図鑑」で確認できます）
+        </p>
 
         {history.length === 0 ? (
           <p className="text-xl md:text-2xl text-center text-gray-500">なし</p>

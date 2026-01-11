@@ -22,6 +22,7 @@ export default function MyPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const [avatarUrl, setAvatarUrl] = useState<string>("/images/初期アイコン.png");
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   useEffect(() => {
     if (userLoading) return;
@@ -103,112 +104,128 @@ export default function MyPage() {
   const expPercent = Math.min(100, Math.floor((gainedThisLevel / needThisLevel) * 100));
 
   return (
-    <div className="max-w-md mx-auto p-4 space-y-4">
-      <h1 className="text-2xl md:text-4xl font-bold text-center">マイページ</h1>
+    <>
+      <div className="max-w-md mx-auto p-4 space-y-4">
+        <h1 className="text-2xl md:text-4xl font-bold text-center">マイページ</h1>
 
-      <div className="border rounded p-3 space-y-2">
-        <p>
-          <span className="font-medium text-md md:text-xl">ユーザー名：</span>
-          <span className="text-md md:text-xl">{profile?.username ?? "(未設定)"}</span>
-        </p>
-
-        <p>
-          <span className="font-medium text-md md:text-xl">ユーザーID：</span>
-          <span className="text-md md:text-xl">{profile?.user_id ?? "(未設定)"}</span>
-        </p>
-
-        <p>
-          <span className="font-medium text-md md:text-xl">
-            復旧用メールアドレス：
-          </span>
-          <span className="text-md md:text-xl">{profile?.recovery_email ?? "(未設定)"}</span>
-        </p>
-
-        <p>
-          <span className="font-medium text-md md:text-xl">
-            アイコン：
-          </span>
-          <span className="text-md md:text-xl">
-            {profile?.avatar_character_id ? "設定中" : "初期アイコン"}
-          </span>
-        </p>
-        <p>
-          <span className="text-sm md:text-md">
-            ※「クイズガチャ」で当たったキャラを設定できます
-          </span>
-        </p>
-        <div className="flex items-center justify-center gap-3">
-          <img
-            src={avatarUrl}
-            alt="icon"
-            className="w-30 h-30 md:w-40 md:h-40 border-2 border-white shadow-lg rounded-full bg-white object-contain"
-          />
-        </div>
-
-        <p>
-          <span className="font-medium text-md md:text-xl">現在のユーザーレベル：</span>
-          <span className="font-medium text-md md:text-xl text-amber-500">Lv.{profile?.level ?? 1}</span>
-        </p>
-
-        <div className="space-y-2">
-          <p className="text-sm md:text-base text-gray-700 font-bold">
-            次のレベルまで <span className="text-green-700">{expToNext}</span> EXP
+        <div className="border rounded p-3 space-y-2">
+          <p>
+            <span className="font-medium text-md md:text-xl">ユーザー名：</span>
+            <span className="text-md md:text-xl">{profile?.username ?? "(未設定)"}</span>
           </p>
 
-          {/* ゲージ */}
-          <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden border">
-            <div
-              className="h-4 bg-green-500"
-              style={{ width: `${expPercent}%` }}
+          <p>
+            <span className="font-medium text-md md:text-xl">ユーザーID：</span>
+            <span className="text-md md:text-xl">{profile?.user_id ?? "(未設定)"}</span>
+          </p>
+
+          <p>
+            <span className="font-medium text-md md:text-xl">
+              復旧用メールアドレス：
+            </span>
+            <span className="text-md md:text-xl">{profile?.recovery_email ?? "(未設定)"}</span>
+          </p>
+
+          <p>
+            <span className="font-medium text-md md:text-xl">
+              アイコン：
+            </span>
+            <span className="text-md md:text-xl">
+              {profile?.avatar_character_id ? "設定中" : "初期アイコン"}
+            </span>
+          </p>
+          <p>
+            <span className="text-sm md:text-md">
+              ※「クイズガチャ」で当たったキャラを設定できます
+            </span>
+          </p>
+          <div className="flex items-center justify-center gap-3">
+            <img
+              src={avatarUrl}
+              alt="icon"
+              onClick={() => setIsPreviewOpen(true)}
+              className="w-30 h-30 md:w-40 md:h-40 border-2 border-white shadow-lg rounded-full bg-white object-contain"
             />
           </div>
 
-          {/* 数字 */}
-          <p className="text-sm md:text-md text-gray-600">
-            {gainedThisLevel} / {needThisLevel} 
+          <p>
+            <span className="font-medium text-md md:text-xl">現在のユーザーレベル：</span>
+            <span className="font-medium text-md md:text-xl text-amber-500">Lv.{profile?.level ?? 1}</span>
+          </p>
+
+          <div className="space-y-2">
+            <p className="text-sm md:text-base text-gray-700 font-bold">
+              次のレベルまで <span className="text-green-700">{expToNext}</span> EXP
+            </p>
+
+            {/* ゲージ */}
+            <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden border">
+              <div
+                className="h-4 bg-green-500"
+                style={{ width: `${expPercent}%` }}
+              />
+            </div>
+
+            {/* 数字 */}
+            <p className="text-sm md:text-md text-gray-600">
+              {gainedThisLevel} / {needThisLevel} 
+            </p>
+          </div>
+
+          <p>
+            <span className="font-medium text-md md:text-xl">現在の所持ポイント：</span>
+            <span className="text-blue-500 font-bold text-md md:text-xl">{totalPoints} pt</span>
           </p>
         </div>
 
-        <p>
-          <span className="font-medium text-md md:text-xl">現在の所持ポイント：</span>
-          <span className="text-blue-500 font-bold text-md md:text-xl">{totalPoints} pt</span>
-        </p>
+        <button
+          onClick={() => router.push("/user/mypage/edit")}
+          className="w-full bg-yellow-500 text-white py-2 rounded cursor-pointer"
+        >
+          プロフィールを編集
+        </button>
+
+        <button
+          onClick={() => router.push("/user/mypage/points-history")}
+          className="w-full bg-blue-500 text-white py-2 rounded cursor-pointer"
+        >
+          ポイント履歴
+        </button>
+
+        <button
+          onClick={() => router.push("/user/mypage/records")}
+          className="w-full bg-green-500 text-white py-2 rounded cursor-pointer"
+        >
+          プレイ記録
+        </button>
+
+        <button
+          onClick={() => router.push("/user/mypage/titles")}
+          className="w-full bg-purple-500 text-white py-2 rounded cursor-pointer"
+        >
+          称号コレクション
+        </button>
+
+        <button
+          onClick={() => router.push("/user/change-password")}
+          className="w-full bg-red-500 text-white py-2 rounded cursor-pointer"
+        >
+          パスワードを変更
+        </button>
       </div>
 
-      <button
-        onClick={() => router.push("/user/mypage/edit")}
-        className="w-full bg-yellow-500 text-white py-2 rounded cursor-pointer"
-      >
-        プロフィールを編集
-      </button>
-
-      <button
-        onClick={() => router.push("/user/mypage/points-history")}
-        className="w-full bg-blue-500 text-white py-2 rounded cursor-pointer"
-      >
-        ポイント履歴
-      </button>
-
-      <button
-        onClick={() => router.push("/user/mypage/records")}
-        className="w-full bg-green-500 text-white py-2 rounded cursor-pointer"
-      >
-        プレイ記録
-      </button>
-
-      <button
-        onClick={() => router.push("/user/mypage/titles")}
-        className="w-full bg-purple-500 text-white py-2 rounded cursor-pointer"
-      >
-        称号コレクション
-      </button>
-
-      <button
-        onClick={() => router.push("/user/change-password")}
-        className="w-full bg-red-500 text-white py-2 rounded cursor-pointer"
-      >
-        パスワードを変更
-      </button>
-    </div>
+      {isPreviewOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+          onClick={() => setIsPreviewOpen(false)}
+        >
+          <img
+            src={avatarUrl}
+            alt="icon preview"
+            className="w-60 h-60 md:w-100 md:h-100 rounded-full bg-white shadow-2xl object-contain"
+          />
+        </div>
+      )}
+    </>
   );
 }

@@ -84,7 +84,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                       `,
                     }}
                   >
-                    空き時間にみんなで楽しむなら
+                    空き時間に遊ぶなら
                     <span className="block text-5xl md:text-7xl mt-2">ひまQ</span>
                   </h1>
                   <p className="text-black/90 mt-3 md:mt-4 mb-1 md:mb-0 md:text-xl tracking-wide font-bold">
