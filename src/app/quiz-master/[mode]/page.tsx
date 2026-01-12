@@ -595,7 +595,7 @@ export default function QuizModePage() {
 
           // ドロップ判定（10分の1）
           const dropChance = Math.random();
-          if (dropChance < 0.03) {
+          if (dropChance < 0.005) {
             setMiracleSeedCount((prev) => prev + 1);
             setMiracleSeedMessage("伝説の果実🍏を手に入れた！✨");
           }
