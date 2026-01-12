@@ -8,6 +8,7 @@ import remarkSlug from "remark-slug";
 import remarkAutolinkHeadings from "remark-autolink-headings";
 import type { Metadata } from "next";
 import Link from "next/link";
+import BackButton from "@/app/components/BackButton";
 
 // 👇 追加：TableOfContentsコンポーネントを読み込む
 import TableOfContents from "@/app/components//TableOfContents";
@@ -51,7 +52,7 @@ function getGenreBg(genre?: string) {
 // ===== 記事一覧を取得（関連記事用にも再利用） =====
 async function getAllArticles(): Promise<ArticleData[]> {
   const dir = path.join(process.cwd(), "src", "articles");
-  const fileNames = fs.readdirSync(dir).filter((f) => f.endsWith(".md"));
+  const fileNames = fs.readdirSync(dir).filter((f) => f.endsWith(".md")).sort();;
 
   return fileNames.map((fileName) => {
     const id = fileName.replace(/\.md$/, "");
@@ -145,15 +146,48 @@ export default async function ArticleDetailPage({
   const { id } = await params;
   const articleData = await getArticleData(id);
 
+  const allArticlesSorted = (await getAllArticles())
+    .filter((a) => a.quiz?.genre === articleData.quiz?.genre) // クイズがある記事だけ
+    .sort(
+      (a, b) =>
+        new Date(a.date).getTime() - new Date(b.date).getTime()
+    ); // 日付順（昇順）
+
+  const decodedId = decodeURIComponent(id);
+
+  const currentIndex = allArticlesSorted.findIndex((a) => a.id === decodedId);
+
+  const prevArticle =
+    currentIndex > 0 ? allArticlesSorted[currentIndex - 1] : null;
+
+  const nextArticle =
+    currentIndex >= 0 && currentIndex < allArticlesSorted.length - 1
+      ? allArticlesSorted[currentIndex + 1]
+      : null;
+
   // 👇 関連記事を取得（自分以外・同じ難易度の記事のみ・上位4件）
   const allArticles = await getAllArticles();
   const relatedArticles = allArticles
     .filter((a) => a.id !== id)
     .filter((a) => a.quiz?.genre === articleData.quiz?.genre)
+    .sort(() => Math.random() - 0.5)
     .slice(0, 4);
 
   return (
     <article className="max-w-5xl mx-auto p-8 md:p-12 bg-white shadow-lg rounded-xl">
+      {/* 左上：一覧に戻る */}
+      {/* <div className="mb-4">
+        <Link
+          href="/quizzes"
+          className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 text-sm"
+        >
+          ← 一覧に戻る
+        </Link>
+      </div> */}
+      {/* 左上：前のページに戻る */}
+      <div className="mb-4">
+        <BackButton />
+      </div>
       {/* タイトル */}
       <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-6 text-center">
         {articleData.title}
@@ -176,6 +210,31 @@ export default async function ArticleDetailPage({
           dangerouslySetInnerHTML={{ __html: articleData.contentHtml }}
         />
       )}
+
+      {/* 前/次の問題ボタン */}
+      <div className="mt-6 flex items-center justify-between gap-3">
+        {nextArticle ? (
+          <Link
+            href={`/article/${nextArticle.id}`}
+            className="px-4 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50"
+          >
+            ← 前の問題
+          </Link>
+        ) : (
+          <div />
+        )}
+
+        {prevArticle ? (
+          <Link
+            href={`/article/${prevArticle.id}`}
+            className="px-4 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50"
+          >
+            次の問題 →
+          </Link>
+        ) : (
+          <div />
+        )}
+      </div>
 
       {/* おすすめクイズ */}
       {relatedArticles.length > 0 && (
