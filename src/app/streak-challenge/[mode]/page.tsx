@@ -100,6 +100,7 @@ const QuizResult = ({
   titles,
   onGoLogin,
   onShareX,
+  onRetry,
 }: {
   correctCount: number;
   earnedPoints: number;
@@ -110,6 +111,7 @@ const QuizResult = ({
   titles: { threshold: number; title: string }[];
   onGoLogin: () => void;
   onShareX: () => void;
+  onRetry: () => void;
 }) => {
   const [showScore, setShowScore] = useState(false);
   const [showText, setShowText] = useState(false);
@@ -240,7 +242,7 @@ const QuizResult = ({
 
             <button
               className="px-6 py-3 bg-green-500 text-white border border-black rounded-lg font-bold text-xl hover:bg-green-600 cursor-pointer"
-              onClick={() => window.location.reload()}
+              onClick={onRetry}
             >
               もう一回挑戦する
             </button>
@@ -319,6 +321,36 @@ export default function QuizModePage() {
     { threshold: 95, title: "究極クイズマスター" },
     { threshold: 100, title: "神（ゴッド）🌟" },
   ];
+
+  const resetGame = () => {
+    // 進行リセット
+    setCurrentIndex(0);
+    setUserAnswer(null);
+    setCorrectCount(0);
+    setFinished(false);
+
+    // 表示/演出リセット
+    setShowCorrectMessage(false);
+    setFlashMilestone(null);
+    setIncorrectMessage(null);
+
+    // タイマーリセット（各問30秒）
+    setTimeLeft(30);
+
+    // リザルト関連リセット
+    setEarnedPoints(0);
+    setEarnedExp(0);
+    setAwardStatus("idle");
+    awardedOnceRef.current = false;
+    sentRef.current = false;
+
+    // ref も同期（あなたのタイマー制御が ref を見てるので重要）
+    finishedRef.current = false;
+    showCorrectRef.current = false;
+
+    // 問題順もシャッフルし直す（任意だけどおすすめ）
+    setQuestions((prev) => shuffleArray(prev));
+  };
 
   useEffect(() => {
     finishedRef.current = finished;
@@ -696,6 +728,7 @@ export default function QuizModePage() {
           titles={titles}
           onGoLogin={() => router.push("/user/login")}
           onShareX={handleShareX}
+          onRetry={resetGame}
         />
       )}
     </div>

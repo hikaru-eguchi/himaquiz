@@ -203,6 +203,7 @@ const QuizResult = ({
   awardStatus,
   onGoLogin,
   onShareX,
+  onRetry,
 }: {
   correctCount: number;
   getTitle: () => string;
@@ -214,6 +215,7 @@ const QuizResult = ({
   awardStatus: AwardStatus;
   onGoLogin: () => void;
   onShareX: () => void;
+  onRetry: () => void;
 }) => {
   const [showScore, setShowScore] = useState(false);
   const [showText, setShowText] = useState(false);
@@ -322,7 +324,7 @@ const QuizResult = ({
             </button>
             <button
               className="px-6 py-3 bg-green-500 text-white border border-black rounded-lg font-bold text-xl hover:bg-green-600 cursor-pointer"
-              onClick={() => window.location.reload()}
+              onClick={onRetry}
             >
               もう一回挑戦する
             </button>
@@ -417,6 +419,65 @@ export default function QuizModePage() {
     { threshold: 21, title: "✨クイズ王👑" },
     { threshold: 22, title: "💫クイズ神💫" },
   ];
+
+  const resetGame = () => {
+    // 進行
+    setCurrentIndex(0);
+    setCurrentStage(0);
+    setCorrectCount(0);
+    setFinished(false);
+    setUserAnswer(null);
+
+    // 表示/演出
+    setShowCorrectMessage(false);
+    setIncorrectMessage(null);
+    setAttackMessage(null);
+    setIsAttacking(false);
+    setShowAttackEffect(false);
+    setShowEnemyAttackEffect(false);
+    setEnemyDefeatedMessage(null);
+    setDeathMessage(null);
+    setShowNextStageButton(false);
+    setShowMagicButtons(false);
+    setHintText(null);
+    setLevelUpMessage(null);
+    setLevelUp(null);
+    setHealing(null);
+    setIsBlinking(false);
+    setIsBlinkingEnemy(false);
+    setEnemyVisible(true);
+    setMiracleSeedMessage(null);
+
+    // クールダウン系
+    setLastHintUsedIndex(null);
+    setLastHealUsedIndex(null);
+
+    // タイマー
+    setTimeLeft(30);
+
+    // リザルト/付与系
+    setEarnedPoints(0);
+    setEarnedExp(0);
+    setAwardStatus("idle");
+    awardedOnceRef.current = false;
+    sentRef.current = false;
+
+    // ref同期（タイマー制御で見てるので重要）
+    finishedRef.current = false;
+    showCorrectRef.current = false;
+    incorrectRef.current = null;
+    isAttackingRef.current = false;
+
+    // HP/レベル初期化
+    const char = characters.find((c) => c.id === character);
+    if (char) setCharacterHP(char.hp);
+    setCharacterLevel(1);
+    setEnemyHP(getEnemyForStage(1).hp);
+    setCharacter(null)
+
+    // 問題順シャッフル（任意）
+    setQuestions((prev) => shuffleArray(prev));
+  };
 
   useEffect(() => {
     finishedRef.current = finished;
@@ -515,7 +576,7 @@ export default function QuizModePage() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [currentIndex, questions]); 
+  }, []); 
 
   const checkAnswer = () => {
     const correctAnswer = questions[currentIndex].quiz?.answer;
@@ -1673,6 +1734,7 @@ export default function QuizModePage() {
           awardStatus={awardStatus}
           onGoLogin={() => router.push("/user/login")}
           onShareX={handleShareX}
+          onRetry={resetGame}
         />
       )}
     </div>

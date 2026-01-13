@@ -88,6 +88,7 @@ const QuizResult = ({
   onGoLogin,
   earnedExp,
   onShareX,
+  onRetry,
 }: {
   correctCount: number;
   getTitle: () => string;
@@ -100,6 +101,7 @@ const QuizResult = ({
   onGoLogin: () => void;
   earnedExp: number;
   onShareX: () => void;
+  onRetry: () => void;
 }) => {
   const [showScore, setShowScore] = useState(false);
   const [showText, setShowText] = useState(false);
@@ -205,7 +207,7 @@ const QuizResult = ({
             </button>
             <button
               className="px-6 py-3 bg-green-500 text-white border border-black rounded-lg font-bold text-xl hover:bg-green-600 cursor-pointer"
-              onClick={() => window.location.reload()}
+              onClick={() => onRetry()}
             >
               もう一回挑戦する
             </button>
@@ -253,6 +255,7 @@ export default function QuizModePage() {
 
   const sentRef = useRef(false);
   const { pushModal } = useResultModal();
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const titles = [
     { threshold: 300, title: "優等生" },
@@ -288,6 +291,35 @@ export default function QuizModePage() {
     { threshold: 9500, title: "究極クイズマスター" },
     { threshold: 10000, title: "神（ゴッド）🌟" },
   ];
+
+  const resetGame = () => {
+    setCurrentIndex(0);
+    setUserAnswer(null);
+    setCorrectCount(0);
+    setFinished(false);
+    setShowCorrectMessage(false);
+    setFlashMilestone(null);
+    setIncorrectMessage(null);
+
+    setScore(0);
+    wrongStreakRef.current = 0;
+    setWrongStreak(0);
+    setScoreChange(null);
+
+    // タイマーリセット
+    setTimeLeft(totalTime);
+
+    // リザルト関連
+    setEarnedPoints(0);
+    setEarnedExp(0);
+    setAwardStatus("idle");
+    awardedOnceRef.current = false;
+    sentRef.current = false;
+
+    // 問題をシャッフルし直す（同じ問題順を避けたい場合）
+    setQuestions((prev) => shuffleArray(prev));
+    startTimer();
+  };
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -327,19 +359,32 @@ export default function QuizModePage() {
 
   const shuffleArray = <T,>(arr: T[]) => [...arr].sort(() => Math.random() - 0.5);
 
-  // タイマー（0になったら強制終了）
-  useEffect(() => {
-    const timer = setInterval(() => {
+  const startTimer = () => {
+    // 既存があれば止める
+    if (timerRef.current) clearInterval(timerRef.current);
+
+    timerRef.current = setInterval(() => {
       setTimeLeft((t) => {
         if (t <= 1) {
-          clearInterval(timer);
+          // ここでは clearInterval(timer) は使わない（refを止める）
+          if (timerRef.current) clearInterval(timerRef.current);
+          timerRef.current = null;
+
           setFinished(true);
           return 0;
         }
         return t - 1;
       });
     }, 1000);
-    return () => clearInterval(timer);
+  };
+
+  // タイマー（0になったら強制終了）
+  useEffect(() => {
+    startTimer();
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const checkAnswer = () => {
@@ -687,6 +732,7 @@ export default function QuizModePage() {
           awardStatus={awardStatus}
           onGoLogin={() => router.push("/user/login")}
           onShareX={handleShareX}
+          onRetry={resetGame}
         />
       )}
     </div>
