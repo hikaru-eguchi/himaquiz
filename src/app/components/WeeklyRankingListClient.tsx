@@ -165,7 +165,6 @@ export default function WeeklyRankingListClient({
         >
           <div
             className="w-full max-w-sm bg-white rounded-2xl border-2 border-black p-5 shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
           >
             <p className="text-xl md:text-2xl font-extrabold mb-3 text-center">ユーザープロフィール</p>
 
