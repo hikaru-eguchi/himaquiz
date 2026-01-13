@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createSupabasePublicServerClient } from "../../lib/supabase/public-server";
 import { getWeekStartJST } from "../../lib/week";
+import WeeklyRankingListClient from "@/app/components/WeeklyRankingListClient";
 
 type RankKey = "score" | "correct_count" | "play_count";
 type Row = {
@@ -40,8 +41,6 @@ export default async function WeeklyRankingCard({
   if (error) return null;
 
   const list = (data ?? []) as Row[];
-  const top3 = list.slice(0, 3);
-  const rest = list.slice(3);
 
   return (
     <div className={`max-w-[700px] mx-auto border-2 border-black rounded-xl m-5 p-5 bg-gradient-to-b ${bgClass}`}>
@@ -62,86 +61,7 @@ export default async function WeeklyRankingCard({
         ) : null}
       </div>
 
-      <div className="mt-4 grid grid-cols-3 gap-2 items-end">
-        {[1, 0, 2].map((i) => {
-          const u = top3[i];
-          const rank = i + 1;
-
-          // 高さ（差は上に伸びる＝下揃え）
-          const podiumH =
-            rank === 1 ? "h-48 md:h-52" : rank === 2 ? "h-44 md:h-48" : "h-40 md:h-44";
-
-          const ring =
-            rank === 1
-              ? "ring-4 ring-yellow-400"
-              : rank === 2
-              ? "ring-2 ring-gray-300"
-              : "ring-2 ring-amber-600/40";
-
-          const medal = rank === 1 ? "👑" : rank === 2 ? "🥈" : "🥉";
-
-          // ✅ 追加：順位ごとのカード背景
-          const topBg =
-            rank === 1
-              ? "bg-gradient-to-b from-yellow-50 via-yellow-100 to-white"
-              : rank === 2
-              ? "bg-gradient-to-b from-gray-50 via-slate-100 to-white"
-              : "bg-gradient-to-b from-amber-50 via-orange-100 to-white";
-
-          return (
-            <div key={rank} className="text-center">
-              <div
-                className={`rounded-xl ${topBg} ${podiumH} grid place-items-center p-2 md:p-3 shadow ${ring}`}
-              >
-                {/* 👑🥈🥉 */}
-                <p className="text-2xl md:text-3xl">{medal}</p>
-
-                {/* アイコン */}
-                <div className="mt-1 w-14 h-14 md:w-16 md:h-16 rounded-full border-2 border-black bg-white overflow-hidden shadow">
-                  <img
-                    src={u?.avatar_url ?? "/images/初期アイコン.png"}
-                    alt={u?.username ?? "user"}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-
-                {/* 名前 */}
-                <p className="mt-2 text-xs md:text-sm font-extrabold truncate w-full px-1">
-                  {u?.username ?? "---"}
-                </p>
-
-                {/* 値（score/回数など） */}
-                <p className="text-xs md:text-sm font-bold">
-                  {u ? valueLabel(u) : "--"}
-                </p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* 4位〜10位 */}
-      <div className="mt-4 space-y-2">
-        {rest.map((u, idx) => (
-          <div
-            key={u.user_id}
-            className="flex items-center justify-between bg-white/80 border-2 border-black rounded-xl px-3 py-2"
-          >
-            <div className="flex items-center gap-2 min-w-0">
-              <p className="font-extrabold w-10">{idx + 4}位</p>
-              <div className="w-9 h-9 rounded-full border-2 border-black bg-white overflow-hidden">
-                <img
-                  src={u.avatar_url ?? "/images/初期アイコン.png"}
-                  alt={u.username ?? "user"}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <p className="font-bold truncate">{u.username ?? "名無し"}</p>
-            </div>
-            <p className="font-extrabold">{valueLabel(u)}</p>
-          </div>
-        ))}
-      </div>
+      <WeeklyRankingListClient rows={list} labelType={orderBy} />
     </div>
   );
 }

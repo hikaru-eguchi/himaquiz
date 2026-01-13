@@ -360,11 +360,11 @@ export default async function HomePage({
           クイズなどで集めたポイントでガチャを回そう！
         </p>
         <div className="flex justify-center gap-3 md:gap-5 flex-wrap">
-          {/* クイズガチャ */}
+          {/* ひまQガチャ */}
           <div className="text-center max-w-[260px]">
             <Link href="/quiz-gacha" className="w-full md:w-auto flex justify-center">
               <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-br from-red-400 via-sky-400 to-green-400 text-white hover:scale-110 transition-all">
-                クイズガチャ
+                ひまQガチャ
               </button>
             </Link>
             <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">

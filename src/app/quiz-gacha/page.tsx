@@ -19,6 +19,8 @@ const QuizGacha = ({
   history,
   setHistory,
   rolling,
+  rollGachaPremium,
+  isPremiumRoll,
 }: {
   points: number;
   rollGacha: () => void;
@@ -38,6 +40,8 @@ const QuizGacha = ({
     >
   >;
   rolling: boolean;
+  rollGachaPremium: () => void;
+  isPremiumRoll: boolean;
 }) => {
   const [showOpen, setShowOpen] = useState(false);
   const [showEffect, setShowEffect] = useState(false);
@@ -149,10 +153,14 @@ const QuizGacha = ({
   const canRoll = points >= 100 && !rolling;
 
   const showRainbowBg = !!gachaResult && phase !== "result";
+  const showPremiumBg = isPremiumRoll && !!gachaResult && phase !== "result";
+
+  const PREMIUM_COST = 1000;
+  const canRollPremium = points >= PREMIUM_COST && !rolling;
 
   return (
     <div className="text-center">
-      <div className="flex flex-col items-center justify-center gap-4 mb-10">
+      <div className="flex flex-col items-center justify-center gap-3 mb-10">
         <img src="/images/gacha.png" className="w-60 h-60 md:w-100 md:h-100" />
         <div className="flex flex-col items-center justify-between w-full mx-auto">
           <div className="bg-white border border-black px-4 py-2 rounded shadow">
@@ -174,12 +182,55 @@ const QuizGacha = ({
           onClick={rollGacha}
           disabled={!canRoll}
         >
-          {rolling ? "抽選中..." : "100Pでガチャを回す🎰"}
+          {rolling ? "抽選中..." : "通常ガチャ（100P）🎰"}
+        </button>
+
+        <button
+          className={`
+            relative px-6 py-3 rounded-lg font-extrabold text-xl border-2 border-yellow-200
+            transition-all duration-300 ease-in-out text-white
+            overflow-hidden w-full max-w-[246px] md:w-auto
+            ${
+              canRollPremium
+                ? "cursor-pointer"
+                : "opacity-50 cursor-not-allowed pointer-events-none"
+            }
+          `}
+          onClick={() => rollGachaPremium()}
+          disabled={!canRollPremium}
+        >
+          {/* キラキラ用の薄い光（背景） */}
+          <span className="absolute inset-0 bg-gradient-to-r from-yellow-400 via-pink-400 to-purple-500 opacity-90" />
+          <span className="absolute inset-0 animate-pulse bg-white/20" />
+
+          {/* ボタン本体文字 */}
+          <span className="relative z-10 drop-shadow-[0_2px_0_rgba(0,0,0,0.6)]">
+            {rolling ? (
+              "抽選中..."
+            ) : (
+              <>
+                <span className="hidden md:inline">
+                  ★4以上確定ガチャ（1000P）🌟
+                </span>
+
+                <span className="md:hidden block leading-tight">
+                  <span className="block">★4以上確定ガチャ</span>
+                  <span className="block">（1000P）🌟</span>
+                </span>
+              </>
+            )}
+          </span>
         </button>
 
         {points < 100 && (
           <p className="text-xl text-red-500 font-bold animate-pulse">
             ポイントが足りないよ！
+          </p>
+        )}
+
+        {points < 1000 && (
+          <p className="text-sm md:text-lg text-yellow-100 font-bold drop-shadow mt-1">
+            ★4以上確定は1000P必要！
           </p>
         )}
       </div>
@@ -323,6 +374,40 @@ const QuizGacha = ({
                   opacity: 0.55,
                 }}
               />
+            )}
+            {showPremiumBg && (
+              <>
+                {/* 金のフラッシュ */}
+                <motion.div
+                  className="fixed inset-0 z-10"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: [0, 0.9, 0.2, 0.9, 0.2] }}
+                  transition={{ duration: 1.2 }}
+                  style={{
+                    background:
+                      "radial-gradient(circle at center, #fff7b0, #ffd700, transparent 70%)",
+                  }}
+                />
+                {/* きら粒 */}
+                {Array.from({ length: 60 }).map((_, i) => (
+                  <motion.div
+                    key={`p-${i}`}
+                    className="fixed z-20 w-2 h-2 rounded-full bg-white"
+                    style={{
+                      top: `${Math.random() * 100}%`,
+                      left: `${Math.random() * 100}%`,
+                      opacity: 0.8,
+                      filter: "blur(1px)",
+                    }}
+                    animate={{ y: [-30, 30], opacity: [0, 1, 0] }}
+                    transition={{
+                      duration: 0.8 + Math.random(),
+                      repeat: Infinity,
+                      repeatType: "mirror",
+                    }}
+                  />
+                ))}
+              </>
             )}
             {(phase === "drop") && (
               <motion.img
@@ -490,6 +575,7 @@ export default function QuizMasterPage() {
   const descriptionRef = useRef<HTMLParagraphElement>(null);
 
   const [rolling, setRolling] = useState(false);
+  const [isPremiumRoll, setIsPremiumRoll] = useState(false);
   // DB から読むポイント
   const [points, setPoints] = useState(0);
   const [gachaResult, setGachaResult] = useState<null | {
@@ -727,6 +813,105 @@ export default function QuizMasterPage() {
     }
   };
 
+  const PREMIUM_COST = 1000;
+
+  const rollGachaPremium = async () => {
+    if (rolling) return;
+    setRolling(true);
+    setIsPremiumRoll(true); // ★ プレミアム演出ON
+
+    const unlockTimer = setTimeout(() => {
+      setRolling(false);
+      setIsPremiumRoll(false); // ★ 演出OFF（通常画面に戻す）
+    }, 3500); // 通常よりちょい長く
+
+    try {
+      if (!user) {
+        alert("ログインしてからガチャを回してね！");
+        return;
+      }
+
+      // 最新ポイントを DB から取得
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("points")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError) {
+        console.error("get profile points error:", profileError);
+        alert("ポイントの取得に失敗しました。時間をおいてもう一度試してください。");
+        return;
+      }
+
+      const currentPoints = profile?.points ?? 0;
+      if (currentPoints < PREMIUM_COST) {
+        alert("ポイントが足りません！（1000P以上必要です）");
+        return;
+      }
+
+      const newPoints = currentPoints - PREMIUM_COST;
+
+      // プロフィールのポイントを更新
+      const { data: updatedProfile, error: updateError } = await supabase
+        .from("profiles")
+        .update({ points: newPoints })
+        .eq("id", user.id)
+        .select("points")
+        .single();
+
+      if (updateError) {
+        console.error("update points error:", updateError);
+        alert("ポイントの更新に失敗しました。時間をおいてもう一度試してください。");
+        return;
+      }
+
+      setPoints(updatedProfile?.points ?? newPoints);
+      window.dispatchEvent(new Event("points:updated"));
+
+      // ポイントログ（-1000）
+      await supabase.from("user_point_logs").insert({
+        user_id: user.id,
+        change: -PREMIUM_COST,
+        reason: "★4以上確定ガチャでポイント消費",
+      });
+
+      // ✅ ★4以上だけ抽選（激レア/超激レア/神レア/シークレット）
+      const premiumPool = gachaCharacters.filter((c) =>
+        ["激レア", "超激レア", "神レア", "シークレット"].includes(c.rarity)
+      );
+
+      const totalWeight = premiumPool.reduce((sum, c) => sum + c.weight, 0);
+      let random = Math.random() * totalWeight;
+
+      for (const char of premiumPool) {
+        if (random < char.weight) {
+          setGachaResult(char);
+          setTimeout(() => setHistory((prev) => [...prev, char]), 2000);
+
+          // キャラ取得ログ（通常と同じ）
+          const { data: characterRow } = await supabase
+            .from("characters")
+            .select("id")
+            .eq("no", char.no)
+            .maybeSingle();
+
+          if (characterRow?.id) {
+            await supabase.rpc("increment_user_character", {
+              p_user_id: user.id,
+              p_character_id: characterRow.id,
+            });
+          }
+          return;
+        }
+        random -= char.weight;
+      }
+    } finally {
+      // 固定ロック優先のためここでは解除しない（既存方針と同じ）
+      // clearTimeout(unlockTimer) したいならここで
+    }
+  };
+
   if (!userLoading && !user) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-red-300 via-blue-200 to-green-200">
@@ -792,9 +977,9 @@ export default function QuizMasterPage() {
             "
           >
             <span className="block md:hidden leading-tight">
-              クイズ<br />ガチャ
+              ひまQ<br />ガチャ
             </span>
-            <span className="hidden md:block">クイズガチャ</span>
+            <span className="hidden md:block">ひまQガチャ</span>
           </h1>
           <p
             className="
@@ -829,7 +1014,7 @@ export default function QuizMasterPage() {
               ref={descriptionRef}
               className="text-gray-700 text-md md:text-lg text-center px-4 py-2"
             >
-              「クイズガチャ」は、ポイントを使ってガチャに挑戦し、さまざまなキャラクターを手に入れるゲームです。
+              「ひまQガチャ」は、ポイントを使ってガチャに挑戦し、さまざまなキャラクターを手に入れるゲームです。
               <br />
               ガチャは 1回100P で回せます。
               <br />
@@ -868,6 +1053,8 @@ export default function QuizMasterPage() {
         <QuizGacha
           points={points}
           rollGacha={rollGacha}
+          rollGachaPremium={rollGachaPremium}
+          isPremiumRoll={isPremiumRoll} 
           gachaResult={gachaResult}
           setGachaResult={setGachaResult}
           history={history}

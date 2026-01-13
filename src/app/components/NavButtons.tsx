@@ -125,7 +125,7 @@ export default function NavButtons() {
               activeUrl === "/quiz-gacha" ? activeStyle : ""
             }`}
           >
-            クイズガチャ
+            ひまQガチャ
           </button>
         </Link>
       </div>

@@ -136,7 +136,7 @@ export default function MyPage() {
           </p>
           <p>
             <span className="text-sm md:text-md">
-              ※「クイズガチャ」で当たったキャラを設定できます
+              ※「ひまQガチャ」で当たったキャラを設定できます
             </span>
           </p>
           <div className="flex items-center justify-center gap-3">

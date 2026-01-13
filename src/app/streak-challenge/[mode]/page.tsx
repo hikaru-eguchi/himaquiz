@@ -271,7 +271,7 @@ export default function QuizModePage() {
   const [finished, setFinished] = useState(false);
   const [showCorrectMessage, setShowCorrectMessage] = useState(false);
   const [flashMilestone, setFlashMilestone] = useState<string | null>(null);
-  const [timeLeft, setTimeLeft] = useState(60);
+  const [timeLeft, setTimeLeft] = useState(30);
   const [incorrectMessage, setIncorrectMessage] = useState<string | null>(null);
 
   // ★ リザルト用：獲得ポイントと付与状態
@@ -416,7 +416,7 @@ export default function QuizModePage() {
       setFinished(true);
     } else {
       setCurrentIndex((i) => i + 1);
-      setTimeLeft(60);
+      setTimeLeft(30);
     }
   };
 
@@ -593,8 +593,8 @@ export default function QuizModePage() {
           </h2>
 
           {!incorrectMessage && (
-            <p className="text-xl font-bold mb-4 text-red-500">
-              残り時間: {timeLeft} 秒
+            <p className="text-2xl md:text-3xl font-bold mb-4 text-red-500">
+              回答タイマー: {timeLeft} 秒
             </p>
           )}
 
