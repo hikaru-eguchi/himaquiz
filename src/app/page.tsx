@@ -186,9 +186,32 @@ export default async function HomePage({
 
       <WeeklyRankingSection />
       
-        <p className="text-xl md:text-2xl mb-2 text-center leading-tight mt-5 mb-5">
-          楽しいクイズはこちら👇
+      <p className="text-xl md:text-2xl mb-2 text-center leading-tight mt-5 mb-5">
+        「クイズ問題集」はこちら👇
+      </p>
+
+      <div className="max-w-[700px] mx-auto border-2 border rounded-xl m-5 p-5 mb-10 bg-orange-50">
+        <p className="text-2xl md:text-4xl font-extrabold mb-2 text-center">
+          クイズ問題集
         </p>
+        <p className="text-lg md:text-xl mb-2 text-center leading-tight mb-4">
+          面白クイズや脳トレクイズの問題集！ひとりでもみんなとでも楽しめる！
+        </p>
+        <div className="flex justify-center gap-3 md:gap-5 flex-wrap">
+          {/* クイズ集一覧 */}
+          <div className="text-center max-w-[260px]">
+            <Link href="/quizbooks" className="w-full md:w-auto flex justify-center">
+              <button className="text-xl md:text-2xl px-3 py-1 md:px-5 md:py-2 bg-white border-2 border-black rounded-full font-bold hover:scale-105 transition-all">
+                おもしろクイズ一覧
+              </button>
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      <p className="text-xl md:text-2xl mb-2 text-center leading-tight mt-5 mb-5">
+        「4択クイズ」はこちら👇
+      </p>
 
       <div className="max-w-[700px] mx-auto border-2 border-black rounded-xl m-5 p-5 bg-gradient-to-b from-blue-0 via-blue-50 to-blue-100">
         <p className="text-2xl md:text-4xl font-extrabold mb-2 text-center leading-tight drop-shadow-xl text-blue-500">

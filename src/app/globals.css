@@ -54,7 +54,7 @@
 
 /* --- 画像 --- */
 .prose img {
-  @apply w-full max-w-3xl mx-auto rounded-xl shadow-xl;
+  @apply w-full max-w-md mx-auto rounded-xl shadow-xl;
   border: 4px solid #FFCE54;
 }
 
