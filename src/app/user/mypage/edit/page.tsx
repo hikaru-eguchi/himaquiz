@@ -5,6 +5,14 @@ import { createSupabaseBrowserClient } from "@/lib/supabaseClient";
 import { useSupabaseUser } from "../../../../hooks/useSupabaseUser";
 import { useRouter } from "next/navigation";
 
+const DEFAULT_ICONS = [
+  { id: "default_1", name: "はてなマーク", url: "/images/hatena.png" },
+  { id: "default_2", name: "スターマーク", url: "/images/hosi.png" },
+  { id: "default_3", name: "ハートマーク", url: "/images/ha-to.png" },
+] as const;
+
+type DefaultIconId = (typeof DEFAULT_ICONS)[number]["id"];
+
 export default function ProfileEditPage() {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const { user, loading: userLoading } = useSupabaseUser();
@@ -17,7 +25,9 @@ export default function ProfileEditPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [avatarType, setAvatarType] = useState<"initial" | "default" | "owned">("initial");
   const [avatarCharacterId, setAvatarCharacterId] = useState<string | null>(null);
+  const [avatarDefaultId, setAvatarDefaultId] = useState<DefaultIconId | null>(null);
 
   useEffect(() => {
     if (userLoading) return;
@@ -38,7 +48,27 @@ export default function ProfileEditPage() {
         setUserId(data.user_id ?? "");
         setOriginalUserId(data.user_id ?? "");
         setRecoveryEmail(data.recovery_email ?? "");
-        setAvatarCharacterId(data.avatar_character_id ?? null);
+
+        const savedUrl = (data.avatar_url ?? "/images/初期アイコン.png").startsWith("/")
+          ? (data.avatar_url ?? "/images/初期アイコン.png")
+          : `/${data.avatar_url}`;
+
+        if (data.avatar_character_id) {
+          setAvatarType("owned");
+          setAvatarCharacterId(data.avatar_character_id);
+          setAvatarDefaultId(null);
+        } else {
+          const hit = DEFAULT_ICONS.find(i => i.url === savedUrl);
+          if (hit) {
+            setAvatarType("default");
+            setAvatarDefaultId(hit.id);
+            setAvatarCharacterId(null);
+          } else {
+            setAvatarType("initial");
+            setAvatarDefaultId(null);
+            setAvatarCharacterId(null);
+          }
+        }
       }
       setLoading(false);
     };
@@ -149,10 +179,21 @@ export default function ProfileEditPage() {
       }
 
       // 3. profiles の更新
-      const selectedAvatarUrl =
-        avatarCharacterId
-          ? (ownedChars.find(c => c.id === avatarCharacterId)?.image_url ?? "/images/初期アイコン.png")
-          : "/images/初期アイコン.png";
+      const INITIAL = "/images/初期アイコン.png";
+
+      let selectedAvatarUrl = INITIAL;
+      let nextAvatarCharacterId: string | null = null;
+
+      if (avatarType === "default" && avatarDefaultId) {
+        selectedAvatarUrl = DEFAULT_ICONS.find(i => i.id === avatarDefaultId)?.url ?? INITIAL;
+        nextAvatarCharacterId = null;
+      }
+
+      if (avatarType === "owned" && avatarCharacterId) {
+        const raw = ownedChars.find(c => c.id === avatarCharacterId)?.image_url ?? INITIAL;
+        selectedAvatarUrl = raw.startsWith("/") ? raw : `/${raw}`;
+        nextAvatarCharacterId = avatarCharacterId;
+      }
 
       const normalizedAvatarUrl =
         selectedAvatarUrl.startsWith("/") ? selectedAvatarUrl : `/${selectedAvatarUrl}`;
@@ -163,8 +204,8 @@ export default function ProfileEditPage() {
           username,
           user_id: userId,
           recovery_email: recoveryEmail || null,
-          avatar_character_id: avatarCharacterId,
-          avatar_url: normalizedAvatarUrl, // ★追加
+          avatar_character_id: nextAvatarCharacterId,
+          avatar_url: normalizedAvatarUrl,
         })
         .eq("id", user.id);
 
@@ -192,24 +233,26 @@ export default function ProfileEditPage() {
       setSaving(false);
     }
   };
-
+  
+  const selectedUrl = useMemo(() => {
+    const INITIAL = "/images/初期アイコン.png";
+    
+    if (avatarType === "default" && avatarDefaultId) {
+      return DEFAULT_ICONS.find(i => i.id === avatarDefaultId)?.url ?? INITIAL;
+    }
+    if (avatarType === "owned" && avatarCharacterId) {
+      const raw = ownedChars.find(c => c.id === avatarCharacterId)?.image_url ?? INITIAL;
+      return raw.startsWith("/") ? raw : `/${raw}`;
+    }
+    return INITIAL;
+  }, [avatarType, avatarDefaultId, avatarCharacterId, ownedChars]);
+  
   if (userLoading || loading) return <p>読み込み中...</p>;
-
-  const selectedChar = avatarCharacterId
-    ? ownedChars.find(c => c.id === avatarCharacterId)
-    : undefined;
-
-  const selectedUrlRaw = selectedChar?.image_url;
-
-  const selectedUrl =
-    typeof selectedUrlRaw === "string" && selectedUrlRaw.length > 0
-      ? (selectedUrlRaw.startsWith("/") ? selectedUrlRaw : `/${selectedUrlRaw}`)
-      : "/images/初期アイコン.png";
 
   return (
     <div className="max-w-md mx-auto p-4 space-y-4">
       <div className="mb-6 md:mb-8">
-        <div className="flex justify-end">
+        <div className="flex justify-start">
           <button
             onClick={() => router.push("/user/mypage")}
             className="text-sm md:text-base text-blue-600 underline cursor-pointer"
@@ -272,14 +315,41 @@ export default function ProfileEditPage() {
             />
             <button
               type="button"
-              onClick={() => setAvatarCharacterId(null)}
+              onClick={() => {
+                setAvatarType("initial");
+                setAvatarDefaultId(null);
+                setAvatarCharacterId(null);
+              }}
               className="px-3 py-2 rounded bg-gray-200 hover:bg-gray-300"
             >
               初期アイコンにする
             </button>
           </div>
 
+          <p className="text-sm md:text-base text-gray-600 mb-2">＜ 最初から選べるアイコン ＞</p>
+          <div className="grid grid-cols-3 md:grid-cols-4 gap-2 mb-4">
+            {DEFAULT_ICONS.map((ic) => {
+              const selected = avatarType === "default" && avatarDefaultId === ic.id;
+              return (
+                <button
+                  key={ic.id}
+                  type="button"
+                  onClick={() => {
+                    setAvatarType("default");
+                    setAvatarDefaultId(ic.id);
+                    setAvatarCharacterId(null); // ownedの選択を外す
+                  }}
+                  className={`p-1 rounded border ${selected ? "border-blue-600 ring-4 ring-blue-400" : "border-gray-400"}`}
+                  title={ic.name}
+                >
+                  <img src={ic.url} alt={ic.name} className="w-full aspect-square object-contain" />
+                </button>
+              );
+            })}
+          </div>
+
           {/* 所持キャラから選択 */}
+          <p className="text-sm md:text-base text-gray-600 mb-2">＜ 所持キャラアイコン ＞</p>
           {ownedChars.length === 0 ? (
             <p className="text-sm text-gray-600">まだ所持キャラがいません（ガチャでゲットできます）</p>
           ) : (
@@ -289,13 +359,17 @@ export default function ProfileEditPage() {
                   ? ch.image_url.startsWith("/") ? ch.image_url : `/${ch.image_url}`
                   : "/images/初期アイコン.png";
 
-                const selected = avatarCharacterId === ch.id;
+                const selected = avatarType === "owned" && avatarCharacterId === ch.id;
 
                 return (
                   <button
                     key={ch.id}
                     type="button"
-                    onClick={() => setAvatarCharacterId(ch.id)}
+                    onClick={() => {
+                      setAvatarType("owned");
+                      setAvatarCharacterId(ch.id);
+                      setAvatarDefaultId(null);
+                    }}
                     className={`p-1 rounded border ${selected ? "border-blue-600 ring-4 ring-blue-400" : "border-gray-400"}`}
                     title={ch.name}
                   >

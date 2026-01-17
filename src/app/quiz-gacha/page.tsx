@@ -171,7 +171,7 @@ const QuizGacha = ({
         </div>
         <button
           className={`
-            px-6 py-3 rounded-lg font-bold text-xl border border-black
+            px-6 py-3 rounded-lg font-bold text-xl
             transition-all duration-300 ease-in-out
             ${
               canRoll
@@ -692,6 +692,7 @@ export default function QuizMasterPage() {
 
   // ★ 修正: プロフィールの points を減らしてログを書き込んでからガチャ抽選
   const rollGacha = async () => {
+    setIsPremiumRoll(false);
     if (rolling) return;
     setRolling(true);
 
@@ -822,7 +823,6 @@ export default function QuizMasterPage() {
 
     const unlockTimer = setTimeout(() => {
       setRolling(false);
-      setIsPremiumRoll(false); // ★ 演出OFF（通常画面に戻す）
     }, 3500); // 通常よりちょい長く
 
     try {

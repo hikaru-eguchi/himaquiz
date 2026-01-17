@@ -18,6 +18,8 @@ export default function NavButtons() {
   // ✅ クリックしたら activeUrl だけ更新（開閉はしない）
   const handleNavClick = (url: string) => {
     setActiveUrl(url);
+    const isDesktop = window.matchMedia("(min-width: 768px)").matches;
+    if (!isDesktop) setIsOpen(false);
   };
 
   const genreMap: Record<string, string> = {
@@ -207,7 +209,7 @@ export default function NavButtons() {
                   </div>
 
                   <p className="mt-1 text-xs text-black/60 text-center md:hidden">
-                    ← 横にスワイプできます
+                    ← 横にスワイプできます →
                   </p>
                 </div>
               </fieldset>
@@ -263,7 +265,7 @@ export default function NavButtons() {
                   </div>
 
                   <p className="mt-1 text-xs text-black/60 text-center md:hidden">
-                    ← 横にスワイプできます
+                    ← 横にスワイプできます →
                   </p>
                 </div>
               </fieldset>

@@ -130,7 +130,7 @@ const QuizResult = ({
       {showScore && (
         <>
           <p className="text-3xl md:text-5xl mb-4 md:mb-6">正解数： {correctCount}問</p>
-          <p className="text-3xl md:text-5xl mb-4 md:mb-6 text-blue-500 font-bold">得点：{score} P</p>
+          <p className="text-3xl md:text-5xl mb-4 md:mb-6 text-blue-500 font-bold">得点：{score} 点</p>
         </>
       )}
 
@@ -206,7 +206,7 @@ const QuizResult = ({
               Xで結果をシェア
             </button>
             <button
-              className="px-6 py-3 bg-green-500 text-white border border-black rounded-lg font-bold text-xl hover:bg-green-600 cursor-pointer"
+              className="px-6 py-3 bg-green-500 text-white rounded-lg font-bold text-xl hover:bg-green-600 cursor-pointer"
               onClick={() => onRetry()}
             >
               もう一回挑戦する
@@ -617,7 +617,7 @@ export default function QuizModePage() {
                   bg-white text-blue-600 border-2 border-blue-600
                 "
               >
-                得点：{score} P
+                得点：{score} 点
               </p>
 
               <AnimatePresence>
@@ -681,7 +681,7 @@ export default function QuizModePage() {
                   <div className="mt-10">
                     {(showCorrectMessage || incorrectMessage) && (
                       <button
-                        className="px-5 py-3 md:px-6 md:py-3 border border-black bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-4 hover:bg-blue-600 cursor-pointer"
+                        className="px-5 py-3 md:px-6 md:py-3 bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-4 hover:bg-blue-600 cursor-pointer"
                         onClick={() => {
                           setShowCorrectMessage(false);
                           setIncorrectMessage(null);
@@ -703,7 +703,7 @@ export default function QuizModePage() {
                 <>
                   <QuizQuestion quiz={questions[currentIndex].quiz} userAnswer={userAnswer} setUserAnswer={setUserAnswer} />
                   <button
-                    className="px-5 py-3 md:px-6 md:py-3 border border-black bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-4 hover:bg-blue-600 cursor-pointer"
+                    className="px-5 py-3 md:px-6 md:py-3 bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-4 hover:bg-blue-600 cursor-pointer"
                     onClick={checkAnswer}
                     disabled={userAnswer === null}
                   >

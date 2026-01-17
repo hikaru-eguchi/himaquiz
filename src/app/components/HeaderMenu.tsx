@@ -22,7 +22,7 @@ export default function HeaderMenu() {
   const fetchProfile = async (uid: string) => {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("username, points, level, exp, avatar_character_id")
+      .select("username, points, level, exp, avatar_character_id, avatar_url")
       .eq("id", uid)
       .single();
 
@@ -31,7 +31,12 @@ export default function HeaderMenu() {
     setLevel(profile?.level ?? 1);
     setExp(profile?.exp ?? 0);
 
-    // avatar_character_id があれば、そのキャラ画像を取りに行く
+    const initial = "/images/初期アイコン.png";
+    const saved = profile?.avatar_url
+      ? (profile.avatar_url.startsWith("/") ? profile.avatar_url : `/${profile.avatar_url}`)
+      : initial;
+
+    // ✅ 所持キャラがあれば characters を優先
     if (profile?.avatar_character_id) {
       const { data: ch } = await supabase
         .from("characters")
@@ -40,12 +45,13 @@ export default function HeaderMenu() {
         .single();
 
       const url = ch?.image_url
-        ? ch.image_url.startsWith("/") ? ch.image_url : `/${ch.image_url}`
-        : "/images/初期アイコン.png";
+        ? (ch.image_url.startsWith("/") ? ch.image_url : `/${ch.image_url}`)
+        : saved; // ← 失敗時は saved にフォールバック
 
       setAvatarUrl(url);
     } else {
-      setAvatarUrl("/images/初期アイコン.png");
+      // ✅ default / initial は avatar_url をそのまま表示
+      setAvatarUrl(saved);
     }
   };
 
@@ -64,6 +70,9 @@ export default function HeaderMenu() {
       else {
         setUsername(null);
         setPoints(null);
+        setLevel(null);
+        setExp(null);
+        setAvatarUrl("/images/初期アイコン.png");
       }
     };
 
@@ -113,10 +122,12 @@ export default function HeaderMenu() {
     // ✅ サーバーでCookie削除
     await fetch("/api/auth/logout", { method: "POST" });
 
-    setOpen(false);
     setUser(null);
     setUsername(null);
     setPoints(null);
+    setLevel(null);
+    setExp(null);
+    setAvatarUrl("/images/初期アイコン.png");
 
     // ✅ 画面遷移＆Server Component再描画
     router.push("/");

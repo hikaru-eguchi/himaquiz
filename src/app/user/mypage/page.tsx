@@ -13,6 +13,7 @@ type Profile = {
   level: number | null;
   exp: number | null;
   avatar_character_id: string | null;
+  avatar_url: string | null;
 };
 
 export default function MyPage() {
@@ -38,7 +39,7 @@ export default function MyPage() {
       try {
         const { data, error } = await supabase
           .from("profiles")
-          .select("username, user_id, recovery_email, points, level, exp, avatar_character_id")
+          .select("username, user_id, recovery_email, points, level, exp, avatar_character_id, avatar_url")
           .eq("id", user.id)
           .single();
 
@@ -49,8 +50,12 @@ export default function MyPage() {
           setProfile(p);
 
           // ✅ アイコンURLを作る
+          const initial = "/images/初期アイコン.png";
+          const saved = p.avatar_url ? (p.avatar_url.startsWith("/") ? p.avatar_url : `/${p.avatar_url}`) : initial;
+
           if (!p.avatar_character_id) {
-            setAvatarUrl("/images/初期アイコン.png");
+            // default も initial もここに入る（avatar_url が入ってればそれが表示される）
+            setAvatarUrl(saved);
           } else {
             const { data: ch, error: chErr } = await supabase
               .from("characters")
@@ -59,7 +64,7 @@ export default function MyPage() {
               .single();
 
             if (chErr || !ch?.image_url) {
-              setAvatarUrl("/images/初期アイコン.png");
+              setAvatarUrl(saved); // ← fallbackを初期じゃなく saved にすると強い
             } else {
               const url = ch.image_url.startsWith("/") ? ch.image_url : `/${ch.image_url}`;
               setAvatarUrl(url);
@@ -131,12 +136,9 @@ export default function MyPage() {
               アイコン：
             </span>
             <span className="text-md md:text-xl">
-              {profile?.avatar_character_id ? "設定中" : "初期アイコン"}
-            </span>
-          </p>
-          <p>
-            <span className="text-sm md:text-md">
-              ※「ひまQガチャ」で当たったキャラを設定できます
+              {profile?.avatar_character_id
+                ? "所持キャラ"
+                : (profile?.avatar_url && profile.avatar_url !== "/images/初期アイコン.png" ? "デフォルト" : "初期アイコン")}
             </span>
           </p>
           <div className="flex items-center justify-center gap-3">

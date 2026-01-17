@@ -179,11 +179,11 @@ const QuizResult = ({
           </p>
 
           <p className="text-2xl md:text-4xl font-bold mb-2">
-            あなた：{myScore} P
+            あなた：{myScore} 点
           </p>
 
           <p className="text-2xl md:text-4xl font-bold mb-6">
-            相手：{opponentScore} P
+            相手：{opponentScore} 点
           </p>
         </>
       )}
@@ -1259,7 +1259,7 @@ export default function QuizModePage() {
                   )}
 
                   <button
-                    className="px-5 py-3 md:px-6 md:py-3 border border-black bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-4 hover:bg-blue-600 cursor-pointer"
+                    className="px-5 py-3 md:px-6 md:py-3 bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-4 hover:bg-blue-600 cursor-pointer"
                     onClick={nextQuestion}
                   >
                     次の問題へ
@@ -1273,7 +1273,7 @@ export default function QuizModePage() {
                     setUserAnswer={setUserAnswer}
                   />
                   <button
-                    className="px-5 py-3 md:px-6 md:py-3 border border-black bg-blue-500 text-white text-lg md:text-xl font-medium rounded hover:bg-blue-600 cursor-pointer"
+                    className="px-5 py-3 md:px-6 md:py-3 bg-blue-500 text-white text-lg md:text-xl font-medium rounded hover:bg-blue-600 cursor-pointer"
                     onClick={checkAnswer}
                     disabled={userAnswer === null}
                   >

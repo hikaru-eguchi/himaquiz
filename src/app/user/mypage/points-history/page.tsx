@@ -91,7 +91,7 @@ export default function PointHistoryPage() {
     <div className="max-w-3xl mx-auto px-4 py-6 md:py-10">
       {/* タイトル */}
       <div className="mb-6 md:mb-8">
-        <div className="flex justify-end">
+        <div className="flex justify-start">
           <button
             onClick={() => router.push("/user/mypage")}
             className="text-sm md:text-base text-blue-600 underline cursor-pointer"

@@ -145,7 +145,7 @@ export default function ChangePasswordPage() {
   return (
     <div className="max-w-md mx-auto p-4">
       <div className="mb-6 md:mb-8">
-        <div className="flex justify-end">
+        <div className="flex justify-start">
           <button
             onClick={() => router.push("/user/mypage")}
             className="text-sm md:text-base text-blue-600 underline cursor-pointer"
