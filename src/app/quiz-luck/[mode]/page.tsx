@@ -709,8 +709,11 @@ export default function QuizModePage() {
         <div className="absolute -bottom-4 left-4 text-xl md:text-2xl animate-pulse">🌟</div>
 
         {/* 本体 */}
-        <p className="relative px-6 py-3 md:px-10 md:py-4 text-3xl md:text-6xl font-extrabold text-green-600 drop-shadow">
-          チャレンジ成功！
+        <p className="relative px-6 py-3 md:px-10 md:py-4 text-4xl md:text-6xl font-extrabold text-orange-500 drop-shadow text-center leading-tight">
+          チャレンジ
+          <br className="md:hidden" />
+          <span className="hidden md:inline"> </span>
+          成功！
         </p>
       </div>
       <div>
@@ -773,7 +776,7 @@ export default function QuizModePage() {
     <div className="container mx-auto p-8 text-center bg-gradient-to-b from-green-50 via-green-100 to-green-200">
       {phase !== "finished" ? (
         <>
-          <h2 className="text-4xl md:text-5xl font-extrabold mb-4 md:mb-8 text-purple-500 drop-shadow-lg">
+          <h2 className="text-4xl md:text-5xl font-extrabold mb-4 md:mb-8 text-orange-500 drop-shadow-lg">
             {label}
           </h2>
 
