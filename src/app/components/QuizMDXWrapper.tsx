@@ -32,7 +32,7 @@ export default function QuizMDXWrapper({ quiz, children }: QuizProps) {
   };
 
   return (
-    <div className="p-4 max-w-xl mx-auto bg-white rounded-xl">
+    <div className="p-4 max-w-xl mx-auto bg-white rounded-xl text-center">
       <p className="mb-4 text-xl md:text-2xl">{quiz.question}</p>
 
       {quiz.choices.map((choice, i) => {

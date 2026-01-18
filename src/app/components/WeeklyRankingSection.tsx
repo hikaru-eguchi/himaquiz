@@ -3,13 +3,13 @@ import Link from "next/link";
 
 export default async function WeeklyRankingSection() {
   return (
-    <section className="max-w-[740px] mx-auto my-8">
+    <section className="max-w-[700px] mx-auto my-8">
       {/* セクション見出し */}
       <div className="border-2 border-black rounded-2xl bg-amber-50 shadow p-4 md:p-6">
-        <div className="flex items-end justify-between gap-3">
+        <div className="flex flex-col items-center text-center gap-3">
           <div>
             <p className="text-2xl md:text-4xl font-extrabold drop-shadow">
-              🏅 週間ランキング
+              週間ランキング🏅
             </p>
             <p className="text-sm md:text-md text-gray-700 mt-1">
               今週のトッププレイヤーをチェック！（スコア／プレイ回数／正解数）
@@ -23,7 +23,7 @@ export default async function WeeklyRankingSection() {
         </div>
 
         {/* ログイン案内（固定でここに出す） */}
-        <div className="mt-3 border-2 border-black rounded-xl bg-white px-3 py-2">
+        <div className="mt-3 border-2 border-black rounded-xl bg-white px-3 py-2 text-center">
           <p className="text-sm md:text-md font-bold text-gray-800">
             🔔 ログインするとプレイ結果がランキングに反映されます
           </p>

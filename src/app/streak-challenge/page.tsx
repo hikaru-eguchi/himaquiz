@@ -208,7 +208,7 @@ export default function QuizMasterPage() {
             ref={descriptionRef}
             className="text-gray-700 text-md md:text-lg text-center px-4 py-2"
           >
-            「連続正解チャレンジ」は、どれだけクイズに連続正解できるかを競うゲームです。<br />
+            「連続正解チャレンジ」は、どれだけクイズに連続正解できるかを競うクイズゲームです。<br />
             1問あたりの制限時間は60秒。<br />
             1問でも間違えた時点でチャレンジ終了となります。<br />
             連続正解数が増えるほど、あなたの称号もランクアップ！<br />

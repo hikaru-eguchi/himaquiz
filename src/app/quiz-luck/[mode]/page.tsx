@@ -1,0 +1,892 @@
+"use client";
+
+import { useState, useEffect, useRef, useMemo } from "react";
+import { useSearchParams, usePathname, useRouter } from "next/navigation";
+import QuizQuestion from "../../components/QuizQuestion";
+import { QuizData } from "@/lib/articles";
+import { createSupabaseBrowserClient } from "@/lib/supabaseClient";
+import { useSupabaseUser } from "../../../hooks/useSupabaseUser";
+import { submitGameResult, calcTitle } from "@/lib/gameResults";
+import { buildResultModalPayload } from "@/lib/resultMessages";
+import { useResultModal } from "../../components/ResultModalProvider";
+import { getWeekStartJST } from "@/lib/week";
+import { openXShare, buildTopUrl } from "@/lib/shareX";
+
+interface ArticleData {
+  id: string;
+  title: string;
+  genre: string;
+  quiz?: {
+    title: string;
+    question: string;
+    answer: string | number;
+    displayAnswer?: string;
+    choices?: (string | number)[];
+    genre: string;
+    level: string;
+    answerExplanation?: string;
+    trivia?: string;
+  };
+}
+
+function calcQuizEarnedPoints(correctCount: number) {
+  let total = 0;
+  for (let i = 1; i <= correctCount; i++) {
+    const tier = Math.floor((i - 1) / 3); // 0,1,2...
+    const per = 5 * (tier + 1); // 5,10,15...
+    total += per;
+  }
+  return total;
+}
+
+// EXPは「正解数 × 20」
+function calcEarnedExp(correctCount: number) {
+  return correctCount * 20;
+}
+
+type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
+
+const QuizResult = ({
+  correctCount,
+  earnedPoints,
+  earnedExp,
+  isLoggedIn,
+  awardStatus,
+  titles,
+  onGoLogin,
+  onShareX,
+  onRetry,
+}: {
+  correctCount: number;
+  earnedPoints: number;
+  earnedExp: number;
+  isLoggedIn: boolean;
+  awardStatus: AwardStatus;
+  titles: { threshold: number; title: string }[];
+  onGoLogin: () => void;
+  onShareX: () => void;
+  onRetry: () => void;
+}) => {
+  const [showScore, setShowScore] = useState(false);
+  const [showText, setShowText] = useState(false);
+  const [showRank, setShowRank] = useState(false);
+  const [showButton, setShowButton] = useState(false);
+
+  useEffect(() => {
+    const timers: NodeJS.Timeout[] = [];
+    timers.push(setTimeout(() => setShowScore(true), 500));
+    timers.push(setTimeout(() => setShowText(true), 1000));
+    timers.push(setTimeout(() => setShowRank(true), 1500));
+    timers.push(setTimeout(() => setShowButton(true), 1500));
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
+  return (
+    <div className="text-center mt-6">
+      {showScore && (
+        <p className="text-3xl md:text-5xl mb-4 md:mb-6">
+          正解数： {correctCount}問
+        </p>
+      )}
+
+      {showRank && (
+        <>
+          <div className="mx-auto inline-block mb-6">
+  <div className="bg-gradient-to-b from-yellow-100 via-white to-yellow-200 rounded-3xl px-8 py-5 md:px-12 md:py-7 shadow-xl">
+    <p className="text-xl md:text-3xl font-extrabold text-gray-900">
+      ✨ 今回の報酬 ✨
+    </p>
+    <p className="mt-1 text-4xl md:text-6xl font-extrabold text-green-600 drop-shadow">
+      {earnedPoints}P！
+    </p>
+  </div>
+</div>
+          <div className="flex flex-col md:flex-row items-center justify-center mb-10 gap-4 md:gap-10">
+            <img
+              src="/images/quiz.png"
+              alt="クイズ"
+              className="w-0 h-0 md:w-36 md:h-55 ml-15"
+            />
+            <div className="flex flex-row md:flex-row items-center justify-center gap-8">
+              <img
+                src="/images/quiz.png"
+                alt="クイズ"
+                className="w-20 h-30 md:w-0 md:h-0"
+              />
+              <img
+                src="/images/quiz_woman.png"
+                alt="クイズ"
+                className="w-22 h-25 md:w-38 md:h-40"
+              />
+            </div>
+          </div>
+        </>
+      )}
+      
+      {/* ★ 獲得ポイント表示（ログイン有無で文言変更） */}
+      {showRank && (
+        <div className="mx-auto max-w-[520px] bg-white border-2 border-black rounded-xl p-4 shadow mt-2">
+          <p className="text-xl md:text-2xl font-extrabold text-gray-800">
+            今回の獲得ポイント：{" "}
+            <span className="text-green-600">{earnedPoints} P</span>
+          </p>
+          <p className="text-xl md:text-2xl font-extrabold text-gray-800 mt-2">
+            今回の獲得経験値： <span className="text-purple-600">{earnedExp} EXP</span>
+          </p>
+
+          {isLoggedIn ? (
+            <>
+              {awardStatus === "awarding" && (
+                <p className="text-md md:text-xl text-gray-600 mt-2">
+                  ポイント反映中...
+                </p>
+              )}
+              {awardStatus === "awarded" && (
+                <p className="text-md md:text-xl text-green-700 font-bold mt-2">
+                  ✅ ポイントを加算しました！
+                </p>
+              )}
+              {awardStatus === "error" && (
+                <p className="text-md md:text-xl text-red-600 font-bold mt-2">
+                  ❌ ポイント加算に失敗しました。時間をおいて再度お試しください。
+                </p>
+              )}
+            </>
+          ) : (
+            <div className="mt-2">
+              <p className="text-md md:text-xl text-gray-700 font-bold">
+                ※未ログインのため受け取れません。ログインすると次からポイントを受け取れます！
+              </p>
+              <button
+                onClick={onGoLogin}
+                className="mt-2 px-4 py-2 bg-blue-500 text-white border border-black rounded-lg font-bold hover:bg-blue-600 cursor-pointer"
+              >
+                ログインする
+              </button>
+              <p className="text-md md:text-xl text-gray-700 font-bold mt-2">
+                ログインなしでも、引き続き遊べます👇
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {showButton && (
+        <div className="flex flex-col md:flex-row justify-center items-center gap-4 mt-6">
+          <div className="flex flex-col md:flex-row gap-4">
+            <button
+              className="px-6 py-3 bg-black text-white border border-black rounded-lg font-bold text-xl hover:opacity-80 cursor-pointer"
+              onClick={onShareX}
+            >
+              Xで結果をシェア
+            </button>
+
+            <button
+              className="px-6 py-3 bg-blue-500 text-white rounded-lg font-bold text-xl hover:bg-blue-600 cursor-pointer"
+              onClick={onRetry}
+            >
+              もう一回挑戦する
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default function QuizModePage() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const mode = pathname.split("/").pop() || "random";
+  const searchParams = useSearchParams();
+  const genre = searchParams?.get("genre") || "";
+  const level = searchParams?.get("level") || "";
+
+  type GamePhase = "intro" | "playing" | "between" | "finished";
+  const CHALLENGE_TARGETS = [2, 3, 5] as const; // 1回目2連続 / 2回目3連続 / 3回目5連続
+
+  const randChoice = <T,>(arr: readonly T[]) => arr[Math.floor(Math.random() * arr.length)];
+  const randInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+  // 第2以降の倍率用（第1はベース報酬決定）
+  const getMulRange = (idx: number) => {
+    // idx: 0=第1, 1=第2, 2=第3
+    if (idx === 1) return { min: 2, max: 3 }; // 第2
+    return { min: 2, max: 4 };               // 第3(とそれ以外)
+  };
+
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+  const { user, loading: userLoading } = useSupabaseUser();
+
+  const [questions, setQuestions] = useState<{ id: string; quiz: QuizData }[]>(
+    []
+  );
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [userAnswer, setUserAnswer] = useState<number | null>(null);
+  const [correctCount, setCorrectCount] = useState(0);
+  const [finished, setFinished] = useState(false);
+  const [showCorrectMessage, setShowCorrectMessage] = useState(false);
+  const [flashMilestone, setFlashMilestone] = useState<string | null>(null);
+  const [timeLeft, setTimeLeft] = useState(30);
+  const [incorrectMessage, setIncorrectMessage] = useState<string | null>(null);
+
+  // ★ リザルト用：獲得ポイントと付与状態
+  const [earnedPoints, setEarnedPoints] = useState(0);
+  const [earnedExp, setEarnedExp] = useState(0);
+  const [awardStatus, setAwardStatus] = useState<AwardStatus>("idle");
+  const awardedOnceRef = useRef(false); // 二重加算防止
+  const sentRef = useRef(false);        // ★ 成績/称号送信用（二重送信防止）
+  const { pushModal } = useResultModal();
+
+  const [phase, setPhase] = useState<GamePhase>("intro");
+
+  const [challengeIndex, setChallengeIndex] = useState(0); // 0,1,2
+  const [streakInChallenge, setStreakInChallenge] = useState(0); // 連続正解（チャレンジ内）
+  const [baseReward, setBaseReward] = useState<number | null>(null); // 100/200/300
+  const [reward, setReward] = useState(0); // 現在の未確定報酬
+  const [failReward, setFailReward] = useState(0); // 失敗時の取得ポイント（半分）
+  const [lastMultiplier, setLastMultiplier] = useState<number | null>(null); // 2~4(演出用)
+  const [finalReward, setFinalReward] = useState(0); // 確定して結果に渡すポイント
+  const [prevReward, setPrevReward] = useState<number | null>(null);
+
+  const finishedRef = useRef(finished);
+  const showCorrectRef = useRef(showCorrectMessage);
+  const rewardAppliedRef = useRef<{ [k: number]: boolean }>({});
+
+  const titles = [
+    { threshold: 3, title: "優等生" },
+    { threshold: 5, title: "異端児" },
+    { threshold: 8, title: "賢者" },
+    { threshold: 10, title: "博識者" },
+    { threshold: 13, title: "クイズ研究家" },
+    { threshold: 15, title: "クイズ学者" },
+    { threshold: 18, title: "クイズ教授" },
+    { threshold: 20, title: "クイズ名人" },
+    { threshold: 23, title: "クイズ達人" },
+    { threshold: 25, title: "クイズ仙人" },
+    { threshold: 28, title: "クイズ星人" },
+    { threshold: 30, title: "知識マスター" },
+    { threshold: 33, title: "天才クイズプレイヤー" },
+    { threshold: 35, title: "脳内図書館 " },
+    { threshold: 38, title: "クイズマシーン " },
+    { threshold: 40, title: "問題バスター " },
+    { threshold: 43, title: "答えの支配者 " },
+    { threshold: 45, title: "クイズモンスター " },
+    { threshold: 48, title: "答えの錬金術師" },
+    { threshold: 50, title: "ひらめきの妖精" },
+    { threshold: 53, title: "クイズ帝王" },
+    { threshold: 55, title: "問題ハンター" },
+    { threshold: 58, title: "記憶の魔術師" },
+    { threshold: 60, title: "IQ200超えの賢者" },
+    { threshold: 65, title: "クイズ鬼人" },
+    { threshold: 70, title: "クイズ竜王" },
+    { threshold: 75, title: "クイズ魔人" },
+    { threshold: 80, title: "クイズ覇王" },
+    { threshold: 85, title: "クイズオリンポスの支配者" },
+    { threshold: 90, title: "レジェンドクイズマスター" },
+    { threshold: 95, title: "究極クイズマスター" },
+    { threshold: 100, title: "神（ゴッド）🌟" },
+  ];
+
+  const resetGame = () => {
+    // 進行リセット
+    setCurrentIndex(0);
+    setUserAnswer(null);
+    setCorrectCount(0);
+    setFinished(false);
+
+    // 画面/演出
+    setShowCorrectMessage(false);
+    setFlashMilestone(null);
+    setIncorrectMessage(null);
+    setTimeLeft(30);
+
+    // 追加：運命チャレンジ用
+    setPhase("intro");
+    setChallengeIndex(0);
+    setStreakInChallenge(0);
+    setBaseReward(null);
+    setReward(0);
+    setFailReward(0);
+    setLastMultiplier(null);
+    setFinalReward(0);
+
+    // リザルト関連
+    setEarnedPoints(0);
+    setEarnedExp(0);
+    setAwardStatus("idle");
+    awardedOnceRef.current = false;
+    sentRef.current = false;
+
+    finishedRef.current = false;
+    showCorrectRef.current = false;
+
+    setQuestions((prev) => shuffleArray(prev));
+  };
+
+  const startFirstChallenge = () => {
+    // 最初から始める
+    setPhase("playing");
+    setChallengeIndex(0);
+    setStreakInChallenge(0);
+    setBaseReward(null);
+    setReward(0);
+    setFailReward(0);
+    setLastMultiplier(null);
+
+    // クイズ開始準備
+    setCurrentIndex(0);
+    setCorrectCount(0);
+    setFinished(false);
+    setShowCorrectMessage(false);
+    setIncorrectMessage(null);
+    setTimeLeft(30);
+
+    // シャッフル（任意だけどおすすめ）
+    setQuestions((prev) => shuffleArray(prev));
+  };
+
+  useEffect(() => {
+    finishedRef.current = finished;
+  }, [finished]);
+  useEffect(() => {
+    showCorrectRef.current = showCorrectMessage;
+  }, [showCorrectMessage]);
+  useEffect(() => {
+    rewardAppliedRef.current[challengeIndex] = false;
+  }, [challengeIndex]);
+
+  useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        const res = await fetch("/api/articles");
+        const data: ArticleData[] = await res.json();
+        let all: ArticleData[] = data;
+
+        if (mode === "genre" && genre) {
+          all = all.filter((a) => a.quiz?.genre === genre);
+        }
+        if (mode === "level" && level) {
+          all = all.filter((a) => a.quiz?.level === level);
+        }
+
+        const quizQuestions: { id: string; quiz: QuizData }[] = all
+          .filter((a) => a.quiz)
+          .map((a) => ({
+            id: a.id,
+            quiz: {
+              title: a.title,
+              question: a.quiz!.question,
+              answer: Number(a.quiz!.answer),
+              displayAnswer: a.quiz!.displayAnswer,
+              choices: a.quiz!.choices ? a.quiz!.choices.map(String) : [],
+              genre: a.quiz!.genre,
+              level: a.quiz!.level,
+              answerExplanation: a.quiz!.answerExplanation,
+              trivia: a.quiz!.trivia,
+            },
+          }));
+
+        setQuestions(shuffleArray(quizQuestions));
+      } catch (error) {
+        console.error("クイズ問題の取得に失敗しました:", error);
+      }
+    };
+
+    fetchArticles();
+  }, [mode, genre, level]);
+
+  const shuffleArray = <T,>(arr: T[]) => [...arr].sort(() => Math.random() - 0.5);
+
+  useEffect(() => {
+    if (phase !== "playing") return;
+    if (finished) return;
+    if (showCorrectMessage) return;
+
+    const timer = setInterval(() => {
+      if (phase !== "playing") return;
+      if (finishedRef.current || showCorrectRef.current) return;
+
+      setTimeLeft((t) => {
+        if (t <= 1) {
+          clearInterval(timer);
+          setFinished(true);
+          setFinalReward(Math.floor(reward / 2)); // 時間切れは失敗扱い：半分（※1回目はreward=0なので0）
+          setPhase("finished");
+          return 0;
+        }
+        return t - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [phase, currentIndex, finished, showCorrectMessage, reward]);
+
+  const checkAnswer = () => {
+    const correctAnswer = questions[currentIndex].quiz?.answer;
+    const displayAnswer = questions[currentIndex].quiz?.displayAnswer;
+
+    if (userAnswer === correctAnswer) {
+      // ✅ 正解
+      setCorrectCount((c) => c + 1);
+
+      setStreakInChallenge((prev) => {
+        const nextStreak = prev + 1;
+        const need = CHALLENGE_TARGETS[challengeIndex];
+
+        if (nextStreak >= need) {
+          // ✅ ここでは「達成した」事実だけ作る
+          // 報酬処理は下で 1回だけやる
+          queueMicrotask(() => {
+            if (rewardAppliedRef.current[challengeIndex]) return;
+            rewardAppliedRef.current[challengeIndex] = true;
+
+            if (challengeIndex === 0) {
+              const base = randChoice([100, 200, 300] as const);
+              setBaseReward(base);
+              setReward(base);
+              setFailReward(Math.floor(base / 2));
+              setLastMultiplier(null);
+            } else {
+              const { min, max } = getMulRange(challengeIndex);
+              const mul = randInt(min, max);
+              setLastMultiplier(mul);
+
+              setReward((r) => {
+                setPrevReward(r);
+                const next = r * mul;
+                setFailReward(Math.floor(next / 2));
+                return next;
+              });
+            }
+          });
+
+          setShowCorrectMessage(true);
+        } else {
+          setShowCorrectMessage(true);
+        }
+
+        return nextStreak;
+      });
+
+    } else {
+      // ❌ 不正解：失敗
+      setIncorrectMessage(`ざんねん！\n答えは" ${displayAnswer} "でした！`);
+
+      // 失敗時の確定報酬（半分）
+      const half = Math.floor(reward / 2);
+      setFinalReward(half);
+    }
+
+    setUserAnswer(null);
+  };
+
+  const nextQuestion = () => {
+    setShowCorrectMessage(false);
+
+    const need = CHALLENGE_TARGETS[challengeIndex];
+
+    // ✅ チャレンジ達成後なら「between」へ
+    if (streakInChallenge >= need) {
+      setPhase("between");
+      return;
+    }
+
+    // 通常：次の問題
+    if (currentIndex + 1 >= questions.length) {
+      setFinalReward(Math.floor(reward / 2));
+      setFinished(true);
+      setPhase("finished");
+    } else {
+      setCurrentIndex((i) => i + 1);
+      setTimeLeft(30);
+    }
+  };
+
+  const finishQuiz = () => {
+    setFinished(true);
+    setPhase("finished");
+  };
+
+  const goNextChallenge = () => {
+    // 次チャレンジへ
+    if (challengeIndex >= 2) return;
+
+    setChallengeIndex((v) => v + 1);
+    setStreakInChallenge(0);
+    setShowCorrectMessage(false);
+    setIncorrectMessage(null);
+    setTimeLeft(30);
+
+    // 次の問題へ進める
+    setCurrentIndex((i) => i + 1);
+
+    setPhase("playing");
+  };
+
+  const takeRewardAndFinish = () => {
+    setFinalReward(reward);
+    setFinished(true);
+    setPhase("finished");
+  };
+
+  const getTitle = () => {
+    let title = "クイズ初心者";
+    titles.forEach((t) => {
+      if (correctCount >= t.threshold) title = t.title;
+    });
+    return title;
+  };
+
+  // ★ finished になったタイミングで「獲得ポイント計算」→「ログインなら加算」
+  useEffect(() => {
+    if (phase !== "finished") return;
+
+    const pointsEarned = finalReward;       // ✅ ここが運命チャレンジの報酬
+    const expEarned = calcEarnedExp(correctCount);
+
+    setEarnedPoints(pointsEarned);
+    setEarnedExp(expEarned);
+
+    if (pointsEarned <= 0 && expEarned <= 0) {
+      setAwardStatus("idle");
+      return;
+    }
+
+    if (!userLoading && !user) {
+      setAwardStatus("need_login");
+      return;
+    }
+
+    if (!userLoading && user && !awardedOnceRef.current) {
+      awardedOnceRef.current = true;
+
+      const award = async () => {
+        try {
+          setAwardStatus("awarding");
+
+          const { data, error } = await supabase.rpc("add_points_and_exp", {
+            p_user_id: user.id,
+            p_points: pointsEarned,
+            p_exp: expEarned,
+          });
+
+          if (error) {
+            console.error("add_points_and_exp error:", error);
+            setAwardStatus("error");
+            return;
+          }
+
+          window.dispatchEvent(new Event("points:updated"));
+
+          await supabase.from("user_point_logs").insert({
+            user_id: user.id,
+            change: pointsEarned,
+            reason: `運命のクイズでポイント獲得（正解数 ${correctCount}問）`,
+          });
+
+          setAwardStatus("awarded");
+        } catch (e) {
+          console.error("award points/exp error:", e);
+          setAwardStatus("error");
+        }
+      };
+
+      award();
+    }
+  }, [phase, finalReward, correctCount, user, userLoading, supabase]);
+
+  // ★ 連続正解チャレンジ：成績(最高連続正解数)＆称号を保存 → 新記録/新称号ならモーダル
+  useEffect(() => {
+    if (!finished) return;
+    if (sentRef.current) return;
+    sentRef.current = true;
+
+    // 未ログインなら保存しない（任意）
+    if (!userLoading && !user) return;
+
+    (async () => {
+      try {
+        const weekStart = getWeekStartJST();
+
+        // ✅ 週間ランキングに反映したい値を決める
+        // score: 今回獲得ポイントを加算、correct: 正解数、play: 1回、best_streak: max更新
+        const { error: weeklyErr } = await supabase.rpc("upsert_weekly_stats", {
+          p_user_id: user!.id,
+          p_week_start: weekStart,
+          p_score_add: 0,
+          p_correct_add: correctCount,
+          p_play_add: 1,
+          p_best_streak: correctCount,
+        });
+
+        if (weeklyErr) {
+          console.log("upsert_weekly_stats error:", weeklyErr);
+          // ランキング保存失敗してもゲームは止めない
+        }
+
+        // 連続正解数から称号を計算
+        const title = calcTitle(titles, correctCount);
+
+        const res = await submitGameResult(supabase, {
+          game: "streak",       // ← 連続正解チャレンジ用の識別子（あなたの設計に合わせて）
+          streak: correctCount, // ✅ 連続正解数は streak で送る
+          score: 0,
+          stage: 0,
+          title,
+          writeLog: true,
+        });
+
+        // 新記録 or 新称号 のときだけモーダルを出す
+        const modal = buildResultModalPayload("streak", res);
+        if (modal) pushModal(modal);
+      } catch (e) {
+        console.error("[streak] submitGameResult error:", e);
+        // 成績保存が失敗してもゲームは止めない
+      }
+    })();
+  }, [finished, userLoading, user, correctCount, titles, supabase, pushModal]);
+
+  if (questions.length === 0) return <p></p>;
+
+  // Xシェア機能
+  const handleShareX = () => {
+    const text = [
+      "【ひまQ｜運命のクイズ🎲】",
+      `正解数：${correctCount}問`,
+      `獲得：${earnedPoints}P / ${earnedExp}EXP`,
+      "",
+      "👇ひまQ（みんなで遊べるクイズ）",
+      "#ひまQ #クイズ #クイズゲーム",
+    ].join("\n");
+
+    openXShare({ text, url: buildTopUrl() }); // ✅トップへ
+  };
+
+  if (questions.length === 0) return <p></p>;
+
+  // =========================
+  // intro 画面
+  // =========================
+  if (phase === "intro") {
+    return (
+      <div className="container mx-auto p-8 text-center bg-gradient-to-b from-green-50 via-green-100 to-green-200">
+        <p className="text-4xl md:text-6xl font-extrabold text-orange-500 drop-shadow mb-6">
+          最初のチャレンジ！
+        </p>
+
+        <p className="text-xl md:text-3xl font-bold text-gray-700 mb-10">
+          間違えずに <span className="text-red-500">2問連続</span>で正解したらチャレンジ成功！
+        </p>
+
+        <button
+          onClick={startFirstChallenge}
+          className="px-8 py-4 bg-purple-500 text-white text-2xl md:text-3xl font-extrabold rounded-full border-2 border-black shadow-lg hover:scale-105 transition"
+        >
+          チャレンジする！
+        </button>
+      </div>
+    );
+  }
+
+  // =========================
+  // between 画面
+  // =========================
+  if (phase === "between") {
+    const nextIndex = challengeIndex + 1;
+    const hasNext = nextIndex <= 2;
+    const nextNeed = hasNext ? CHALLENGE_TARGETS[nextIndex] : null;
+
+    return (
+      <div className="container mx-auto p-8 text-center bg-gradient-to-b from-green-200 via-green-100 to-green-200">
+        <div className="relative inline-block mb-6">
+        {/* キラキラ背景（ぼかし光） */}
+        <div className="absolute -inset-3 md:-inset-4 rounded-3xl bg-gradient-to-r from-yellow-200 via-pink-200 to-sky-200 blur-xl opacity-90" />
+
+        {/* ちょいキラ粒 */}
+        <div className="absolute -top-3 -left-2 text-2xl md:text-3xl animate-pulse">✨</div>
+        <div className="absolute -top-4 -right-2 text-2xl md:text-3xl animate-pulse">✨</div>
+        <div className="absolute -bottom-4 left-4 text-xl md:text-2xl animate-pulse">🌟</div>
+
+        {/* 本体 */}
+        <p className="relative px-6 py-3 md:px-10 md:py-4 text-3xl md:text-6xl font-extrabold text-green-600 drop-shadow">
+          チャレンジ成功！
+        </p>
+      </div>
+      <div>
+        {lastMultiplier && prevReward !== null && (
+          <div className="mx-auto inline-block mb-3 bg-white/70 border border-black rounded-xl px-4 py-2 shadow">
+            <p className="text-lg md:text-2xl font-extrabold text-gray-800">
+              {prevReward}P（前回の報酬） × {lastMultiplier}（今回の報酬倍率） ＝{" "}
+              <span className="text-green-700">{reward}P</span>
+            </p>
+          </div>
+        )}
+      </div>
+        <p className="text-xl md:text-3xl font-bold text-gray-800 mb-4 md:mb-8">
+          チャレンジ報酬は{" "}
+          <span className="text-green-600">{reward}P</span>！
+        </p>
+
+        {hasNext ? (
+          <p className="text-md md:text-2xl font-bold text-gray-700 mb-10 whitespace-pre-line">
+            次のチャレンジは <span className="text-red-500">{nextNeed}問連続正解</span>で成功！{"\n"}
+            成功すると報酬が2〜4倍のどれかにアップ！{"\n"}
+            ただし失敗したら <span className="text-orange-600">{failReward}P</span> に下がるよ。
+          </p>
+        ) : (
+          <p className="relative mx-auto inline-block mb-10 px-8 py-6 md:px-12 md:py-8 text-2xl md:text-4xl font-extrabold text-white text-center rounded-3xl shadow-2xl bg-gradient-to-r from-pink-400 via-yellow-400 to-green-400 animate-pulse">
+            🎊全てのチャレンジに成功！<br />
+            <span className="text-3xl md:text-5xl drop-shadow">
+              おめでとう！✨
+            </span>
+          </p>
+        )}
+
+        <div className="flex flex-col md:flex-row justify-center gap-4">
+          {hasNext && (
+            <button
+              onClick={goNextChallenge}
+              className="px-6 py-4 bg-blue-500 text-white text-xl md:text-2xl font-bold rounded-xl shadow hover:bg-blue-600"
+            >
+              次のチャレンジをする！
+            </button>
+          )}
+
+          <button
+            onClick={takeRewardAndFinish}
+            className="px-6 py-4 bg-yellow-500 text-white text-xl md:text-2xl font-bold rounded-xl shadow hover:bg-yellow-600"
+          >
+            終了して報酬を受け取る
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const need = CHALLENGE_TARGETS[challengeIndex];
+  const remaining = Math.max(0, need - streakInChallenge);
+  const label =
+    challengeIndex === 2 ? "最終チャレンジ" : `第${challengeIndex + 1}チャレンジ`;
+
+  return (
+    <div className="container mx-auto p-8 text-center bg-gradient-to-b from-green-50 via-green-100 to-green-200">
+      {phase !== "finished" ? (
+        <>
+          <h2 className="text-4xl md:text-5xl font-extrabold mb-4 md:mb-8 text-purple-500 drop-shadow-lg">
+            {label}
+          </h2>
+
+          <p className="text-xl md:text-2xl font-bold text-gray-700 mb-4">
+            達成まであと <span className="text-red-600">{remaining}</span> 問
+          </p>
+
+          {!incorrectMessage && (
+            <p className="text-2xl md:text-3xl font-bold mb-4 text-red-500">
+              回答タイマー: {timeLeft} 秒
+            </p>
+          )}
+
+          {questions[currentIndex].quiz && (
+            <>
+              {(showCorrectMessage || incorrectMessage) && (
+                <>
+                  {showCorrectMessage && (
+                    <p className="text-4xl md:text-6xl font-extrabold mb-2 text-green-600 drop-shadow-lg animate-bounce animate-pulse">
+                      ◎正解！🎉
+                    </p>
+                  )}
+                  {incorrectMessage && (
+                    <p className="text-3xl md:text-4xl font-extrabold mb-2 text-red-500 drop-shadow-lg animate-shake whitespace-pre-line">
+                      {incorrectMessage}
+                    </p>
+                  )}
+
+                  {(() => {
+                    const currentQuiz = questions[currentIndex].quiz;
+                    const answerExplanation = currentQuiz?.answerExplanation;
+                    const trivia = currentQuiz?.trivia;
+
+                    return (
+                      <>
+                        {answerExplanation && (
+                          <div className="mt-5 md:mt-15 text-center">
+                            <p className="text-xl md:text-2xl font-bold text-blue-600">解説📖</p>
+                            <p className="mt-1 md:mt-2 text-lg md:text-xl text-gray-700">
+                              {answerExplanation}
+                            </p>
+                          </div>
+                        )}
+
+                        {trivia && (
+                          <div className="mt-5 md:mt-10 text-center">
+                            <p className="text-xl md:text-2xl font-bold text-yellow-600">知って得する豆知識💡</p>
+                            <p className="mt-1 md:mt-2 text-lg md:text-xl text-gray-700">{trivia}</p>
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
+
+                  <div className="mt-10">
+                    {showCorrectMessage && (
+                      <button
+                        className="px-5 py-3 md:px-6 md:py-3 bg-blue-500 text-white text-lg md:text-xl font-medium rounded hover:bg-blue-600 cursor-pointer"
+                        onClick={nextQuestion}
+                      >
+                        次の問題へ
+                      </button>
+                    )}
+                    {incorrectMessage && (
+                      <button
+                        className="px-5 py-3 md:px-6 md:py-3 bg-blue-500 text-white text-lg md:text-xl font-medium rounded hover:bg-blue-600 cursor-pointer"
+                        onClick={finishQuiz}
+                      >
+                        終了する
+                      </button>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {!showCorrectMessage && !incorrectMessage && (
+                <>
+                  <QuizQuestion
+                    quiz={questions[currentIndex].quiz}
+                    userAnswer={userAnswer}
+                    setUserAnswer={setUserAnswer}
+                  />
+                  <button
+                    className="px-5 py-3 md:px-6 md:py-3 bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-4 hover:bg-blue-600 cursor-pointer"
+                    onClick={checkAnswer}
+                    disabled={userAnswer === null}
+                  >
+                    回答
+                  </button>
+                </>
+              )}
+            </>
+          )}
+
+          {flashMilestone && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 text-yellow-400 text-5xl md:text-7xl font-extrabold animate-pulse">
+              {flashMilestone}
+            </div>
+          )}
+        </>
+      ) : (
+        <QuizResult
+          correctCount={correctCount}
+          earnedPoints={earnedPoints}
+          earnedExp={earnedExp}
+          isLoggedIn={!!user}
+          awardStatus={awardStatus}
+          titles={[]}
+          onGoLogin={() => router.push("/user/login")}
+          onShareX={handleShareX}
+          onRetry={resetGame}
+        />
+      )}
+    </div>
+  );
+}

@@ -205,6 +205,19 @@ export default function NavButtons() {
                           クイズダンジョン
                         </button>
                       </Link>
+
+                      <Link
+                        href="/quiz-luck"
+                        onClick={() => handleNavClick("/quiz-luck")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-gradient-to-r from-yellow-500 to-yellow-400 text-white ring-2 ring-yellow-400 md:hover:scale-110 ${
+                            activeUrl === "/quiz-luck" ? activeStyle : ""
+                          }`}
+                        >
+                          運命のクイズ
+                        </button>
+                      </Link>
                     </div>
                   </div>
 

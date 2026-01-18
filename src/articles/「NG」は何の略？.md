@@ -12,7 +12,7 @@ quiz:
     - "New Game"
     - "No Good"
     - "No Gain"
-  answer: 3
+  answer: 2
   displayAnswer: "No Good"
   hint: "よくない"
   answerExplanation: "NGは「No Good」の略として使われます。"

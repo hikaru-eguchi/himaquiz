@@ -173,7 +173,7 @@ export default function QuizMasterPage() {
             ref={descriptionRef}
             className="text-gray-700 text-md md:text-lg text-center px-4 py-2"
           >
-            「クイズダンジョン」は、クイズを解きながらダンジョンを進んでいく冒険ゲームです。<br />
+            「クイズダンジョン」は、クイズを解きながらダンジョンを進んでいく冒険クイズゲームです。<br />
             クイズに正解すれば敵に攻撃できますが、間違えるとあなたのHP（ライフ）が減ってしまいます。<br />
             HPが0になるとゲームオーバー。<br />
             敵を倒すごとにステージが進み、あなたのランク（称号）もどんどん昇格していきます。<br />

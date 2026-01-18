@@ -23,9 +23,9 @@ export default async function WeeklyRankingCard({
 }: {
   title: string;
   icon: string;
-  bgClass: string; // 例: "from-emerald-50 via-emerald-100 to-emerald-200"
+  bgClass: string;
   orderBy: RankKey;
-  valueLabel: (r: Row) => string; // 例: (r)=>`${r.score}pt`
+  valueLabel: (r: Row) => string;
   moreHref?: string;
 }) {
   const supabase = createSupabasePublicServerClient();
@@ -44,21 +44,15 @@ export default async function WeeklyRankingCard({
 
   return (
     <div className={`max-w-[700px] mx-auto border-2 border-black rounded-xl m-5 p-5 bg-gradient-to-b ${bgClass}`}>
-      <div className="flex items-end justify-between gap-2">
+      <div className="flex flex-col items-center text-center gap-2">
         <div>
           <p className="text-2xl md:text-4xl font-extrabold drop-shadow-xl">
-            {icon} {title}
+            {icon}{title}{icon}
           </p>
           <p className="text-xs md:text-sm text-gray-700">
             集計開始：{weekStart}（月曜0:00〜）
           </p>
         </div>
-
-        {moreHref ? (
-          <Link href={moreHref} className="text-sm md:text-base font-bold underline">
-            もっと見る →
-          </Link>
-        ) : null}
       </div>
 
       <WeeklyRankingListClient rows={list} labelType={orderBy} />

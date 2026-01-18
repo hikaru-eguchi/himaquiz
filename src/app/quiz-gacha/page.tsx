@@ -1014,7 +1014,7 @@ export default function QuizMasterPage() {
               ref={descriptionRef}
               className="text-gray-700 text-md md:text-lg text-center px-4 py-2"
             >
-              「ひまQガチャ」は、ポイントを使ってガチャに挑戦し、さまざまなキャラクターを手に入れるゲームです。
+              「ひまQガチャ」は、ポイントを使ってガチャに挑戦し、さまざまなキャラクターを手に入れるガチャゲームです。
               <br />
               ガチャは 1回100P で回せます。
               <br />

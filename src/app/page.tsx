@@ -185,14 +185,10 @@ export default async function HomePage({
       </div>
 
       <WeeklyRankingSection />
-      
-      <p className="text-xl md:text-2xl mb-2 text-center leading-tight mt-5 mb-5">
-        「クイズ問題集」はこちら👇
-      </p>
 
-      <div className="max-w-[700px] mx-auto border-2 border rounded-xl m-5 p-5 mb-10 bg-orange-50">
-        <p className="text-2xl md:text-4xl font-extrabold mb-2 text-center">
-          クイズ問題集
+      <div className="max-w-[700px] mx-auto border-2 border rounded-xl m-5 p-5 mb-10 bg-gradient-to-b from-red-50 via-red-100 to-red-200">
+        <p className="text-2xl md:text-4xl font-extrabold mt-2 mb-4 text-center text-red-500">
+          📖クイズ問題集📖
         </p>
         <p className="text-lg md:text-xl mb-2 text-center leading-tight mb-4">
           面白クイズや脳トレクイズの問題集！ひとりでもみんなとでも楽しめる！
@@ -209,69 +205,85 @@ export default async function HomePage({
         </div>
       </div>
 
-      <p className="text-xl md:text-2xl mb-2 text-center leading-tight mt-5 mb-5">
-        「4択クイズ」はこちら👇
-      </p>
-
-      <div className="max-w-[700px] mx-auto border-2 border-black rounded-xl m-5 p-5 bg-gradient-to-b from-blue-0 via-blue-50 to-blue-100">
-        <p className="text-2xl md:text-4xl font-extrabold mb-2 text-center leading-tight drop-shadow-xl text-blue-500">
-          📚ジャンルから選ぶ📚
+      <div className="
+        max-w-[700px] 
+        mx-auto 
+        border-2 border-black 
+        rounded-xl 
+        my-8 
+        bg-gradient-to-b from-lime-50 via-green-100 to-emerald-200
+        p-4 md:p-4
+      ">
+        <p className="
+          text-2xl md:text-4xl 
+          font-extrabold 
+          mt-4 mb-2 
+          text-center 
+          text-green-700 
+          drop-shadow
+        ">
+          📝4択クイズコーナー📝
         </p>
-        <p className="text-lg md:text-xl mb-2 text-center leading-tight mb-4">
-          あなたはどれが好き？ジャンルを選ぼう！
-        </p>
-        <div className="flex flex-wrap justify-center gap-2 md:gap-5">
-          <Link href="/quizzes/genre/psychology">
-            <button className="text-xl md:text-2xl px-3 md:px-5 py-1 md:py-2 border-2 border-black rounded-full font-bold shadow-sm bg-gradient-to-br from-pink-100 via-pink-300 to-purple-100 hover:scale-105 transition-all">
-              心理系
-            </button>
-          </Link>
+        <div className="max-w-[660px] mx-auto border-2 border-black rounded-xl m-5 p-5 bg-white bg-gradient-to-b from-blue-0 via-blue-50 to-blue-100">
+          <p className="text-2xl md:text-3xl font-extrabold mb-2 text-center leading-tight drop-shadow-xl text-blue-500">
+            📚ジャンルから選ぶ📚
+          </p>
+          <p className="text-lg md:text-xl mb-2 text-center leading-tight mb-4">
+            あなたはどれが好き？ジャンルを選ぼう！
+          </p>
+          <div className="flex flex-wrap justify-center gap-2 md:gap-5">
+            <Link href="/quizzes/genre/psychology">
+              <button className="text-xl md:text-2xl px-3 md:px-5 py-1 md:py-2 border-2 border-black rounded-full font-bold shadow-sm bg-gradient-to-br from-pink-100 via-pink-300 to-purple-100 hover:scale-105 transition-all">
+                心理系
+              </button>
+            </Link>
 
-          <Link href="/quizzes/genre/knowledge">
-            <button className="text-xl md:text-2xl px-3 md:px-5 py-1 md:py-2 border-2 border-black rounded-full font-bold shadow-sm bg-gradient-to-br from-sky-100 via-sky-300 to-teal-100 hover:scale-105 transition-all">
-              知識系
-            </button>
-          </Link>
+            <Link href="/quizzes/genre/knowledge">
+              <button className="text-xl md:text-2xl px-3 md:px-5 py-1 md:py-2 border-2 border-black rounded-full font-bold shadow-sm bg-gradient-to-br from-sky-100 via-sky-300 to-teal-100 hover:scale-105 transition-all">
+                知識系
+              </button>
+            </Link>
 
-          <Link href="/quizzes/genre/trivia">
-            <button className="text-xl md:text-2xl px-3 md:px-5 py-1 md:py-2 border-2 border-black rounded-full font-bold shadow-sm bg-gradient-to-br from-yellow-100 via-green-300 to-green-100 hover:scale-105 transition-all">
-              雑学系
-            </button>
-          </Link>
+            <Link href="/quizzes/genre/trivia">
+              <button className="text-xl md:text-2xl px-3 md:px-5 py-1 md:py-2 border-2 border-black rounded-full font-bold shadow-sm bg-gradient-to-br from-yellow-100 via-green-300 to-green-100 hover:scale-105 transition-all">
+                雑学系
+              </button>
+            </Link>
+          </div>
         </div>
-      </div>
 
-      <div className="max-w-[700px] mx-auto border-2 border-black rounded-xl m-5 p-5 bg-gradient-to-b from-yellow-0 via-yellow-50 to-yellow-100">
-        <p className="text-2xl md:text-4xl font-extrabold mb-2 text-center leading-tight drop-shadow-xl text-yellow-500">
-          ⭐難易度から選ぶ⭐
-        </p>
-        <p className="text-lg md:text-xl mb-2 text-center leading-tight mb-4">
-          どのレベルまで解ける？レベルを選んでね！
-        </p>
-        <div className="flex flex-wrap justify-center gap-2 md:gap-5">
-          <Link href="/quizzes/level/easy">
-            <button className="text-xl md:text-2xl px-3 py-1 md:px-5 md:py-2 bg-white border-2 border-black rounded-full font-bold hover:scale-105 transition-all">
-              かんたん
-            </button>
-          </Link>
+        <div className="max-w-[660px] mx-auto border-2 border-black rounded-xl m-5 p-5 bg-white bg-gradient-to-b from-yellow-0 via-yellow-50 to-yellow-100">
+          <p className="text-2xl md:text-3xl font-extrabold mb-2 text-center leading-tight drop-shadow-xl text-yellow-500">
+            ⭐難易度から選ぶ⭐
+          </p>
+          <p className="text-lg md:text-xl mb-2 text-center leading-tight mb-4">
+            どのレベルまで解ける？レベルを選んでね！
+          </p>
+          <div className="flex flex-wrap justify-center gap-2 md:gap-5">
+            <Link href="/quizzes/level/easy">
+              <button className="text-xl md:text-2xl px-3 py-1 md:px-5 md:py-2 bg-white border-2 border-black rounded-full font-bold hover:scale-105 transition-all">
+                かんたん
+              </button>
+            </Link>
 
-          <Link href="/quizzes/level/normal">
-            <button className="text-xl md:text-2xl px-3 py-1 md:px-5 md:py-2 bg-white border-2 border-black rounded-full font-bold hover:scale-105 transition-all">
-              ふつう
-            </button>
-          </Link>
+            <Link href="/quizzes/level/normal">
+              <button className="text-xl md:text-2xl px-3 py-1 md:px-5 md:py-2 bg-white border-2 border-black rounded-full font-bold hover:scale-105 transition-all">
+                ふつう
+              </button>
+            </Link>
 
-          <Link href="/quizzes/level/hard">
-            <button className="text-xl md:text-2xl px-3 py-1 md:px-5 md:py-2 bg-white border-2 border-black rounded-full font-bold hover:scale-105 transition-all">
-              難しい
-            </button>
-          </Link>
+            <Link href="/quizzes/level/hard">
+              <button className="text-xl md:text-2xl px-3 py-1 md:px-5 md:py-2 bg-white border-2 border-black rounded-full font-bold hover:scale-105 transition-all">
+                難しい
+              </button>
+            </Link>
+          </div>
         </div>
       </div>
 
       <div className="max-w-[700px] mx-auto border-2 border-black rounded-xl m-5 p-5 bg-gradient-to-b from-purple-0 via-purple-100 to-purple-200">
         <p className="text-2xl md:text-4xl font-extrabold mb-2 text-center leading-tight drop-shadow-xl text-purple-500">
-          🎮ゲームで遊ぶ🎮
+          🎮一人で遊べるクイズゲーム🎮
         </p>
         <p className="text-lg md:text-xl mb-2 text-center leading-tight mb-4">
           腕試しをしたい人にオススメ！
@@ -319,12 +331,26 @@ export default async function HomePage({
               君は深層まで進めるか！？
             </p>
           </div>
+          {/* 運命のクイズ */}
+          <div className="text-center max-w-[260px]">
+            <Link href="/quiz-luck" className="w-full md:w-auto flex justify-center">
+              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-yellow-500 to-yellow-400 text-white hover:scale-110 transition-all">
+                運命のクイズ
+              </button>
+            </Link>
+            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
+              チャレンジ成功で報酬アップ！
+            </p>
+            <p className="text-sm md:text-base text-gray-700 leading-tight">
+              運命のクイズでどこまで挑む！？
+            </p>
+          </div>
         </div>
       </div>
 
       <div className="max-w-[700px] mx-auto border-2 border-black rounded-xl m-5 p-5 bg-gradient-to-b from-sky-0 via-sky-100 to-sky-200">
         <p className="text-2xl md:text-4xl font-extrabold mb-2 text-center leading-tight drop-shadow-xl text-sky-500">
-          🌐だれかと遊ぶ🌐
+          🌐みんなで遊べるクイズゲーム🌐
         </p>
         <p className="text-lg md:text-xl mb-2 text-center leading-tight mb-4">
           ネットの誰かと！友達や家族と！みんなで一緒に遊ぼう🎉
