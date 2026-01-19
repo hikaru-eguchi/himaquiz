@@ -5,7 +5,7 @@ import { Anton } from "next/font/google";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Rarity } from "../../types/gacha";
-import { createSupabaseBrowserClient } from "@/lib/supabaseClient";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useSupabaseUser } from "../../hooks/useSupabaseUser";
 
 const anton = Anton({ subsets: ["latin"], weight: "400" });

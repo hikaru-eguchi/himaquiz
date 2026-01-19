@@ -274,6 +274,19 @@ export default function NavButtons() {
                           サバイバルクイズ
                         </button>
                       </Link>
+
+                      {/* <Link
+                        href="/quiz-majority"
+                        onClick={() => handleNavClick("/quiz-majority")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-gradient-to-r from-red-500 to-blue-500 text-white ring-2 ring-red-600 md:hover:scale-110 ${
+                            activeUrl === "/quiz-majority" ? activeStyle : ""
+                          }`}
+                        >
+                          多数決クイズ
+                        </button>
+                      </Link> */}
                     </div>
                   </div>
 

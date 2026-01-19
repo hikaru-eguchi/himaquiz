@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createSupabaseBrowserClient } from "@/lib/supabaseClient";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useSupabaseUser } from "../../../hooks/useSupabaseUser";
 import { motion, AnimatePresence } from "framer-motion";
 

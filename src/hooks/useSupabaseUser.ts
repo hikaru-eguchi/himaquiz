@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { User } from "@supabase/supabase-js";
-import { createSupabaseBrowserClient } from "@/lib/supabaseClient";
+import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export function useSupabaseUser() {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
@@ -10,27 +11,32 @@ export function useSupabaseUser() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let mounted = true;
+    let alive = true;
 
-    const init = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (!mounted) return;
-      setUser(data.user ?? null);
-      setLoading(false);
-    };
+    (async () => {
+      try {
+        const { data, error } = await supabase.auth.getUser();
+        if (!alive) return;
+        setUser(error ? null : (data.user ?? null));
+      } catch {
+        if (!alive) return;
+        setUser(null);
+      } finally {
+        if (!alive) return;
+        setLoading(false);
+      }
+    })();
 
-    init();
-
-    // ログイン/ログアウトの変化を監視
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
+    const { data: sub } = supabase.auth.onAuthStateChange(
+      (_event: AuthChangeEvent, session: Session | null) => {
+        setUser(session?.user ?? null);
+        setLoading(false);
+      }
+    );
 
     return () => {
-      mounted = false;
-      subscription.unsubscribe();
+      alive = false;
+      sub.subscription.unsubscribe();
     };
   }, [supabase]);
 

@@ -2,7 +2,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { createSupabaseBrowserClient } from "@/lib/supabaseClient";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type RankKey = "score" | "correct_count" | "play_count";
 

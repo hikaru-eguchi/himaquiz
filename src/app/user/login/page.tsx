@@ -2,7 +2,7 @@
 
 import { FormEvent, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { createSupabaseBrowserClient } from "@/lib/supabaseClient";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { Session } from "@supabase/supabase-js";
 
 type ApiResponse =

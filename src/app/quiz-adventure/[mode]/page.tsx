@@ -7,7 +7,7 @@ import { QuizData } from "@/lib/articles";
 import { motion, AnimatePresence } from "framer-motion";
 import { useBattle } from "../../../hooks/useBattle";
 import { useQuestionPhase } from "../../../hooks/useQuestionPhase";
-import { createSupabaseBrowserClient } from "@/lib/supabaseClient";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useSupabaseUser } from "../../../hooks/useSupabaseUser";
 import { submitGameResult, calcTitle } from "@/lib/gameResults";
 import { buildResultModalPayload } from "@/lib/resultMessages";

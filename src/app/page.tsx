@@ -398,6 +398,20 @@ export default async function HomePage({
               君は最後まで生き残れるか！？
             </p>
           </div>
+          {/* 多数決クイズ */}
+          {/* <div className="text-center max-w-[260px]">
+            <Link href="/quiz-majority" className="w-full md:w-auto flex justify-center">
+              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-red-500 to-blue-500 text-white hover:scale-110 transition-all">
+                多数決クイズ
+              </button>
+            </Link>
+            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
+              多数決で運命が決まる！
+            </p>
+            <p className="text-sm md:text-base text-gray-700 leading-tight">
+              最後のステージまでたどり着けるか！？
+            </p>
+          </div> */}
         </div>
       </div>
 

@@ -60,20 +60,22 @@ export default function HeaderMenu() {
     let alive = true;
 
     const fetchUser = async () => {
-      const { data } = await supabase.auth.getSession();
-      const currentUser = data.session?.user ?? null;
-
+      const { data, error } = await supabase.auth.getUser();
+      const currentUser = error ? null : data.user;
       if (!alive) return;
 
       setUser(currentUser);
-      if (currentUser) await fetchProfile(currentUser.id);
-      else {
+
+      if (!currentUser) {
         setUsername(null);
         setPoints(null);
         setLevel(null);
         setExp(null);
         setAvatarUrl("/images/初期アイコン.png");
+        return;
       }
+
+      await fetchProfile(currentUser.id);
     };
 
     // 初回
@@ -86,7 +88,7 @@ export default function HeaderMenu() {
 
     // ★ 追加：ログインAPI成功後に投げるカスタムイベント
     const onAuthChanged = () => setTimeout(() => fetchUser(), 0);
-    window.addEventListener("auth:changed", onAuthChanged);
+    // window.addEventListener("auth:changed", onAuthChanged);
 
     // フォーカス復帰でも更新
     const onFocus = () => fetchUser();
@@ -95,15 +97,15 @@ export default function HeaderMenu() {
     return () => {
       alive = false;
       listener.subscription.unsubscribe();
-      window.removeEventListener("auth:changed", onAuthChanged);
+      // window.removeEventListener("auth:changed", onAuthChanged);
       window.removeEventListener("focus", onFocus);
     };
   }, [supabase]);
 
   useEffect(() => {
     const refreshPoints = async () => {
-      const { data } = await supabase.auth.getSession();
-      const currentUser = data.session?.user ?? null;
+      const { data, error } = await supabase.auth.getUser();
+      const currentUser = error ? null : data.user;
       setUser(currentUser);
 
       if (currentUser) await fetchProfile(currentUser.id);
@@ -134,7 +136,7 @@ export default function HeaderMenu() {
     router.refresh();
 
     // ✅ fetchUserが走ってもCookieが消えてるので復活しない
-    window.dispatchEvent(new Event("auth:changed"));
+    // window.dispatchEvent(new Event("auth:changed"));
   };
 
   return (

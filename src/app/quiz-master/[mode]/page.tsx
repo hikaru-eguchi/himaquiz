@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import QuizQuestion from "../../components/QuizQuestion";
 import { QuizData } from "@/lib/articles";
-import { createSupabaseBrowserClient } from "@/lib/supabaseClient";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useSupabaseUser } from "../../../hooks/useSupabaseUser";
 import { submitGameResult, calcTitle } from "@/lib/gameResults";
 import { buildResultModalPayload } from "@/lib/resultMessages";
@@ -61,54 +61,54 @@ const characters = [
 ];
 
 // 敵情報
-// const enemies = [
-//   { id: "slime", name: "スライム", image: "/images/スライム_1.png", hp: 100, attack: 50, description: "ぷるぷるして弱そうに見えるが油断は禁物。" },
-//   { id: "goblin", name: "ゴブリン", image: "/images/ゴブリン_1.png", hp: 220, attack: 100, description: "素早く群れで襲いかかる小型のモンスター。" },
-//   { id: "skeleton", name: "スケルトン", image: "/images/スケルトン_1.png", hp: 350, attack: 200, description: "朽ちた骨から生まれた剣と盾を操る不気味な戦士。" },
-//   { id: "mimic", name: "ミミック", image: "/images/ミミック_1.png", hp: 500, attack: 400, description: "宝箱に化けるトリッキーな敵。油断すると噛まれる！" },
-//   { id: "lizardman", name: "リザードマン", image: "/images/リザードマン_1.png", hp: 850, attack: 600, description: "鱗に覆われた戦士。高い身体能力と鋭い爪で攻撃してくる。" },
-//   { id: "golem", name: "ゴーレム", image: "/images/ゴーレム_1.png", hp: 1200, attack: 850, description: "岩と魔力で作られた巨人。圧倒的な防御力を誇る。" },
-//   { id: "cerberus", name: "ケルベロス", image: "/images/ケルベロス_1.png", hp: 1400, attack: 1000, description: "冥界を守る三つ首の魔獣。素早い連続攻撃が脅威。" },
-//   { id: "berserker", name: "バーサーカー", image: "/images/バーサーカー_1.png", hp: 1800, attack: 1500, description: "理性を失った狂戦士。攻撃力が非常に高い。" },
-//   { id: "dragon", name: "ドラゴン", image: "/images/ドラゴン_1.png", hp: 2500, attack: 2000, description: "火を吹く巨大竜。圧倒的な力を誇る古代の王者。" },
-//   { id: "fenikkusu", name: "フェニックス", image: "/images/フェニックス_1.png", hp: 3000, attack: 2500, description: "不死鳥の炎を操る神秘的な生物。燃え盛る翼で攻撃。" },
-//   { id: "leviathan", name: "リヴァイアサン", image: "/images/リヴァイアサン_1.png", hp: 4000, attack: 3500, description: "海の深淵から現れる巨大モンスター。水流で圧倒する。" },
-//   { id: "blackdragon", name: "ブラックドラゴン", image: "/images/ブラックドラゴン_1.png", hp: 7000, attack: 5000, description: "闇の力を宿す黒竜。魔法攻撃も強力。" },
-//   { id: "kingdemon", name: "キングデーモン", image: "/images/キングデーモン_1.png", hp: 8500, attack: 7000, description: "魔界を統べる悪魔の王。圧倒的な魔力と威圧感を放つ。" },
-//   { id: "kinghydra", name: "キングヒドラ", image: "/images/キングヒドラ_1.png", hp: 10000, attack: 8500, description: "複数の首を持つ巨大魔獣。倒しても再生する恐怖の存在。" },
-//   { id: "ordin", name: "オーディン", image: "/images/オーディン_1.png", hp: 12000, attack: 12000, description: "知恵と戦の神。魔法と剣技を極めた伝説の戦士。" },
-//   { id: "poseidon", name: "ポセイドン", image: "/images/ポセイドン_1.png", hp: 15000, attack: 15000, description: "海の神。雷と津波で敵を蹴散らす力を持つ。" },
-//   { id: "hades", name: "ハデス", image: "/images/ハデス_1.png", hp: 18000, attack: 18000, description: "冥界の支配者。死者の力を操り、強大な攻撃を仕掛ける。" },
-//   { id: "zeus", name: "ゼウス", image: "/images/ゼウス_1.png", hp: 25000, attack: 25000, description: "天空の王。雷霆を操る全知全能の神。" },
-//   { id: "gundarimyouou", name: "軍荼利明王（ぐんだりみょうおう）", image: "/images/軍荼利明王_1.png", hp: 30000, attack: 30000, description: "仏教の怒りの守護神。恐怖の炎で全てを焼き尽くす。" },
-//   { id: "maou", name: "魔王", image: "/images/魔王_1.png", hp: 40000, attack: 40000, description: "世界を闇に包もうとする存在。圧倒的な魔力を秘める。" },
-//   { id: "yuusya_game", name: "クイズマスターの最強勇者", image: "/images/勇者1_1.png", hp: 50000, attack: 50000, description: "全てのクイズと戦闘を制した伝説の勇者。前人未到の強さを誇る。" },
-//   { id: "quizou", name: "クイズ王", image: "/images/王様_1.png", hp: 100000, attack: 100000, description: "クイズの王様。クイズ界の支配者。" },
-// ];
 const enemies = [
-  { id: "slime", name: "スライム", image: "/images/スライム_1.png", hp: 1, attack: 1, description: "ぷるぷるして弱そうに見えるが油断は禁物。" },
-  { id: "goblin", name: "ゴブリン", image: "/images/ゴブリン_1.png", hp: 1, attack: 1, description: "素早く群れで襲いかかる小型のモンスター。" },
-  { id: "skeleton", name: "スケルトン", image: "/images/スケルトン_1.png", hp: 1, attack: 1, description: "朽ちた骨から生まれた剣と盾を操る不気味な戦士。" },
-  { id: "mimic", name: "ミミック", image: "/images/ミミック_1.png", hp: 1, attack: 1, description: "宝箱に化けるトリッキーな敵。油断すると噛まれる！" },
-  { id: "lizardman", name: "リザードマン", image: "/images/リザードマン_1.png", hp: 1, attack: 1, description: "鱗に覆われた戦士。高い身体能力と鋭い爪で攻撃してくる。" },
-  { id: "golem", name: "ゴーレム", image: "/images/ゴーレム_1.png", hp: 1, attack: 1, description: "岩と魔力で作られた巨人。圧倒的な防御力を誇る。" },
-  { id: "cerberus", name: "ケルベロス", image: "/images/ケルベロス_1.png", hp: 1, attack: 1, description: "冥界を守る三つ首の魔獣。素早い連続攻撃が脅威。" },
-  { id: "berserker", name: "バーサーカー", image: "/images/バーサーカー_1.png", hp: 1, attack: 1, description: "理性を失った狂戦士。攻撃力が非常に高い。" },
-  { id: "dragon", name: "ドラゴン", image: "/images/ドラゴン_1.png", hp: 1, attack: 1, description: "火を吹く巨大竜。圧倒的な力を誇る古代の王者。" },
-  { id: "fenikkusu", name: "フェニックス", image: "/images/フェニックス_1.png", hp: 1, attack: 1, description: "不死鳥の炎を操る神秘的な生物。燃え盛る翼で攻撃。" },
-  { id: "leviathan", name: "リヴァイアサン", image: "/images/リヴァイアサン_1.png", hp: 1, attack: 1, description: "海の深淵から現れる巨大モンスター。水流で圧倒する。" },
-  { id: "blackdragon", name: "ブラックドラゴン", image: "/images/ブラックドラゴン_1.png", hp: 1, attack: 1, description: "闇の力を宿す黒竜。魔法攻撃も強力。" },
-  { id: "kingdemon", name: "キングデーモン", image: "/images/キングデーモン_1.png", hp: 1, attack: 1, description: "魔界を統べる悪魔の王。圧倒的な魔力と威圧感を放つ。" },
-  { id: "kinghydra", name: "キングヒドラ", image: "/images/キングヒドラ_1.png", hp: 1, attack: 1, description: "複数の首を持つ巨大魔獣。倒しても再生する恐怖の存在。" },
-  { id: "ordin", name: "オーディン", image: "/images/オーディン_1.png", hp: 1, attack: 1, description: "知恵と戦の神。魔法と剣技を極めた伝説の戦士。" },
-  { id: "poseidon", name: "ポセイドン", image: "/images/ポセイドン_1.png", hp: 1, attack: 1, description: "海の神。雷と津波で敵を蹴散らす力を持つ。" },
-  { id: "hades", name: "ハデス", image: "/images/ハデス_1.png", hp: 1, attack: 1, description: "冥界の支配者。死者の力を操り、強大な攻撃を仕掛ける。" },
-  { id: "zeus", name: "ゼウス", image: "/images/ゼウス_1.png", hp: 1, attack: 1, description: "天空の王。雷霆を操る全知全能の神。" },
-  { id: "gundarimyouou", name: "軍荼利明王（ぐんだりみょうおう）", image: "/images/軍荼利明王_1.png", hp: 1, attack: 1, description: "仏教の怒りの守護神。恐怖の炎で全てを焼き尽くす。" },
-  { id: "maou", name: "魔王", image: "/images/魔王_1.png", hp: 1, attack: 1, description: "世界を闇に包もうとする存在。圧倒的な魔力を秘める。" },
-  { id: "yuusya_game", name: "クイズマスターの最強勇者", image: "/images/勇者1_1.png", hp: 1, attack: 1, description: "全てのクイズと戦闘を制した伝説の勇者。前人未到の強さを誇る。" },
-  { id: "quizou", name: "クイズ王", image: "/images/王様_1.png", hp: 1, attack: 1, description: "クイズの王様。クイズ界の支配者。" },
+  { id: "slime", name: "スライム", image: "/images/スライム_1.png", hp: 100, attack: 50, description: "ぷるぷるして弱そうに見えるが油断は禁物。" },
+  { id: "goblin", name: "ゴブリン", image: "/images/ゴブリン_1.png", hp: 220, attack: 100, description: "素早く群れで襲いかかる小型のモンスター。" },
+  { id: "skeleton", name: "スケルトン", image: "/images/スケルトン_1.png", hp: 350, attack: 200, description: "朽ちた骨から生まれた剣と盾を操る不気味な戦士。" },
+  { id: "mimic", name: "ミミック", image: "/images/ミミック_1.png", hp: 500, attack: 400, description: "宝箱に化けるトリッキーな敵。油断すると噛まれる！" },
+  { id: "lizardman", name: "リザードマン", image: "/images/リザードマン_1.png", hp: 850, attack: 600, description: "鱗に覆われた戦士。高い身体能力と鋭い爪で攻撃してくる。" },
+  { id: "golem", name: "ゴーレム", image: "/images/ゴーレム_1.png", hp: 1200, attack: 850, description: "岩と魔力で作られた巨人。圧倒的な防御力を誇る。" },
+  { id: "cerberus", name: "ケルベロス", image: "/images/ケルベロス_1.png", hp: 1400, attack: 1000, description: "冥界を守る三つ首の魔獣。素早い連続攻撃が脅威。" },
+  { id: "berserker", name: "バーサーカー", image: "/images/バーサーカー_1.png", hp: 1800, attack: 1500, description: "理性を失った狂戦士。攻撃力が非常に高い。" },
+  { id: "dragon", name: "ドラゴン", image: "/images/ドラゴン_1.png", hp: 2500, attack: 2000, description: "火を吹く巨大竜。圧倒的な力を誇る古代の王者。" },
+  { id: "fenikkusu", name: "フェニックス", image: "/images/フェニックス_1.png", hp: 3000, attack: 2500, description: "不死鳥の炎を操る神秘的な生物。燃え盛る翼で攻撃。" },
+  { id: "leviathan", name: "リヴァイアサン", image: "/images/リヴァイアサン_1.png", hp: 4000, attack: 3500, description: "海の深淵から現れる巨大モンスター。水流で圧倒する。" },
+  { id: "blackdragon", name: "ブラックドラゴン", image: "/images/ブラックドラゴン_1.png", hp: 7000, attack: 5000, description: "闇の力を宿す黒竜。魔法攻撃も強力。" },
+  { id: "kingdemon", name: "キングデーモン", image: "/images/キングデーモン_1.png", hp: 8500, attack: 7000, description: "魔界を統べる悪魔の王。圧倒的な魔力と威圧感を放つ。" },
+  { id: "kinghydra", name: "キングヒドラ", image: "/images/キングヒドラ_1.png", hp: 10000, attack: 8500, description: "複数の首を持つ巨大魔獣。倒しても再生する恐怖の存在。" },
+  { id: "ordin", name: "オーディン", image: "/images/オーディン_1.png", hp: 12000, attack: 12000, description: "知恵と戦の神。魔法と剣技を極めた伝説の戦士。" },
+  { id: "poseidon", name: "ポセイドン", image: "/images/ポセイドン_1.png", hp: 15000, attack: 15000, description: "海の神。雷と津波で敵を蹴散らす力を持つ。" },
+  { id: "hades", name: "ハデス", image: "/images/ハデス_1.png", hp: 18000, attack: 18000, description: "冥界の支配者。死者の力を操り、強大な攻撃を仕掛ける。" },
+  { id: "zeus", name: "ゼウス", image: "/images/ゼウス_1.png", hp: 25000, attack: 25000, description: "天空の王。雷霆を操る全知全能の神。" },
+  { id: "gundarimyouou", name: "軍荼利明王（ぐんだりみょうおう）", image: "/images/軍荼利明王_1.png", hp: 30000, attack: 30000, description: "仏教の怒りの守護神。恐怖の炎で全てを焼き尽くす。" },
+  { id: "maou", name: "魔王", image: "/images/魔王_1.png", hp: 40000, attack: 40000, description: "世界を闇に包もうとする存在。圧倒的な魔力を秘める。" },
+  { id: "yuusya_game", name: "クイズマスターの最強勇者", image: "/images/勇者1_1.png", hp: 50000, attack: 50000, description: "全てのクイズと戦闘を制した伝説の勇者。前人未到の強さを誇る。" },
+  { id: "quizou", name: "クイズ王", image: "/images/王様_1.png", hp: 100000, attack: 100000, description: "クイズの王様。クイズ界の支配者。" },
 ];
+// const enemies = [
+//   { id: "slime", name: "スライム", image: "/images/スライム_1.png", hp: 1, attack: 1, description: "ぷるぷるして弱そうに見えるが油断は禁物。" },
+//   { id: "goblin", name: "ゴブリン", image: "/images/ゴブリン_1.png", hp: 1, attack: 1, description: "素早く群れで襲いかかる小型のモンスター。" },
+//   { id: "skeleton", name: "スケルトン", image: "/images/スケルトン_1.png", hp: 1, attack: 1, description: "朽ちた骨から生まれた剣と盾を操る不気味な戦士。" },
+//   { id: "mimic", name: "ミミック", image: "/images/ミミック_1.png", hp: 1, attack: 1, description: "宝箱に化けるトリッキーな敵。油断すると噛まれる！" },
+//   { id: "lizardman", name: "リザードマン", image: "/images/リザードマン_1.png", hp: 1, attack: 1, description: "鱗に覆われた戦士。高い身体能力と鋭い爪で攻撃してくる。" },
+//   { id: "golem", name: "ゴーレム", image: "/images/ゴーレム_1.png", hp: 1, attack: 1, description: "岩と魔力で作られた巨人。圧倒的な防御力を誇る。" },
+//   { id: "cerberus", name: "ケルベロス", image: "/images/ケルベロス_1.png", hp: 1, attack: 1, description: "冥界を守る三つ首の魔獣。素早い連続攻撃が脅威。" },
+//   { id: "berserker", name: "バーサーカー", image: "/images/バーサーカー_1.png", hp: 1, attack: 1, description: "理性を失った狂戦士。攻撃力が非常に高い。" },
+//   { id: "dragon", name: "ドラゴン", image: "/images/ドラゴン_1.png", hp: 1, attack: 1, description: "火を吹く巨大竜。圧倒的な力を誇る古代の王者。" },
+//   { id: "fenikkusu", name: "フェニックス", image: "/images/フェニックス_1.png", hp: 1, attack: 1, description: "不死鳥の炎を操る神秘的な生物。燃え盛る翼で攻撃。" },
+//   { id: "leviathan", name: "リヴァイアサン", image: "/images/リヴァイアサン_1.png", hp: 1, attack: 1, description: "海の深淵から現れる巨大モンスター。水流で圧倒する。" },
+//   { id: "blackdragon", name: "ブラックドラゴン", image: "/images/ブラックドラゴン_1.png", hp: 1, attack: 1, description: "闇の力を宿す黒竜。魔法攻撃も強力。" },
+//   { id: "kingdemon", name: "キングデーモン", image: "/images/キングデーモン_1.png", hp: 1, attack: 1, description: "魔界を統べる悪魔の王。圧倒的な魔力と威圧感を放つ。" },
+//   { id: "kinghydra", name: "キングヒドラ", image: "/images/キングヒドラ_1.png", hp: 1, attack: 1, description: "複数の首を持つ巨大魔獣。倒しても再生する恐怖の存在。" },
+//   { id: "ordin", name: "オーディン", image: "/images/オーディン_1.png", hp: 1, attack: 1, description: "知恵と戦の神。魔法と剣技を極めた伝説の戦士。" },
+//   { id: "poseidon", name: "ポセイドン", image: "/images/ポセイドン_1.png", hp: 1, attack: 1, description: "海の神。雷と津波で敵を蹴散らす力を持つ。" },
+//   { id: "hades", name: "ハデス", image: "/images/ハデス_1.png", hp: 1, attack: 1, description: "冥界の支配者。死者の力を操り、強大な攻撃を仕掛ける。" },
+//   { id: "zeus", name: "ゼウス", image: "/images/ゼウス_1.png", hp: 1, attack: 1, description: "天空の王。雷霆を操る全知全能の神。" },
+//   { id: "gundarimyouou", name: "軍荼利明王（ぐんだりみょうおう）", image: "/images/軍荼利明王_1.png", hp: 1, attack: 1, description: "仏教の怒りの守護神。恐怖の炎で全てを焼き尽くす。" },
+//   { id: "maou", name: "魔王", image: "/images/魔王_1.png", hp: 1, attack: 1, description: "世界を闇に包もうとする存在。圧倒的な魔力を秘める。" },
+//   { id: "yuusya_game", name: "クイズマスターの最強勇者", image: "/images/勇者1_1.png", hp: 1, attack: 1, description: "全てのクイズと戦闘を制した伝説の勇者。前人未到の強さを誇る。" },
+//   { id: "quizou", name: "クイズ王", image: "/images/王様_1.png", hp: 1, attack: 1, description: "クイズの王様。クイズ界の支配者。" },
+// ];
 
 // キャラクター選択画面
 const CharacterSelect = ({ onSelect }: { onSelect: (characterId: string) => void }) => {

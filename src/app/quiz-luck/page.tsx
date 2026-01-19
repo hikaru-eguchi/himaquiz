@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Anton } from "next/font/google";
 import { useRouter } from "next/navigation";
 
-import { createSupabaseBrowserClient } from "@/lib/supabaseClient";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useSupabaseUser } from "../../hooks/useSupabaseUser"; // パスはプロジェクトに合わせて調整
 
 const anton = Anton({ subsets: ["latin"], weight: "400" });
