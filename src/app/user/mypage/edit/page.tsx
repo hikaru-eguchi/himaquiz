@@ -89,8 +89,11 @@ export default function ProfileEditPage() {
     if (userLoading) return;
     if (!user) return;
 
+    type UserCharacterRow = {
+      character_id: string | null;
+    };
+
     const fetchOwned = async () => {
-      // user_characters から所持キャラIDを取り、characters を引く
       const { data: rows, error } = await supabase
         .from("user_characters")
         .select("character_id")
@@ -98,7 +101,10 @@ export default function ProfileEditPage() {
 
       if (error) return;
 
-      const ids = (rows ?? []).map(r => r.character_id);
+      const ids = ((rows ?? []) as UserCharacterRow[])
+        .map((r) => r.character_id)
+        .filter((v): v is string => !!v);
+
       if (ids.length === 0) {
         setOwnedChars([]);
         return;
