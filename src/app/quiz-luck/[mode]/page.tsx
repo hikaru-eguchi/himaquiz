@@ -244,7 +244,7 @@ export default function QuizModePage() {
   const [streakInChallenge, setStreakInChallenge] = useState(0); // 連続正解（チャレンジ内）
   const [baseReward, setBaseReward] = useState<number | null>(null); // 100/200/300
   const [reward, setReward] = useState(0); // 現在の未確定報酬
-  const [failReward, setFailReward] = useState(0); // 失敗時の取得ポイント（半分）
+  const [failReward, setFailReward] = useState(0); // 失敗時の取得ポイント（半分→4分の1）
   const [lastMultiplier, setLastMultiplier] = useState<number | null>(null); // 2~4(演出用)
   const [finalReward, setFinalReward] = useState(0); // 確定して結果に渡すポイント
   const [prevReward, setPrevReward] = useState<number | null>(null);
@@ -317,6 +317,7 @@ export default function QuizModePage() {
     setAwardStatus("idle");
     awardedOnceRef.current = false;
     sentRef.current = false;
+    rewardAppliedRef.current = {};
 
     finishedRef.current = false;
     showCorrectRef.current = false;
@@ -333,6 +334,7 @@ export default function QuizModePage() {
     setReward(0);
     setFailReward(0);
     setLastMultiplier(null);
+    rewardAppliedRef.current = {};
 
     // クイズ開始準備
     setCurrentIndex(0);
@@ -411,7 +413,7 @@ export default function QuizModePage() {
         if (t <= 1) {
           clearInterval(timer);
           setFinished(true);
-          setFinalReward(Math.floor(reward / 2)); // 時間切れは失敗扱い：半分（※1回目はreward=0なので0）
+          setFinalReward(Math.floor(reward / 4)); // 時間切れは失敗扱い：半分→4分の1（※1回目はreward=0なので0）
           setPhase("finished");
           return 0;
         }
@@ -435,8 +437,6 @@ export default function QuizModePage() {
         const need = CHALLENGE_TARGETS[challengeIndex];
 
         if (nextStreak >= need) {
-          // ✅ ここでは「達成した」事実だけ作る
-          // 報酬処理は下で 1回だけやる
           queueMicrotask(() => {
             if (rewardAppliedRef.current[challengeIndex]) return;
             rewardAppliedRef.current[challengeIndex] = true;
@@ -445,7 +445,7 @@ export default function QuizModePage() {
               const base = randChoice([100, 200, 300] as const);
               setBaseReward(base);
               setReward(base);
-              setFailReward(Math.floor(base / 2));
+              setFailReward(Math.floor(base / 4));
               setLastMultiplier(null);
             } else {
               const { min, max } = getMulRange(challengeIndex);
@@ -455,7 +455,7 @@ export default function QuizModePage() {
               setReward((r) => {
                 setPrevReward(r);
                 const next = r * mul;
-                setFailReward(Math.floor(next / 2));
+                setFailReward(Math.floor(next / 4));
                 return next;
               });
             }
@@ -473,8 +473,8 @@ export default function QuizModePage() {
       // ❌ 不正解：失敗
       setIncorrectMessage(`ざんねん！\n答えは" ${displayAnswer} "でした！`);
 
-      // 失敗時の確定報酬（半分）
-      const half = Math.floor(reward / 2);
+      // 失敗時の確定報酬（半分→4分の1）
+      const half = Math.floor(reward / 4);
       setFinalReward(half);
     }
 
@@ -494,7 +494,7 @@ export default function QuizModePage() {
 
     // 通常：次の問題
     if (currentIndex + 1 >= questions.length) {
-      setFinalReward(Math.floor(reward / 2));
+      setFinalReward(Math.floor(reward / 4));
       setFinished(true);
       setPhase("finished");
     } else {
