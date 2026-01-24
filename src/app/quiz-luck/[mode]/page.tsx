@@ -253,6 +253,111 @@ export default function QuizModePage() {
   const showCorrectRef = useRef(showCorrectMessage);
   const rewardAppliedRef = useRef<{ [k: number]: boolean }>({});
 
+  // ============================
+  // ✅ 取りこぼし防止：pending key
+  // ============================
+  const PENDING_KEY = "fate_award_pending_v1"; // ← streak と別キーにする
+
+  // ✅ 付与直前に “いまログインできてるか” を確認して userId を返す
+  const ensureAuthedUserId = async (): Promise<string | null> => {
+    const { data: u1, error: e1 } = await supabase.auth.getUser();
+    if (!e1 && u1.user) return u1.user.id;
+
+    await supabase.auth.refreshSession();
+    const { data: u2, error: e2 } = await supabase.auth.getUser();
+    if (!e2 && u2.user) return u2.user.id;
+
+    return null;
+  };
+
+  const savePendingAward = (payload: { correctCount: number; points: number; exp: number }) => {
+    try {
+      localStorage.setItem(PENDING_KEY, JSON.stringify({ ...payload, at: Date.now() }));
+    } catch {}
+  };
+
+  const loadPendingAward = (): null | { correctCount: number; points: number; exp: number } => {
+    try {
+      const raw = localStorage.getItem(PENDING_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  };
+
+  const clearPendingAward = () => {
+    try {
+      localStorage.removeItem(PENDING_KEY);
+    } catch {}
+  };
+
+  // ✅ “付与”の本体（何回でも呼べる）
+  const awardPointsAndExp = async (payload?: { correctCount: number; points: number; exp: number }) => {
+    if (awardedOnceRef.current) return;
+
+    const p = payload ?? loadPendingAward();
+    if (!p) return;
+
+    if (p.points <= 0 && p.exp <= 0) {
+      clearPendingAward();
+      setAwardStatus("idle");
+      return;
+    }
+
+    setAwardStatus("awarding");
+
+    const uid = await ensureAuthedUserId();
+    if (!uid) {
+      savePendingAward(p);
+      setAwardStatus("need_login");
+      return;
+    }
+
+    // ✅ ここで初めて二重加算防止フラグ（未ログイン時に立てない）
+    awardedOnceRef.current = true;
+
+    try {
+      const { data, error } = await supabase.rpc("add_points_and_exp", {
+        p_user_id: uid,
+        p_points: p.points,
+        p_exp: p.exp,
+      });
+
+      if (error) {
+        console.error("add_points_and_exp error:", error);
+        savePendingAward(p);
+        awardedOnceRef.current = false;
+        setAwardStatus("error");
+        return;
+      }
+
+      // UI更新イベント
+      window.dispatchEvent(new Event("points:updated"));
+
+      // ログ（失敗しても致命的じゃない運用でOK）
+      await supabase.from("user_point_logs").insert({
+        user_id: uid,
+        change: p.points,
+        reason: `運命のクイズでポイント獲得（正解数 ${p.correctCount}問）`,
+      });
+
+      await supabase.from("user_exp_logs").insert({
+        user_id: uid,
+        change: p.exp,
+        reason: `運命のクイズでEXP獲得（正解数 ${p.correctCount}問）`,
+      });
+
+      clearPendingAward();
+      setAwardStatus("awarded");
+    } catch (e) {
+      console.error("award points/exp error:", e);
+      savePendingAward(p);
+      awardedOnceRef.current = false;
+      setAwardStatus("error");
+    }
+  };
+
   const titles = [
     { threshold: 3, title: "優等生" },
     { threshold: 5, title: "異端児" },
@@ -322,6 +427,8 @@ export default function QuizModePage() {
     finishedRef.current = false;
     showCorrectRef.current = false;
 
+    clearPendingAward();
+
     setQuestions((prev) => shuffleArray(prev));
   };
 
@@ -357,6 +464,15 @@ export default function QuizModePage() {
   useEffect(() => {
     rewardAppliedRef.current[challengeIndex] = false;
   }, [challengeIndex]);
+
+  useEffect(() => {
+    (async () => {
+      const pending = loadPendingAward();
+      if (!pending) return;
+      await awardPointsAndExp(pending);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -541,60 +657,50 @@ export default function QuizModePage() {
   // ★ finished になったタイミングで「獲得ポイント計算」→「ログインなら加算」
   useEffect(() => {
     if (phase !== "finished") return;
+    if (userLoading) return; // streak と同じく、判定が揺れてる時は待つ
 
-    const pointsEarned = finalReward;       // ✅ ここが運命チャレンジの報酬
-    const expEarned = calcEarnedExp(correctCount);
+    const points = finalReward; // ✅ 運命の確定報酬
+    const exp = calcEarnedExp(correctCount);
 
-    setEarnedPoints(pointsEarned);
-    setEarnedExp(expEarned);
+    setEarnedPoints(points);
+    setEarnedExp(exp);
 
-    if (pointsEarned <= 0 && expEarned <= 0) {
-      setAwardStatus("idle");
-      return;
-    }
+    // ✅ finished になったら必ず pending を作る（取りこぼしゼロ）
+    savePendingAward({ correctCount, points, exp });
 
-    if (!userLoading && !user) {
-      setAwardStatus("need_login");
-      return;
-    }
+    // ✅ そのまま付与を試す（ログインできれば即付与、できなければ need_login）
+    awardPointsAndExp({ correctCount, points, exp });
 
-    if (!userLoading && user && !awardedOnceRef.current) {
-      awardedOnceRef.current = true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, finalReward, correctCount, userLoading]);
 
-      const award = async () => {
-        try {
-          setAwardStatus("awarding");
+  useEffect(() => {
+    const onVisibility = async () => {
+      if (document.visibilityState !== "visible") return;
 
-          const { data, error } = await supabase.rpc("add_points_and_exp", {
-            p_user_id: user.id,
-            p_points: pointsEarned,
-            p_exp: expEarned,
-          });
+      await supabase.auth.refreshSession();
 
-          if (error) {
-            console.error("add_points_and_exp error:", error);
-            setAwardStatus("error");
-            return;
-          }
+      if (phase === "finished" && !awardedOnceRef.current) {
+        await awardPointsAndExp();
+      }
+    };
 
-          window.dispatchEvent(new Event("points:updated"));
+    const onFocus = async () => {
+      await supabase.auth.refreshSession();
 
-          await supabase.from("user_point_logs").insert({
-            user_id: user.id,
-            change: pointsEarned,
-            reason: `運命のクイズでポイント獲得（正解数 ${correctCount}問）`,
-          });
+      if (phase === "finished" && !awardedOnceRef.current) {
+        await awardPointsAndExp();
+      }
+    };
 
-          setAwardStatus("awarded");
-        } catch (e) {
-          console.error("award points/exp error:", e);
-          setAwardStatus("error");
-        }
-      };
-
-      award();
-    }
-  }, [phase, finalReward, correctCount, user, userLoading, supabase]);
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("focus", onFocus);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("focus", onFocus);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase]);
 
   // ★ 連続正解チャレンジ：成績(最高連続正解数)＆称号を保存 → 新記録/新称号ならモーダル
   useEffect(() => {
@@ -727,7 +833,7 @@ export default function QuizModePage() {
         )}
       </div>
         <p className="text-xl md:text-3xl font-bold text-gray-800 mb-4 md:mb-8">
-          チャレンジ報酬は{" "}
+          ここで終了すれば{" "}
           <span className="text-green-600">{reward}P</span>！
         </p>
 

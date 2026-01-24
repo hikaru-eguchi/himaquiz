@@ -105,7 +105,7 @@ export default function NavButtons() {
                         activeUrl === "/quizbooks" ? activeStyle : ""
                       }`}
                     >
-                      おもしろクイズ一覧
+                      漢字穴埋めクイズ
                     </button>
                   </Link>
                 </div>

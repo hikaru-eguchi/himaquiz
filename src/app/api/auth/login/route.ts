@@ -1,9 +1,9 @@
 // app/api/auth/login/route.ts
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 function calcLockSeconds(nextFailedCount: number) {
@@ -23,11 +23,16 @@ function getClientIp(req: Request) {
 
 export async function POST(req: Request) {
   const ip = getClientIp(req);
+
+  // スロットル更新用（管理権限）
   const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
     auth: { persistSession: false },
   });
 
-  const supabase = await createSupabaseServerClient(); // ✅ Cookie対応のserver client
+  // ✅ Auth用（Cookieは使わず、session を返すだけ）
+  const supabaseAuth = createClient(supabaseUrl, anonKey, {
+    auth: { persistSession: false },
+  });
 
   try {
     const { userId, password } = await req.json();
@@ -39,7 +44,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, message: "ユーザーIDに「@」は使えません。" }, { status: 400 });
     }
 
-    // --- ① DBでロック確認（前回案のまま） ---
+    // --- ① ロック確認 ---
     const { data: throttleRow } = await supabaseAdmin
       .from("login_throttles")
       .select("failed_count, locked_until")
@@ -58,17 +63,15 @@ export async function POST(req: Request) {
       );
     }
 
-    // --- ② Supabase Authログイン（ここが重要） ---
+    // --- ② Authログイン（session を返す） ---
     const authEmail = `${userId}@hima-quiz.com`;
 
-    // ✅ server clientでログインすると、必要なCookieがSet-Cookieされる
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabaseAuth.auth.signInWithPassword({
       email: authEmail,
       password,
     });
 
     if (error || !data.session) {
-      // 失敗カウント更新（前回案のまま）
       const currentFailed = throttleRow?.failed_count ?? 0;
       const nextFailed = currentFailed + 1;
       const lockSec = calcLockSeconds(nextFailed);
@@ -112,11 +115,8 @@ export async function POST(req: Request) {
         { onConflict: "user_id,ip" }
       );
 
-    // ✅ sessionを返す（クライアントがsetSessionできるように）
-    return NextResponse.json(
-      { ok: true, session: data.session },
-      { status: 200 }
-    );
+    // ✅ クライアントで setSession するために session を返す
+    return NextResponse.json({ ok: true, session: data.session }, { status: 200 });
   } catch (e) {
     console.error(e);
     return NextResponse.json({ ok: false, message: "サーバーエラーが発生しました。" }, { status: 500 });

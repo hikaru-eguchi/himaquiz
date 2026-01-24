@@ -370,6 +370,126 @@ export default function QuizModePage() {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const { user, loading: userLoading } = useSupabaseUser();
 
+  // ============================
+  // ✅ 取りこぼし防止：pending key（ダンジョン用）
+  // ============================
+  const PENDING_KEY = "dungeon_award_pending_v1";
+
+  // ✅ 付与直前に “いまログインできてるか” を確認して userId を返す
+  const ensureAuthedUserId = async (): Promise<string | null> => {
+    const { data: u1, error: e1 } = await supabase.auth.getUser();
+    if (!e1 && u1.user) return u1.user.id;
+
+    await supabase.auth.refreshSession();
+    const { data: u2, error: e2 } = await supabase.auth.getUser();
+    if (!e2 && u2.user) return u2.user.id;
+
+    return null;
+  };
+
+  const savePendingAward = (payload: { correctCount: number; points: number; exp: number }) => {
+    try {
+      localStorage.setItem(PENDING_KEY, JSON.stringify({ ...payload, at: Date.now() }));
+    } catch {}
+  };
+
+  const loadPendingAward = (): null | { correctCount: number; points: number; exp: number } => {
+    try {
+      const raw = localStorage.getItem(PENDING_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  };
+
+  const clearPendingAward = () => {
+    try {
+      localStorage.removeItem(PENDING_KEY);
+    } catch {}
+  };
+
+  // ✅ “付与”の本体（何回でも呼べる）
+  const awardPointsAndExp = async (payload?: { correctCount: number; points: number; exp: number }) => {
+    // 既に付与済みなら何もしない
+    if (awardedOnceRef.current) return;
+
+    const p = payload ?? loadPendingAward();
+    if (!p) return;
+
+    // 0以下は付与しない（pending も消す）
+    if (p.points <= 0 && p.exp <= 0) {
+      clearPendingAward();
+      setAwardStatus("idle");
+      return;
+    }
+
+    setAwardStatus("awarding");
+
+    const uid = await ensureAuthedUserId();
+    if (!uid) {
+      // ✅ 未ログインなら “取りこぼさないよう保留”
+      savePendingAward(p);
+      setAwardStatus("need_login");
+      return;
+    }
+
+    // ✅ ここで初めて二重加算防止フラグを立てる（未ログイン時に立てない）
+    awardedOnceRef.current = true;
+
+    try {
+      const { data, error } = await supabase.rpc("add_points_and_exp", {
+        p_user_id: uid,
+        p_points: p.points,
+        p_exp: p.exp,
+      });
+
+      if (error) {
+        console.error("add_points_and_exp error:", error);
+        // 失敗時は pending を残す（取りこぼし防止）
+        savePendingAward(p);
+        awardedOnceRef.current = false; // リトライできるよう戻す
+        setAwardStatus("error");
+        return;
+      }
+
+      const row = Array.isArray(data) ? data[0] : data;
+      const oldLevel = row?.old_level ?? 1;
+      const newLevel = row?.new_level ?? 1;
+
+      window.dispatchEvent(new Event("points:updated"));
+      window.dispatchEvent(new CustomEvent("profile:updated", { detail: { oldLevel, newLevel } }));
+
+      // ログ（ポイント）
+      if (p.points > 0) {
+        await supabase.from("user_point_logs").insert({
+          user_id: uid,
+          change: p.points,
+          reason: `クイズダンジョンでポイント獲得（クリアステージ ${p.correctCount}）`,
+        });
+      }
+
+      // ログ（EXP）
+      if (p.exp > 0) {
+        await supabase.from("user_exp_logs").insert({
+          user_id: uid,
+          change: p.exp,
+          reason: `クイズダンジョンでEXP獲得（正解数 ${p.correctCount} → ${p.exp}EXP）`,
+        });
+      }
+
+      // ✅ 成功したら pending を消す
+      clearPendingAward();
+      setAwardStatus("awarded");
+    } catch (e) {
+      console.error("award points/exp error:", e);
+      savePendingAward(p);
+      awardedOnceRef.current = false;
+      setAwardStatus("error");
+    }
+  };
+
+
   const [character, setCharacter] = useState<string | null>(null); // 選択したキャラクター
   const [questions, setQuestions] = useState<{ id: string; quiz: QuizData }[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -485,6 +605,7 @@ export default function QuizModePage() {
     setAwardStatus("idle");
     awardedOnceRef.current = false;
     sentRef.current = false;
+    clearPendingAward();
 
     // ref同期（タイマー制御で見てるので重要）
     finishedRef.current = false;
@@ -1233,89 +1354,66 @@ export default function QuizModePage() {
   };
 
   // ★ 追加：finished になったタイミングで「獲得ポイント計算(ステージ別)」→「ログインなら加算」
+  // ============================
+  // ✅ finished 時：計算 → pending 保存 → 付与を試す
+  // ============================
   useEffect(() => {
     if (!finished) return;
+    if (userLoading) return; // ← userの揺れ対策（判定を安定させる）
 
-    const earned = calcEarnedPointsByClearedStage(correctCount);
-    setEarnedPoints(earned);
+    const points = calcEarnedPointsByClearedStage(correctCount);
+    const exp = calcEarnedExpByCorrectCount(correctCount);
 
-    const expEarned = calcEarnedExpByCorrectCount(correctCount); // ★EXP=正解数×10
-    setEarnedExp(expEarned);
+    setEarnedPoints(points);
+    setEarnedExp(exp);
 
-    if (earned <= 0 && expEarned <= 0) {
-      setAwardStatus("idle");
-      return;
-    }
+    // ✅ finished になったら必ず “保留” を作る（取りこぼしゼロ）
+    savePendingAward({ correctCount, points, exp });
 
-    if (!userLoading && !user) {
-      setAwardStatus("need_login");
-      return;
-    }
+    // ✅ そのまま付与を試す（ログインできてれば即付与、できなければ need_login）
+    awardPointsAndExp({ correctCount, points, exp });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [finished, correctCount, userLoading]);
 
-    if (!userLoading && user && !awardedOnceRef.current) {
-      awardedOnceRef.current = true;
+  // ============================
+  // ✅ 取りこぼし防止：マウント時に pending を拾う
+  // ============================
+  useEffect(() => {
+    (async () => {
+      const pending = loadPendingAward();
+      if (!pending) return;
+      await awardPointsAndExp(pending);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-      const award = async () => {
-        try {
-          setAwardStatus("awarding");
+  useEffect(() => {
+    const onVisibility = async () => {
+      if (document.visibilityState !== "visible") return;
+      await supabase.auth.refreshSession();
 
-          // RPCで points と exp を同時加算＆level再計算
-          const { data, error } = await supabase.rpc("add_points_and_exp", {
-            p_user_id: user.id,
-            p_points: earned,
-            p_exp: expEarned,
-          });
+      if (finishedRef.current && !awardedOnceRef.current) {
+        await awardPointsAndExp();
+      }
+    };
 
-          if (error) {
-            console.error("add_points_and_exp error:", error);
-            setAwardStatus("error");
-            return;
-          }
+    const onFocus = async () => {
+      await supabase.auth.refreshSession();
 
-          const row = Array.isArray(data) ? data[0] : data;
-          const oldLevel = row?.old_level ?? 1;
-          const newLevel = row?.new_level ?? 1;
+      if (finishedRef.current && !awardedOnceRef.current) {
+        await awardPointsAndExp();
+      }
+    };
 
-          // ヘッダー等を即時更新（ポイント表示）
-          window.dispatchEvent(new Event("points:updated"));
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("focus", onFocus);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("focus", onFocus);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-          // レベルアップ演出（LevelUpToast等が監視）
-          window.dispatchEvent(
-            new CustomEvent("profile:updated", {
-              detail: { oldLevel, newLevel },
-            })
-          );
-
-          // ログ（ポイント）※ earned>0 の時だけ
-          if (earned > 0) {
-            const { error: logError } = await supabase.from("user_point_logs").insert({
-              user_id: user.id,
-              change: earned,
-              reason: `クイズダンジョンでポイント獲得（クリアステージ ${correctCount}）`,
-            });
-            if (logError) console.log("insert user_point_logs error:", logError);
-          }
-
-          // ログ（EXP）※ expEarned>0 の時だけ
-          if (expEarned > 0) {
-            const { error: logError2 } = await supabase.from("user_exp_logs").insert({
-              user_id: user.id,
-              change: expEarned,
-              reason: `クイズダンジョンでEXP獲得（正解数 ${correctCount} → ${expEarned}EXP）`,
-            });
-            if (logError2) console.log("insert user_exp_logs error:", logError2);
-          }
-
-          setAwardStatus("awarded");
-        } catch (e) {
-          console.error("award points/exp error:", e);
-          setAwardStatus("error");
-        }
-      };
-
-      award();
-    }
-  }, [finished, correctCount, user, userLoading, supabase]);
 
   // ★ クイズダンジョン：成績(到達ステージ)＆称号を保存 → 新記録/新称号ならモーダル
   useEffect(() => {

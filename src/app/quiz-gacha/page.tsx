@@ -10,6 +10,23 @@ import { useSupabaseUser } from "../../hooks/useSupabaseUser";
 
 const anton = Anton({ subsets: ["latin"], weight: "400" });
 
+type GachaCharacter = {
+  name: string;
+  image: string;
+  rarity: Rarity;
+  weight: number;
+  no: string;
+};
+
+type GachaItem = {
+  name: string;
+  image: string;
+  rarity: Rarity;
+  no: string;
+  characterId: string;
+  isNew: boolean;
+};
+
 /* ====== 下部のガチャコンポーネント ====== */
 const QuizGacha = ({
   points,
@@ -24,21 +41,10 @@ const QuizGacha = ({
 }: {
   points: number;
   rollGacha: () => void;
-  gachaResult: null | {
-    name: string;
-    image: string;
-    rarity: Rarity;
-    no: string;
-  };
-  setGachaResult: (
-    v: null | { name: string; image: string; rarity: Rarity; no: string }
-  ) => void;
-  history: { name: string; image: string; rarity: Rarity; no: string }[];
-  setHistory: React.Dispatch<
-    React.SetStateAction<
-      { name: string; image: string; rarity: Rarity; no: string }[]
-    >
-  >;
+  gachaResult: null | GachaItem;
+  setGachaResult: (v: null | GachaItem) => void;
+  history: GachaItem[];
+  setHistory: React.Dispatch<React.SetStateAction<GachaItem[]>>;
   rolling: boolean;
   rollGachaPremium: () => void;
   isPremiumRoll: boolean;
@@ -80,10 +86,7 @@ const QuizGacha = ({
     }, HOLD_MS);
   };
 
-  const [selectedHistory, setSelectedHistory] =
-    useState<null | { name: string; image: string; rarity: Rarity; no: string }>(
-      null
-    );
+  const [selectedHistory, setSelectedHistory] = useState<null | GachaItem>(null);
 
   const rarityToStarCount: Record<string, number> = {
     ノーマル: 1,
@@ -155,7 +158,7 @@ const QuizGacha = ({
   const showRainbowBg = !!gachaResult && phase !== "result";
   const showPremiumBg = isPremiumRoll && !!gachaResult && phase !== "result";
 
-  const PREMIUM_COST = 1000;
+  const PREMIUM_COST = 600;
   const canRollPremium = points >= PREMIUM_COST && !rolling;
 
   return (
@@ -210,12 +213,12 @@ const QuizGacha = ({
             ) : (
               <>
                 <span className="hidden md:inline">
-                  ★4以上確定ガチャ（1000P）🌟
+                  ★4以上確定ガチャ（600P）🌟
                 </span>
 
                 <span className="md:hidden block leading-tight">
                   <span className="block">★4以上確定ガチャ</span>
-                  <span className="block">（1000P）🌟</span>
+                  <span className="block">（600P）🌟</span>
                 </span>
               </>
             )}
@@ -230,7 +233,7 @@ const QuizGacha = ({
 
         {points < 1000 && (
           <p className="text-sm md:text-lg text-yellow-100 font-bold drop-shadow mt-1">
-            ★4以上確定は1000P必要！
+            ★4以上確定は600P必要！
           </p>
         )}
       </div>
@@ -254,6 +257,26 @@ const QuizGacha = ({
                     className="text-center flex-shrink-0 cursor-pointer"
                     onClick={() => setSelectedHistory(item)}
                   >
+                    <div className="relative inline-block">
+                      {item.isNew && (
+                        <div
+  className="
+    absolute -top-3 -left-15 md:-left-20
+    px-3 py-1
+    rounded-full
+    text-sm md:text-lg
+    font-extrabold
+    text-white
+    bg-gradient-to-r from-pink-500 via-red-500 to-yellow-400
+    shadow-lg
+    border-2 border-white
+    leading-none
+  "
+>
+                          NEW
+                        </div>
+                      )}
+                    </div>
                     <img
                       src={item.image}
                       className="w-16 h-16 md:w-32 md:h-32 mx-auto rounded"
@@ -537,6 +560,24 @@ const QuizGacha = ({
                     bg-gradient-to-r ${rarityGradient[gachaResult.rarity]}
                   `}
                 >
+                  {gachaResult.isNew && (
+                    <div
+  className="
+    absolute -top-6 md:-top-7 left-1 md:left-2
+    px-4 py-2
+    rounded-full
+    text-xl md:text-3xl
+    font-extrabold
+    text-white
+    bg-gradient-to-r from-pink-500 via-red-500 to-yellow-400
+    shadow-lg
+    border-4 border-white
+    leading-none
+  "
+>
+                      NEW
+                    </div>
+                  )}
                   <img
                     src={gachaResult.image}
                     className="w-50 h-50 md:w-70 md:h-70 mx-auto drop-shadow-lg"
@@ -574,19 +615,14 @@ export default function QuizMasterPage() {
 
   const descriptionRef = useRef<HTMLParagraphElement>(null);
 
+  const [ownedCharacterIds, setOwnedCharacterIds] = useState<Set<string>>(new Set());
+
   const [rolling, setRolling] = useState(false);
   const [isPremiumRoll, setIsPremiumRoll] = useState(false);
   // DB から読むポイント
   const [points, setPoints] = useState(0);
-  const [gachaResult, setGachaResult] = useState<null | {
-    name: string;
-    image: string;
-    rarity: Rarity;
-    no: string;
-  }>(null);
-  const [history, setHistory] = useState<
-    { name: string; image: string; rarity: Rarity; no: string }[]
-  >([]);
+  const [gachaResult, setGachaResult] = useState<GachaItem | null>(null);
+  const [history, setHistory] = useState<GachaItem[]>([]);
 
   // ★ 追加: プロフィールからポイント読み込み
   useEffect(() => {
@@ -610,49 +646,57 @@ export default function QuizMasterPage() {
       setPoints(data?.points ?? 0);
     };
 
+    const fetchOwned = async () => {
+      const { data, error } = await supabase
+        .from("user_characters")
+        .select("character_id")
+        .eq("user_id", user.id);
+
+      if (error) {
+        console.error("fetchOwned error:", error);
+        return;
+      }
+      setOwnedCharacterIds(new Set((data ?? []).map((r) => r.character_id)));
+    };
+
     fetchPoints();
+    fetchOwned();
   }, [user, userLoading, supabase, router]);
 
-  const gachaCharacters: {
-    name: string;
-    image: string;
-    rarity: Rarity;
-    weight: number;
-    no: string;
-  }[] = [
-    { name: "ダンジョンの剣士", image: "/images/ダンジョンの剣士_1.png", rarity: "ノーマル", weight: 2.8571, no: "1" },
-    { name: "ダンジョンの武闘家", image: "/images/ダンジョンの武闘家_1.png", rarity: "ノーマル", weight: 2.8571, no: "2" },
-    { name: "ダンジョンの魔法使い", image: "/images/ダンジョンの魔法使い_1.png", rarity: "ノーマル", weight: 2.8571, no: "3" },
-    { name: "スライム", image: "/images/スライム_1.png", rarity: "ノーマル", weight: 2.8571, no: "4" },
-    { name: "スライム【フェアリー】", image: "/images/スライム_2.png", rarity: "ノーマル", weight: 2.8571, no: "5" },
-    { name: "ゴブリン", image: "/images/ゴブリン_1.png", rarity: "ノーマル", weight: 2.8571, no: "6" },
-    { name: "ゴブリン【フェアリー】", image: "/images/ゴブリン_2.png", rarity: "ノーマル", weight: 2.8571, no: "7" },
-    { name: "スケルトン", image: "/images/スケルトン_1.png", rarity: "レア", weight: 2.8333, no: "8" },
-    { name: "スケルトン【フェアリー】", image: "/images/スケルトン_2.png", rarity: "レア", weight: 2.8333, no: "9" },
-    { name: "ミミック", image: "/images/ミミック_1.png", rarity: "レア", weight: 2.8333, no: "10" },
-    { name: "ミミック【フェアリー】", image: "/images/ミミック_2.png", rarity: "レア", weight: 2.8333, no: "11" },
-    { name: "リザードマン", image: "/images/リザードマン_1.png", rarity: "レア", weight: 2.8333, no: "12" },
-    { name: "リザードマン【フェアリー】", image: "/images/リザードマン_2.png", rarity: "レア", weight: 2.8333, no: "13" },
-    { name: "ゴーレム", image: "/images/ゴーレム_1.png", rarity: "超レア", weight: 2.5300, no: "14" },
-    { name: "ゴーレム【フェアリー】", image: "/images/ゴーレム_2.png", rarity: "超レア", weight: 2.5300, no: "15" },
-    { name: "ケルベロス", image: "/images/ケルベロス_1.png", rarity: "超レア", weight: 2.5300, no: "16" },
-    { name: "ケルベロス【フェアリー】", image: "/images/ケルベロス_2.png", rarity: "超レア", weight: 2.5300, no: "17" },
-    { name: "バーサーカー", image: "/images/バーサーカー_1.png", rarity: "超レア", weight: 2.5300, no: "18" },
-    { name: "バーサーカー【フェアリー】", image: "/images/バーサーカー_2.png", rarity: "超レア", weight: 2.5300, no: "19" },
-    { name: "キングスライム", image: "/images/キングスライム_1.png", rarity: "激レア", weight: 1.8913, no: "20" },
-    { name: "キングスライム【フェアリー】", image: "/images/キングスライム_2.png", rarity: "激レア", weight: 1.8913, no: "21" },
-    { name: "ドラゴン", image: "/images/ドラゴン_1.png", rarity: "激レア", weight: 1.8913, no: "22" },
-    { name: "ドラゴン【フェアリー】", image: "/images/ドラゴン_2.png", rarity: "激レア", weight: 1.8913, no: "23" },
-    { name: "フェニックス", image: "/images/フェニックス_1.png", rarity: "激レア", weight: 1.8913, no: "24" },
-    { name: "フェニックス【フェアリー】", image: "/images/フェニックス_2.png", rarity: "激レア", weight: 1.8913, no: "25" },
-    { name: "リヴァイアサン", image: "/images/リヴァイアサン_1.png", rarity: "激レア", weight: 1.8913, no: "26" },
-    { name: "リヴァイアサン【フェアリー】", image: "/images/リヴァイアサン_2.png", rarity: "激レア", weight: 1.8913, no: "27" },
-    { name: "ブラックドラゴン", image: "/images/ブラックドラゴン_1.png", rarity: "超激レア", weight: 1.2057, no: "28" },
-    { name: "ブラックドラゴン【フェアリー】", image: "/images/ブラックドラゴン_2.png", rarity: "超激レア", weight: 1.2057, no: "29" },
-    { name: "キングデーモン", image: "/images/キングデーモン_1.png", rarity: "超激レア", weight: 1.2057, no: "30" },
-    { name: "キングデーモン【フェアリー】", image: "/images/キングデーモン_2.png", rarity: "超激レア", weight: 1.2057, no: "31" },
-    { name: "キングヒドラ", image: "/images/キングヒドラ_1.png", rarity: "超激レア", weight: 1.2057, no: "32" },
-    { name: "キングヒドラ【フェアリー】", image: "/images/キングヒドラ_2.png", rarity: "超激レア", weight: 1.2057, no: "33" },
+  const gachaCharacters: GachaCharacter[] = [
+    { name: "ダンジョンの剣士", image: "/images/ダンジョンの剣士_1.png", rarity: "ノーマル", weight: 2.8206, no: "1" },
+    { name: "ダンジョンの武闘家", image: "/images/ダンジョンの武闘家_1.png", rarity: "ノーマル", weight: 2.8206, no: "2" },
+    { name: "ダンジョンの魔法使い", image: "/images/ダンジョンの魔法使い_1.png", rarity: "ノーマル", weight: 2.8206, no: "3" },
+    { name: "スライム", image: "/images/スライム_1.png", rarity: "ノーマル", weight: 2.8206, no: "4" },
+    { name: "スライム【フェアリー】", image: "/images/スライム_2.png", rarity: "ノーマル", weight: 2.8206, no: "5" },
+    { name: "ゴブリン", image: "/images/ゴブリン_1.png", rarity: "ノーマル", weight: 2.8206, no: "6" },
+    { name: "ゴブリン【フェアリー】", image: "/images/ゴブリン_2.png", rarity: "ノーマル", weight: 2.8206, no: "7" },
+    { name: "スケルトン", image: "/images/スケルトン_1.png", rarity: "レア", weight: 2.7969, no: "8" },
+    { name: "スケルトン【フェアリー】", image: "/images/スケルトン_2.png", rarity: "レア", weight: 2.7969, no: "9" },
+    { name: "ミミック", image: "/images/ミミック_1.png", rarity: "レア", weight: 2.7969, no: "10" },
+    { name: "ミミック【フェアリー】", image: "/images/ミミック_2.png", rarity: "レア", weight: 2.7969, no: "11" },
+    { name: "リザードマン", image: "/images/リザードマン_1.png", rarity: "レア", weight: 2.7969, no: "12" },
+    { name: "リザードマン【フェアリー】", image: "/images/リザードマン_2.png", rarity: "レア", weight: 2.7969, no: "13" },
+    { name: "ゴーレム", image: "/images/ゴーレム_1.png", rarity: "超レア", weight: 2.4983, no: "14" },
+    { name: "ゴーレム【フェアリー】", image: "/images/ゴーレム_2.png", rarity: "超レア", weight: 2.4983, no: "15" },
+    { name: "ケルベロス", image: "/images/ケルベロス_1.png", rarity: "超レア", weight: 2.4983, no: "16" },
+    { name: "ケルベロス【フェアリー】", image: "/images/ケルベロス_2.png", rarity: "超レア", weight: 2.4983, no: "17" },
+    { name: "バーサーカー", image: "/images/バーサーカー_1.png", rarity: "超レア", weight: 2.4983, no: "18" },
+    { name: "バーサーカー【フェアリー】", image: "/images/バーサーカー_2.png", rarity: "超レア", weight: 2.4983, no: "19" },
+    { name: "キングスライム", image: "/images/キングスライム_1.png", rarity: "激レア", weight: 0.9961, no: "20" },
+    { name: "キングスライム【フェアリー】", image: "/images/キングスライム_2.png", rarity: "激レア", weight: 0.9961, no: "21" },
+    { name: "ドラゴン", image: "/images/ドラゴン_1.png", rarity: "激レア", weight: 0.9961, no: "22" },
+    { name: "ドラゴン【フェアリー】", image: "/images/ドラゴン_2.png", rarity: "激レア", weight: 0.9961, no: "23" },
+    { name: "フェニックス", image: "/images/フェニックス_1.png", rarity: "激レア", weight: 0.9961, no: "24" },
+    { name: "フェニックス【フェアリー】", image: "/images/フェニックス_2.png", rarity: "激レア", weight: 0.9961, no: "25" },
+    { name: "リヴァイアサン", image: "/images/リヴァイアサン_1.png", rarity: "激レア", weight: 0.9961, no: "26" },
+    { name: "リヴァイアサン【フェアリー】", image: "/images/リヴァイアサン_2.png", rarity: "激レア", weight: 0.9961, no: "27" },
+    { name: "ブラックドラゴン", image: "/images/ブラックドラゴン_1.png", rarity: "超激レア", weight: 0.6943, no: "28" },
+    { name: "ブラックドラゴン【フェアリー】", image: "/images/ブラックドラゴン_2.png", rarity: "超激レア", weight: 0.6943, no: "29" },
+    { name: "キングデーモン", image: "/images/キングデーモン_1.png", rarity: "超激レア", weight: 0.6943, no: "30" },
+    { name: "キングデーモン【フェアリー】", image: "/images/キングデーモン_2.png", rarity: "超激レア", weight: 0.6943, no: "31" },
+    { name: "キングヒドラ", image: "/images/キングヒドラ_1.png", rarity: "超激レア", weight: 0.6943, no: "32" },
+    { name: "キングヒドラ【フェアリー】", image: "/images/キングヒドラ_2.png", rarity: "超激レア", weight: 0.6943, no: "33" },
     { name: "オーディン", image: "/images/オーディン_1.png", rarity: "神レア", weight: 0.2, no: "34" },
     { name: "オーディン【フェアリー】", image: "/images/オーディン_2.png", rarity: "神レア", weight: 0.2, no: "35" },
     { name: "ポセイドン", image: "/images/ポセイドン_1.png", rarity: "神レア", weight: 0.2, no: "36" },
@@ -678,16 +722,36 @@ export default function QuizMasterPage() {
     { name: "伝説の勇者", image: "/images/勇者2_1.png", rarity: "シークレット", weight: 0.01, no: "56" },
     { name: "伝説の勇者【フェアリー】", image: "/images/勇者2_2.png", rarity: "シークレット", weight: 0.01, no: "57" },
     { name: "伝説の勇者【プレミア】", image: "/images/勇者2_3.png", rarity: "シークレット", weight: 0.01, no: "58" },
-    { name: "きまぐれモンスター【赤】", image: "/images/きまぐれモンスター【赤】.png", rarity: "ノーマル", weight: 2.8571, no: "59" },
-    { name: "きまぐれモンスター【青】", image: "/images/きまぐれモンスター【青】.png", rarity: "ノーマル", weight: 2.8571, no: "60" },
-    { name: "きまぐれモンスター【黄】", image: "/images/きまぐれモンスター【黄】.png", rarity: "ノーマル", weight: 2.8571, no: "61" },
-    { name: "きまぐれモンスター【緑】", image: "/images/きまぐれモンスター【緑】.png", rarity: "ノーマル", weight: 2.8571, no: "62" },
-    { name: "きまぐれモンスター【紫】", image: "/images/きまぐれモンスター【紫】.png", rarity: "ノーマル", weight: 2.8571, no: "63" },
-    { name: "きまぐれモンスター【白】", image: "/images/きまぐれモンスター【白】.png", rarity: "ノーマル", weight: 2.8571, no: "64" },
-    { name: "きまぐれモンスター【黒】", image: "/images/きまぐれモンスター【黒】.png", rarity: "ノーマル", weight: 2.8571, no: "65" },
-    { name: "きまぐれモンスター【銀】", image: "/images/きまぐれモンスター【銀】.png", rarity: "激レア", weight: 1.8913, no: "66" },
-    { name: "きまぐれモンスター【金】", image: "/images/きまぐれモンスター【金】.png", rarity: "超激レア", weight: 1.2057, no: "67" },
+    { name: "きまぐれモンスター【赤】", image: "/images/きまぐれモンスター【赤】.png", rarity: "ノーマル", weight: 2.8206, no: "59" },
+    { name: "きまぐれモンスター【青】", image: "/images/きまぐれモンスター【青】.png", rarity: "ノーマル", weight: 2.8206, no: "60" },
+    { name: "きまぐれモンスター【黄】", image: "/images/きまぐれモンスター【黄】.png", rarity: "ノーマル", weight: 2.8206, no: "61" },
+    { name: "きまぐれモンスター【緑】", image: "/images/きまぐれモンスター【緑】.png", rarity: "ノーマル", weight: 2.8206, no: "62" },
+    { name: "きまぐれモンスター【紫】", image: "/images/きまぐれモンスター【紫】.png", rarity: "ノーマル", weight: 2.8206, no: "63" },
+    { name: "きまぐれモンスター【白】", image: "/images/きまぐれモンスター【白】.png", rarity: "ノーマル", weight: 2.8206, no: "64" },
+    { name: "きまぐれモンスター【黒】", image: "/images/きまぐれモンスター【黒】.png", rarity: "ノーマル", weight: 2.8206, no: "65" },
+    { name: "きまぐれモンスター【銀】", image: "/images/きまぐれモンスター【銀】.png", rarity: "激レア", weight: 0.9961, no: "66" },
+    { name: "きまぐれモンスター【金】", image: "/images/きまぐれモンスター【金】.png", rarity: "超激レア", weight: 0.6943, no: "67" },
     { name: "きまぐれモンスター【虹】", image: "/images/きまぐれモンスター【虹】.png", rarity: "神レア", weight: 0.2, no: "68" },
+    { name: "きまぐれモンスター【水玉】", image: "/images/きまぐれモンスター【水玉】.png", rarity: "激レア", weight: 0.9961, no: "69" },
+    { name: "きまぐれモンスター【ハート】", image: "/images/きまぐれモンスター【ハート】.png", rarity: "激レア", weight: 0.9961, no: "70" },
+    { name: "きまぐれモンスター【ギンガムチェック】", image: "/images/きまぐれモンスター【ギンガムチェック】.png", rarity: "激レア", weight: 0.9961, no: "71" },
+    { name: "きまぐれモンスター【花】", image: "/images/きまぐれモンスター【花】.png", rarity: "激レア", weight: 0.9961, no: "72" },
+    { name: "きまぐれモンスター【スター】", image: "/images/きまぐれモンスター【スター】.png", rarity: "激レア", weight: 0.9961, no: "73" },
+    { name: "きまぐれモンスター【ハチ】", image: "/images/きまぐれモンスター【ハチ】.png", rarity: "激レア", weight: 0.9961, no: "74" },
+    { name: "きまぐれモンスター【リボン】", image: "/images/きまぐれモンスター【リボン】.png", rarity: "超激レア", weight: 0.6943, no: "75" },
+    { name: "きまぐれモンスター【花畑】", image: "/images/きまぐれモンスター【花畑】.png", rarity: "超激レア", weight: 0.6943, no: "76" },
+    { name: "きまぐれモンスター【お菓子】", image: "/images/きまぐれモンスター【お菓子】.png", rarity: "超激レア", weight: 0.6943, no: "77" },
+    { name: "きまぐれモンスター【いちご】", image: "/images/きまぐれモンスター【いちご】.png", rarity: "超激レア", weight: 0.6943, no: "78" },
+    { name: "きまぐれモンスター【宝石】", image: "/images/きまぐれモンスター【宝石】.png", rarity: "超激レア", weight: 0.6943, no: "79" },
+    { name: "きまぐれモンスター【勇者】", image: "/images/きまぐれモンスター【勇者】.png", rarity: "神レア", weight: 0.2, no: "80" },
+    { name: "きまぐれモンスター【魔王】", image: "/images/きまぐれモンスター【魔王】.png", rarity: "神レア", weight: 0.2, no: "81" },
+    { name: "きまぐれモンスター【スーツ】", image: "/images/きまぐれモンスター【スーツ】.png", rarity: "神レア", weight: 0.2, no: "82" },
+    { name: "きまぐれモンスター【ゲーマー】", image: "/images/きまぐれモンスター【ゲーマー】.png", rarity: "神レア", weight: 0.2, no: "83" },
+    { name: "きまぐれモンスター【ヤンキー】", image: "/images/きまぐれモンスター【ヤンキー】.png", rarity: "神レア", weight: 0.2, no: "84" },
+    { name: "きまぐれモンスター【ガンマン】", image: "/images/きまぐれモンスター【ガンマン】.png", rarity: "神レア", weight: 0.2, no: "85" },
+    { name: "きまぐれモンスター【すし職人】", image: "/images/きまぐれモンスター【すし職人】.png", rarity: "シークレット", weight: 0.01, no: "86" },
+    { name: "きまぐれモンスター【ラーメン屋】", image: "/images/きまぐれモンスター【ラーメン屋】.png", rarity: "シークレット", weight: 0.01, no: "87" },
+    { name: "きまぐれモンスター【アイドル】", image: "/images/きまぐれモンスター【アイドル】.png", rarity: "シークレット", weight: 0.01, no: "88" },
   ];
 
   // ★ 修正: プロフィールの points を減らしてログを書き込んでからガチャ抽選
@@ -760,46 +824,57 @@ export default function QuizMasterPage() {
       }
 
       // ここからガチャ抽選処理
-      const totalWeight = gachaCharacters.reduce(
-        (sum, c) => sum + c.weight,
-        0
-      );
+      const totalWeight = gachaCharacters.reduce((sum, c) => sum + c.weight, 0);
       let random = Math.random() * totalWeight;
 
       for (const char of gachaCharacters) {
         if (random < char.weight) {
-          setGachaResult(char);
+
+          // ① DBのcharacters.idを取る（noで紐付け）
+          const { data: characterRow, error: findError } = await supabase
+            .from("characters")
+            .select("id")
+            .eq("no", char.no)
+            .maybeSingle();
+
+          if (findError || !characterRow?.id) {
+            console.error("character lookup error:", findError, char.no);
+            return;
+          }
+
+          // ② NEW判定（引く前の所持セットで判定）
+          const isNew = !ownedCharacterIds.has(characterRow.id);
+
+          // ③ ガチャ結果に isNew を入れる
+          const result: GachaItem = {
+            name: char.name,
+            image: char.image,
+            rarity: char.rarity,
+            no: char.no,
+            characterId: characterRow.id,
+            isNew,
+          };
+          setGachaResult(result);
+
+          // ④ 履歴にも入れる（演出タイミングはそのまま）
           setTimeout(() => {
-            setHistory((prev) => [...prev, char]);
+            setHistory((prev) => [...prev, result]);
           }, 2000);
 
-          // キャラ取得ログ
-          try {
-            const { data: characterRow, error: findError } = await supabase
-              .from("characters")
-              .select("id")
-              .eq("no", char.no)
-              .maybeSingle();
+          // ⑤ 取得保存（既存RPC）
+          const { error: rpcError } = await supabase.rpc("increment_user_character", {
+            p_user_id: user.id,
+            p_character_id: characterRow.id,
+          });
+          if (rpcError) console.error("increment_user_character rpc error:", rpcError);
 
-            if (findError) {
-              console.error("character lookup error:", findError);
-              return;
-            }
-            if (!characterRow) {
-              console.error("character not found for no:", char.no);
-              return;
-            }
-
-            const { error: rpcError } = await supabase.rpc("increment_user_character", {
-              p_user_id: user.id,
-              p_character_id: characterRow.id,
+          // ⑥ NEWだったなら所持セットも更新（次からNEWにならない）
+          if (isNew) {
+            setOwnedCharacterIds((prev) => {
+              const next = new Set(prev);
+              next.add(characterRow.id);
+              return next;
             });
-
-            if (rpcError) {
-              console.error("increment_user_character rpc error:", rpcError);
-            }
-          } catch (e) {
-            console.error("save gacha result error:", e);
           }
 
           return;
@@ -814,7 +889,7 @@ export default function QuizMasterPage() {
     }
   };
 
-  const PREMIUM_COST = 1000;
+  const PREMIUM_COST = 600;
 
   const rollGachaPremium = async () => {
     if (rolling) return;
@@ -846,7 +921,7 @@ export default function QuizMasterPage() {
 
       const currentPoints = profile?.points ?? 0;
       if (currentPoints < PREMIUM_COST) {
-        alert("ポイントが足りません！（1000P以上必要です）");
+        alert("ポイントが足りません！（600P以上必要です）");
         return;
       }
 
@@ -869,7 +944,7 @@ export default function QuizMasterPage() {
       setPoints(updatedProfile?.points ?? newPoints);
       window.dispatchEvent(new Event("points:updated"));
 
-      // ポイントログ（-1000）
+      // ポイントログ（-600）
       await supabase.from("user_point_logs").insert({
         user_id: user.id,
         change: -PREMIUM_COST,
@@ -886,22 +961,52 @@ export default function QuizMasterPage() {
 
       for (const char of premiumPool) {
         if (random < char.weight) {
-          setGachaResult(char);
-          setTimeout(() => setHistory((prev) => [...prev, char]), 2000);
 
-          // キャラ取得ログ（通常と同じ）
-          const { data: characterRow } = await supabase
+          // ① DBのcharacters.idを取る（noで紐付け）
+          const { data: characterRow, error: findError } = await supabase
             .from("characters")
             .select("id")
             .eq("no", char.no)
             .maybeSingle();
 
-          if (characterRow?.id) {
-            await supabase.rpc("increment_user_character", {
-              p_user_id: user.id,
-              p_character_id: characterRow.id,
+          if (findError || !characterRow?.id) {
+            console.error("character lookup error:", findError, char.no);
+            return;
+          }
+
+          // ② NEW判定
+          const isNew = !ownedCharacterIds.has(characterRow.id);
+
+          // ③ GachaItem を作る（ここが重要）
+          const result: GachaItem = {
+            name: char.name,
+            image: char.image,
+            rarity: char.rarity,
+            no: char.no,
+            characterId: characterRow.id,
+            isNew,
+          };
+
+          // ④ 画面表示・履歴
+          setGachaResult(result);
+          setTimeout(() => setHistory((prev) => [...prev, result]), 2000);
+
+          // ⑤ 取得保存（既存RPC）
+          const { error: rpcError } = await supabase.rpc("increment_user_character", {
+            p_user_id: user.id,
+            p_character_id: characterRow.id,
+          });
+          if (rpcError) console.error("increment_user_character rpc error:", rpcError);
+
+          // ⑥ NEWだったなら所持セットも更新
+          if (isNew) {
+            setOwnedCharacterIds((prev) => {
+              const next = new Set(prev);
+              next.add(characterRow.id);
+              return next;
             });
           }
+
           return;
         }
         random -= char.weight;
@@ -1029,19 +1134,19 @@ export default function QuizMasterPage() {
               <br />
               ＜キャラ出現率＞
               <br />
-              ノーマル　全14種類　出現率：2.8571%　全体の40%
+              ノーマル　全14種類　出現率：2.8206%　全体の39.49%
               <br />
-              レア　全6種類　出現率：2.8333%　全体の17%
+              レア　全6種類　出現率：2.7969%　全体の16.78%
               <br />
-              超レア　全6種類　出現率：2.5300%　全体の15.18%
+              超レア　全6種類　出現率：2.4983%　全体の14.99%
               <br />
-              激レア　全8種類　出現率：約1.8913%　全体の15.13%
+              激レア　全15種類　出現率：約0.9961%　全体の14.94%
               <br />
-              超激レア　全7種類　出現率：約1.2057%　全体の8.44%
+              超激レア　全12種類　出現率：約0.6943%　全体の8.33%
               <br />
-              神レア　全21種類　出現率：0.2%　全体の4%
+              神レア　全27種類　出現率：0.2%　全体の5.4%
               <br />
-              シークレット　全5種類　出現率：0.01%　全体の0.05%
+              シークレット　全8種類　出現率：0.01%　全体の0.08%
               <br />
             </p>
           </div>

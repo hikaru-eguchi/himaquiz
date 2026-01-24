@@ -7,7 +7,33 @@ import type { Session } from "@supabase/supabase-js";
 
 type ApiResponse =
   | { ok: true; session: Session }
-  | { ok: false; code?: "LOCKED" | "INVALID"; message: string; remainingSec?: number; hint?: string };
+  | {
+      ok: false;
+      code?: "LOCKED" | "INVALID";
+      message: string;
+      remainingSec?: number;
+      hint?: string;
+    };
+
+function now() {
+  return new Date().toISOString();
+}
+
+function msSince(t0: number) {
+  return Math.floor(performance.now() - t0);
+}
+
+function withTimeout<T>(p: Promise<T>, ms: number, label: string) {
+  return Promise.race<T>([
+    p,
+    new Promise<T>((_, reject) => {
+      const id = setTimeout(() => {
+        clearTimeout(id);
+        reject(new Error(`[timeout] ${label} (${ms}ms)`));
+      }, ms);
+    }),
+  ]);
+}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -21,41 +47,97 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
+    const t0 = performance.now();
+    const tag = `[login ${Math.random().toString(16).slice(2, 8)}]`;
+
+    const log = (...args: any[]) => console.log(tag, now(), `+${msSince(t0)}ms`, ...args);
+
     setError(null);
     setHint(null);
     setLoading(true);
 
+    log("START", { userIdLen: userId.length });
+
     try {
       if (userId.includes("@")) {
         setError("ユーザーIDに「@」は使えません。");
-        setLoading(false);
+        log("BLOCKED: contains @");
         return;
       }
 
-      // ✅ サーバー(API)経由でログイン＆待機判定（Cookieセットされる）
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, password }),
-      });
+      // ① API 呼び出し
+      log("fetch /api/auth/login ...");
+      const res = await withTimeout(
+        fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId, password }),
+        }),
+        15000,
+        "fetch(/api/auth/login)"
+      );
+      log("fetch done", { status: res.status });
 
-      const json = (await res.json()) as ApiResponse;
+      // ② JSON パース
+      log("res.json ...");
+      const json = (await withTimeout(res.json(), 15000, "res.json()")) as ApiResponse;
+      log("json parsed", json.ok ? { ok: true } : { ok: false, code: json.code });
 
       if (!json.ok) {
         setError(json.message);
         if (json.hint) setHint(json.hint);
-        setLoading(false);
+        log("API returned not ok", json);
         return;
       }
 
+      // ③ token の存在チェック（ここ重要）
+      const at = json.session?.access_token;
+      const rt = json.session?.refresh_token;
+      log("tokens", { hasAccess: !!at, hasRefresh: !!rt });
+
+      if (!at || !rt) {
+        setError("ログイン情報が不完全です（token不足）。APIの返却を確認してください。");
+        log("MISSING TOKEN", { access_token: !!at, refresh_token: !!rt, session: json.session });
+        return;
+      }
+
+      // ④ setSession（ここで止まる可能性が一番高い）
+      log("supabase.auth.setSession ...");
+      const { error: setErr } = await withTimeout(
+        supabase.auth.setSession({ access_token: at, refresh_token: rt }),
+        10000,
+        "supabase.auth.setSession"
+      );
+      log("setSession done", { hasError: !!setErr });
+
+      if (setErr) {
+        console.error(tag, "setSession error detail:", setErr);
+        setError("セッションの保存に失敗しました。もう一度お試しください。");
+        return;
+      }
+
+      // ⑤ 直後に getSession / getUser で確定（ここでズレると別タブ問題が出る）
+      log("supabase.auth.getSession ...");
+      const s = await withTimeout(supabase.auth.getSession(), 10000, "supabase.auth.getSession");
+      log("getSession done", { hasSession: !!s.data.session });
+
+      log("supabase.auth.getUser ...");
+      const u = await withTimeout(supabase.auth.getUser(), 10000, "supabase.auth.getUser");
+      log("getUser done", { hasUser: !!u.data.user });
+
+      // ⑥ 画面遷移
+      log("router.push /");
       router.push("/");
-      router.refresh(); // Server Component等の表示更新を確実に走らせる
+      router.refresh();
       setTimeout(() => window.dispatchEvent(new Event("auth:changed")), 0);
+      log("DONE (routed)");
     } catch (err: any) {
-      console.error(err);
+      console.error(tag, "EXCEPTION", err);
       setError(err?.message ?? "ログインに失敗しました");
     } finally {
       setLoading(false);
+      log("FINALLY (loading=false)");
     }
   };
 
@@ -97,26 +179,6 @@ export default function LoginPage() {
           {loading ? "ログイン中..." : "ログイン"}
         </button>
       </form>
-
-      <div className="mt-4 text-center space-y-3">
-        <button
-          type="button"
-          onClick={() => router.push("/user/forgot-password")}
-          className="text-md md:text-base text-blue-700 underline hover:text-blue-900 cursor-pointer"
-        >
-          パスワードをお忘れの方はこちら
-        </button>
-
-        <div className="text-sm md:text-base text-gray-600 mt-6">まだユーザー登録がお済みでない方はこちら👇</div>
-
-        <button
-          type="button"
-          onClick={() => router.push("/user/signup")}
-          className="inline-block px-4 py-2 bg-green-500 text-white rounded-md text-sm md:text-base font-semibold hover:bg-green-600 cursor-pointer"
-        >
-          新規ユーザー登録
-        </button>
-      </div>
     </div>
   );
 }

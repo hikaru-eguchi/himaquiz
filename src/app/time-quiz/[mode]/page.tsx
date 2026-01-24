@@ -53,7 +53,7 @@ const rankComments = [
   { threshold: 2500, comment: "クイズ仙人級！悟りを開き、問題の未来すら見えている…？" },
   { threshold: 2800, comment: "クイズ星人！地球の常識を超えた動きだ…異次元！" },
   { threshold: 3000, comment: "知識マスター認定！君の脳内には百科事典が入ってるだろ！？" },
-  { threshold: 3300, comment: "天才クイズプレイヤー！天才と言うより天災級の強さ！" },
+  { threshold: 3300, comment: "天才クイズプレイヤー！天才と言うより天災級の強さだ！" },
   { threshold: 3500, comment: "脳内図書館レベル！その頭の中、何階建てなんだ！？" },
   { threshold: 3800, comment: "クイズマシーン化！もはや動きが機械的に正確すぎる！" },
   { threshold: 4000, comment: "問題バスター！問題が君に立ち向かっては消えていく…！" },
@@ -125,6 +125,9 @@ const QuizResult = ({
     return () => timers.forEach(clearTimeout);
   }, []);
 
+  // ✅ streak版と同じ：未ログイン判定は isLoggedIn ではなく awardStatus の need_login を採用
+  const showLoginUI = !isLoggedIn && awardStatus === "need_login";
+
   return (
     <div className="text-center mt-6">
       {showScore && (
@@ -150,7 +153,9 @@ const QuizResult = ({
           </div>
 
           {getRankComment() && (
-            <p className="text-lg md:text-2xl text-gray-800 mb-8 font-bold whitespace-pre-line">{getRankComment()}</p>
+            <p className="text-lg md:text-2xl text-gray-800 mb-8 font-bold whitespace-pre-line">
+              {getRankComment()}
+            </p>
           )}
 
           {/* ★ 獲得ポイント表示（ログイン有無で文言変更） */}
@@ -162,21 +167,7 @@ const QuizResult = ({
               今回の獲得経験値： <span className="text-purple-600">{earnedExp} EXP</span>
             </p>
 
-            {isLoggedIn ? (
-              <>
-                {awardStatus === "awarding" && (
-                  <p className="text-md md:text-xl text-gray-600 mt-2">ポイント反映中...</p>
-                )}
-                {awardStatus === "awarded" && (
-                  <p className="text-md md:text-xl text-green-700 font-bold mt-2">✅ ポイントを加算しました！</p>
-                )}
-                {awardStatus === "error" && (
-                  <p className="text-md md:text-xl text-red-600 font-bold mt-2">
-                    ❌ ポイント加算に失敗しました。時間をおいて再度お試しください。
-                  </p>
-                )}
-              </>
-            ) : (
+            {showLoginUI ? (
               <div className="mt-2">
                 <p className="text-md md:text-xl text-gray-700 font-bold">
                   ※未ログインのため受け取れません。ログインすると次からポイントを受け取れます！
@@ -191,6 +182,20 @@ const QuizResult = ({
                   ログインなしでも、引き続き遊べます👇
                 </p>
               </div>
+            ) : (
+              <>
+                {awardStatus === "awarding" && (
+                  <p className="text-md md:text-xl text-gray-600 mt-2">ポイント反映中...</p>
+                )}
+                {awardStatus === "awarded" && (
+                  <p className="text-md md:text-xl text-green-700 font-bold mt-2">✅ ポイントを加算しました！</p>
+                )}
+                {awardStatus === "error" && (
+                  <p className="text-md md:text-xl text-red-600 font-bold mt-2">
+                    ❌ ポイント加算に失敗しました。時間をおいて再度お試しください。
+                  </p>
+                )}
+              </>
             )}
           </div>
         </>
@@ -257,6 +262,12 @@ export default function QuizModePage() {
   const { pushModal } = useResultModal();
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // ✅ フォーカス復帰時などの判定用
+  const finishedRef = useRef(finished);
+  useEffect(() => {
+    finishedRef.current = finished;
+  }, [finished]);
+
   const titles = [
     { threshold: 300, title: "優等生" },
     { threshold: 500, title: "異端児" },
@@ -292,6 +303,145 @@ export default function QuizModePage() {
     { threshold: 10000, title: "神（ゴッド）🌟" },
   ];
 
+  // ============================
+  // ✅ 取りこぼし防止：pending key（timed 用）
+  // ============================
+  const PENDING_KEY = "timed_award_pending_v1";
+
+  // ✅ 付与直前に “いまログインできてるか” を確認して userId を返す
+  const ensureAuthedUserId = async (): Promise<string | null> => {
+    const { data: u1, error: e1 } = await supabase.auth.getUser();
+    if (!e1 && u1.user) return u1.user.id;
+
+    await supabase.auth.refreshSession();
+    const { data: u2, error: e2 } = await supabase.auth.getUser();
+    if (!e2 && u2.user) return u2.user.id;
+
+    return null;
+  };
+
+  const savePendingAward = (payload: { score: number; correctCount: number; points: number; exp: number }) => {
+    try {
+      localStorage.setItem(PENDING_KEY, JSON.stringify({ ...payload, at: Date.now() }));
+    } catch {}
+  };
+
+  const loadPendingAward = (): null | { score: number; correctCount: number; points: number; exp: number } => {
+    try {
+      const raw = localStorage.getItem(PENDING_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  };
+
+  const clearPendingAward = () => {
+    try {
+      localStorage.removeItem(PENDING_KEY);
+    } catch {}
+  };
+
+  // ✅ “付与”の本体（何回でも呼べる）
+  const awardPointsAndExp = async (
+    payload?: { score: number; correctCount: number; points: number; exp: number }
+  ) => {
+    // 既に付与済みなら何もしない
+    if (awardedOnceRef.current) return;
+
+    const p = payload ?? loadPendingAward();
+    if (!p) return;
+
+    // 0以下は付与しない（pending も消す）
+    if (p.points <= 0 && p.exp <= 0) {
+      clearPendingAward();
+      setAwardStatus("idle");
+      return;
+    }
+
+    setAwardStatus("awarding");
+
+    const uid = await ensureAuthedUserId();
+    if (!uid) {
+      // ✅ 未ログインなら “取りこぼさないよう保留”
+      savePendingAward(p);
+      setAwardStatus("need_login");
+      return;
+    }
+
+    // ✅ ここで初めて二重加算防止フラグを立てる（未ログイン時に立てない）
+    awardedOnceRef.current = true;
+
+    try {
+      const { data, error } = await supabase.rpc("add_points_and_exp", {
+        p_user_id: uid,
+        p_points: p.points,
+        p_exp: p.exp,
+      });
+
+      if (error) {
+        console.error("add_points_and_exp error:", error);
+        // 失敗時は pending を残す（取りこぼし防止）
+        savePendingAward(p);
+        awardedOnceRef.current = false; // リトライできるよう戻す
+        setAwardStatus("error");
+        return;
+      }
+
+      const row = Array.isArray(data) ? data[0] : data;
+      const oldLevel = row?.old_level ?? 1;
+      const newLevel = row?.new_level ?? 1;
+
+      // ヘッダー等を即時更新（ポイント表示）
+      window.dispatchEvent(new Event("points:updated"));
+      // レベルアップ演出（LevelUpToastがこれを監視してる）
+      window.dispatchEvent(new CustomEvent("profile:updated", { detail: { oldLevel, newLevel } }));
+
+      // ログ（＋） ※失敗しても致命的にはしない
+      const { error: logError } = await supabase.from("user_point_logs").insert({
+        user_id: uid,
+        change: p.points,
+        reason: `制限時間クイズでポイント獲得（score ${p.score} → ${p.points}P）`,
+      });
+      if (logError) console.log("insert user_point_logs error:", logError);
+
+      const { error: logError2 } = await supabase.from("user_exp_logs").insert({
+        user_id: uid,
+        change: p.exp,
+        reason: `制限時間クイズでEXP獲得（score ${p.score} / 正解${p.correctCount} → ${p.exp}EXP）`,
+      });
+      if (logError2) console.log("insert user_exp_logs error:", logError2);
+
+      // ✅ 成功したら pending を消す
+      clearPendingAward();
+      setAwardStatus("awarded");
+    } catch (e) {
+      console.error("award points/exp error:", e);
+      savePendingAward(p);
+      awardedOnceRef.current = false;
+      setAwardStatus("error");
+    }
+  };
+
+  const shuffleArray = <T,>(arr: T[]) => [...arr].sort(() => Math.random() - 0.5);
+
+  const startTimer = () => {
+    // 既存があれば止める
+    if (timerRef.current) clearInterval(timerRef.current);
+
+    timerRef.current = setInterval(() => {
+      setTimeLeft((t) => {
+        if (t <= 1) {
+          if (timerRef.current) clearInterval(timerRef.current);
+          timerRef.current = null;
+          setFinished(true);
+          return 0;
+        }
+        return t - 1;
+      });
+    }, 1000);
+  };
+
   const resetGame = () => {
     setCurrentIndex(0);
     setUserAnswer(null);
@@ -315,6 +465,9 @@ export default function QuizModePage() {
     setAwardStatus("idle");
     awardedOnceRef.current = false;
     sentRef.current = false;
+
+    // ✅ 次プレイに持ち越さない（任意：残したいなら消さなくてOK）
+    clearPendingAward();
 
     // 問題をシャッフルし直す（同じ問題順を避けたい場合）
     setQuestions((prev) => shuffleArray(prev));
@@ -356,27 +509,6 @@ export default function QuizModePage() {
 
     fetchArticles();
   }, [mode, genre, level]);
-
-  const shuffleArray = <T,>(arr: T[]) => [...arr].sort(() => Math.random() - 0.5);
-
-  const startTimer = () => {
-    // 既存があれば止める
-    if (timerRef.current) clearInterval(timerRef.current);
-
-    timerRef.current = setInterval(() => {
-      setTimeLeft((t) => {
-        if (t <= 1) {
-          // ここでは clearInterval(timer) は使わない（refを止める）
-          if (timerRef.current) clearInterval(timerRef.current);
-          timerRef.current = null;
-
-          setFinished(true);
-          return 0;
-        }
-        return t - 1;
-      });
-    }, 1000);
-  };
 
   // タイマー（0になったら強制終了）
   useEffect(() => {
@@ -441,89 +573,69 @@ export default function QuizModePage() {
     return title;
   };
 
-  // ★ finished になったタイミングで「獲得ポイント計算(score/5)」→「ログインなら加算」
+  // ============================
+  // ✅ 取りこぼし防止：マウント時に pending を拾う
+  // ============================
+  useEffect(() => {
+    (async () => {
+      const pending = loadPendingAward();
+      if (!pending) return;
+      await awardPointsAndExp(pending);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ============================
+  // ✅ finished 時：計算 → pending 保存 → 付与を試す（streak版と同じ流れ）
+  // ============================
   useEffect(() => {
     if (!finished) return;
+    if (userLoading) return;
 
-    // 表示用ポイントは必ず計算
-    const earned = calcEarnedPointsFromScore(score);
-    setEarnedPoints(earned);
+    const points = calcEarnedPointsFromScore(score);
+    const exp = correctCount * 20;
 
-    const expEarned = correctCount * 20; // ★ ポイント分EXPも加算
-    setEarnedExp(expEarned);
+    setEarnedPoints(points);
+    setEarnedExp(exp);
 
-    // 0PならDB処理はしない（表示だけ）
-    if (earned <= 0) {
-      setAwardStatus("idle");
-      return;
-    }
+    // ✅ finished になったら必ず “保留” を作る（取りこぼしゼロ）
+    savePendingAward({ score, correctCount, points, exp });
 
-    // 未ログインなら案内だけ
-    if (!userLoading && !user) {
-      setAwardStatus("need_login");
-      return;
-    }
+    // ✅ そのまま付与を試す（ログインできてれば即付与、できなければ need_login）
+    awardPointsAndExp({ score, correctCount, points, exp });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [finished, score, correctCount, userLoading]);
 
-    // ログイン中なら付与（1回だけ）
-    if (!userLoading && user && !awardedOnceRef.current) {
-      awardedOnceRef.current = true;
+  // ============================
+  // ✅ タブ復帰/フォーカス復帰で pending を拾って再付与
+  // ============================
+  useEffect(() => {
+    const onVisibility = async () => {
+      if (document.visibilityState !== "visible") return;
 
-      const award = async () => {
-        try {
-          setAwardStatus("awarding");
+      await supabase.auth.refreshSession();
 
-          // RPCで points と exp を同時加算＆level再計算
-          const { data, error } = await supabase.rpc("add_points_and_exp", {
-            p_user_id: user.id,
-            p_points: earned,
-            p_exp: expEarned,
-          });
+      if (finishedRef.current && !awardedOnceRef.current) {
+        await awardPointsAndExp();
+      }
+    };
 
-          if (error) {
-            console.error("add_points_and_exp error:", error);
-            setAwardStatus("error");
-            return;
-          }
+    const onFocus = async () => {
+      await supabase.auth.refreshSession();
 
-          const row = Array.isArray(data) ? data[0] : data;
-          const oldLevel = row?.old_level ?? 1;
-          const newLevel = row?.new_level ?? 1;
+      if (finishedRef.current && !awardedOnceRef.current) {
+        await awardPointsAndExp();
+      }
+    };
 
-          // ヘッダー等を即時更新（ポイント表示）
-          window.dispatchEvent(new Event("points:updated"));
-
-          // レベルアップ演出（LevelUpToastがこれを監視してる）
-          window.dispatchEvent(
-            new CustomEvent("profile:updated", {
-              detail: { oldLevel, newLevel },
-            })
-          );
-
-          // ログ（＋） ※失敗しても致命的にはしない
-          const { error: logError } = await supabase.from("user_point_logs").insert({
-            user_id: user.id,
-            change: earned,
-            reason: `制限時間クイズでポイント獲得（score ${score} → ${earned}P）`,
-          });
-          if (logError) console.log("insert user_point_logs error:", logError);
-
-          const { error: logError2 } = await supabase.from("user_exp_logs").insert({
-            user_id: user.id,
-            change: expEarned,
-            reason: `制限時間クイズでEXP獲得（score ${score} → ${expEarned}EXP）`,
-          });
-          if (logError2) console.log("insert user_exp_logs error:", logError2);
-
-          setAwardStatus("awarded");
-        } catch (e) {
-          console.error("award points/exp error:", e);
-          setAwardStatus("error");
-        }
-      };
-
-      award();
-    }
-  }, [finished, score, user, userLoading, supabase]);
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("focus", onFocus);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("focus", onFocus);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ★ 成績/称号（timed）を保存して、新記録 or 新称号ならモーダル表示
   useEffect(() => {
@@ -539,7 +651,6 @@ export default function QuizModePage() {
         const weekStart = getWeekStartJST();
 
         // ✅ 週間ランキングに反映したい値を決める
-        // score: 今回獲得ポイントを加算、correct: 正解数、play: 1回、best_streak: max更新
         const { error: weeklyErr } = await supabase.rpc("upsert_weekly_stats", {
           p_user_id: user!.id,
           p_week_start: weekStart,
@@ -551,16 +662,14 @@ export default function QuizModePage() {
 
         if (weeklyErr) {
           console.log("upsert_weekly_stats error:", weeklyErr);
-          // ランキング保存失敗してもゲームは止めない
         }
 
-        // scoreが確定してから称号判定
-        const title = calcTitle(titles, score); // titles = timedTitles
+        const title = calcTitle(titles, score);
 
         const res = await submitGameResult(supabase, {
           game: "timed",
-          score: score,       // totalScore ではなく score
-          title: title,       // nullでもOK
+          score: score,
+          title: title,
           writeLog: true,
         });
 
@@ -568,11 +677,9 @@ export default function QuizModePage() {
         if (modal) pushModal(modal);
       } catch (e) {
         console.error("[timed] submitGameResult error:", e);
-        // 成績保存が失敗してもゲーム進行は止めない
       }
     })();
   }, [finished, userLoading, user, score, supabase, pushModal]);
-
 
   if (questions.length === 0) return <p></p>;
 
@@ -701,7 +808,11 @@ export default function QuizModePage() {
 
               {!showCorrectMessage && !incorrectMessage && (
                 <>
-                  <QuizQuestion quiz={questions[currentIndex].quiz} userAnswer={userAnswer} setUserAnswer={setUserAnswer} />
+                  <QuizQuestion
+                    quiz={questions[currentIndex].quiz}
+                    userAnswer={userAnswer}
+                    setUserAnswer={setUserAnswer}
+                  />
                   <button
                     className="px-5 py-3 md:px-6 md:py-3 bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-4 hover:bg-blue-600 cursor-pointer"
                     onClick={checkAnswer}

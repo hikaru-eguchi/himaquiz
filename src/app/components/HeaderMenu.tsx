@@ -5,26 +5,44 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
+import type { User, Session, AuthChangeEvent } from "@supabase/supabase-js";
 
 export default function HeaderMenu() {
   const router = useRouter();
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+
   const [open, setOpen] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
+
   const [username, setUsername] = useState<string | null>(null);
-  const [points, setPoints] = useState<number | null>(null); // 所持ポイント
+  const [points, setPoints] = useState<number | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string>("/images/初期アイコン.png");
   const [level, setLevel] = useState<number | null>(null);
   const [exp, setExp] = useState<number | null>(null);
+
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [avatarPreviewOpen, setAvatarPreviewOpen] = useState(false);
 
+  const resetHeader = () => {
+    setUser(null);
+    setUsername(null);
+    setPoints(null);
+    setLevel(null);
+    setExp(null);
+    setAvatarUrl("/images/初期アイコン.png");
+  };
+
   const fetchProfile = async (uid: string) => {
-    const { data: profile } = await supabase
+    const { data: profile, error } = await supabase
       .from("profiles")
       .select("username, points, level, exp, avatar_character_id, avatar_url")
       .eq("id", uid)
       .single();
+
+    if (error) {
+      console.error("fetchProfile error:", error);
+      return;
+    }
 
     setUsername(profile?.username ?? null);
     setPoints(profile?.points ?? 0);
@@ -36,7 +54,6 @@ export default function HeaderMenu() {
       ? (profile.avatar_url.startsWith("/") ? profile.avatar_url : `/${profile.avatar_url}`)
       : initial;
 
-    // ✅ 所持キャラがあれば characters を優先
     if (profile?.avatar_character_id) {
       const { data: ch } = await supabase
         .from("characters")
@@ -46,98 +63,96 @@ export default function HeaderMenu() {
 
       const url = ch?.image_url
         ? (ch.image_url.startsWith("/") ? ch.image_url : `/${ch.image_url}`)
-        : saved; // ← 失敗時は saved にフォールバック
+        : saved;
 
       setAvatarUrl(url);
     } else {
-      // ✅ default / initial は avatar_url をそのまま表示
       setAvatarUrl(saved);
     }
   };
 
-  // ===== セッション監視（初回 & ログイン状態変化）=====
+  // ✅ 初回だけ getSession。イベントでは session 引数だけ使う
   useEffect(() => {
     let alive = true;
 
-    const fetchUser = async () => {
-      const { data, error } = await supabase.auth.getUser();
-      const currentUser = error ? null : data.user;
+    const init = async () => {
+      const { data } = await supabase.auth.getSession();
+      const u = data.session?.user ?? null;
+
       if (!alive) return;
 
-      setUser(currentUser);
-
-      if (!currentUser) {
-        setUsername(null);
-        setPoints(null);
-        setLevel(null);
-        setExp(null);
-        setAvatarUrl("/images/初期アイコン.png");
+      if (!u) {
+        resetHeader();
         return;
       }
 
-      await fetchProfile(currentUser.id);
+      setUser(u);
+      // プロフィール取得は別タスク（イベント内await回避）
+      setTimeout(() => void fetchProfile(u.id), 0);
     };
 
-    // 初回
-    fetchUser();
+    init();
 
-    // Supabase の auth イベント（※Cookie方式では即時発火しないことがある）
-    const { data: listener } = supabase.auth.onAuthStateChange(async () => {
-      await fetchUser();
-    });
+    const { data: sub } = supabase.auth.onAuthStateChange(
+      (event: AuthChangeEvent, session: Session | null) => {
+        // 🚫 ここで supabase.auth.getSession/getUser/refreshSession を await しない
+        const u = session?.user ?? null;
 
-    // ★ 追加：ログインAPI成功後に投げるカスタムイベント
-    const onAuthChanged = () => setTimeout(() => fetchUser(), 0);
-    // window.addEventListener("auth:changed", onAuthChanged);
+        if (!u) {
+          resetHeader();
+          return;
+        }
 
-    // フォーカス復帰でも更新
-    const onFocus = () => fetchUser();
+        setUser(u);
+        setTimeout(() => void fetchProfile(u.id), 0);
+      }
+    );
+
+    const onAuthChanged = () => setTimeout(() => void init(), 0);
+    window.addEventListener("auth:changed", onAuthChanged);
+
+    const onFocus = () => setTimeout(() => void init(), 0);
     window.addEventListener("focus", onFocus);
 
     return () => {
       alive = false;
-      listener.subscription.unsubscribe();
-      // window.removeEventListener("auth:changed", onAuthChanged);
+      sub.subscription.unsubscribe();
+      window.removeEventListener("auth:changed", onAuthChanged);
       window.removeEventListener("focus", onFocus);
     };
   }, [supabase]);
 
+  // points:updated はOK（ただし getUser を多用しすぎない）
   useEffect(() => {
     const refreshPoints = async () => {
-      const { data, error } = await supabase.auth.getUser();
-      const currentUser = error ? null : data.user;
-      setUser(currentUser);
+      const { data } = await supabase.auth.getSession();
+      const u = data.session?.user ?? null;
 
-      if (currentUser) await fetchProfile(currentUser.id);
+      setUser(u);
+      if (u) await fetchProfile(u.id);
     };
 
-    const handler = () => refreshPoints();
+    const handler = () => void refreshPoints();
     window.addEventListener("points:updated", handler);
     return () => window.removeEventListener("points:updated", handler);
   }, [supabase]);
 
   const handleLogout = async () => {
-    // 先に閉じる
     setConfirmOpen(false);
     setOpen(false);
 
-    // ✅ サーバーでCookie削除
-    await fetch("/api/auth/logout", { method: "POST" });
+    // ✅ もし以前Cookie方式も混ざってたなら「両方」消すのが安全
+    // await fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
 
-    setUser(null);
-    setUsername(null);
-    setPoints(null);
-    setLevel(null);
-    setExp(null);
-    setAvatarUrl("/images/初期アイコン.png");
+    await supabase.auth.signOut(); // localStorage のセッションを消す
 
-    // ✅ 画面遷移＆Server Component再描画
+    resetHeader();
+    window.dispatchEvent(new Event("auth:changed"));
+
     router.push("/");
     router.refresh();
-
-    // ✅ fetchUserが走ってもCookieが消えてるので復活しない
-    // window.dispatchEvent(new Event("auth:changed"));
   };
+
 
   return (
     <>

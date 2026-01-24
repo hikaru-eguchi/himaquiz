@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getAllQuizBooksMeta } from "@/lib/quizbooks";
 
 export const metadata = {
-  title: "おもしろクイズ問題集｜ひまQ",
+  title: "漢字穴埋めクイズ｜ひまQ",
   description: "答えを見ながら楽しめる！テーマ別のおもしろクイズ問題集をまとめて紹介。",
 };
 
@@ -14,7 +14,7 @@ export default function QuizBooksIndexPage() {
       {/* ===== タイトル ===== */}
       <div className="text-center mb-8">
         <h1 className="text-3xl md:text-5xl font-extrabold mb-3">
-          🎉 おもしろクイズ問題集
+          漢字穴埋めクイズ📘
         </h1>
         <p className="text-gray-700 md:text-lg font-medium">
           答えをクリックしながら、気軽に楽しめるクイズ集！

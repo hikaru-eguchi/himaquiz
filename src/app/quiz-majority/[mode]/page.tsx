@@ -221,11 +221,6 @@ const QuizResult = ({
 
       {showButton && (
         <div className="mx-auto max-w-[520px] bg-white border-2 border-black rounded-xl p-4 shadow mt-6">
-          {isCodeMatch ? (
-            <p className="text-xl md:text-2xl font-extrabold text-gray-800">
-              合言葉マッチのためポイントは加算されません
-            </p>
-          ) : (
             <>
               <div className="mb-2 text-lg md:text-xl text-gray-700 font-bold">
                 <p className="text-blue-500">正解数ポイント：{basePoints}P（{correctCount}問 × 20P）</p>
@@ -280,7 +275,6 @@ const QuizResult = ({
                 </div>
               )}
             </>
-          )}
         </div>
       )}
 
@@ -375,6 +369,128 @@ export default function QuizModePage() {
   const router = useRouter();
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const { user, loading: userLoading } = useSupabaseUser();
+
+  // =====================
+  // ✅ pending（付与待ち）管理：多数決クイズ用
+  // =====================
+  const PENDING_KEY = "majority_award_pending_v1";
+
+  type PendingAward = {
+    points: number;
+    exp: number;
+    correctCount: number;
+    basePoints: number;
+    firstBonusPoints: number;
+    predictionBonusPoints: number;
+    hasPredicted: boolean;
+    predictedWinner: string | null;
+    winnerSocketIds: string[];
+    createdAt: number;
+  };
+
+  const savePendingAward = (payload: PendingAward) => {
+    try {
+      localStorage.setItem(PENDING_KEY, JSON.stringify(payload));
+    } catch {}
+  };
+  const loadPendingAward = (): PendingAward | null => {
+    try {
+      const raw = localStorage.getItem(PENDING_KEY);
+      return raw ? (JSON.parse(raw) as PendingAward) : null;
+    } catch {
+      return null;
+    }
+  };
+  const clearPendingAward = () => {
+    try {
+      localStorage.removeItem(PENDING_KEY);
+    } catch {}
+  };
+
+  // ✅ 付与直前に “いまログインできてるか” を確認して userId を返す
+  const ensureAuthedUserId = async (): Promise<string | null> => {
+    const { data: u1, error: e1 } = await supabase.auth.getUser();
+    if (!e1 && u1.user) return u1.user.id;
+
+    // タブ復帰直後などの揺れ対策
+    await supabase.auth.refreshSession();
+
+    const { data: u2, error: e2 } = await supabase.auth.getUser();
+    if (!e2 && u2.user) return u2.user.id;
+
+    return null;
+  };
+
+  // ✅ 実際の付与処理（pendingがあれば何度でも拾える）
+  const awardPointsAndExp = async (payload: PendingAward) => {
+    if (awardedOnceRef.current) return;
+
+    if (payload.points <= 0 && payload.exp <= 0) return;
+
+    setAwardStatus("awarding");
+
+    const authedUserId = await ensureAuthedUserId();
+    if (!authedUserId) {
+      setAwardStatus("need_login");
+      return;
+    }
+
+    try {
+      awardedOnceRef.current = true;
+
+      const { data, error } = await supabase.rpc("add_points_and_exp", {
+        p_user_id: authedUserId,
+        p_points: payload.points,
+        p_exp: payload.exp,
+      });
+
+      if (error) {
+        console.error("add_points_and_exp error:", error);
+        awardedOnceRef.current = false; // 失敗時は再試行できるよう戻す
+        setAwardStatus("error");
+        return;
+      }
+
+      const row = Array.isArray(data) ? data[0] : data;
+      const oldLevel = row?.old_level ?? 1;
+      const newLevel = row?.new_level ?? 1;
+
+      window.dispatchEvent(new Event("points:updated"));
+      window.dispatchEvent(
+        new CustomEvent("profile:updated", { detail: { oldLevel, newLevel } })
+      );
+
+      const reasonPoint =
+        `多数決クイズ獲得: 正解${payload.correctCount}問=${payload.basePoints}P` +
+        (payload.firstBonusPoints ? ` / 1位ボーナス${payload.firstBonusPoints}P` : "") +
+        (payload.predictionBonusPoints ? ` / 予想的中${payload.predictionBonusPoints}P` : "");
+
+      if (payload.points > 0) {
+        const { error: logError } = await supabase.from("user_point_logs").insert({
+          user_id: authedUserId,
+          change: payload.points,
+          reason: reasonPoint,
+        });
+        if (logError) console.log("insert user_point_logs error raw:", logError);
+      }
+
+      if (payload.exp > 0) {
+        const { error: logError2 } = await supabase.from("user_exp_logs").insert({
+          user_id: authedUserId,
+          change: payload.exp,
+          reason: `多数決クイズEXP獲得: 正解${payload.correctCount}問 → ${payload.exp}EXP`,
+        });
+        if (logError2) console.log("insert user_exp_logs error raw:", logError2);
+      }
+
+      clearPendingAward();
+      setAwardStatus("awarded");
+    } catch (e) {
+      console.error("award points/exp error:", e);
+      awardedOnceRef.current = false;
+      setAwardStatus("error");
+    }
+  };
 
   const [awardStatus, setAwardStatus] = useState<AwardStatus>("idle");
   const awardedOnceRef = useRef(false);
@@ -589,6 +705,7 @@ export default function QuizModePage() {
     setPredictionBonusPoints(0);
     setEarnedExp(0);
     sentRef.current = false;
+    clearPendingAward();
   };
 
   const handleNewMatch = () => {
@@ -621,6 +738,7 @@ export default function QuizModePage() {
     setPredictionBonusPoints(0);
     setEarnedExp(0);
     sentRef.current = false;
+    clearPendingAward();
 
     setReadyToStart(false);
 
@@ -936,29 +1054,19 @@ export default function QuizModePage() {
   
   useEffect(() => {
     if (!finished) return;
-    
-    // 合言葉マッチは付与しない（必要なら pathname/mode の条件はあなたの仕様に合わせて）
-    const isCodeMatch = mode === "code";
-    if (isCodeMatch) {
-      setBasePoints(0);
-      setFirstBonusPoints(0);
-      setEarnedPoints(0);
-      setAwardStatus("idle");
-      return;
-    }
-    
+
     // 勝者情報がまだ来てないなら待つ（1位ボーナス/予想的中に必要）
     if (!lastPlayerElimination) return;
 
     const base = correctCount * 20;
 
-    const groups = lastPlayerElimination?.eliminationGroups ?? [];
+    const groups = lastPlayerElimination.eliminationGroups ?? [];
     const winnerGroup = groups.length ? groups[groups.length - 1] : [];
     const isSoloWinner = winnerGroup.length === 1;
     const amIWinner = winnerGroup.includes(mySocketId);
+
     const firstBonus = (isSoloWinner && amIWinner) ? 500 : 0;
 
-    // 予想的中ボーナス +150（予想していないなら0）
     const predictionHit =
       hasPredicted &&
       predictedWinner &&
@@ -967,7 +1075,6 @@ export default function QuizModePage() {
     const predictionBonus = predictionHit ? 150 : 0;
 
     const earned = base + firstBonus + predictionBonus;
-
     const expEarned = correctCount * 20;
 
     setBasePoints(base);
@@ -978,89 +1085,68 @@ export default function QuizModePage() {
 
     if (earned <= 0 && expEarned <= 0) {
       setAwardStatus("idle");
+      clearPendingAward();
       return;
     }
 
-    // 未ログインなら案内だけ
-    if (!userLoading && !user) {
-      setAwardStatus("need_login");
-      return;
-    }
+    const payload: PendingAward = {
+      points: earned,
+      exp: expEarned,
+      correctCount,
+      basePoints: base,
+      firstBonusPoints: firstBonus,
+      predictionBonusPoints: predictionBonus,
+      hasPredicted,
+      predictedWinner,
+      winnerSocketIds: winnerGroup,
+      createdAt: Date.now(),
+    };
 
-    // ログイン中なら付与（1回だけ）
-    if (!userLoading && user && !awardedOnceRef.current) {
-      awardedOnceRef.current = true;
+    // ✅ まずpending保存（確実付与の要）
+    savePendingAward(payload);
 
-      const award = async () => {
-        try {
-          setAwardStatus("awarding");
+    // ✅ その場で付与を試す（ログイン揺れでも ensureAuthedUserId が面倒みる）
+    awardPointsAndExp(payload);
+  }, [finished,correctCount,lastPlayerElimination,mySocketId,hasPredicted,predictedWinner,]);
 
-          // ★ RPCで points/exp 同時加算（レベル再計算もできる）
-          const { data, error } = await supabase.rpc("add_points_and_exp", {
-            p_user_id: user.id,
-            p_points: earned,
-            p_exp: expEarned,
-          });
+  useEffect(() => {
+    const pending = loadPendingAward();
+    if (!pending) return;
 
-          if (error) {
-            console.error("add_points_and_exp error:", error);
-            setAwardStatus("error");
-            return;
-          }
+    // 既に付与済みなら何もしない
+    if (awardStatus === "awarded") return;
 
-          const row = Array.isArray(data) ? data[0] : data;
-          const oldLevel = row?.old_level ?? 1;
-          const newLevel = row?.new_level ?? 1;
+    awardPointsAndExp(pending);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-          window.dispatchEvent(new Event("points:updated"));
-          window.dispatchEvent(
-            new CustomEvent("profile:updated", {
-              detail: { oldLevel, newLevel },
-            })
-          );
+  useEffect(() => {
+    const onFocus = async () => {
+      const pending = loadPendingAward();
+      if (!pending) return;
+      await supabase.auth.refreshSession();
+      await awardPointsAndExp(pending);
+    };
 
-          const reasonPoint =
-            `サバイバルクイズ獲得: 正解${correctCount}問=${base}P` +
-            (firstBonus ? ` / 1位ボーナス${firstBonus}P` : "") +
-            (predictionBonus ? ` / 予想的中${predictionBonus}P` : "");
+    const onVis = async () => {
+      if (document.visibilityState !== "visible") return;
+      const pending = loadPendingAward();
+      if (!pending) return;
+      await supabase.auth.refreshSession();
+      await awardPointsAndExp(pending);
+    };
 
-          // ポイントログ
-          if (earned > 0) {
-            const { error: logError } = await supabase.from("user_point_logs").insert({
-              user_id: user.id,
-              change: earned,
-              reason: reasonPoint,
-            });
-            if (logError) console.log("insert user_point_logs error raw:", logError);
-          }
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVis);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVis);
+    };
+  }, [supabase]);
 
-          // EXPログ
-          if (expEarned > 0) {
-            const { error: logError2 } = await supabase.from("user_exp_logs").insert({
-              user_id: user.id,
-              change: expEarned,
-              reason: `サバイバルクイズEXP獲得: 正解${correctCount}問 → ${expEarned}EXP`,
-            });
-            if (logError2) console.log("insert user_exp_logs error raw:", logError2);
-          }
-
-          setAwardStatus("awarded");
-        } catch (e) {
-          console.error("award points error:", e);
-          setAwardStatus("error");
-        }
-      };
-
-      award();
-    }
-  }, [finished, mode, correctCount, lastPlayerElimination, mySocketId, hasPredicted, predictedWinner, user, userLoading, supabase]);
 
   useEffect(() => {
     if (!finished) return;
-
-    // 合言葉マッチは保存しないならここでreturn（仕様に合わせて）
-    const isCodeMatch = mode === "code";
-    if (isCodeMatch) return;
 
     // 未ログインなら保存しない（任意：ランキング機能をログイン必須にする場合）
     if (!userLoading && !user) return;

@@ -198,7 +198,7 @@ export default async function HomePage({
           <div className="text-center max-w-[260px]">
             <Link href="/quizbooks" className="w-full md:w-auto flex justify-center">
               <button className="text-xl md:text-2xl px-3 py-1 md:px-5 md:py-2 bg-white border-2 border-black rounded-full font-bold hover:scale-105 transition-all">
-                おもしろクイズ一覧
+                漢字穴埋めクイズ
               </button>
             </Link>
           </div>
