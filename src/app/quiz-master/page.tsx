@@ -32,14 +32,14 @@ export default function QuizMasterPage() {
 
   const secretBosses = [
     { id: "ancient_dragon", name: "エンシェントドラゴン", requiredLevel: 10 },
-    { id: "dark_knight", name: "ダークナイト", requiredLevel: 20 },
-    { id: "susanoo", name: "スサノオ", requiredLevel: 30 },
-    { id: "takemikazuchi", name: "タケミカヅチ", requiredLevel: 40 },
-    { id: "ultimate_dragon", name: "アルティメットドラゴン", requiredLevel: 50 },
-    { id: "fujin", name: "風神", requiredLevel: 60 },
-    { id: "raijin", name: "雷神", requiredLevel: 60 },
-    { id: "quiz_demon_king", name: "クイズ大魔王", requiredLevel: 70 },
-    { id: "quiz_emperor", name: "クイズ帝王", requiredLevel: 80 },
+    { id: "dark_knight", name: "ダークナイト", requiredLevel: 15 },
+    { id: "susanoo", name: "スサノオ", requiredLevel: 20 },
+    { id: "takemikazuchi", name: "タケミカヅチ", requiredLevel: 25 },
+    { id: "ultimate_dragon", name: "アルティメットドラゴン", requiredLevel: 30 },
+    { id: "fujin", name: "風神", requiredLevel: 35 },
+    { id: "raijin", name: "雷神", requiredLevel: 35 },
+    { id: "quiz_demon_king", name: "クイズ大魔王", requiredLevel: 40 },
+    { id: "quiz_emperor", name: "クイズ帝王", requiredLevel: 50 },
   ] as const;
 
   const [userLevel, setUserLevel] = useState<number>(0);

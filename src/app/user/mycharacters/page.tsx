@@ -427,10 +427,10 @@ export default function MyCharactersPage() {
                     </p>
                   )}
 
-                  {/* 当たった回数（★の下） */}
+                  {/* 入手回数（★の下） */}
                   {isOwnedSelected && (
                     <p className="mt-3 md:mt-4 text-sm md:text-base font-bold text-white drop-shadow bg-gray-700 p-2 rounded-full">
-                      当たった数：{selectedCharacter.ownedCount}
+                      持っている数：{selectedCharacter.ownedCount}
                     </p>
                   )}
 
