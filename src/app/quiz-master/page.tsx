@@ -3,10 +3,18 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Anton } from "next/font/google";
+import { useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { useSupabaseUser } from "../../hooks/useSupabaseUser"; 
 
 const anton = Anton({ subsets: ["latin"], weight: "400" });
 
 export default function QuizMasterPage() {
+  const router = useRouter();
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+  const { user, loading: userLoading } = useSupabaseUser();
+
   const [showGenreButtons, setShowGenreButtons] = useState(false);
   const [showDescription, setShowDescription] = useState(false);
 
@@ -21,6 +29,58 @@ export default function QuizMasterPage() {
     "/images/yuusya_game.png",
     "/images/mimic.png",
   ];
+
+  const secretBosses = [
+    { id: "ancient_dragon", name: "エンシェントドラゴン", requiredLevel: 10 },
+    { id: "dark_knight", name: "ダークナイト", requiredLevel: 20 },
+    { id: "susanoo", name: "スサノオ", requiredLevel: 30 },
+    { id: "takemikazuchi", name: "タケミカヅチ", requiredLevel: 40 },
+    { id: "ultimate_dragon", name: "アルティメットドラゴン", requiredLevel: 50 },
+    { id: "fujin", name: "風神", requiredLevel: 60 },
+    { id: "raijin", name: "雷神", requiredLevel: 60 },
+    { id: "quiz_demon_king", name: "クイズ大魔王", requiredLevel: 70 },
+    { id: "quiz_emperor", name: "クイズ帝王", requiredLevel: 80 },
+  ] as const;
+
+  const [userLevel, setUserLevel] = useState<number>(0);
+  const [levelLoading, setLevelLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchLevel = async () => {
+      if (!user) {
+        setUserLevel(0);
+        return;
+      }
+      setLevelLoading(true);
+      try {
+        // ここはあなたのprofiles設計に合わせる：
+        // - 例: profiles に level カラムがある想定
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("level")
+          .eq("id", user.id)
+          .single();
+
+        if (error) throw error;
+
+        setUserLevel(Number(data?.level ?? 0));
+      } catch (e) {
+        console.error("failed to load user level:", e);
+        setUserLevel(0);
+      } finally {
+        setLevelLoading(false);
+      }
+    };
+
+    fetchLevel();
+  }, [user, supabase]);
+
+  const unlocked = secretBosses.filter((b) => userLevel >= b.requiredLevel);
+  const locked = secretBosses.filter((b) => userLevel < b.requiredLevel);
+
+  // 「未解放」は最初の1つだけ表示、それ以降は非表示
+  const showBosses = [...unlocked, ...(locked[0] ? [locked[0]] : [])];
+
 
   // ★ スマホ専用キャラ（2枚だけ）
   const mobileCharacters = [
@@ -152,6 +212,7 @@ export default function QuizMasterPage() {
             </div>
           </div>
         )}
+
         {/* 説明ボタン */}
         <button
           onClick={handleDescriptionClick}
@@ -159,6 +220,110 @@ export default function QuizMasterPage() {
         >
           このゲームの説明を見る
         </button>
+
+        {/* ✅ シークレットダンジョン */}
+        <div className="mt-12 max-w-4xl mx-auto">
+          <div
+  className="relative overflow-hidden border-2 border-black rounded-2xl p-4 shadow
+             bg-gradient-to-br from-[#f6f1ff] via-[#efe7ff] to-[#fff4d6]"
+>
+            <div className="relative">
+              <p className="text-2xl md:text-3xl font-extrabold text-gray-900">
+                🔒 シークレットダンジョン
+              </p>
+
+              {userLoading ? (
+                <p className="mt-2 text-gray-600 font-bold">判定中...</p>
+              ) : user ? (
+                <>
+                  <p className="text-md md:text-lg mt-2 text-gray-800 font-bold">
+                    挑戦するダンジョンを選んでください
+                  </p>
+                  <p className="text-xs md:text-sm text-gray-700 font-bold">
+                    ※通常/フェアリーで強さ・報酬が変わります
+                  </p>
+
+                  <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {showBosses.map((b) => {
+                      const isUnlocked = userLevel >= b.requiredLevel;
+
+                      return (
+                        <div
+                          key={b.id}
+                          className="relative overflow-hidden rounded-xl p-4 shadow flex flex-col gap-3
+                          bg-gradient-to-br from-[#fff7cc] via-[#f7d774] to-[#d4a017]"
+                        >
+                          {/* 条件表示 */}
+                          {isUnlocked ? (
+                            <p className="text-sm md:text-md font-extrabold text-gray-700">
+                              条件：ユーザーレベル {b.requiredLevel} 以上
+                            </p>
+                          ) : (
+                            <p className="text-sm md:text-md font-extrabold text-gray-700">
+                              🔒 ユーザーレベル {b.requiredLevel} で解放
+                            </p>
+                          )}
+
+                          {/* ボス名（未解放は伏せてもOK） */}
+                          <p className="text-xl md:text-2xl font-extrabold text-gray-900">
+                            {isUnlocked ? `${b.name} に挑戦🔥` : "？？？（未解放）"}
+                          </p>
+
+                          {/* 解放されている時だけボタン表示 */}
+                          {isUnlocked ? (
+                            <div className="flex gap-2">
+                              <Link
+                                href={`/quiz-master/random?course=secret&boss=${encodeURIComponent(
+                                  b.id
+                                )}&variant=normal`}
+                                className="flex-1"
+                              >
+                                <button className="w-full px-4 py-2 bg-white text-gray-900 rounded-lg border-2 border-black font-extrabold hover:bg-gray-100 cursor-pointer">
+                                  通常
+                                </button>
+                              </Link>
+
+                              <Link
+                                href={`/quiz-master/random?course=secret&boss=${encodeURIComponent(
+                                  b.id
+                                )}&variant=fairy`}
+                                className="flex-1"
+                              >
+                                <button className="w-full px-4 py-2 bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 text-white rounded-lg border-2 border-black font-extrabold hover:opacity-90 cursor-pointer">
+                                  フェアリー
+                                </button>
+                              </Link>
+                            </div>
+                          ) : (
+                            <button
+                              disabled
+                              className="w-full px-4 py-2 rounded-lg border-2 border-black font-extrabold
+                                        bg-black/30 text-white/60 cursor-not-allowed"
+                            >
+                              まだ挑戦できません
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="mt-3 text-gray-800 font-bold">
+                    このコースはログインすると遊べます！
+                  </p>
+                  <button
+                    onClick={() => router.push("/user/login")}
+                    className="mt-3 px-6 py-3 bg-blue-500 text-white rounded-xl font-extrabold hover:bg-blue-600 cursor-pointer"
+                  >
+                    ログインして遊ぶ
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
 
         {/* アコーディオン説明文 */}
         <div

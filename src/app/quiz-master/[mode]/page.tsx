@@ -9,8 +9,10 @@ import { useSupabaseUser } from "../../../hooks/useSupabaseUser";
 import { submitGameResult, calcTitle } from "@/lib/gameResults";
 import { buildResultModalPayload } from "@/lib/resultMessages";
 import { useResultModal } from "../../components/ResultModalProvider";
+import { CharacterAcquireModal, type CharacterItem } from "../../components/CharacterAcquireModal";
 import { getWeekStartJST } from "@/lib/week";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
+import type { Rarity } from "@/types/gacha";
 
 // =====================
 // ポイント仕様（ステージ到達に応じて付与）
@@ -40,6 +42,110 @@ const stagePointMap: Record<number, number> = {
   22: 15000,
   23: 15000,
 };
+
+const RARITIES: Rarity[] = [
+  "ノーマル",
+  "レア",
+  "超レア",
+  "激レア",
+  "超激レア",
+  "神レア",
+  "シークレット",
+];
+
+const isRarity = (v: unknown): v is Rarity =>
+  typeof v === "string" && RARITIES.includes(v as Rarity);
+
+// シークレットダンジョン専用：敵ごとの報酬
+const secretRewardMap: Record<
+  "normal" | "fairy",
+  Record<string, { points: number; exp: number }>
+> = {
+  normal: {
+    ancient_dragon: { points: 600, exp: 200 },
+    dark_knight:    { points: 1200, exp: 400 },
+    susanoo:        { points: 1800, exp: 600 },
+    takemikazuchi:  { points: 2400, exp: 800 },
+    ultimate_dragon:{ points: 3000, exp: 1000 },
+    fujin:          { points: 3600, exp: 1200 },
+    raijin:         { points: 3600, exp: 1200 },
+    quiz_demon_king:{ points: 4800, exp: 1600 },
+    quiz_emperor:   { points: 6000, exp: 2000 },
+  },
+  fairy: {
+    ancient_dragon: { points: 900, exp: 300 },
+    dark_knight:    { points: 1800, exp: 600 },
+    susanoo:        { points: 2700, exp: 900 },
+    takemikazuchi:  { points: 3600, exp: 1200 },
+    ultimate_dragon:{ points: 4500, exp: 1500 },
+    fujin:          { points: 4500, exp: 1800 },
+    raijin:         { points: 5400, exp: 1800 },
+    quiz_demon_king:{ points: 7200, exp: 2400 },
+    quiz_emperor:   { points: 9000, exp: 3000 },
+  },
+};
+
+function calcSecretRewardByBoss(bossId: string, variant: "normal" | "fairy") {
+  return secretRewardMap[variant]?.[bossId] ?? { points: 1000, exp: 500 };
+}
+
+// ✅ シークレットボスの no 割当（normalが奇数、fairyが+1）
+const secretBossNoBaseMap: Record<string, number> = {
+  ancient_dragon: 89,
+  dark_knight: 91,
+  susanoo: 93,
+  takemikazuchi: 95,
+  ultimate_dragon: 97,
+  fujin: 99,
+  raijin: 101,
+  quiz_demon_king: 103,
+  quiz_emperor: 105,
+};
+
+const getBossNoById = (bossId: string, variant: "normal" | "fairy") => {
+  const base = secretBossNoBaseMap[bossId];
+  if (!base) return null;
+  return String(variant === "fairy" ? base + 1 : base);
+};
+
+// ✅ シークレットダンジョン専用：称号＆コメント
+const secretResultMap: Record<
+  "normal" | "fairy",
+  Record<string, { title: string; comment: string }>
+> = {
+  normal: {
+    ancient_dragon: { title: "エンシェントドラゴン討伐⚔", comment: "エンシェントドラゴンを倒した！おめでとう！🎉" },
+    dark_knight:    { title: "ダークナイト討伐⚔",       comment: "ダークナイトを倒した！おめでとう！🎉" },
+    susanoo:        { title: "スサノオ討伐⚔",           comment: "スサノオを倒した！おめでとう！🎉" },
+    takemikazuchi:  { title: "タケミカヅチ討伐⚔",       comment: "タケミカヅチを倒した！おめでとう！🎉" },
+    ultimate_dragon:{ title: "アルティメットドラゴン討伐⚔", comment: "アルティメットドラゴンを倒した！おめでとう！🎉" },
+    fujin:          { title: "風神討伐⚔",               comment: "風神を倒した！おめでとう！🎉" },
+    raijin:         { title: "雷神討伐⚔",               comment: "雷神を倒した！おめでとう！🎉" },
+    quiz_demon_king:{ title: "クイズ大魔王討伐⚔",       comment: "クイズ大魔王を倒した！おめでとう！🎉" },
+    quiz_emperor:   { title: "クイズ帝王討伐⚔",         comment: "クイズ帝王を倒した！おめでとう！🎉" },
+  },
+  fairy: {
+    ancient_dragon: { title: "エンシェントドラゴン【フェアリー】討伐⚔", comment: "エンシェントドラゴン【フェアリー】を倒した！おめでとう！🎉" },
+    dark_knight:    { title: "ダークナイト【フェアリー】討伐⚔",       comment: "ダークナイト【フェアリー】を倒した！おめでとう！🎉" },
+    susanoo:        { title: "スサノオ【フェアリー】討伐⚔",           comment: "スサノオ【フェアリー】を倒した！おめでとう！🎉" },
+    takemikazuchi:  { title: "タケミカヅチ【フェアリー】討伐⚔",       comment: "タケミカヅチ【フェアリー】を倒した！おめでとう！🎉" },
+    ultimate_dragon:{ title: "アルティメットドラゴン【フェアリー】討伐⚔", comment: "アルティメットドラゴン【フェアリー】を倒した！おめでとう！🎉" },
+    fujin:          { title: "風神【フェアリー】討伐⚔",               comment: "風神【フェアリー】を倒した！おめでとう！🎉" },
+    raijin:         { title: "雷神【フェアリー】討伐⚔",               comment: "雷神【フェアリー】を倒した！おめでとう！🎉" },
+    quiz_demon_king:{ title: "クイズ大魔王【フェアリー】討伐⚔",       comment: "クイズ大魔王【フェアリー】を倒した！おめでとう！🎉" },
+    quiz_emperor:   { title: "クイズ帝王【フェアリー】討伐⚔",         comment: "クイズ帝王【フェアリー】を倒した！おめでとう！🎉" },
+  },
+};
+
+const getSecretResult = (bossId: string, variant: "normal" | "fairy") => {
+  const enemy = getSecretEnemy(bossId, variant);
+  // マップに無いボスでも動くようにフォールバック
+  return secretResultMap[variant]?.[bossId] ?? {
+    title: `${enemy.name}討伐⚔`,
+    comment: `${enemy.name}を倒した！おめでとう！🎉`,
+  };
+};
+
 
 function calcEarnedPointsByClearedStage(clearedStage: number) {
   return stagePointMap[clearedStage] ?? 0;
@@ -85,6 +191,168 @@ const enemies = [
   { id: "yuusya_game", name: "クイズマスターの最強勇者", image: "/images/勇者1_1.png", hp: 50000, attack: 50000, description: "全てのクイズと戦闘を制した伝説の勇者。前人未到の強さを誇る。" },
   { id: "quizou", name: "クイズ王", image: "/images/王様_1.png", hp: 100000, attack: 100000, description: "クイズの王様。クイズ界の支配者。" },
 ];
+
+type SecretVariant = "normal" | "fairy";
+
+const secretEnemiesByVariant: Record<SecretVariant, readonly {
+  id: string;
+  name: string;
+  image: string;
+  hp: number;
+  attack: number;
+  description: string;
+}[]> = {
+  normal: [
+    {
+      id: "ancient_dragon",
+      name: "エンシェントドラゴン",
+      image: "/images/エンシェントドラゴン_1.png",
+      hp: 1000,
+      attack: 1000,
+      description: "古代の覇王竜。灼熱の息で全てを焼き尽くす。",
+    },
+    {
+      id: "dark_knight",
+      name: "ダークナイト",
+      image: "/images/ダークナイト_1.png",
+      hp: 2000,
+      attack: 2000,
+      description: "闇に落ちた騎士。絶望の剣で斬り裂く。",
+    },
+    {
+      id: "susanoo",
+      name: "スサノオ",
+      image: "/images/スサノオ_1.png",
+      hp: 3000,
+      attack: 3000,
+      description: "嵐を統べる神。雷と暴風で薙ぎ払う。",
+    },
+    {
+      id: "takemikazuchi",
+      name: "タケミカヅチ",
+      image: "/images/タケミカヅチ_1.png",
+      hp: 4000,
+      attack: 4000,
+      description: "雷剣を携えた武神。天を裂く一撃で敵を討つ。",
+    },
+    {
+      id: "ultimate_dragon",
+      name: "アルティメットドラゴン",
+      image: "/images/アルティメットドラゴン_1.png",
+      hp: 5000,
+      attack: 5000,
+      description: "全竜の頂点に立つ究極竜。世界を終焉へ導く咆哮を放つ。",
+    },
+    {
+      id: "fujin",
+      name: "風神",
+      image: "/images/風神_1.png",
+      hp: 6000,
+      attack: 6000,
+      description: "暴風を操る最強神。空間を切り裂く風刃で敵を吹き飛ばす。",
+    },
+    {
+      id: "raijin",
+      name: "雷神",
+      image: "/images/雷神_1.png",
+      hp: 6000,
+      attack: 6000,
+      description: "雷を支配する最強神。天罰の雷撃で全てを貫く。",
+    },
+    {
+      id: "quiz_demon_king",
+      name: "クイズ大魔王",
+      image: "/images/大魔王_1.png",
+      hp: 8000,
+      attack: 8000,
+      description: "クイズ界の知識を歪める最強大魔王。誤答を糧に世界を支配する。",
+    },
+    {
+      id: "quiz_emperor",
+      name: "クイズ帝王",
+      image: "/images/帝王_1.png",
+      hp: 10000,
+      attack: 10000,
+      description: "知識の頂点に君臨する帝王。真理を超えた問いを突きつける。",
+    },
+  ],
+  fairy: [
+    {
+      id: "ancient_dragon",
+      name: "エンシェントドラゴン【フェアリー】",
+      image: "/images/エンシェントドラゴン_2.png", // ←フェアリー用画像に
+      hp: 1500,
+      attack: 1500,
+      description: "妖精の加護を得た覇王竜。炎が虹色に揺らめく。",
+    },
+    {
+      id: "dark_knight",
+      name: "ダークナイト【フェアリー】",
+      image: "/images/ダークナイト_2.png",
+      hp: 2500,
+      attack: 2500,
+      description: "妖精の呪詛を纏う騎士。斬撃が幻惑を起こす。",
+    },
+    {
+      id: "susanoo",
+      name: "スサノオ【フェアリー】",
+      image: "/images/スサノオ_2.png",
+      hp: 3500,
+      attack: 3500,
+      description: "妖精嵐を従える神。雷が花弁のように舞う。",
+    },
+    {
+      id: "takemikazuchi",
+      name: "タケミカヅチ【フェアリー】",
+      image: "/images/タケミカヅチ_2.png",
+      hp: 4500,
+      attack: 4500,
+      description: "妖精雷を纏う武神。雷剣が幻想の光を放つ。",
+    },
+    {
+      id: "ultimate_dragon",
+      name: "アルティメットドラゴン【フェアリー】",
+      image: "/images/アルティメットドラゴン_2.png",
+      hp: 5500,
+      attack: 5500,
+      description: "妖精の力で覚醒した究極竜。虹色の咆哮が次元を震わせる。",
+    },
+    {
+      id: "fujin",
+      name: "風神【フェアリー】",
+      image: "/images/風神_2.png",
+      hp: 6500,
+      attack: 6500,
+      description: "妖精風を従える神。風が光の羽となり舞い踊る。",
+    },
+    {
+      id: "raijin",
+      name: "雷神【フェアリー】",
+      image: "/images/雷神_2.png",
+      hp: 6500,
+      attack: 6500,
+      description: "妖精雷に祝福された神。雷撃が星のように降り注ぐ。",
+    },
+    {
+      id: "quiz_demon_king",
+      name: "クイズ大魔王【フェアリー】",
+      image: "/images/大魔王_2.png",
+      hp: 9000,
+      attack: 9000,
+      description: "妖精の契約を結んだ大魔王。幻想の問いで心を支配する。",
+    },
+    {
+      id: "quiz_emperor",
+      name: "クイズ帝王【フェアリー】",
+      image: "/images/帝王_2.png",
+      hp: 12000,
+      attack: 12000,
+      description: "妖精王の力を得たクイズ界の帝王。真理すら書き換える存在。",
+    },
+  ],
+} as const;
+
+
 // const enemies = [
 //   { id: "slime", name: "スライム", image: "/images/スライム_1.png", hp: 1, attack: 1, description: "ぷるぷるして弱そうに見えるが油断は禁物。" },
 //   { id: "goblin", name: "ゴブリン", image: "/images/ゴブリン_1.png", hp: 1, attack: 1, description: "素早く群れで襲いかかる小型のモンスター。" },
@@ -144,8 +412,18 @@ const CharacterSelect = ({ onSelect }: { onSelect: (characterId: string) => void
   );
 };
 
+const getSecretEnemy = (bossId: string, variant: "normal" | "fairy") => {
+  const list = secretEnemiesByVariant[variant] ?? secretEnemiesByVariant.normal;
+  return list.find((e) => e.id === bossId) ?? list[0];
+};
+
 // ステージに応じて敵を取得する
-const getEnemyForStage = (stage: number) => {
+const getEnemyForStage = (stage: number, course?: string, bossId?: string, variant?: "normal" | "fairy") => {
+  // ✅ secret の場合はボス固定
+  if (course === "secret") {
+    return getSecretEnemy(bossId || "", variant ?? "normal");
+  }
+
   // ステージに応じて敵を変える
   if (stage < 2) return enemies[0];
   if (stage < 3) return enemies[1];
@@ -228,6 +506,11 @@ const QuizResult = ({
   onGoLogin,
   onShareX,
   onRetry,
+  isSecret,
+  secretBossName,
+  secretTitle,
+  secretComment,
+  secretCleared,
 }: {
   correctCount: number;
   getTitle: () => string;
@@ -240,6 +523,11 @@ const QuizResult = ({
   onGoLogin: () => void;
   onShareX: () => void;
   onRetry: () => void;
+  isSecret: boolean;
+  secretBossName?: string;
+  secretTitle?: string;
+  secretComment?: string;
+  secretCleared: boolean;
 }) => {
   const [showScore, setShowScore] = useState(false);
   const [showText, setShowText] = useState(false);
@@ -268,7 +556,15 @@ const QuizResult = ({
 
   return (
     <div className="text-center mt-6">
-      {showScore && <p className="text-3xl md:text-5xl mb-4 md:mb-6">ステージ {correctCount} までクリア！</p>}
+      {showScore && (
+        <p className="text-3xl md:text-5xl mb-4 md:mb-6">
+          {isSecret
+            ? (secretCleared
+                ? `${secretBossName}を倒した！`
+                : `${secretBossName}に敗北…`)
+            : `ステージ ${correctCount} までクリア！`}
+        </p>
+      )}
       {showText && <p className="text-xl md:text-2xl text-gray-600 mb-2">あなたの称号は…</p>}
 
       {showRank && (
@@ -280,7 +576,9 @@ const QuizResult = ({
                 isFinalStage ? "final-title text-yellow-300" : "text-blue-600"
               }`}
             >
-              {getTitle()}
+              {isSecret
+                ? (secretCleared ? (secretTitle ?? "討伐者") : "秘密の冒険者")
+                : getTitle()}
             </p>
             <div className="flex flex-row md:flex-row items-center justify-center gap-4 md:gap-8">
               <img src="/images/yuusya_game.png" alt="勇者" className="w-30 h-30 md:w-0 md:h-0" />
@@ -289,11 +587,19 @@ const QuizResult = ({
           </div>
 
           {/* ★ 正解数に応じたコメント */}
-          {getRankComment() && (
-            <p className="text-lg md:text-2xl text-gray-800 mb-8 font-bold whitespace-pre-line">
-              {getRankComment()}
-            </p>
-          )}
+          {(() => {
+            const text = isSecret
+              ? (secretCleared
+                  ? secretComment
+                  : "惜しくも討伐できなかった…！\nもう一度挑戦してリベンジしよう🔥")
+              : getRankComment();
+
+            return text ? (
+              <p className="text-lg md:text-2xl text-gray-800 mb-8 font-bold whitespace-pre-line">
+                {text}
+              </p>
+            ) : null;
+          })()}
           {/* ★ 追加：獲得ポイント表示 */}
           <div className="mx-auto max-w-[520px] bg-white border-2 border-black rounded-xl p-4 shadow mt-2">
             <p className="text-xl md:text-2xl font-extrabold text-gray-800">
@@ -365,6 +671,9 @@ export default function QuizModePage() {
   const mode = pathname.split("/").pop() || "random";
   const searchParams = useSearchParams();
   const genre = searchParams?.get("genre") || "";
+  const course = searchParams?.get("course") || "normal"; // "normal" | "secret"
+  const boss = searchParams?.get("boss") || "";
+  const variant = (searchParams?.get("variant") || "normal") as "normal" | "fairy";
 
   // ★ 追加：Supabase & ユーザー
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
@@ -460,12 +769,14 @@ export default function QuizModePage() {
       window.dispatchEvent(new Event("points:updated"));
       window.dispatchEvent(new CustomEvent("profile:updated", { detail: { oldLevel, newLevel } }));
 
+      const suffix = course === "secret" ? ` / secret:${boss}:${variant}` : "";
+
       // ログ（ポイント）
       if (p.points > 0) {
         await supabase.from("user_point_logs").insert({
           user_id: uid,
           change: p.points,
-          reason: `クイズダンジョンでポイント獲得（クリアステージ ${p.correctCount}）`,
+          reason: `クイズダンジョンでポイント獲得（クリアステージ ${p.correctCount}${suffix}）`,
         });
       }
 
@@ -496,6 +807,7 @@ export default function QuizModePage() {
   const [currentStage, setCurrentStage] = useState(0);
   const [userAnswer, setUserAnswer] = useState<number | null>(null);
   const [correctCount, setCorrectCount] = useState(0);
+  const [quizCorrectCount, setQuizCorrectCount] = useState(0);
   const [finished, setFinished] = useState(false);
   const [showCorrectMessage, setShowCorrectMessage] = useState(false);
   const [incorrectMessage, setIncorrectMessage] = useState<string | null>(null);
@@ -523,6 +835,13 @@ export default function QuizModePage() {
   const [enemyVisible, setEnemyVisible] = useState(true);
   const [miracleSeedCount, setMiracleSeedCount] = useState(0); // 所持数
   const [miracleSeedMessage, setMiracleSeedMessage] = useState<string | null>(null); // ドロップメッセージ
+  // ====== シークレット討伐：獲得モーダル用 ======
+  const [ownedCharacterIds, setOwnedCharacterIds] = useState<Set<string>>(new Set());
+  const [acquired, setAcquired] = useState<CharacterItem | null>(null);
+  const [acquireOpen, setAcquireOpen] = useState(false);
+
+  // 「リザルト突入時に一回だけ」発火させる用
+  const acquiredOnceRef = useRef(false);
   // 最後にヒントボタンを使った問題番号
   const [lastHintUsedIndex, setLastHintUsedIndex] = useState<number | null>(null);
   // 最後に回復ボタンを使った問題番号
@@ -536,8 +855,24 @@ export default function QuizModePage() {
   const sentRef = useRef(false); // ★ 成績保存の二重送信防止
   const { pushModal } = useResultModal();
 
+  const isSecret = course === "secret";
+  const secretEnemy = isSecret ? getSecretEnemy(boss || "ancient_dragon", variant) : null;
+  const secretRes = isSecret ? getSecretResult(boss || "ancient_dragon", variant) : null;
+  const getPlayerStats = (characterId: string) => {
+  const base = characters.find((c) => c.id === characterId);
+    if (!base) return null;
+
+    const mul = isSecret ? 20 : 1;
+    return {
+      ...base,
+      hp: base.hp * mul,
+      Attack: base.Attack * mul,
+    };
+  };
+
   const finishedRef = useRef(finished);
   const showCorrectRef = useRef(showCorrectMessage);
+  const questionsReady = questions.length > 0 && !!questions[currentIndex]?.quiz;
 
   const titles = [
     { threshold: 1, title: "クイズ戦士" },
@@ -566,9 +901,11 @@ export default function QuizModePage() {
 
   const resetGame = () => {
     // 進行
+    setQuestions([]); 
     setCurrentIndex(0);
     setCurrentStage(0);
     setCorrectCount(0);
+    setQuizCorrectCount(0);
     setFinished(false);
     setUserAnswer(null);
 
@@ -606,6 +943,10 @@ export default function QuizModePage() {
     awardedOnceRef.current = false;
     sentRef.current = false;
     clearPendingAward();
+    startedRef.current = false;
+    acquiredOnceRef.current = false;
+    setAcquireOpen(false);
+    setAcquired(null);
 
     // ref同期（タイマー制御で見てるので重要）
     finishedRef.current = false;
@@ -617,7 +958,7 @@ export default function QuizModePage() {
     const char = characters.find((c) => c.id === character);
     if (char) setCharacterHP(char.hp);
     setCharacterLevel(1);
-    setEnemyHP(getEnemyForStage(1).hp);
+    setEnemyHP(getEnemyForStage(1, course, boss, variant).hp);
     setCharacter(null)
 
     // 問題順シャッフル（任意）
@@ -640,11 +981,34 @@ export default function QuizModePage() {
     isAttackingRef.current = isAttacking;
   }, [isAttacking]);
 
+  // ✅ NEW判定用：所持キャラIDを取得
+  useEffect(() => {
+    if (!user) return;
+
+    (async () => {
+      const { data, error } = await supabase
+        .from("user_characters")
+        .select("character_id")
+        .eq("user_id", user.id);
+
+      if (error) {
+        console.error("fetch owned characters error:", error);
+        return;
+      }
+
+      const ids = new Set<string>((data ?? []).map((r: any) => r.character_id));
+      setOwnedCharacterIds(ids);
+    })();
+  }, [user, supabase]);
+
   useEffect(() => {
     if (!character) return; // キャラ選択前は取得しない
+
+    const controller = new AbortController();
+
     const fetchArticles = async () => {
       try {
-        const res = await fetch("/api/articles");
+        const res = await fetch("/api/articles", { signal: controller.signal });
         const data: ArticleData[] = await res.json();
         let all: ArticleData[] = data;
 
@@ -671,21 +1035,32 @@ export default function QuizModePage() {
           }));
 
         setQuestions(shuffleArray(quizQuestions));
-      } catch (error) {
-        console.error("クイズ問題の取得に失敗しました:", error);
+      } catch (e: any) {
+        if (e?.name === "AbortError") return; // ✅ 中断は無視
+        console.error("クイズ問題の取得に失敗しました:", e);
       }
     };
 
     fetchArticles();
+    return () => controller.abort(); // ✅ キャラ変更/アンマウント時に中断
   }, [mode, genre, character]);
 
+  // useEffect(() => {
+  //   if (character) {
+  //     const char = characters.find((c) => c.id === character);
+  //     if (char) setCharacterHP(char.hp);
+  //     setEnemyHP(getEnemyForStage(1, course, boss, variant).hp);
+  //   }
+  // }, [character]);
+
   useEffect(() => {
-    if (character) {
-      const char = characters.find((c) => c.id === character);
-      if (char) setCharacterHP(char.hp);
-      setEnemyHP(getEnemyForStage(1).hp);
-    }
-  }, [character]);
+    if (!character) return;
+
+    const char = getPlayerStats(character);
+    if (char) setCharacterHP(char.hp);
+
+    setEnemyHP(getEnemyForStage(1, course, boss, variant).hp);
+  }, [character, isSecret, course, boss, variant]);
 
   useEffect(() => {
     setShowStageIntro(true);
@@ -703,8 +1078,32 @@ export default function QuizModePage() {
 
   const shuffleArray = <T,>(arr: T[]) => [...arr].sort(() => Math.random() - 0.5);
 
+  const startedRef = useRef(false);
+
+  useEffect(() => {
+    if (!questionsReady) return;
+
+    // ✅ questions が入った“初回だけ”同時スタート
+    if (!startedRef.current) {
+      startedRef.current = true;
+
+      setTimeLeft(30);
+      setShowCorrectMessage(false);
+      setIncorrectMessage(null);
+      setIsAttacking(false);
+
+      // ref同期（タイマー停止条件に使ってるので）
+      showCorrectRef.current = false;
+      incorrectRef.current = null;
+      isAttackingRef.current = false;
+      finishedRef.current = false;
+    }
+  }, [questionsReady]);
+
+
   useEffect(() => {
     if (!character) return;
+    if (!questionsReady) return;
 
     const timer = setInterval(() => {
       if (finishedRef.current) return;
@@ -723,7 +1122,7 @@ export default function QuizModePage() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [character, currentIndex]); 
+  }, [character, currentIndex, questionsReady]); 
 
   const checkAnswer = () => {
     const correctAnswer = questions[currentIndex].quiz?.answer;
@@ -731,6 +1130,7 @@ export default function QuizModePage() {
 
     if (userAnswer === correctAnswer) {
       setShowCorrectMessage(true);
+      setQuizCorrectCount((c) => c + 1);
     } else {
       setIncorrectMessage(`ざんねん！\n答えは" ${displayAnswer} "でした！`);
     }
@@ -806,7 +1206,7 @@ export default function QuizModePage() {
 
     // アニメーション開始前に startHP をキャプチャ
     const startHP = enemyHP ?? 0;
-    setAttackMessage(`${player.name}の攻撃！${getEnemyForStage(currentStage + 1).name}に${attackPower}のダメージ！`);
+    setAttackMessage(`${player.name}の攻撃！${getEnemyForStage(currentStage + 1, course, boss, variant).name}に${attackPower}のダメージ！`);
 
     const speed = getSpeedByStage(currentStage);
 
@@ -826,14 +1226,16 @@ export default function QuizModePage() {
           setEnemyVisible(false);
 
           // 敵を倒したメッセージをセット
-          const enemyName = getEnemyForStage(currentStage + 1).name;
+          const enemyName = getEnemyForStage(currentStage + 1, course, boss, variant).name;
           setEnemyDefeatedMessage(`🎉 ${enemyName} を倒した！`);
           setAttackMessage(null);
 
           setCorrectCount((c) => c + 1);
           
           // ★★★ 最終ステージなら強制終了 ★★★
-          if (currentStage + 1 >= 22) {
+          const finalStage = course === "secret" ? 1 : 22;
+
+          if (currentStage + 1 >= finalStage) {
             setTimeout(() => {
               setFinished(true);
             }, 3000); // メッセージをちょっと見せるために2秒待ち（好みで変更可）
@@ -875,8 +1277,73 @@ export default function QuizModePage() {
     }, 1500); // ← この間 AttackEffect を見せたい時間（1.2秒など好みで）
   };
 
+  // ✅ no を渡すだけで「獲得モーダル表示」→「DB登録」までやる
+  const acquireBossCharacterByNo = async (bossNo: string) => {
+    if (!user) return;
+
+    // ① characters.id を取得（noで紐付け）
+    const { data: characterRow, error: findError } = await supabase
+      .from("characters")
+      .select("id, name, image_url, rarity, no")
+      .eq("no", bossNo)
+      .maybeSingle();
+
+    if (findError || !characterRow?.id) {
+      console.error("character lookup error:", findError, bossNo);
+      return;
+    }
+
+    // ② NEW判定
+    const isNew = !ownedCharacterIds.has(characterRow.id);
+
+    // ③ モーダル用 item（ガチャと同じ形）
+    if (
+      !characterRow?.name ||
+      !characterRow?.image_url ||
+      !characterRow?.rarity ||
+      !characterRow?.no
+    ) {
+      console.error("characterRow has null fields:", characterRow);
+      return;
+    }
+
+    if (!isRarity(characterRow.rarity)) {
+      console.error("invalid rarity:", characterRow.rarity);
+      return;
+    }
+
+    const item: CharacterItem = {
+      name: characterRow.name,
+      image: characterRow.image_url,
+      rarity: characterRow.rarity,
+      no: characterRow.no,
+      characterId: characterRow.id,
+      isNew,
+    };
+
+    // ④ 先にモーダル表示（演出優先）
+    setAcquired(item);
+    setAcquireOpen(true);
+
+    // ⑤ DB登録（ガチャと同じRPC）
+    const { error: rpcError } = await supabase.rpc("increment_user_character", {
+      p_user_id: user.id,
+      p_character_id: characterRow.id,
+    });
+    if (rpcError) console.error("increment_user_character rpc error:", rpcError);
+
+    // ⑥ owned更新（次回NEWにならない）
+    if (isNew) {
+      setOwnedCharacterIds((prev) => {
+        const next = new Set(prev);
+        next.add(characterRow.id);
+        return next;
+      });
+    }
+  };
+
   const attackCharacter = () => {
-    const enemy = getEnemyForStage(currentStage + 1);
+    const enemy = getEnemyForStage(currentStage + 1, course, boss, variant);
     if (characterHP === null || enemyHP === null) return;
 
     // ⭐ 敵攻撃エフェクト表示！
@@ -1067,6 +1534,15 @@ export default function QuizModePage() {
       id === "maou" ? "bg-gradient-to-r from-black via-purple-900 to-red-800" :
       id === "yuusya_game" ? "bg-gradient-to-r from-purple-700 via-red-700 to-yellow-400 bg-opacity-80" :
       id === "quizou" ? "bg-gradient-to-r from-red-500 via-orange-400 via-yellow-300 via-green-400 via-blue-500 via-indigo-500 to-purple-600 bg-opacity-90" :
+      id === "ancient_dragon" ? "bg-gradient-to-r from-black via-purple-900 to-red-800" :
+      id === "dark_knight" ? "bg-gradient-to-r from-black via-purple-900 to-red-800" :
+      id === "susanoo" ? "bg-gradient-to-r from-black via-purple-900 to-red-800" :
+      id === "takemikazuchi" ? "bg-gradient-to-r from-black via-purple-900 to-red-800" :
+      id === "ultimate_dragon" ? "bg-gradient-to-r from-black via-purple-900 to-red-800" :
+      id === "fujin" ? "bg-gradient-to-r from-black via-purple-900 to-red-800" :
+      id === "raijin" ? "bg-gradient-to-r from-black via-purple-900 to-red-800" :
+      id === "quiz_demon_king" ? "bg-gradient-to-r from-black via-purple-900 to-red-800" :
+      id === "quiz_emperor" ? "bg-gradient-to-r from-red-500 via-orange-400 via-yellow-300 via-green-400 via-blue-500 via-indigo-500 to-purple-600 bg-opacity-90" :
       "bg-gray-900 bg-opacity-60";
 
     // 攻撃用カラー
@@ -1093,6 +1569,15 @@ export default function QuizModePage() {
       id === "maou" ? "text-purple-100" :
       id === "yuusya_game" ? "text-yellow-100" :
       id === "quizou" ? "text-yellow-100" :
+      id === "ancient_dragon" ? "text-purple-100" :
+      id === "dark_knight" ? "text-purple-100" :
+      id === "susanoo" ? "text-purple-100" :
+      id === "takemikazuchi" ? "text-purple-100" :
+      id === "ultimate_dragon" ? "text-purple-100" :
+      id === "fujin" ? "text-purple-100" :
+      id === "raijin" ? "text-purple-100" :
+      id === "quiz_demon_king" ? "text-purple-100" :
+      id === "quiz_emperor" ? "text-yellow-100" :
       "text-white";
 
     return (
@@ -1146,7 +1631,7 @@ export default function QuizModePage() {
         )}
 
         {/* バーサーカー：切りつけ */}
-        {id === "berserker" && (
+        {id === "berserker" || id === "susanoo" || id === "takemikazuchi" && (
           <>
             <div className="absolute z-40 w-[150%] h-[4px] bg-white rotate-45 animate-slashb-1"></div>
             <div className="absolute z-40 w-[150%] h-[4px] bg-white rotate-135 animate-slashb-2"></div>
@@ -1170,7 +1655,7 @@ export default function QuizModePage() {
         )}
 
         {/* ドラゴン：火炎ブレス */}
-        {(id === "dragon" || id === "kinghydra") && (
+        {(id === "dragon" || id === "kinghydra" || id === "ultimate_dragon") && (
           <>
             {/* 前に出る薄い赤の小爆発 */}
             <div className="absolute z-40 w-48 h-48 bg-red-200 opacity-40 rounded-full animate-fire-front z-20"></div>
@@ -1181,7 +1666,7 @@ export default function QuizModePage() {
         )}
 
         {/* ブラックドラゴン：闇の爆発 */}
-        {(id === "blackdragon" || id === "kingdemon" || id === "maou") && (
+        {(id === "blackdragon" || id === "kingdemon" || id === "maou" || id === "ancient_dragon" || id === "dark_knight") && (
           <>
             {/* 前に出る薄い紫の小爆発 */}
             <div className="absolute z-40 w-48 h-48 bg-purple-200 opacity-40 rounded-full animate-fire-front z-20"></div>
@@ -1234,7 +1719,7 @@ export default function QuizModePage() {
         )}
 
         {/* ハデス：冥界の黒炎 */}
-        {id === "hades" && (
+        {id === "hades" || id === "quiz_demon_king" || id === "fujin" && (
           <>
             {/* 前に出る薄い紫の小爆発 */}
             <div className="absolute z-40 w-48 h-48 bg-purple-700 opacity-40 rounded-full animate-fire-front z-20"></div>
@@ -1248,7 +1733,7 @@ export default function QuizModePage() {
         )}
 
         {/* ゼウス：雷 */}
-        {id === "zeus" && (
+        {id === "zeus" || id === "raijin" && (
           <>
             <div className="absolute z-40 w-48 h-48 top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2">
             {/* 三角形の角の位置に落とす稲妻 */}
@@ -1319,7 +1804,7 @@ export default function QuizModePage() {
         )}
 
         {/* クイズ王：光の爆発 */}
-        {id === "quizou" && (
+        {id === "quizou" || id === "quiz_emperor" && (
           <>
             <div className="absolute z-40 w-72 h-72 bg-yellow-300 opacity-40 rounded-full animate-enemy-ultimate" style={{ animationDelay: '0.8s' }}></div>
           </>
@@ -1348,9 +1833,19 @@ export default function QuizModePage() {
     return 0; // 7以上
   };
 
+  // const getCharacterAttack = () => {
+  //   const base = characters.find(c => c.id === character)?.Attack ?? 0;
+  //   return Math.floor(base * (1 + (characterLevel-1) * 0.2));
+  // };
+
   const getCharacterAttack = () => {
     const base = characters.find(c => c.id === character)?.Attack ?? 0;
-    return Math.floor(base * (1 + (characterLevel-1) * 0.2));
+
+    // ✅ シークレットだけ「初期の2.5倍」で固定（レベル無視）
+    if (isSecret) return base * 2.5;
+
+    // ✅ 通常はレベルで伸びる
+    return Math.floor(base * (1 + (characterLevel - 1) * 0.2));
   };
 
   // ★ 追加：finished になったタイミングで「獲得ポイント計算(ステージ別)」→「ログインなら加算」
@@ -1361,8 +1856,17 @@ export default function QuizModePage() {
     if (!finished) return;
     if (userLoading) return; // ← userの揺れ対策（判定を安定させる）
 
-    const points = calcEarnedPointsByClearedStage(correctCount);
-    const exp = calcEarnedExpByCorrectCount(correctCount);
+    let points = calcEarnedPointsByClearedStage(correctCount);
+    let exp = calcEarnedExpByCorrectCount(quizCorrectCount);
+
+    // ✅ シークレットボスを倒した時だけ特別報酬
+    const isSecretBossCleared = course === "secret" && correctCount >= 1;
+
+    if (isSecretBossCleared) {
+      const r = calcSecretRewardByBoss(boss, variant);
+      points = r.points;
+      exp = r.exp;
+    }
 
     setEarnedPoints(points);
     setEarnedExp(exp);
@@ -1373,7 +1877,7 @@ export default function QuizModePage() {
     // ✅ そのまま付与を試す（ログインできてれば即付与、できなければ need_login）
     awardPointsAndExp({ correctCount, points, exp });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [finished, correctCount, userLoading]);
+  }, [finished, correctCount, quizCorrectCount, userLoading]);
 
   // ============================
   // ✅ 取りこぼし防止：マウント時に pending を拾う
@@ -1448,7 +1952,9 @@ export default function QuizModePage() {
         const clearedStage = correctCount;
 
         // ステージに応じた称号を計算
-        const title = calcTitle(titles, clearedStage);
+        const title = (course === "secret" && correctCount >= 1)
+          ? getSecretResult(boss || "ancient_dragon", variant).title
+          : calcTitle(titles, clearedStage);
 
         const res = await submitGameResult(supabase, {
           game: "dungeon",      // ← あなたのDB設計に合わせた識別子
@@ -1465,12 +1971,45 @@ export default function QuizModePage() {
     })();
   }, [finished, userLoading, user, correctCount, titles, supabase, pushModal]);
 
+  
+  // ✅ リザルト突入時（finished=true）に、シークレットクリアなら獲得モーダルを出す
+  useEffect(() => {
+    if (!finished) return;
+
+    // リトライ等でfinishedになっても1回だけにする
+    if (acquiredOnceRef.current) return;
+
+    // シークレット以外/未クリアなら何もしない
+    if (!(course === "secret" && correctCount >= 1)) return;
+
+    // 未ログインなら（あなたの方針次第）…今回は「何もしない」にしておく
+    if (!user) return;
+
+    const bossNo = getBossNoById(boss, variant);
+    if (!bossNo) return;
+
+    acquiredOnceRef.current = true;
+
+    // 「モーダル表示 → RPC登録」
+    acquireBossCharacterByNo(bossNo);
+  }, [finished, course, correctCount, user, boss, variant]);
+
   // キャラクター選択前は CharacterSelect を表示
   if (!character) {
     return <CharacterSelect onSelect={setCharacter} />;
   }
 
-  if (questions.length === 0) return <p></p>;
+  // if (questions.length === 0) return <p></p>;
+
+  if (!character) return <CharacterSelect onSelect={setCharacter} />;
+
+  if (!questionsReady) {
+    return (
+      <div className="container mx-auto p-8 text-center">
+        <p className="text-xl font-bold">問題を読み込み中...</p>
+      </div>
+    );
+  }
 
   // Xシェア機能
   const handleShareX = () => {
@@ -1487,381 +2026,403 @@ export default function QuizModePage() {
     openXShare({ text, url: buildTopUrl() }); // ✅トップへ
   };
 
+  const secretCleared = isSecret && correctCount >= 1;
+
   return (
     <>
-    {showStageIntro && <StageIntro enemy={getEnemyForStage(currentStage + 1)} />}
-    {showAttackEffect && (
-      <AttackEffect chara={characters.find((c) => c.id === character)} />
-    )}
-    {showEnemyAttackEffect && (
-      <EnemyAttackEffect enemy={getEnemyForStage(currentStage + 1)} />
-    )}
-    <div className="container mx-auto p-8 text-center bg-gradient-to-b from-purple-50 via-purple-100 to-purple-200">
-      {!finished ? (
-        <>
-          <h2 className="text-5xl md:text-6xl font-extrabold mb-6 text-purple-500 drop-shadow-lg">
-            STAGE {currentStage + 1}
-          </h2>
+      <CharacterAcquireModal
+        open={acquireOpen}
+        item={acquired}
+        verb="手に入れた！"
+        onClose={() => {
+          setAcquireOpen(false);
+          setAcquired(null);
+        }}
+      />
+      {showStageIntro && <StageIntro enemy={getEnemyForStage(currentStage + 1, course, boss, variant)} />}
+      {showAttackEffect && (
+        <AttackEffect chara={characters.find((c) => c.id === character)} />
+      )}
+      {showEnemyAttackEffect && (
+        <EnemyAttackEffect enemy={getEnemyForStage(currentStage + 1, course, boss)} />
+      )}
+      <div className="container mx-auto p-8 text-center bg-gradient-to-b from-purple-50 via-purple-100 to-purple-200">
+        {!finished ? (
+          <>
+            <h2 className="text-5xl md:text-6xl font-extrabold mb-6 text-purple-500 drop-shadow-lg">
+              STAGE {currentStage + 1}
+            </h2>
 
-          <div className="mb-3 bg-white p-3 border-2 border-purple-300 rounded-xl mx-auto w-full max-w-md md:max-w-xl">
-            <p className="text-xl md:text-2xl text-center mb-2">{getEnemyForStage(currentStage + 1).name}が現れた！クイズに正解して倒そう！</p>
-            {/* 横並び */}
-            <div className="flex flex-col items-center md:flex-row justify-center md:gap-12">
-              {/* 自分のキャラクター */}
-              {character && (
-                <div
-                  className={`flex items-center gap-4 mb-2 md:mb-0 p-3 rounded-xl ${
-                    isBlinking ? "red-blink" : "border-purple-300"
-                  } ${
-                    character === "warrior"
-                      ? "bg-gradient-to-r from-blue-400 via-blue-200 to-cyan-300"
-                      : character === "fighter"
-                      ? "bg-gradient-to-r from-red-400 via-orange-200 to-yellow-300"
-                      : character === "wizard"
-                      ? "bg-gradient-to-r from-purple-400 via-pink-200 to-pink-300"
-                      : "bg-gray-200"
-                  }`}
-                >
-                  <img
-                    src={characters.find(c => c.id === character)?.image}
-                    alt={characters.find(c => c.id === character)?.name}
-                    className="w-20 h-20 md:w-24 md:h-24"
-                  />
-                  <div className="flex flex-col items-start">
-                    <p className="text-xl md:text-2xl font-bold">
-                      {characters.find((c) => c.id === character)?.name}
-                    </p>
-                    <p className="text-sm md:text-xl font-semibold">
-                      レベル：{characterLevel}
-                    </p>
-                    <p className="text-sm md:text-xl font-semibold">
-                      HP：{characterHP}
-                    </p>
-                    <p className="text-sm md:text-xl font-semibold">
-                      攻撃力：{getCharacterAttack()}
-                    </p>
+            <div className="mb-3 bg-white p-3 border-2 border-purple-300 rounded-xl mx-auto w-full max-w-md md:max-w-xl">
+              <p className="text-xl md:text-2xl text-center mb-2">{getEnemyForStage(currentStage + 1, course, boss, variant).name}が現れた！クイズに正解して倒そう！</p>
+              {/* 横並び */}
+              <div className="flex flex-col items-center md:flex-row justify-center md:gap-12">
+                {/* 自分のキャラクター */}
+                {character && (
+                  <div
+                    className={`flex items-center gap-4 mb-2 md:mb-0 p-3 rounded-xl ${
+                      isBlinking ? "red-blink" : "border-purple-300"
+                    } ${
+                      character === "warrior"
+                        ? "bg-gradient-to-r from-blue-400 via-blue-200 to-cyan-300"
+                        : character === "fighter"
+                        ? "bg-gradient-to-r from-red-400 via-orange-200 to-yellow-300"
+                        : character === "wizard"
+                        ? "bg-gradient-to-r from-purple-400 via-pink-200 to-pink-300"
+                        : "bg-gray-200"
+                    }`}
+                  >
+                    <img
+                      src={characters.find(c => c.id === character)?.image}
+                      alt={characters.find(c => c.id === character)?.name}
+                      className="w-20 h-20 md:w-24 md:h-24"
+                    />
+                    <div className="flex flex-col items-start">
+                      <p className="text-xl md:text-2xl font-bold">
+                        {characters.find((c) => c.id === character)?.name}
+                      </p>
+                      <p className="text-sm md:text-xl font-semibold">
+                        レベル：{characterLevel}
+                      </p>
+                      <p className="text-sm md:text-xl font-semibold">
+                        HP：{characterHP}
+                      </p>
+                      <p className="text-sm md:text-xl font-semibold">
+                        攻撃力：{getCharacterAttack()}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* 敵キャラクター */}
-              <div className="flex flex-col gap-1 md:gap-2">
-                <div className={`flex items-center gap-4 bg-gradient-to-r from-red-700 via-purple-800 to-black p-3 rounded-xl ${isBlinkingEnemy ? "red-blink" : "border-purple-300"} transition-opacity duration-1000 ${enemyVisible ? "opacity-100" : "opacity-0"}`}>
-                  <img
-                    src={getEnemyForStage(currentStage + 1).image}
-                    alt={getEnemyForStage(currentStage + 1).name}
-                    className="w-20 h-20 md:w-24 md:h-24"
-                  />
-                  <div className="flex flex-col items-start">
-                    <p className="text-xl md:text-2xl font-bold text-purple-200 max-w-[100px]">
-                      {getEnemyForStage(currentStage + 1).name}
-                    </p>
-                    <p className="text-sm md:text-xl font-semibold text-purple-200">
-                      HP： {enemyHP}
-                    </p>
-                    <p className="text-sm md:text-xl font-semibold text-purple-200">
-                      攻撃力：{getEnemyForStage(currentStage + 1).attack}
-                    </p>
+                {/* 敵キャラクター */}
+                <div className="flex flex-col gap-1 md:gap-2">
+                  <div className={`flex items-center gap-4 bg-gradient-to-r from-red-700 via-purple-800 to-black p-3 rounded-xl ${isBlinkingEnemy ? "red-blink" : "border-purple-300"} transition-opacity duration-1000 ${enemyVisible ? "opacity-100" : "opacity-0"}`}>
+                    <img
+                      src={getEnemyForStage(currentStage + 1, course, boss, variant).image}
+                      alt={getEnemyForStage(currentStage + 1, course, boss, variant).name}
+                      className="w-20 h-20 md:w-24 md:h-24"
+                    />
+                    <div className="flex flex-col items-start">
+                      <p className="text-xl md:text-2xl font-bold text-purple-200 max-w-[100px]">
+                        {getEnemyForStage(currentStage + 1, course, boss, variant).name}
+                      </p>
+                      <p className="text-sm md:text-xl font-semibold text-purple-200">
+                        HP： {enemyHP}
+                      </p>
+                      <p className="text-sm md:text-xl font-semibold text-purple-200">
+                        攻撃力：{getEnemyForStage(currentStage + 1, course, boss, variant).attack}
+                      </p>
+                    </div>
                   </div>
+                  <p className="text-lg md:text-xl font-semibold text-gray-600 w-50 md:w-55">
+                    {getEnemyForStage(currentStage + 1, course, boss, variant).description}
+                  </p>
                 </div>
-                <p className="text-lg md:text-xl font-semibold text-gray-600 w-50 md:w-55">
-                  {getEnemyForStage(currentStage + 1).description}
-                </p>
               </div>
             </div>
-          </div>
 
-          {attackMessage && (
-            <p className="text-2xl md:text-4xl font-bold mb-4">
-              {attackMessage}
-            </p>
-          )}
-
-          {enemyDefeatedMessage && (
-            <p className="text-2xl md:text-4xl font-bold text-blue-500 mb-1 md:mb-4 animate-bounce">
-              {enemyDefeatedMessage}
-            </p>
-          )}
-
-          {levelUpMessage && (
-            <div className="flex flex-col items-center gap-2 mb-4">
-              <p className="text-2xl md:text-4xl font-bold md:mb-4 animate-bounce 
-                            bg-gradient-to-r from-blue-500 via-red-500 to-yellow-500 
-                            text-transparent bg-clip-text drop-shadow-lg">
-                {levelUpMessage}
+            {attackMessage && (
+              <p className="text-2xl md:text-4xl font-bold mb-4">
+                {attackMessage}
               </p>
-              <p className="text-2xl md:text-4xl font-bold md:mb-4 animate-bounce 
-                            bg-red-500
-                            text-transparent bg-clip-text drop-shadow-md">
-                攻撃力が上がった！
+            )}
+
+            {enemyDefeatedMessage && (
+              <p className="text-2xl md:text-4xl font-bold text-blue-500 mb-1 md:mb-4 animate-bounce">
+                {enemyDefeatedMessage}
               </p>
-              <p className="text-2xl md:text-4xl font-bold md:mb-4 animate-bounce 
-                            bg-green-500
-                            text-transparent bg-clip-text drop-shadow-md">
-                HPが上がった！
+            )}
+
+            {levelUpMessage && (
+              <div className="flex flex-col items-center gap-2 mb-4">
+                <p className="text-2xl md:text-4xl font-bold md:mb-4 animate-bounce 
+                              bg-gradient-to-r from-blue-500 via-red-500 to-yellow-500 
+                              text-transparent bg-clip-text drop-shadow-lg">
+                  {levelUpMessage}
+                </p>
+                <p className="text-2xl md:text-4xl font-bold md:mb-4 animate-bounce 
+                              bg-red-500
+                              text-transparent bg-clip-text drop-shadow-md">
+                  攻撃力が上がった！
+                </p>
+                <p className="text-2xl md:text-4xl font-bold md:mb-4 animate-bounce 
+                              bg-green-500
+                              text-transparent bg-clip-text drop-shadow-md">
+                  HPが上がった！
+                </p>
+              </div>
+            )}
+
+            {miracleSeedMessage && (
+              <p className="
+                text-center 
+                text-2xl md:text-4xl 
+                font-extrabold 
+                mb-3 
+                bg-gradient-to-r from-yellow-400 via-red-400 to-pink-500 
+                text-transparent 
+                bg-clip-text 
+                drop-shadow-[0_0_10px_yellow] 
+                animate-bounce
+              ">
+                {miracleSeedMessage}
               </p>
-            </div>
-          )}
+            )}
 
-          {miracleSeedMessage && (
-            <p className="
-              text-center 
-              text-2xl md:text-4xl 
-              font-extrabold 
-              mb-3 
-              bg-gradient-to-r from-yellow-400 via-red-400 to-pink-500 
-              text-transparent 
-              bg-clip-text 
-              drop-shadow-[0_0_10px_yellow] 
-              animate-bounce
-            ">
-              {miracleSeedMessage}
-            </p>
-          )}
+            {/* 次のステージへ進むボタン */}
+            {showNextStageButton && (
+              <button
+                className="px-5 py-3 md:px-6 md:py-4 mb-3 text-white text-xl md:text-2xl font-bold rounded-xl 
+                          bg-gradient-to-r from-purple-400 via-purple-500 to-purple-600
+                          hover:from-purple-500 hover:via-purple-600 hover:to-purple-600
+                          shadow-lg shadow-pink-300 cursor-pointer animate-pulse"
+                onClick={() => {
+                  const nextStage = currentStage + 1;
+                  setCurrentStage(nextStage);
 
-          {/* 次のステージへ進むボタン */}
-          {showNextStageButton && (
-            <button
-              className="px-5 py-3 md:px-6 md:py-4 mb-3 text-white text-xl md:text-2xl font-bold rounded-xl 
-                         bg-gradient-to-r from-purple-400 via-purple-500 to-purple-600
-                         hover:from-purple-500 hover:via-purple-600 hover:to-purple-600
-                         shadow-lg shadow-pink-300 cursor-pointer animate-pulse"
-              onClick={() => {
-                const nextStage = currentStage + 1;
-                setCurrentStage(nextStage);
+                  const nextEnemy = getEnemyForStage(nextStage + 1, course, boss, variant);
+                  setEnemyHP(nextEnemy.hp);
 
-                const nextEnemy = getEnemyForStage(nextStage + 1);
-                setEnemyHP(nextEnemy.hp);
+                  // メッセージを消す
+                  setEnemyDefeatedMessage(null);
+                  setLevelUpMessage(null);
+                  setIsAttacking(false);
+                  setShowNextStageButton(false);
+                  setEnemyVisible(true);
+                  setMiracleSeedMessage(null);
 
-                // メッセージを消す
-                setEnemyDefeatedMessage(null);
-                setLevelUpMessage(null);
-                setIsAttacking(false);
-                setShowNextStageButton(false);
-                setEnemyVisible(true);
-                setMiracleSeedMessage(null);
+                  nextQuestion();
+                }}
+              >
+                次のステージへ進む
+              </button>
+            )}
 
-                nextQuestion();
-              }}
-            >
-              次のステージへ進む
-            </button>
-          )}
+            {deathMessage && (
+              <p className="text-2xl md:text-4xl font-bold text-red-500 mb-4 animate-bounce">
+                {deathMessage}
+              </p>
+            )}
 
-          {deathMessage && (
-            <p className="text-2xl md:text-4xl font-bold text-red-500 mb-4 animate-bounce">
-              {deathMessage}
-            </p>
-          )}
-
-          {questions[currentIndex].quiz && (
-            <>
-              {(showCorrectMessage || incorrectMessage) && (
-                <>
-                  {showCorrectMessage && (
-                    <p className="text-4xl md:text-6xl font-extrabold mb-2 text-green-600 drop-shadow-lg animate-bounce animate-pulse">
-                      ◎正解！🎉
-                    </p>
-                  )}
-                  {incorrectMessage && (
-                    <p className="text-3xl md:text-4xl font-extrabold mb-2 text-red-500 drop-shadow-lg animate-shake whitespace-pre-line">
-                      {incorrectMessage}
-                    </p>
-                  )}
-                  {(() => {
-                    const currentQuiz = questions[currentIndex].quiz;
-                    const answerExplanation = currentQuiz?.answerExplanation;
-                    const trivia = currentQuiz?.trivia;
-
-                    return (
-                      <>
-                        {answerExplanation && (
-                          <div className="mt-5 md:mt-15 text-center">
-                            <p className="text-xl md:text-2xl font-bold text-blue-600">解説📖</p>
-                            <p className="mt-1 md:mt-2 text-lg md:text-xl text-gray-700">{answerExplanation}</p>
-                          </div>
-                        )}
-
-                        {trivia && (
-                          <div className="mt-5 md:mt-10 text-center">
-                            <p className="text-xl md:text-2xl font-bold text-yellow-600">知って得する豆知識💡</p>
-                            <p className="mt-1 md:mt-2 text-lg md:text-xl text-gray-700">{trivia}</p>
-                          </div>
-                        )}
-                      </>
-                    );
-                  })()}
-
-                  <div className="mt-10">
+            {questions[currentIndex].quiz && (
+              <>
+                {(showCorrectMessage || incorrectMessage) && (
+                  <>
                     {showCorrectMessage && (
-                      <button
-                        className="px-5 py-3 md:px-6 md:py-3 border border-gray-600 text-white text-lg md:text-xl font-medium rounded bg-gradient-to-r from-red-500 via-yellow-500 to-pink-500 hover:from-pink-600 hover:via-red-600 hover:to-yellow-600 cursor-pointer"
-                        onClick={attackEnemy}
-                      >
-                        自分の攻撃！🔥
-                      </button>
+                      <p className="text-4xl md:text-6xl font-extrabold mb-2 text-green-600 drop-shadow-lg animate-bounce animate-pulse">
+                        ◎正解！🎉
+                      </p>
                     )}
                     {incorrectMessage && (
-                      <button
-                        className="px-5 py-3 md:px-6 md:py-3 text-white text-lg md:text-xl font-medium rounded border border-black
-                                  bg-gradient-to-r from-red-700 via-purple-800 to-black
-                                  hover:from-purple-700 hover:via-red-800 hover:to-black
-                                  shadow-lg shadow-red-800 cursor-pointer"
-                        onClick={attackCharacter}
-                      >
-                        相手からの攻撃！💀
-                      </button>
+                      <p className="text-3xl md:text-4xl font-extrabold mb-2 text-red-500 drop-shadow-lg animate-shake whitespace-pre-line">
+                        {incorrectMessage}
+                      </p>
                     )}
-                  </div>
-                </>
-              )}
+                    {(() => {
+                      const currentQuiz = questions[currentIndex].quiz;
+                      const answerExplanation = currentQuiz?.answerExplanation;
+                      const trivia = currentQuiz?.trivia;
 
-              {!showCorrectMessage && !incorrectMessage && !isAttacking && (
-                <p className="text-2xl md:text-3xl font-bold mb-4 text-red-500">
-                  回答タイマー: {timeLeft} 秒
-                </p>
-              )}
+                      return (
+                        <>
+                          {answerExplanation && (
+                            <div className="mt-5 md:mt-15 text-center">
+                              <p className="text-xl md:text-2xl font-bold text-blue-600">解説📖</p>
+                              <p className="mt-1 md:mt-2 text-lg md:text-xl text-gray-700">{answerExplanation}</p>
+                            </div>
+                          )}
 
-              {/* 選択肢表示 */}
-              {!showCorrectMessage && !incorrectMessage && !isAttacking && (
-                <QuizQuestion
-                  quiz={questions[currentIndex].quiz}
-                  userAnswer={userAnswer}
-                  setUserAnswer={setUserAnswer}
-                />
-              )}
+                          {trivia && (
+                            <div className="mt-5 md:mt-10 text-center">
+                              <p className="text-xl md:text-2xl font-bold text-yellow-600">知って得する豆知識💡</p>
+                              <p className="mt-1 md:mt-2 text-lg md:text-xl text-gray-700">{trivia}</p>
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
 
-              {!showCorrectMessage && !incorrectMessage && !isAttacking && (
-                <>
-                  {/* 魔法使い専用ボタン */}
-                  {showMagicButtons && (
+                    <div className="mt-10">
+                      {showCorrectMessage && (
+                        <button
+                          className="px-5 py-3 md:px-6 md:py-3 border border-gray-600 text-white text-lg md:text-xl font-medium rounded bg-gradient-to-r from-red-500 via-yellow-500 to-pink-500 hover:from-pink-600 hover:via-red-600 hover:to-yellow-600 cursor-pointer"
+                          onClick={attackEnemy}
+                        >
+                          自分の攻撃！🔥
+                        </button>
+                      )}
+                      {incorrectMessage && (
+                        <button
+                          className="px-5 py-3 md:px-6 md:py-3 text-white text-lg md:text-xl font-medium rounded border border-black
+                                    bg-gradient-to-r from-red-700 via-purple-800 to-black
+                                    hover:from-purple-700 hover:via-red-800 hover:to-black
+                                    shadow-lg shadow-red-800 cursor-pointer"
+                          onClick={attackCharacter}
+                        >
+                          相手からの攻撃！💀
+                        </button>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {!showCorrectMessage && !incorrectMessage && !isAttacking && (
+                  <p className="text-2xl md:text-3xl font-bold mb-4 text-red-500">
+                    回答タイマー: {timeLeft} 秒
+                  </p>
+                )}
+
+                {/* 選択肢表示 */}
+                {!showCorrectMessage && !incorrectMessage && !isAttacking && (
+                  <QuizQuestion
+                    key={questions[currentIndex].id} 
+                    quiz={questions[currentIndex].quiz}
+                    userAnswer={userAnswer}
+                    setUserAnswer={setUserAnswer}
+                  />
+                )}
+
+                {!showCorrectMessage && !incorrectMessage && !isAttacking && (
+                  <>
+                    {/* 魔法使い専用ボタン */}
+                    {showMagicButtons && (
+                      <div>
+                        <p className="text-lg md:text-xl">能力を使用するとその能力は2ターン使用できません</p>
+                        <div className="flex justify-center gap-2 md:gap-4 mt-2 mb-2">
+                          <button
+                            disabled={hintCooldown}
+                            className={`
+                              flex-1 md:max-w-[220px] px-4 py-2 text-lg md:text-xl font-bold rounded-lg shadow-md border transition-all
+                              ${hintCooldown
+                                ? "bg-gray-400 text-gray-200 cursor-not-allowed"
+                                : "bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-500 text-black hover:from-yellow-500 hover:via-yellow-400 hover:to-yellow-600 border-yellow-600"
+                              }
+                            `}
+                            onClick={() => {
+                              if (hintCooldown) return;
+                              setHintText(questions[currentIndex].quiz?.hint || "ヒントはありません");
+                              setLastHintUsedIndex(currentIndex); // ★ 使用した問題番号を記録
+                            }}
+                          >
+                            ヒントを見る🔮
+                          </button>
+
+                          <button
+                            disabled={healCooldown}
+                            className={`
+                              flex-1 md:max-w-[220px] px-4 py-2 text-lg md:text-xl font-bold rounded-lg shadow-md border transition-all
+                              ${healCooldown
+                                ? "bg-gray-400 text-gray-200 cursor-not-allowed"
+                                : "bg-gradient-to-r from-green-400 via-green-300 to-green-500 text-black hover:from-green-500 hover:via-green-400 hover:to-green-600 border-green-600"
+                              }
+                            `}
+                            onClick={() => {
+                              if (healCooldown) return;
+
+                              const mul = isSecret ? 10 : 1;          // ✅ secretだけ10倍
+                              const healHp = characterLevel * 30 * mul;
+                              const healText = characterLevel * 30 * mul;
+
+                              setCharacterHP(prev => (prev ?? 0) + healHp);
+                              setHealing(healText);
+                              setLastHealUsedIndex(currentIndex);
+                            }}
+                          >
+                            HP回復✨
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    {/* ヒント表示 */}
+                    {hintText && (
+                      <div className="bg-white border-2 border-gray-400 p-2 rounded-xl max-w-md mx-auto">
+                        <p className="text-center text-xl md:text-2xl font-semibold text-black mb-2">
+                          ヒント💡
+                        </p>
+                        <p className="text-center text-xl md:text-2xl font-semibold text-blue-600 mb-2">
+                          {hintText}
+                        </p>
+                      </div>
+                    )}
+                    {/* レベルアップ表示 */}
+                    {levelUp && (
+                      <p className="text-center text-xl md:text-2xl 
+                                    font-semibold mb-1 
+                                    bg-gradient-to-r from-blue-500 via-red-400 to-yellow-500 
+                                    text-transparent bg-clip-text animate-pulse">
+                        レベルが {levelUp} 上がった！
+                      </p>
+                    )}
+                    {/* 攻撃力アップ表示 */}
+                    {levelUp && (
+                      <p className="text-center text-xl md:text-2xl text-red-500 font-semibold text-black mb-1 animate-pulse">
+                        攻撃力が上がった！
+                      </p>
+                    )}
+                    {/* 回復表示 */}
+                    {healing && (
+                      <p className="text-center text-xl md:text-2xl text-green-500 font-semibold text-black mb-1 animate-pulse">
+                        HPが {healing} 上がった！✨
+                      </p>
+                    )}
+                  </>
+                )}
+
+                {miracleSeedCount > 0 && !isAttacking && !showCorrectMessage && !incorrectMessage && (
+                  <>
                     <div>
-                      <p className="text-lg md:text-xl">能力を使用するとその能力は2ターン使用できません</p>
+                      <p className="text-lg md:text-xl">能力が上がるといわれている伝説の果実</p>
                       <div className="flex justify-center gap-2 md:gap-4 mt-2 mb-2">
                         <button
-                          disabled={hintCooldown}
-                          className={`
-                            flex-1 md:max-w-[220px] px-4 py-2 text-lg md:text-xl font-bold rounded-lg shadow-md border transition-all
-                            ${hintCooldown
-                              ? "bg-gray-400 text-gray-200 cursor-not-allowed"
-                              : "bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-500 text-black hover:from-yellow-500 hover:via-yellow-400 hover:to-yellow-600 border-yellow-600"
-                            }
-                          `}
+                          className="px-5 py-3 md:px-6 border-2 border-pink-200 bg-gradient-to-r from-yellow-400 via-red-400 to-pink-500 text-white text-lg md:text-xl font-bold  rounded-lg shadow-md hover:from-yellow-500 hover:via-red-500 hover:to-pink-600 transition-all cursor-pointer"
                           onClick={() => {
-                            if (hintCooldown) return;
-                            setHintText(questions[currentIndex].quiz?.hint || "ヒントはありません");
-                            setLastHintUsedIndex(currentIndex); // ★ 使用した問題番号を記録
+                            setCharacterHP(prev => (prev ?? 0) + 5000);
+                            setCharacterLevel(prev => prev + 50); // 攻撃力にもレベル依存して加算されます
+                            setMiracleSeedCount(prev => prev - 1);
+                            setLevelUp(50); // レベルアップ表示
+                            setHealing(5000); // 回復表示
                           }}
                         >
-                          ヒントを見る🔮
-                        </button>
-
-                        <button
-                          disabled={healCooldown}
-                          className={`
-                            flex-1 md:max-w-[220px] px-4 py-2 text-lg md:text-xl font-bold rounded-lg shadow-md border transition-all
-                            ${healCooldown
-                              ? "bg-gray-400 text-gray-200 cursor-not-allowed"
-                              : "bg-gradient-to-r from-green-400 via-green-300 to-green-500 text-black hover:from-green-500 hover:via-green-400 hover:to-green-600 border-green-600"
-                            }
-                          `}
-                          onClick={() => {
-                            if (healCooldown) return;
-                            setCharacterHP(prev => (prev ?? 0) + characterLevel * 40);
-                            setHealing(characterLevel * 30);
-                            setLastHealUsedIndex(currentIndex); // ★ 記録
-                          }}
-                        >
-                          HP回復✨
+                          伝説の果実🍏を使う
                         </button>
                       </div>
                     </div>
-                  )}
-                  {/* ヒント表示 */}
-                  {hintText && (
-                    <div className="bg-white border-2 border-gray-400 p-2 rounded-xl max-w-md mx-auto">
-                      <p className="text-center text-xl md:text-2xl font-semibold text-black mb-2">
-                        ヒント💡
-                      </p>
-                      <p className="text-center text-xl md:text-2xl font-semibold text-blue-600 mb-2">
-                        {hintText}
-                      </p>
-                    </div>
-                  )}
-                  {/* レベルアップ表示 */}
-                  {levelUp && (
-                    <p className="text-center text-xl md:text-2xl 
-                                  font-semibold mb-1 
-                                  bg-gradient-to-r from-blue-500 via-red-400 to-yellow-500 
-                                  text-transparent bg-clip-text animate-pulse">
-                      レベルが {levelUp} 上がった！
-                    </p>
-                  )}
-                  {/* 攻撃力アップ表示 */}
-                  {levelUp && (
-                    <p className="text-center text-xl md:text-2xl text-red-500 font-semibold text-black mb-1 animate-pulse">
-                      攻撃力が上がった！
-                    </p>
-                  )}
-                  {/* 回復表示 */}
-                  {healing && (
-                    <p className="text-center text-xl md:text-2xl text-green-500 font-semibold text-black mb-1 animate-pulse">
-                      HPが {healing} 上がった！✨
-                    </p>
-                  )}
-                </>
-              )}
+                  </>
+                )}
 
-              {miracleSeedCount > 0 && !isAttacking && !showCorrectMessage && !incorrectMessage && (
-                <>
-                  <div>
-                    <p className="text-lg md:text-xl">能力が上がるといわれている伝説の果実</p>
-                    <div className="flex justify-center gap-2 md:gap-4 mt-2 mb-2">
-                      <button
-                        className="px-5 py-3 md:px-6 border-2 border-pink-200 bg-gradient-to-r from-yellow-400 via-red-400 to-pink-500 text-white text-lg md:text-xl font-bold  rounded-lg shadow-md hover:from-yellow-500 hover:via-red-500 hover:to-pink-600 transition-all cursor-pointer"
-                        onClick={() => {
-                          setCharacterHP(prev => (prev ?? 0) + 5000);
-                          setCharacterLevel(prev => prev + 50); // 攻撃力にもレベル依存して加算されます
-                          setMiracleSeedCount(prev => prev - 1);
-                          setLevelUp(50); // レベルアップ表示
-                          setHealing(5000); // 回復表示
-                        }}
-                      >
-                        伝説の果実🍏を使う
-                      </button>
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* 回答ボタン */}
-              {!showCorrectMessage && !incorrectMessage && !isAttacking && (
-                <button
-                  className="px-5 py-3 md:px-6 bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-2 hover:bg-blue-600 cursor-pointer"
-                  onClick={checkAnswer}
-                  disabled={userAnswer === null}
-                >
-                  回答
-                </button>
-              )}
-            </>
-          )}
-        </>
-      ) : (
-        <QuizResult
-          correctCount={correctCount}
-          getTitle={getTitle}
-          titles={titles}
-          earnedPoints={earnedPoints}
-          earnedExp={earnedExp} 
-          isLoggedIn={!!user}
-          awardStatus={awardStatus}
-          onGoLogin={() => router.push("/user/login")}
-          onShareX={handleShareX}
-          onRetry={resetGame}
-        />
-      )}
-    </div>
+                {/* 回答ボタン */}
+                {!showCorrectMessage && !incorrectMessage && !isAttacking && (
+                  <button
+                    className="px-5 py-3 md:px-6 bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-2 hover:bg-blue-600 cursor-pointer"
+                    onClick={checkAnswer}
+                    disabled={userAnswer === null}
+                  >
+                    回答
+                  </button>
+                )}
+              </>
+            )}
+          </>
+        ) : (
+          <QuizResult
+            correctCount={correctCount}
+            getTitle={getTitle}
+            titles={titles}
+            earnedPoints={earnedPoints}
+            earnedExp={earnedExp} 
+            isLoggedIn={!!user}
+            awardStatus={awardStatus}
+            onGoLogin={() => router.push("/user/login")}
+            onShareX={handleShareX}
+            onRetry={resetGame}
+            isSecret={isSecret}
+            secretBossName={secretEnemy?.name}
+            secretTitle={secretRes?.title}
+            secretComment={secretRes?.comment}
+            secretCleared={secretCleared}
+          />
+        )}
+      </div>
     </>
   );
 }

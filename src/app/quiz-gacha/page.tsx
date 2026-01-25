@@ -260,19 +260,19 @@ const QuizGacha = ({
                     <div className="relative inline-block">
                       {item.isNew && (
                         <div
-  className="
-    absolute -top-3 -left-15 md:-left-20
-    px-3 py-1
-    rounded-full
-    text-sm md:text-lg
-    font-extrabold
-    text-white
-    bg-gradient-to-r from-pink-500 via-red-500 to-yellow-400
-    shadow-lg
-    border-2 border-white
-    leading-none
-  "
->
+                          className="
+                            absolute -top-3 -left-15 md:-left-20
+                            px-3 py-1
+                            rounded-full
+                            text-sm md:text-lg
+                            font-extrabold
+                            text-white
+                            bg-gradient-to-r from-pink-500 via-red-500 to-yellow-400
+                            shadow-lg
+                            border-2 border-white
+                            leading-none
+                          "
+                        >
                           NEW
                         </div>
                       )}
@@ -562,19 +562,19 @@ const QuizGacha = ({
                 >
                   {gachaResult.isNew && (
                     <div
-  className="
-    absolute -top-6 md:-top-7 left-1 md:left-2
-    px-4 py-2
-    rounded-full
-    text-xl md:text-3xl
-    font-extrabold
-    text-white
-    bg-gradient-to-r from-pink-500 via-red-500 to-yellow-400
-    shadow-lg
-    border-4 border-white
-    leading-none
-  "
->
+                      className="
+                        absolute -top-6 md:-top-7 left-1 md:left-2
+                        px-4 py-2
+                        rounded-full
+                        text-xl md:text-3xl
+                        font-extrabold
+                        text-white
+                        bg-gradient-to-r from-pink-500 via-red-500 to-yellow-400
+                        shadow-lg
+                        border-4 border-white
+                        leading-none
+                      "
+                    >
                       NEW
                     </div>
                   )}
