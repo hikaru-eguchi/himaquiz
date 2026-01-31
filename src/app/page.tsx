@@ -146,11 +146,11 @@ export default async function HomePage({
       <DailyLoginBonusModal />
 
       <p className="text-center text-md md:text-xl font-extrabold text-gray-800 leading-relaxed -mt-2 mb-6">
-        みんなで遊べる暇つぶしクイズ『ひまQ』は、暇つぶしにぴったりな、ひとりでも、みんなでも盛り上がれるクイズが満載です。
+        みんなで遊べる暇つぶしクイズ『ひまQ』は、暇つぶしにぴったりな、ひとりでも、みんなでも盛り上がれる楽しいクイズが満載です。
       </p>
 
       <h1
-        className="text-3xl font-bold mb-2 text-center leading-tight"
+        className="text-3xl font-bold mb-2 text-center leading-tight sr-only"
         style={{
           background: "linear-gradient(90deg, #007BFF, #4C6EF5, #845EF7)",
           WebkitBackgroundClip: "text",
@@ -331,10 +331,24 @@ export default async function HomePage({
               君は深層まで進めるか！？
             </p>
           </div>
+          {/* きまぐれクイズ */}
+          <div className="text-center max-w-[260px]">
+            <Link href="/quiz-kimagure" className="w-full md:w-auto flex justify-center">
+              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-yellow-500 to-yellow-300  text-white hover:scale-110 transition-all">
+                きまぐれクイズ
+              </button>
+            </Link>
+            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
+              きまぐれにモンスターが出現！
+            </p>
+            <p className="text-sm md:text-base text-gray-700 leading-tight">
+              何種類みつけられる？
+            </p>
+          </div>
           {/* 運命のクイズ */}
           <div className="text-center max-w-[260px]">
             <Link href="/quiz-luck" className="w-full md:w-auto flex justify-center">
-              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-yellow-500 to-yellow-400 text-white hover:scale-110 transition-all">
+              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-emerald-500 to-teal-400 text-white hover:scale-110 transition-all">
                 運命のクイズ
               </button>
             </Link>
@@ -399,7 +413,7 @@ export default async function HomePage({
             </p>
           </div>
           {/* 多数決クイズ */}
-          {/* <div className="text-center max-w-[260px]">
+          <div className="text-center max-w-[260px]">
             <Link href="/quiz-majority" className="w-full md:w-auto flex justify-center">
               <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-red-500 to-blue-500 text-white hover:scale-110 transition-all">
                 多数決クイズ
@@ -411,7 +425,7 @@ export default async function HomePage({
             <p className="text-sm md:text-base text-gray-700 leading-tight">
               最後のステージまでたどり着けるか！？
             </p>
-          </div> */}
+          </div>
         </div>
       </div>
 

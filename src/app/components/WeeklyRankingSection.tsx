@@ -12,7 +12,7 @@ export default async function WeeklyRankingSection() {
               週間ランキング🏅
             </p>
             <p className="text-sm md:text-md text-gray-700 mt-1">
-              今週のトッププレイヤーをチェック！（スコア／プレイ回数／正解数）
+              今週のトッププレイヤーをチェック！
             </p>
           </div>
 
@@ -23,18 +23,18 @@ export default async function WeeklyRankingSection() {
         </div>
 
         {/* ログイン案内（固定でここに出す） */}
-        <div className="mt-3 border-2 border-black rounded-xl bg-white px-3 py-2 text-center">
+        <div className="mt-1 md:mt-3 border-2 border-black rounded-xl bg-white px-3 py-2 text-center">
           <p className="text-sm md:text-md font-bold text-gray-800">
             🔔 ログインするとプレイ結果がランキングに反映されます
           </p>
-          <p className="text-sm md:text-md text-gray-700">
+          {/* <p className="text-sm md:text-md text-gray-700">
             ※未ログインのプレイはランキング集計に入りません
-          </p>
+          </p> */}
         </div>
 
         {/* 中身（3カード） */}
-        <div className="mt-5">
-          <WeeklyRankingCard
+        <div className="mt-2 md:mt-5">
+          {/* <WeeklyRankingCard
             title="今週のスコア"
             icon="🏆"
             bgClass="from-emerald-50 via-emerald-100 to-emerald-200"
@@ -48,7 +48,7 @@ export default async function WeeklyRankingSection() {
             bgClass="from-sky-50 via-sky-100 to-sky-200"
             orderBy="play_count"
             valueLabel={(r) => `${r.play_count}回`}
-          />
+          /> */}
 
           <WeeklyRankingCard
             title="今週の正解数"

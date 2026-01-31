@@ -306,7 +306,8 @@ export default function MyCharactersPage() {
                         style={{
                           background:
                             "radial-gradient(circle at 30% 30%, #ff00ff, #00ffff, #ffff00, #ff0000)",
-                          filter: "blur(120px)",
+                          // filter: "blur(120px)",
+                          filter: "blur(40px)",
                           opacity: 0.6,
                           width: "100%",
                           height: "100%",
@@ -315,7 +316,7 @@ export default function MyCharactersPage() {
                     </div>
 
                     {/* ✨ キラキラ粒子 */}
-                    {Array.from({ length: 30 }).map((_, i) => (
+                    {/* {Array.from({ length: 30 }).map((_, i) => (
                       <motion.div
                         key={i}
                         className="fixed z-40 w-4 h-4 rounded-full bg-white"
@@ -332,7 +333,7 @@ export default function MyCharactersPage() {
                           repeatType: "reverse",
                         }}
                       />
-                    ))}
+                    ))} */}
                   </>
                 ) : (
                   // 未所持キャラのときはシンプルにうっすら暗くするだけ

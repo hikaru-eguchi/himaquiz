@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
-import QuizQuestion from "../../components/QuizQuestion";
-import { QuizData } from "@/lib/articles";
+import QuizQuestion2 from "../../components/QuizQuestion2";
+import { QuizData } from "@/lib/articles2";
 import { motion, AnimatePresence } from "framer-motion";
 import { useBattle } from "../../../hooks/useBattle";
 import { useQuestionPhase } from "../../../hooks/useQuestionPhase";
@@ -16,6 +16,20 @@ import { getWeekStartJST } from "@/lib/week";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
 
 type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
+
+const stageMessages: Record<number, string> = {
+  0: "惜しい！次は仲間と作戦立てていこう🔥",
+  1: "まずは1問クリア！チーム始動だ✨",
+  2: "いい連携！この調子で押し切ろう👍",
+  3: "ナイス判断！みんなの流れ来てる💨",
+  4: "強い！チームの空気が仕上がってきた😎",
+  5: "半分突破！連携が噛み合ってる👏",
+  6: "かなり強い！意思統一できてる💪",
+  7: "上級者チーム！読み合いが冴えてる👑",
+  8: "天才ムーブ！仲間との判断が完璧🧠✨",
+  9: "あと1問…！最後は全員で決めよう🔥",
+  10: "完全制覇！！最高のチーム勝利だ🏆✨",
+};
 
 interface ArticleData {
   id: string;
@@ -53,8 +67,6 @@ interface QuizResultProps {
   predictedWinner: string | null;
   hasPredicted: boolean;
   basePoints: number;
-  firstBonusPoints: number;
-  predictionBonusPoints: number;
   earnedPoints: number;
   earnedExp: number;
   isLoggedIn: boolean;
@@ -72,14 +84,8 @@ const QuizResult = ({
   rematchRequested,
   handleNewMatch,
   handleRematch,
-  myRankState,
   eliminationGroups,
-  players,
-  predictedWinner,
-  hasPredicted,
   basePoints,
-  firstBonusPoints,
-  predictionBonusPoints,
   earnedPoints,
   earnedExp,
   isLoggedIn,
@@ -90,9 +96,6 @@ const QuizResult = ({
 }: QuizResultProps) => {
   const [showText1, setShowText1] = useState(false);
   const [showText2, setShowText2] = useState(false);
-  const [showText3, setShowText3] = useState(false);
-  const [showText4, setShowText4] = useState(false);
-  const [showText5, setShowText5] = useState(false);
   const [showButton, setShowButton] = useState(false);
 
   useEffect(() => {
@@ -103,13 +106,13 @@ const QuizResult = ({
     const timers: NodeJS.Timeout[] = [];
     timers.push(setTimeout(() => setShowText1(true), 500));
     timers.push(setTimeout(() => setShowText2(true), 1500));
-    timers.push(setTimeout(() => setShowText3(true), 2500));
-    timers.push(setTimeout(() => setShowText4(true), 3000));
-    timers.push(setTimeout(() => setShowText5(true), 3500));
-    timers.push(setTimeout(() => setShowButton(true), 3500));
+    timers.push(setTimeout(() => setShowButton(true), 2500));
     return () => timers.forEach(clearTimeout);
   }, []);
 
+  const stageMessage =
+    stageMessages[Math.min(10, Math.max(0, correctCount))] ??
+    "ナイスプレイ！🔥";
 
   return (
     <motion.div
@@ -122,101 +125,15 @@ const QuizResult = ({
       {showText1 && (
         <>
           <p className="text-3xl md:text-5xl mb-2 md:mb-6">
-            正解数：{correctCount}問
+            ステージ{correctCount}までクリア！
           </p>
         </>
       )}
 
-      {showText2 && <p className="text-xl md:text-2xl text-gray-600 mb-2">あなたの順位は…</p>}
-
-      {showText3 && myRankState !== null && myRankState !== 1 && (
-        <p
-          className={`text-4xl md:text-6xl font-bold ${
-            myRankState === 1
-              ? "text-yellow-400"   // 1位：最後まで残った人
-              : myRankState === 2
-              ? "text-gray-400"     // 2位
-              : myRankState === 3
-              ? "text-orange-600"   // 3位
-              : "text-blue-600"     // その他
-          }`}
-        >
-           {myRankState} 位！
+      {showText2 && (
+        <p className="text-xl md:text-2xl text-gray-600 mb-2">
+          {stageMessage}
         </p>
-      )}
-
-      {showText3 && myRankState === 1 && (
-        <motion.p
-          initial={{ scale: 0.5, rotate: -10 }}
-          animate={{ scale: [1.2, 1], rotate: 0 }}
-          transition={{ duration: 0.6 }}
-          className="
-            text-4xl md:text-6xl
-            font-extrabold
-            text-yellow-300
-            drop-shadow-[0_0_20px_gold]
-          "
-        >
-          🏆 1 位！ 👑
-        </motion.p>
-      )}
-
-      {showText4 && <p className="text-xl md:text-2xl text-gray-600 mt-6">みんなの順位</p>}
-      {showText4 && eliminationGroups.length > 0 && (
-        <div className="mt-2 space-y-2">
-          {[...eliminationGroups].reverse().map((group, reverseIndex) => {
-            const rank = reverseIndex + 1; // 1位から順に
-
-            return group.map(socketId => {
-              const player = players.find(p => p.socketId === socketId);
-              if (!player) return null;
-
-              return (
-                <div
-                  key={`${rank}-${socketId}`}
-                  className="flex items-center gap-4 px-3 py-2 bg-white rounded-lg shadow max-w-sm mx-auto"
-                >
-                  {/* 何位 */}
-                  <span
-                    className={`font-extrabold text-lg w-10 text-center ${
-                      rank === 1
-                        ? "text-yellow-400"
-                        : rank === 2
-                        ? "text-gray-400"
-                        : rank === 3
-                        ? "text-orange-500"
-                        : "text-blue-500"
-                    }`}
-                  >
-                    {rank}位
-                  </span>
-
-                  {/* 名前 */}
-                  <span className="font-bold text-base truncate flex-1 text-center">
-                    {player.playerName}
-                  </span>
-                </div>
-              );
-            });
-          })}
-        </div>
-      )}
-      {showText5 && predictedWinner && hasPredicted && (
-        <div className="mt-6 p-4 bg-white rounded-xl shadow max-w-sm mx-auto">
-          <p className="text-xl font-bold mb-2">
-            あなたの1位予想
-          </p>
-
-          {eliminationGroups[eliminationGroups.length - 1]?.includes(predictedWinner) ? (
-            <p className="text-3xl font-extrabold text-green-600">
-              的中！🎯
-            </p>
-          ) : (
-            <p className="text-2xl font-bold text-gray-500">
-              はずれ…
-            </p>
-          )}
-        </div>
       )}
 
       {showButton && (
@@ -224,13 +141,6 @@ const QuizResult = ({
             <>
               <div className="mb-2 text-lg md:text-xl text-gray-700 font-bold">
                 <p className="text-blue-500">正解数ポイント：{basePoints}P（{correctCount}問 × 20P）</p>
-                {firstBonusPoints > 0 && (
-                  <p className="text-yellow-500">1位ボーナス✨：{firstBonusPoints}P</p>
-                )}
-
-                {predictionBonusPoints > 0 && (
-                  <p className="text-pink-500">予想的中ボーナス🎉：{predictionBonusPoints}P</p>
-                )}
               </div>
 
               <p className="text-xl md:text-2xl font-extrabold text-gray-800">
@@ -261,11 +171,11 @@ const QuizResult = ({
               ) : (
                 <div className="mt-2">
                   <p className="text-md md:text-xl text-gray-700 font-bold">
-                    ※未ログインのため受け取れません。ログインすると次からポイントを受け取れます！
+                    ※未ログインのため受け取れません。ログイン（無料）すると次からポイントを受け取れます！
                   </p>
                   <button
                     onClick={onGoLogin}
-                    className="mt-2 px-4 py-2 bg-blue-500 text-white border border-black rounded-lg font-bold hover:bg-blue-600 cursor-pointer"
+                    className="mt-2 px-4 py-2 bg-blue-500 text-white  rounded-lg font-bold hover:bg-blue-600 cursor-pointer"
                   >
                     ログインする
                   </button>
@@ -346,7 +256,7 @@ const QuizResult = ({
             {/* 待ちメッセージを下に隔離 */}
             {rematchRequested && !rematchAvailable && (
               <p className="text-center text-2xl md:text-3xl text-gray-700 bg-white rounded-xl p-2 mt-4 md:mt-2">
-                チーム仲間の準備を待っています…
+                仲間の準備を待っています…
               </p>
             )}
           </div>
@@ -380,8 +290,6 @@ export default function QuizModePage() {
     exp: number;
     correctCount: number;
     basePoints: number;
-    firstBonusPoints: number;
-    predictionBonusPoints: number;
     hasPredicted: boolean;
     predictedWinner: string | null;
     winnerSocketIds: string[];
@@ -461,10 +369,7 @@ export default function QuizModePage() {
       );
 
       const reasonPoint =
-        `多数決クイズ獲得: 正解${payload.correctCount}問=${payload.basePoints}P` +
-        (payload.firstBonusPoints ? ` / 1位ボーナス${payload.firstBonusPoints}P` : "") +
-        (payload.predictionBonusPoints ? ` / 予想的中${payload.predictionBonusPoints}P` : "");
-
+        `多数決クイズ獲得: 正解${payload.correctCount}問=${payload.basePoints}P`
       if (payload.points > 0) {
         const { error: logError } = await supabase.from("user_point_logs").insert({
           user_id: authedUserId,
@@ -500,8 +405,6 @@ export default function QuizModePage() {
   const [earnedPoints, setEarnedPoints] = useState(0);
   const [earnedExp, setEarnedExp] = useState(0);
   const [basePoints, setBasePoints] = useState(0);
-  const [firstBonusPoints, setFirstBonusPoints] = useState(0);
-  const [predictionBonusPoints, setPredictionBonusPoints] = useState(0);
 
   const [questions, setQuestions] = useState<{ id: string; quiz: QuizData }[]>([]);
   const [correctCount, setCorrectCount] = useState(0);
@@ -595,11 +498,6 @@ export default function QuizModePage() {
     roomCode
   );
 
-  const groups = lastPlayerElimination?.eliminationGroups ?? [];
-  const winnerGroup = groups.length ? groups[groups.length - 1] : [];
-  const isSoloWinner = winnerGroup.length === 1;          // 単独勝者か
-  const amIWinner = winnerGroup.includes(mySocketId);     // 自分が勝者か
-  const firstBonus = (isSoloWinner && amIWinner) ? 300 : 0;
   const phase = questionPhase?.phase ?? "question";
   const results = questionPhase?.results ?? [];
   const canAnswer = questionPhase?.canAnswer ?? false;
@@ -701,8 +599,6 @@ export default function QuizModePage() {
     setAwardStatus("idle");
     setEarnedPoints(0);
     setBasePoints(0);
-    setFirstBonusPoints(0);
-    setPredictionBonusPoints(0);
     setEarnedExp(0);
     sentRef.current = false;
     clearPendingAward();
@@ -734,8 +630,6 @@ export default function QuizModePage() {
     setAwardStatus("idle");
     setEarnedPoints(0);
     setBasePoints(0);
-    setFirstBonusPoints(0);
-    setPredictionBonusPoints(0);
     setEarnedExp(0);
     sentRef.current = false;
     clearPendingAward();
@@ -769,7 +663,7 @@ export default function QuizModePage() {
 
   useEffect(() => {
     const fetchArticles = async () => {
-      const res = await fetch("/api/articles");
+      const res = await fetch("/api/articles2");
       const data: ArticleData[] = await res.json();
       let all = data;
       if (mode === "genre" && genre) all = all.filter(a => a.quiz?.genre === genre);
@@ -1078,8 +972,6 @@ export default function QuizModePage() {
     const expEarned = correctCount * 20;
 
     setBasePoints(base);
-    setFirstBonusPoints(firstBonus);
-    setPredictionBonusPoints(predictionBonus);
     setEarnedPoints(earned);
     setEarnedExp(expEarned);
 
@@ -1094,8 +986,6 @@ export default function QuizModePage() {
       exp: expEarned,
       correctCount,
       basePoints: base,
-      firstBonusPoints: firstBonus,
-      predictionBonusPoints: predictionBonus,
       hasPredicted,
       predictedWinner,
       winnerSocketIds: winnerGroup,
@@ -1144,70 +1034,6 @@ export default function QuizModePage() {
     };
   }, [supabase]);
 
-
-  useEffect(() => {
-    if (!finished) return;
-
-    // 未ログインなら保存しない（任意：ランキング機能をログイン必須にする場合）
-    if (!userLoading && !user) return;
-
-    // 勝敗情報が欲しいなら lastPlayerElimination を待つ（称号に順位を使うなら必須）
-    if (!lastPlayerElimination) return;
-
-    if (sentRef.current) return;
-    sentRef.current = true;
-
-    (async () => {
-      try {
-        const weekStart = getWeekStartJST();
-
-        // ✅ 週間ランキングに反映したい値を決める
-        // score: 今回獲得ポイントを加算、correct: 正解数、play: 1回、best_streak: max更新
-        const { error: weeklyErr } = await supabase.rpc("upsert_weekly_stats", {
-          p_user_id: user!.id,
-          p_week_start: weekStart,
-          p_score_add: 0,
-          p_correct_add: correctCount,
-          p_play_add: 1,
-          p_best_streak: 0,
-        });
-
-        if (weeklyErr) {
-          console.log("upsert_weekly_stats error:", weeklyErr);
-          // ランキング保存失敗してもゲームは止めない
-        }
-
-        const score = correctCount; // サバイバルは「正解数」がスコアでOK
-
-        const isFirstPlace = amIWinner;
-
-        const res = await submitGameResult(supabase, {
-          game: "survival",
-          score: correctCount,
-          title: null, 
-          firstPlace: isFirstPlace,
-          writeLog: true,
-        });
-
-        const modal = buildResultModalPayload("survival", res);
-        if (modal) pushModal(modal);
-      } catch (e) {
-        console.error("[survival] submitGameResult error:", e);
-        // 失敗してもゲーム体験は壊さない方針でOK
-      }
-    })();
-  }, [
-    finished,
-    mode,
-    correctCount,
-    titles,
-    user,
-    userLoading,
-    supabase,
-    pushModal,
-    lastPlayerElimination,
-    mySocketId,
-  ]);
 
   useEffect(() => {
     if (!socket) return;
@@ -1340,7 +1166,7 @@ export default function QuizModePage() {
             transition-all duration-300
           "
         >
-          チーム仲間を探す
+          仲間を探す
         </button>
       </div>
     );
@@ -1359,7 +1185,7 @@ export default function QuizModePage() {
         </div>
         <div className="text-center">
           <p className="text-3xl animate-pulse">
-            チーム仲間を探しています（{playerCount}）
+            仲間を探しています（{playerCount}）
           </p>
         </div>
       </>
@@ -1371,7 +1197,7 @@ export default function QuizModePage() {
       <div className="container p-8 text-center">
         <div>
           <p className="text-3xl md:text-5xl font-extrabold text-yellow-400 mb-6 animate-pulse drop-shadow-[0_0_10px_yellow]">
-            対戦メンバーが揃ったよ！
+            仲間が揃ったよ！
           </p>
 
           {/* ルームメンバー表示 */}
@@ -1426,7 +1252,7 @@ export default function QuizModePage() {
           <p className="text-xl md:text-3xl mt-2">
             {opponent
               ? `全員の準備を待っています…`
-              : "チーム仲間の準備を待っています…"}
+              : "仲間の準備を待っています…"}
           </p>
         )}
       </div>
@@ -1455,7 +1281,7 @@ export default function QuizModePage() {
   };
 
   return (
-    <div className="container mx-auto p-8 text-center bg-gradient-to-b from-stone-400 via-amber-100 to-stone-400" key={battleKey}>
+    <div className="container mx-auto p-8 text-center bg-gradient-to-b from-blue-400 via-red-100 to-red-400" key={battleKey}>
       {countdown !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
           <motion.div
@@ -1486,17 +1312,6 @@ export default function QuizModePage() {
 
       {!finished ? (
         <>
-          {dungeonStart && (
-            <>
-              <div className="flex flex-col items-center">
-                <p className={`w-[280px] md:w-[400px] text-2xl md:text-4xl font-extrabold mb-1 md:mb-2 px-4 py-2 rounded-lg shadow-lg 
-                              ${timeLeft <= 30 ? 'bg-red-700 text-white animate-pulse' : 'bg-white text-black border-2 border-black'}`}>
-                  制限時間: {Math.floor(timeLeft / 60)}分 {timeLeft % 60}秒
-                </p>
-              </div>
-            </>
-          )}
-
           <div className="flex flex-col items-center">
             <div className="grid grid-cols-4 md:grid-cols-4 gap-1 md:gap-2 mb-1 justify-items-center">
               {orderedPlayers.map((p) => {
@@ -1678,7 +1493,7 @@ export default function QuizModePage() {
                   )}
                 
                   {phase !== "result" && (
-                    <QuizQuestion
+                    <QuizQuestion2
                       quiz={questions[currentIndex].quiz}
                       userAnswer={userAnswer}
                       setUserAnswer={setUserAnswer}
@@ -1692,53 +1507,6 @@ export default function QuizModePage() {
                           <p className="text-xl md:text-2xl font-bold text-gray-800">
                             脱落したため、回答できません
                           </p>
-
-                          {!hasPredicted && (
-                            <>
-                              <p className="text-lg md:text-xl font-bold text-green-500">
-                                1位を予想しよう！
-                              </p>
-
-                              <div className="space-y-2">
-                                {players
-                                  .filter(p => p.socketId !== mySocketId) // 自分以外
-                                  .map(p => (
-                                    <button
-                                      key={p.socketId}
-                                      onClick={() => setPredictedWinner(p.socketId)}
-                                      className={`
-                                        w-full max-w-xs mx-auto block px-4 py-2 rounded-lg border
-                                        ${
-                                          predictedWinner === p.socketId
-                                            ? "bg-green-500 text-white font-bold"
-                                            : "bg-white"
-                                        }
-                                      `}
-                                    >
-                                      {p.playerName}
-                                    </button>
-                                  ))}
-                              </div>
-
-                              <button
-                                disabled={!predictedWinner}
-                                onClick={() => setHasPredicted(true)}
-                                className="
-                                  mt-3 px-6 py-2
-                                  bg-blue-600 disabled:bg-gray-400
-                                  text-white font-bold rounded-lg
-                                "
-                              >
-                                この人にする
-                              </button>
-                            </>
-                          )}
-
-                          {hasPredicted && (
-                            <p className="text-lg md:text-xl font-bold text-gray-600">
-                              予想を受け付けました！
-                            </p>
-                          )}
                         </div>
                       ) : canAnswer ? (
                         <button
@@ -1789,8 +1557,6 @@ export default function QuizModePage() {
           predictedWinner={predictedWinner}
           hasPredicted={hasPredicted}
           basePoints={basePoints}
-          firstBonusPoints={firstBonusPoints}
-          predictionBonusPoints={predictionBonusPoints}
           earnedPoints={earnedPoints}
           earnedExp={earnedExp}
           isLoggedIn={!!user}

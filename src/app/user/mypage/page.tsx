@@ -218,14 +218,32 @@ export default function MyPage() {
 
       {isPreviewOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
-          onClick={() => setIsPreviewOpen(false)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+          onClick={() => setIsPreviewOpen(false)} // 外側クリックで閉じる
         >
-          <img
-            src={avatarUrl}
-            alt="icon preview"
-            className="w-60 h-60 md:w-100 md:h-100 rounded-full bg-white shadow-2xl object-contain"
-          />
+          {/* 中身（ここをクリックしても閉じない） */}
+          <div
+            className="w-[80vw] max-w-[420px]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={avatarUrl}
+              alt="icon preview"
+              className="w-full aspect-square rounded-full bg-white shadow-2xl object-contain"
+            />
+
+            <button
+              type="button"
+              onClick={() => {
+                setIsPreviewOpen(false);
+                router.push("/user/mypage/edit");
+                router.refresh();
+              }}
+              className="mt-4 md:mt-8 w-full rounded-4xl bg-white py-3 text-lg md:text-xl font-extrabold hover:scale-[1.01] transition"
+            >
+              変更する
+            </button>
+          </div>
         </div>
       )}
     </>

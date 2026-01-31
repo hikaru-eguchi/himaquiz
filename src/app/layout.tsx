@@ -56,8 +56,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="flex flex-col min-h-screen">
           {/* ===== HEADER ===== */}
           <header className="py-3 text-center shadow-md bg-yellow-300">
-            <div className="flex items-center justify-center gap-4 md:mr-20">
-              <img src="/images/quiz.png" alt="みんなで遊べる暇つぶしクイズ" className="w-0 md:w-20 h-auto" />
+            <div className="flex items-center justify-center md:gap-4">
+              <img src="/images/quiz.png" alt="みんなで遊べる暇つぶしクイズ" className="w-12 md:w-25 h-auto" />
               <div>
                 <Link href="/" className="no-underline group inline-block">
                   <h1
@@ -92,6 +92,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   </p>
                 </Link>
               </div>
+              <img src="/images/quiz2.png" alt="みんなで遊べる暇つぶしクイズ" className="w-12 md:w-25 h-auto" />
             </div>
 
             {/* ===== ジャンル＆難易度ボタン（ページ遷移型） ===== */}
@@ -115,7 +116,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </div>
               <p className="text-xs text-gray-600">本サイトのクイズ内容は、正確性を保証するものではありません。</p>
               <p className="text-xs text-gray-600 mb-5">一部に誤りや解釈の違いが含まれる可能性がありますので、あらかじめご了承ください。</p>
-              <p className="text-xs text-gray-600 mb-5">当サイトのイラストは「いらすとや」様の素材を使用しています。</p>
               <p className="text-xs text-gray-600">&copy; 2025 ひまQ. All Rights Reserved.</p>
             </div>
           </footer>

@@ -63,7 +63,7 @@ export default function QuizMasterPage() {
         <div className="min-h-screen flex items-center justify-center px-4">
           <div className="bg-white/90 backdrop-blur p-6 md:p-10 rounded-2xl border-2 border-black shadow-xl text-center max-w-xl w-full">
             <p className="text-2xl md:text-3xl font-extrabold text-gray-800">
-              このゲームはログインすると遊べるよ！
+              このゲームはログイン（無料）すると遊べるよ！
             </p>
 
             <p className="mt-3 text-sm md:text-lg text-gray-700 leading-relaxed">
@@ -82,7 +82,7 @@ export default function QuizMasterPage() {
                 onClick={() => router.push("/user/signup")}
                 className="px-6 py-3 rounded-lg font-bold text-white bg-green-500 hover:bg-green-600 shadow"
               >
-                新規ユーザー登録
+                新規ユーザー登録（無料）
               </button>
             </div>
 

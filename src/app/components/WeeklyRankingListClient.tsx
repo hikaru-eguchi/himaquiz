@@ -68,7 +68,7 @@ export default function WeeklyRankingListClient({
   };
 
   const top3 = rows.slice(0, 3);
-  const rest = rows.slice(3);
+  const rest = rows.slice(3, 5);
 
   return (
     <>
@@ -128,7 +128,7 @@ export default function WeeklyRankingListClient({
         })}
         </div>
 
-        {/* ✅ 4位〜10位 */}
+        {/* ✅ 4位〜5位 */}
         <div className="mt-4 space-y-2">
         {rest.map((u, idx) => (
             <button

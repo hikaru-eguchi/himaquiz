@@ -75,7 +75,8 @@ export function CharacterAcquireModal({
             style={{
               background:
                 "radial-gradient(circle at 30% 30%, #ff00ff, #00ffff, #ffff00, #ff0000)",
-              filter: "blur(120px)",
+              // filter: "blur(120px)",
+              filter: "blur(40px)",
               opacity: isUltraRare ? 0.6 : 0.5,
             }}
           />
@@ -95,7 +96,7 @@ export function CharacterAcquireModal({
           )}
 
           {/* ふわ粒 */}
-          {Array.from({ length: 30 }).map((_, i) => (
+          {/* {Array.from({ length: 30 }).map((_, i) => (
             <motion.div
               key={i}
               className="fixed z-20 w-4 h-4 rounded-full bg-white"
@@ -112,7 +113,7 @@ export function CharacterAcquireModal({
                 repeatType: "reverse",
               }}
             />
-          ))}
+          ))} */}
 
           {/* 本体カード */}
           <motion.div

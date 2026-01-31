@@ -185,7 +185,7 @@ const QuizGacha = ({
           onClick={rollGacha}
           disabled={!canRoll}
         >
-          {rolling ? "抽選中..." : "通常ガチャ（100P）🎰"}
+          {rolling ? "抽選中..." : "通常ガチャ（100P）"}
         </button>
 
         <button
@@ -314,7 +314,8 @@ const QuizGacha = ({
                 style={{
                   background:
                     "radial-gradient(circle at 30% 30%, #ff00ff, #00ffff, #ffff00, #ff0000)",
-                  filter: "blur(120px)",
+                  // filter: "blur(120px)",
+                  filter: "blur(40px)",
                   opacity: 0.6,
                   width: "100%",
                   height: "100%",
@@ -393,7 +394,8 @@ const QuizGacha = ({
                 style={{
                   background:
                     "radial-gradient(circle at 30% 30%, #ff00ff, #00ffff, #ffff00, #ff0000)",
-                  filter: "blur(120px)",
+                  // filter: "blur(120px)",
+                  filter: "blur(40px)",
                   opacity: 0.55,
                 }}
               />
@@ -412,7 +414,7 @@ const QuizGacha = ({
                   }}
                 />
                 {/* きら粒 */}
-                {Array.from({ length: 60 }).map((_, i) => (
+                {/* {Array.from({ length: 60 }).map((_, i) => (
                   <motion.div
                     key={`p-${i}`}
                     className="fixed z-20 w-2 h-2 rounded-full bg-white"
@@ -429,7 +431,7 @@ const QuizGacha = ({
                       repeatType: "mirror",
                     }}
                   />
-                ))}
+                ))} */}
               </>
             )}
             {(phase === "drop") && (
@@ -524,12 +526,13 @@ const QuizGacha = ({
                   style={{
                     background:
                       "radial-gradient(circle at 30% 30%, #ff00ff, #00ffff, #ffff00, #ff0000)",
-                    filter: "blur(120px)",
+                    // filter: "blur(120px)",
+                    filter: "blur(40px)",
                     opacity: isUltraRare ? 0.6 : 0.5,
                   }}
                 />
 
-                {Array.from({ length: 30 }).map((_, i) => (
+                {/* {Array.from({ length: 30 }).map((_, i) => (
                   <motion.div
                     key={i}
                     className="fixed z-40 w-4 h-4 rounded-full bg-white"
@@ -546,7 +549,7 @@ const QuizGacha = ({
                       repeatType: "reverse",
                     }}
                   />
-                ))}
+                ))} */}
 
                 <motion.div
                   initial={{ opacity: 0, scale: 0.3, y: 80 }}
@@ -1024,7 +1027,7 @@ export default function QuizMasterPage() {
           <div className="bg-white/90 backdrop-blur p-6 md:p-10 rounded-2xl border-2 border-black shadow-xl text-center max-w-xl w-full">
 
             <p className="mt-4 text-lg md:text-2xl font-bold text-gray-800">
-              このページはログインすると遊べるよ！
+              このページはログイン（無料）すると遊べるよ！
             </p>
 
             <p className="mt-2 text-sm md:text-lg text-gray-700 leading-relaxed">
@@ -1043,7 +1046,7 @@ export default function QuizMasterPage() {
                 onClick={() => router.push("/user/signup")}
                 className="px-6 py-3 rounded-lg font-bold text-white bg-green-500 hover:bg-green-600 shadow"
               >
-                新規ユーザー登録
+                新規ユーザー登録（無料）
               </button>
             </div>
 

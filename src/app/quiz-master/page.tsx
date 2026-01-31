@@ -31,19 +31,26 @@ export default function QuizMasterPage() {
   ];
 
   const secretBosses = [
-    { id: "ancient_dragon", name: "エンシェントドラゴン", requiredLevel: 10 },
-    { id: "dark_knight", name: "ダークナイト", requiredLevel: 15 },
-    { id: "susanoo", name: "スサノオ", requiredLevel: 20 },
-    { id: "takemikazuchi", name: "タケミカヅチ", requiredLevel: 25 },
-    { id: "ultimate_dragon", name: "アルティメットドラゴン", requiredLevel: 30 },
-    { id: "fujin", name: "風神", requiredLevel: 35 },
-    { id: "raijin", name: "雷神", requiredLevel: 35 },
-    { id: "quiz_demon_king", name: "クイズ大魔王", requiredLevel: 40 },
-    { id: "quiz_emperor", name: "クイズ帝王", requiredLevel: 50 },
+    { id: "ancient_dragon", no: "89", name: "エンシェントドラゴン", requiredLevel: 10 },
+    { id: "dark_knight", no: "91", name: "ダークナイト", requiredLevel: 15 },
+    { id: "susanoo", no: "93", name: "スサノオ", requiredLevel: 20 },
+    { id: "takemikazuchi", no: "95", name: "タケミカヅチ", requiredLevel: 25 },
+    { id: "ultimate_dragon", no: "97", name: "アルティメットドラゴン", requiredLevel: 30 },
+    { id: "fujin", no: "99", name: "風神", requiredLevel: 35 },
+    { id: "raijin", no: "101", name: "雷神", requiredLevel: 35 },
+    { id: "quiz_demon_king", no: "103", name: "クイズ大魔王", requiredLevel: 40 },
+    { id: "quiz_emperor", no: "105", name: "クイズ帝王", requiredLevel: 50 },
   ] as const;
 
   const [userLevel, setUserLevel] = useState<number>(0);
   const [levelLoading, setLevelLoading] = useState(false);
+  const [ownedBossNos, setOwnedBossNos] = useState<Set<string>>(new Set()); // クリア表示用（所持してたらtrue）
+  const [ownedUnlockNos, setOwnedUnlockNos] = useState<Set<string>>(new Set()); // 解放条件用（normal/fairyどちらか所持）
+  const [ownedLoading, setOwnedLoading] = useState(false);
+  const normalizeBossNo = (no: string) => {
+    const n = Number(no);
+    return String(n % 2 === 0 ? n - 1 : n);
+  };
 
   useEffect(() => {
     const fetchLevel = async () => {
@@ -53,8 +60,6 @@ export default function QuizMasterPage() {
       }
       setLevelLoading(true);
       try {
-        // ここはあなたのprofiles設計に合わせる：
-        // - 例: profiles に level カラムがある想定
         const { data, error } = await supabase
           .from("profiles")
           .select("level")
@@ -62,7 +67,6 @@ export default function QuizMasterPage() {
           .single();
 
         if (error) throw error;
-
         setUserLevel(Number(data?.level ?? 0));
       } catch (e) {
         console.error("failed to load user level:", e);
@@ -72,14 +76,104 @@ export default function QuizMasterPage() {
       }
     };
 
+    const fetchOwnedBosses = async () => {
+      if (!user) {
+        setOwnedBossNos(new Set());
+        setOwnedUnlockNos(new Set());
+        return;
+      }
+      setOwnedLoading(true);
+
+      try {
+        const bossNos = secretBosses.flatMap((b) => {
+          const base = Number(b.no);
+          return [String(base), String(base + 1)]; // 例: 91 と 92
+        });
+
+        // ① characters から no→id を取得
+        const { data: chars, error: charErr } = await supabase
+          .from("characters")
+          .select("id, no")
+          .in("no", bossNos);
+
+        if (charErr) throw charErr;
+
+        const noToId = new Map<string, string>();
+        for (const c of chars ?? []) {
+          noToId.set(String(c.no), String(c.id));
+        }
+
+        const bossCharIds = bossNos
+          .map((no) => noToId.get(no))
+          .filter((v): v is string => Boolean(v));
+
+        if (bossCharIds.length === 0) {
+          setOwnedBossNos(new Set());
+          setOwnedUnlockNos(new Set());
+          return;
+        }
+
+        // ② user_characters を character_id(id) でまとめて取得
+        //    ※ 解放条件は normal/fairy を持ってたらOK
+        const { data: ownedRows, error: ownedErr } = await supabase
+          .from("user_characters")
+          .select("character_id")
+          .eq("user_id", user.id)
+          .in("character_id", bossCharIds);
+
+        if (ownedErr) throw ownedErr;
+
+        // ③ character_id → no に戻して Set を作る
+        const idToNo = new Map<string, string>();
+        for (const [no, id] of noToId.entries()) idToNo.set(id, no);
+
+        const ownedAnyNo = new Set<string>();
+        const ownedUnlockNo = new Set<string>();
+
+        for (const r of ownedRows ?? []) {
+          const no = idToNo.get(String(r.character_id));
+          if (!no) continue;
+
+          const groupNo = normalizeBossNo(no);
+
+          ownedAnyNo.add(groupNo);
+          ownedUnlockNo.add(groupNo);
+        }
+
+        setOwnedBossNos(ownedAnyNo);
+        setOwnedUnlockNos(ownedUnlockNo);
+      } catch (e) {
+        console.error("failed to load owned bosses:", e);
+        setOwnedBossNos(new Set());
+        setOwnedUnlockNos(new Set());
+      } finally {
+        setOwnedLoading(false);
+      }
+    };
+
     fetchLevel();
+    fetchOwnedBosses();
   }, [user, supabase]);
 
-  const unlocked = secretBosses.filter((b) => userLevel >= b.requiredLevel);
-  const locked = secretBosses.filter((b) => userLevel < b.requiredLevel);
+  const bossProgress = secretBosses.map((b, i) => {
+    const prev = secretBosses[i - 1];
 
-  // 「未解放」は最初の1つだけ表示、それ以降は非表示
-  const showBosses = [...unlocked, ...(locked[0] ? [locked[0]] : [])];
+    const hasPrevOwned =
+      i === 0 ? true : ownedUnlockNos.has(normalizeBossNo(String(prev.no)));
+    const levelOk = userLevel >= b.requiredLevel;
+
+    const canSee = levelOk && hasPrevOwned;
+    const isCleared = ownedBossNos.has(normalizeBossNo(String(b.no)));
+
+    return { ...b, i, levelOk, hasPrevOwned, canSee, isCleared, prevName: prev?.name ?? null, };
+  });
+
+  // 「表示するのは、解放済み全部 + 次の未解放1つ」
+  const showBosses = (() => {
+    const unlocked = bossProgress.filter((x) => x.canSee);
+    const firstLocked = bossProgress.find((x) => !x.canSee);
+    return [...unlocked, ...(firstLocked ? [firstLocked] : [])];
+  })();
 
 
   // ★ スマホ専用キャラ（2枚だけ）
@@ -221,7 +315,7 @@ export default function QuizMasterPage() {
           このゲームの説明を見る
         </button>
 
-        {/* ✅ シークレットダンジョン */}
+        {/* ✅ シークレットステージ */}
         <div className="mt-12 max-w-4xl mx-auto">
           <div
   className="relative overflow-hidden border-2 border-black rounded-2xl p-4 shadow
@@ -229,7 +323,7 @@ export default function QuizMasterPage() {
 >
             <div className="relative">
               <p className="text-2xl md:text-3xl font-extrabold text-gray-900">
-                🔒 シークレットダンジョン
+                🔒 シークレットステージ
               </p>
 
               {userLoading ? (
@@ -237,60 +331,54 @@ export default function QuizMasterPage() {
               ) : user ? (
                 <>
                   <p className="text-md md:text-lg mt-2 text-gray-800 font-bold">
-                    挑戦するダンジョンを選んでください
-                  </p>
-                  <p className="text-xs md:text-sm text-gray-700 font-bold">
-                    ※通常/フェアリーで強さ・報酬が変わります
+                    挑戦するステージを選んでください
                   </p>
 
                   <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
                     {showBosses.map((b) => {
-                      const isUnlocked = userLevel >= b.requiredLevel;
+                      const isUnlocked = b.canSee;
 
                       return (
                         <div
-                          key={b.id}
+                          key={String(b.no)}
                           className="relative overflow-hidden rounded-xl p-4 shadow flex flex-col gap-3
                           bg-gradient-to-br from-[#fff7cc] via-[#f7d774] to-[#d4a017]"
                         >
-                          {/* 条件表示 */}
                           {isUnlocked ? (
                             <p className="text-sm md:text-md font-extrabold text-gray-700">
-                              条件：ユーザーレベル {b.requiredLevel} 以上
+                              {/* 条件：ユーザーレベル {b.requiredLevel} 以上 */}
                             </p>
                           ) : (
                             <p className="text-sm md:text-md font-extrabold text-gray-700">
-                              🔒 ユーザーレベル {b.requiredLevel} で解放
+                              🔒 ユーザーレベル {b.requiredLevel} 以上 {b.prevName ? ` + ${b.prevName}討伐` : ""} で解放
                             </p>
                           )}
 
-                          {/* ボス名（未解放は伏せてもOK） */}
                           <p className="text-xl md:text-2xl font-extrabold text-gray-900">
-                            {isUnlocked ? `${b.name} に挑戦🔥` : "？？？（未解放）"}
+                            {isUnlocked ? `${b.name} の領域⚔` : "？？？ の領域⚔"}
                           </p>
 
-                          {/* 解放されている時だけボタン表示 */}
                           {isUnlocked ? (
                             <div className="flex gap-2">
                               <Link
                                 href={`/quiz-master/random?course=secret&boss=${encodeURIComponent(
-                                  b.id
+                                  String(b.id)
                                 )}&variant=normal`}
                                 className="flex-1"
                               >
                                 <button className="w-full px-4 py-2 bg-white text-gray-900 rounded-lg border-2 border-black font-extrabold hover:bg-gray-100 cursor-pointer">
-                                  通常
+                                  通常に挑戦🔥
                                 </button>
                               </Link>
 
                               <Link
                                 href={`/quiz-master/random?course=secret&boss=${encodeURIComponent(
-                                  b.id
+                                  String(b.id)
                                 )}&variant=fairy`}
                                 className="flex-1"
                               >
                                 <button className="w-full px-4 py-2 bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 text-white rounded-lg border-2 border-black font-extrabold hover:opacity-90 cursor-pointer">
-                                  フェアリー
+                                  フェアリーに挑戦🔥
                                 </button>
                               </Link>
                             </div>
@@ -311,7 +399,7 @@ export default function QuizMasterPage() {
               ) : (
                 <>
                   <p className="mt-3 text-gray-800 font-bold">
-                    このコースはログインすると遊べます！
+                    このステージはログイン（無料）すると遊べます！
                   </p>
                   <button
                     onClick={() => router.push("/user/login")}

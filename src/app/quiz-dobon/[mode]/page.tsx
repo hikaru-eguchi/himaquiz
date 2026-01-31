@@ -261,11 +261,11 @@ const QuizResult = ({
               ) : (
                 <div className="mt-2">
                   <p className="text-md md:text-xl text-gray-700 font-bold">
-                    ※未ログインのため受け取れません。ログインすると次からポイントを受け取れます！
+                    ※未ログインのため受け取れません。ログイン（無料）すると次からポイントを受け取れます！
                   </p>
                   <button
                     onClick={onGoLogin}
-                    className="mt-2 px-4 py-2 bg-blue-500 text-white border border-black rounded-lg font-bold hover:bg-blue-600 cursor-pointer"
+                    className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg font-bold hover:bg-blue-600 cursor-pointer"
                   >
                     ログインする
                   </button>

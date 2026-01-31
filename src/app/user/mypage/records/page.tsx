@@ -154,7 +154,7 @@ export default function RecordsPage() {
     return (
       <div className="max-w-3xl mx-auto p-4">
         <div className="rounded-2xl border bg-white shadow-sm p-6">
-          <h1 className="text-xl font-extrabold mb-2">📌 最高記録を見るにはログインが必要です</h1>
+          <h1 className="text-xl font-extrabold mb-2">📌 最高記録を見るにはログイン（無料）が必要です</h1>
           <p className="text-gray-600 mb-4">
             ログインすると、ゲームごとの最高記録が保存されていつでも確認できます。
           </p>

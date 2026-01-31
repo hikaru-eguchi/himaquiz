@@ -47,7 +47,7 @@ export default async function WeeklyRankingCard({
       <div className="flex flex-col items-center text-center gap-2">
         <div>
           <p className="text-2xl md:text-4xl font-extrabold drop-shadow-xl">
-            {icon}{title}{icon}
+            {title}{icon}
           </p>
           <p className="text-xs md:text-sm text-gray-700">
             集計開始：{weekStart}（月曜0:00〜）

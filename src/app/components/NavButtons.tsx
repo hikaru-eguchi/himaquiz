@@ -207,11 +207,24 @@ export default function NavButtons() {
                       </Link>
 
                       <Link
+                        href="/quiz-kimagure"
+                        onClick={() => handleNavClick("/quiz-kimagure")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-gradient-to-r from-yellow-500 to-yellow-300 text-white ring-2 ring-yellow-400 md:hover:scale-110 ${
+                            activeUrl === "/quiz-kimagure" ? activeStyle : ""
+                          }`}
+                        >
+                          きまぐれクイズ
+                        </button>
+                      </Link>
+
+                      <Link
                         href="/quiz-luck"
                         onClick={() => handleNavClick("/quiz-luck")}
                       >
                         <button
-                          className={`${baseStyle} bg-gradient-to-r from-yellow-500 to-yellow-400 text-white ring-2 ring-yellow-400 md:hover:scale-110 ${
+                          className={`${baseStyle} bg-gradient-to-r from-emerald-500 to-teal-400 text-white ring-2 ring-emerald-500 md:hover:scale-110 ${
                             activeUrl === "/quiz-luck" ? activeStyle : ""
                           }`}
                         >
@@ -275,7 +288,7 @@ export default function NavButtons() {
                         </button>
                       </Link>
 
-                      {/* <Link
+                      <Link
                         href="/quiz-majority"
                         onClick={() => handleNavClick("/quiz-majority")}
                       >
@@ -286,7 +299,7 @@ export default function NavButtons() {
                         >
                           多数決クイズ
                         </button>
-                      </Link> */}
+                      </Link>
                     </div>
                   </div>
 

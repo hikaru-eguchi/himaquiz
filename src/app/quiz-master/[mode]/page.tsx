@@ -56,7 +56,7 @@ const RARITIES: Rarity[] = [
 const isRarity = (v: unknown): v is Rarity =>
   typeof v === "string" && RARITIES.includes(v as Rarity);
 
-// シークレットダンジョン専用：敵ごとの報酬
+// シークレットステージ専用：敵ごとの報酬
 const secretRewardMap: Record<
   "normal" | "fairy",
   Record<string, { points: number; exp: number }>
@@ -108,7 +108,7 @@ const getBossNoById = (bossId: string, variant: "normal" | "fairy") => {
   return String(variant === "fairy" ? base + 1 : base);
 };
 
-// ✅ シークレットダンジョン専用：称号＆コメント
+// ✅ シークレットステージ専用：称号＆コメント
 const secretResultMap: Record<
   "normal" | "fairy",
   Record<string, { title: string; comment: string }>
@@ -626,11 +626,11 @@ const QuizResult = ({
             ) : (
               <div className="mt-2">
                 <p className="text-md md:text-xl text-gray-700 font-bold">
-                  ※未ログインのため受け取れません。ログインすると次からポイントを受け取れます！
+                  ※未ログインのため受け取れません。ログイン（無料）すると次からポイントを受け取れます！
                 </p>
                 <button
                   onClick={onGoLogin}
-                  className="mt-2 px-4 py-2 bg-blue-500 text-white border border-black rounded-lg font-bold hover:bg-blue-600 cursor-pointer"
+                  className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg font-bold hover:bg-blue-600 cursor-pointer"
                 >
                   ログインする
                 </button>

@@ -170,7 +170,7 @@ export default function HeaderMenu() {
 
       {/* メニュー本体 */}
       {open && (
-        <div className="fixed top-0 right-0 w-60 h-full bg-white shadow-xl z-40 p-5 flex flex-col space-y-4 text-lg">
+        <div className="fixed top-0 right-0 w-68 h-full bg-white shadow-xl z-40 p-5 flex flex-col space-y-4 text-lg">
           <button className="self-end text-2xl" onClick={() => setOpen(false)}>
             ✕
           </button>
@@ -220,7 +220,7 @@ export default function HeaderMenu() {
                 className="bg-green-500 text-white py-2 px-4 rounded text-center hover:bg-green-600"
                 onClick={() => setOpen(false)}
               >
-                新規ユーザー登録
+                新規ユーザー登録（無料）
               </Link>
             </>
           )}
@@ -240,7 +240,7 @@ export default function HeaderMenu() {
                 className="bg-gradient-to-r from-red-500 via-sky-500 to-green-500 text-white py-2 px-4 rounded text-center hover:opacity-90"
                 onClick={() => setOpen(false)}
               >
-                ひまQガチャ🎰
+                ひまQガチャ
               </Link>
 
               <Link
@@ -345,16 +345,34 @@ export default function HeaderMenu() {
             {/* 背景 */}
             <div className="absolute inset-0 bg-black/60" />
 
-            {/* 画像（拡大） */}
-            <motion.img
-              src={avatarUrl}
-              alt="avatar preview"
-              className="relative w-[70vw] max-w-[420px] aspect-square rounded-full bg-white shadow-2xl object-contain"
+            {/* 画像（拡大）＋ボタン */}
+            <motion.div
+              className="relative w-[80vw] max-w-[420px]"
               initial={{ scale: 0.92, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.96, opacity: 0 }}
               transition={{ type: "spring", stiffness: 380, damping: 28 }}
-            />
+              onClick={(e) => e.stopPropagation()} // 中身クリックで閉じない
+            >
+              <img
+                src={avatarUrl}
+                alt="avatar preview"
+                className="w-full aspect-square rounded-full bg-white shadow-2xl object-contain"
+              />
+
+              <button
+                type="button"
+                onClick={() => {
+                  setAvatarPreviewOpen(false);
+                  setOpen(false); // メニューも閉じたいなら（不要なら消してOK）
+                  router.push("/user/mypage/edit");
+                  router.refresh();
+                }}
+                className="mt-4 md:mt-8 w-full rounded-4xl bg-white py-3 text-lg md:text-xl font-extrabold hover:scale-[1.01] transition"
+              >
+                変更する
+              </button>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

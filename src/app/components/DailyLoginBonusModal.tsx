@@ -68,7 +68,7 @@ export function DailyLoginBonusModal() {
           今日のログインありがとう！
         </p>
         <p className="text-md md:text-xl text-gray-600 mb-2">
-          ポイントでひまQガチャを回してみよう🎰
+          ポイントでひまQガチャを回してみよう！
         </p>
 
         <p className="text-xl md:text-3xl font-bold text-green-600 mb-4">
