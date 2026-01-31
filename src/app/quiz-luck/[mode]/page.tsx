@@ -116,7 +116,7 @@ const QuizResult = ({
               <img
                 src="/images/quiz_woman.png"
                 alt="クイズ"
-                className="w-22 h-25 md:w-38 md:h-40"
+                className="w-20 h-30 md:w-36 md:h-55"
               />
             </div>
           </div>
