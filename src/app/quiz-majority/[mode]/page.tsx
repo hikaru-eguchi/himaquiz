@@ -9,13 +9,23 @@ import { useBattle } from "../../../hooks/useBattle";
 import { useQuestionPhase } from "../../../hooks/useQuestionPhase";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useSupabaseUser } from "../../../hooks/useSupabaseUser";
-import { submitGameResult, calcTitle } from "@/lib/gameResults";
-import { buildResultModalPayload } from "@/lib/resultMessages";
 import { useResultModal } from "../../components/ResultModalProvider";
-import { getWeekStartJST } from "@/lib/week";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
 
 type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
+
+const stagePointMap: Record<number, number> = {
+  1: 100,
+  2: 150,
+  3: 250,
+  4: 400,
+  5: 600,
+  6: 850,
+  7: 1150,
+  8: 1500,
+  9: 1900,
+  10: 3000,
+};
 
 const stageMessages: Record<number, string> = {
   0: "惜しい！次は仲間と作戦立てていこう🔥",
@@ -61,11 +71,7 @@ interface QuizResultProps {
   rematchRequested : boolean;
   handleNewMatch: () => void;
   handleRematch: () => void;
-  myRankState: number | null;
-  eliminationGroups: string[][];
   players: Player[];
-  predictedWinner: string | null;
-  hasPredicted: boolean;
   basePoints: number;
   earnedPoints: number;
   earnedExp: number;
@@ -74,6 +80,7 @@ interface QuizResultProps {
   onGoLogin: () => void;
   isCodeMatch: boolean;
   onShareX: () => void;
+  clearedStage: number;
 }
 
 const QuizResult = ({
@@ -84,7 +91,6 @@ const QuizResult = ({
   rematchRequested,
   handleNewMatch,
   handleRematch,
-  eliminationGroups,
   basePoints,
   earnedPoints,
   earnedExp,
@@ -93,14 +99,11 @@ const QuizResult = ({
   onGoLogin,
   isCodeMatch,
   onShareX,
+  clearedStage,
 }: QuizResultProps) => {
   const [showText1, setShowText1] = useState(false);
   const [showText2, setShowText2] = useState(false);
   const [showButton, setShowButton] = useState(false);
-
-  useEffect(() => {
-    console.log("eliminationGroups", eliminationGroups);
-  }, [eliminationGroups]);
 
   useEffect(() => {
     const timers: NodeJS.Timeout[] = [];
@@ -111,7 +114,7 @@ const QuizResult = ({
   }, []);
 
   const stageMessage =
-    stageMessages[Math.min(10, Math.max(0, correctCount))] ??
+    stageMessages[Math.min(10, Math.max(0, clearedStage))] ??
     "ナイスプレイ！🔥";
 
   return (
@@ -125,7 +128,7 @@ const QuizResult = ({
       {showText1 && (
         <>
           <p className="text-3xl md:text-5xl mb-2 md:mb-6">
-            ステージ{correctCount}までクリア！
+            ステージ{clearedStage}までクリア！
           </p>
         </>
       )}
@@ -142,9 +145,12 @@ const QuizResult = ({
               <div className="mb-2 text-lg md:text-xl text-gray-700 font-bold">
                 <p className="text-blue-500">正解数ポイント：{basePoints}P（{correctCount}問 × 20P）</p>
               </div>
+              <div className="mb-2 text-lg md:text-xl text-gray-700 font-bold">
+                <p className="text-blue-500">クリアステージボーナス：{earnedPoints}P</p>
+              </div>
 
               <p className="text-xl md:text-2xl font-extrabold text-gray-800">
-                今回の獲得ポイント： <span className="text-green-600">{earnedPoints} P</span>
+                今回の獲得ポイント： <span className="text-green-600">{earnedPoints+basePoints} P</span>
               </p>
               <p className="text-xl md:text-2xl font-extrabold text-gray-800 mt-2">
                 今回の獲得経験値： <span className="text-purple-600">{earnedExp} EXP</span>
@@ -290,9 +296,6 @@ export default function QuizModePage() {
     exp: number;
     correctCount: number;
     basePoints: number;
-    hasPredicted: boolean;
-    predictedWinner: string | null;
-    winnerSocketIds: string[];
     createdAt: number;
   };
 
@@ -369,7 +372,7 @@ export default function QuizModePage() {
       );
 
       const reasonPoint =
-        `多数決クイズ獲得: 正解${payload.correctCount}問=${payload.basePoints}P`
+        `多数決クイズ獲得: 正解${payload.correctCount}問=${payload.basePoints}P + ステージ${Math.min(10, Math.max(0, payload.correctCount))}ボーナス`
       if (payload.points > 0) {
         const { error: logError } = await supabase.from("user_point_logs").insert({
           user_id: authedUserId,
@@ -405,6 +408,7 @@ export default function QuizModePage() {
   const [earnedPoints, setEarnedPoints] = useState(0);
   const [earnedExp, setEarnedExp] = useState(0);
   const [basePoints, setBasePoints] = useState(0);
+  const [clearedStage, setClearedStage] = useState(0);
 
   const [questions, setQuestions] = useState<{ id: string; quiz: QuizData }[]>([]);
   const [correctCount, setCorrectCount] = useState(0);
@@ -441,12 +445,7 @@ export default function QuizModePage() {
   const [roomPlayers, setRoomPlayers] = useState<Player[]>([]);
   const [maxPlayers, setMaxPlayers] = useState(4);
   const [roomLocked, setRoomLocked] = useState(false);
-  const [allPlayersDead, setAllPlayersDead] = useState(false);
   const [battleKey, setBattleKey] = useState(0);
-  const [myRankState, setMyRankState] = useState<number | null>(null);
-  const [allRanks, setAllRanks] = useState<
-    { socketId: string; rank: number }[]
-  >([]);
 
   const roomLockedRef = useRef(false);
   useEffect(() => {
@@ -455,24 +454,6 @@ export default function QuizModePage() {
 
   const [predictedWinner, setPredictedWinner] = useState<string | null>(null);
   const [hasPredicted, setHasPredicted] = useState(false);
-
-  const titles = [
-    { threshold: 2, title: "クイズ戦士" },
-    { threshold: 5, title: "謎解きファイター" },
-    { threshold: 7, title: "頭脳の騎士" },
-    { threshold: 10, title: "ひらめきハンター" },
-    { threshold: 15, title: "真理の探究者" },
-    { threshold: 20, title: "知恵の勇者 🛡️" },
-    { threshold: 25, title: "クイズ大賢者 ⭐" },
-    { threshold: 30, title: "答えの覇者 🌀" },
-    { threshold: 35, title: "クイズ超越者 🌌" },
-    { threshold: 40, title: "フロアマスター 🏆" },
-    { threshold: 45, title: "グランドマスター 🏆" },
-    { threshold: 50, title: "クイズマスター 🏆" },
-    { threshold: 65, title: "レジェンドクイズマスター 🌟" },
-    { threshold: 80, title: "✨クイズ王👑" },
-    { threshold: 100, title: "💫クイズ神💫" },
-  ];
 
   const {
     joinRandom,
@@ -488,8 +469,6 @@ export default function QuizModePage() {
     mySocketId,
     socket,
     playerLives,
-    isGameOver,
-    lastPlayerElimination,
     gameSetScheduled,
   } = useBattle(playerName);
 
@@ -502,10 +481,42 @@ export default function QuizModePage() {
   const results = questionPhase?.results ?? [];
   const canAnswer = questionPhase?.canAnswer ?? false;
   const currentIndex = questionPhase?.currentIndex ?? 0;
+  const stageNumber = currentIndex + 1; // 何問目（1始まり）
   const questionTimeLeft = questionPhase?.questionTimeLeft ?? 20;
   const submitAnswer = questionPhase?.submitAnswer ?? (() => {});
   const [displayLives, setDisplayLives] = useState<Record<string, number>>({});
   const [showStartButton, setShowStartButton] = useState(false);
+  type TeamChoice = "A" | "B" | null;
+  const [teamChoice, setTeamChoice] = useState<TeamChoice>(null);
+  const [teamChoiceDecidedBy, setTeamChoiceDecidedBy] = useState<"majority" | "random" | null>(null);
+  const [gameSet, setGameSet] = useState(false);
+  const [showTeamJudgeOverlay, setShowTeamJudgeOverlay] = useState(false);
+  const [teamJudge, setTeamJudge] = useState<"correct" | "wrong" | null>(null);
+
+  const endOnceRef = useRef(false);
+  const [isTeamAnswerWrong, setIsTeamAnswerWrong] = useState(false); // チーム回答が違った（=ゲームオーバー扱い）
+  const [showStageOverlay, setShowStageOverlay] = useState(false);
+  const [stageOverlayNumber, setStageOverlayNumber] = useState<number>(1);
+  const prevStageRef = useRef<number>(0);
+
+  const isResultPhase = phase === "result";
+  const isQuestionPhase = phase === "question";
+
+
+  // ✅ サーバーから受け取る「チーム投票状況」想定
+  type TeamVotes = {
+    a: number;
+    b: number;
+    answered: number; // 回答済み人数
+    total: number;    // 参加人数（例:4）
+  };
+
+  const [teamVotes, setTeamVotes] = useState<TeamVotes>({
+    a: 0,
+    b: 0,
+    answered: 0,
+    total: maxPlayers,
+  });
   
   const players: Player[] = rawPlayers.map((p) => ({
     socketId: p.socketId,
@@ -516,8 +527,6 @@ export default function QuizModePage() {
   const opponent = players.find(p => p.socketId !== mySocketId);
 
   const allPlayersReady = roomPlayers.length >= maxPlayers;
-  const myLife = playerLives[mySocketId] ?? 3;
-  const isDead = myLife <= 0;
 
   // --- プレイヤー人数監視 ---
   useEffect(() => {
@@ -590,8 +599,6 @@ export default function QuizModePage() {
     setScoreChanges({});
     setIncorrectMessage(null);
     setShowCorrectMessage(false);
-    setMyRankState(null);
-    setAllRanks([]);
     setPredictedWinner(null);
     setHasPredicted(false);
     setUserAnswer(null);
@@ -602,6 +609,12 @@ export default function QuizModePage() {
     setEarnedExp(0);
     sentRef.current = false;
     clearPendingAward();
+    endOnceRef.current = false;
+    setIsTeamAnswerWrong(false);
+    setGameSet(false);
+    setShowStageOverlay(false);
+    prevStageRef.current = 0;
+    setClearedStage(0);
   };
 
   const handleNewMatch = () => {
@@ -623,7 +636,6 @@ export default function QuizModePage() {
     setScoreChanges({});
     setIncorrectMessage(null);
     setShowCorrectMessage(false);
-    setAllPlayersDead(false);
     setPredictedWinner(null);
     setHasPredicted(false);
     awardedOnceRef.current = false;
@@ -633,6 +645,12 @@ export default function QuizModePage() {
     setEarnedExp(0);
     sentRef.current = false;
     clearPendingAward();
+    endOnceRef.current = false;
+    setIsTeamAnswerWrong(false);
+    setGameSet(false);
+    setShowStageOverlay(false);
+    prevStageRef.current = 0;
+    setClearedStage(0);
 
     setReadyToStart(false);
 
@@ -734,21 +752,20 @@ export default function QuizModePage() {
   }, [timeLeft]);
 
   useEffect(() => {
-    if (!isGameOver) return;
+    if (!isTeamAnswerWrong) return;
 
     const deadTimer  = setTimeout(() => {
-      setAllPlayersDead(true);
-    }, 4000);
+      setGameSet(true);
+    }, 6000);
 
     const finishTimer  = setTimeout(() => {
       setFinished(true);
-    }, 6000); // ← 正解発表演出のあと
+    }, 8000); // ← 正解発表演出のあと
 
     return () => {
-      clearTimeout(deadTimer);
       clearTimeout(finishTimer);
     };
-  }, [phase, isGameOver]);
+  }, [isTeamAnswerWrong]);
 
   useEffect(() => {
     if (!bothReady) return;
@@ -874,6 +891,58 @@ export default function QuizModePage() {
   }, [phase]);
 
   useEffect(() => {
+    // すでに終了済みなら何もしない
+    if (endOnceRef.current) return;
+
+    // resultフェーズで、チーム回答が確定していて、問題が存在する時だけ判定
+    if (phase !== "result") return;
+    if (!teamChoice) return;
+    if (!questions[currentIndex]?.quiz) return;
+
+    const correct = questions[currentIndex].quiz.answer; // 0 or 1想定
+    const correctChoice = correct === 0 ? "A" : "B";
+    const isCorrect = teamChoice === correctChoice;
+
+    if (isCorrect) {
+      // ✅ ここで「チームとしてクリアしたステージ数」を増やす
+      setClearedStage(prev => Math.max(prev, currentIndex + 1));
+    }
+
+    // チーム回答が間違っていたら終了
+    if (teamChoice !== correctChoice) {
+      endOnceRef.current = true;
+
+      setIsTeamAnswerWrong(true);
+    }
+  }, [phase, teamChoice, questions, currentIndex]);
+
+  useEffect(() => {
+    // result フェーズで、チーム回答と問題が揃ってるときだけ
+    if (phase !== "result") {
+      setShowTeamJudgeOverlay(false);
+      setTeamJudge(null);
+      return;
+    }
+    if (!teamChoice) return;
+    if (!questions[currentIndex]?.quiz) return;
+
+    const correct = questions[currentIndex].quiz.answer; // 0 or 1想定
+    const correctChoice = correct === 0 ? "A" : "B";
+    const isCorrect = teamChoice === correctChoice;
+
+    // 一旦、今回の判定をセット
+    setTeamJudge(isCorrect ? "correct" : "wrong");
+    setShowTeamJudgeOverlay(false);
+
+    // ✅ 2秒後にドーン！と表示
+    const t = setTimeout(() => {
+      setShowTeamJudgeOverlay(true);
+    }, 3000);
+
+    return () => clearTimeout(t);
+  }, [phase, teamChoice, questions, currentIndex]);
+
+  useEffect(() => {
     if (allPlayersReady && !bothReady) {
       setShowStartButton(false);
 
@@ -886,89 +955,73 @@ export default function QuizModePage() {
   }, [allPlayersReady, bothReady]);
 
   useEffect(() => {
-    if (!lastPlayerElimination) {
-      setMyRankState(null);
+    if (finished || gameSet || countdown !== null || phase !== "question") {
+      setShowStageOverlay(false);
       return;
     }
 
-    const groups = lastPlayerElimination.eliminationGroups;
-
-    const index = groups.findIndex(group =>
-      group.includes(mySocketId)
-    );
-
-    if (index === -1) {
-      setMyRankState(null);
+    // 初回は出さない（好みで：初回も出したいならこの if を消す）
+    if (prevStageRef.current === 0) {
+      prevStageRef.current = stageNumber;
       return;
     }
 
-    const rank = groups.length - index;
-    setMyRankState(rank);
+    // ステージが変わった時だけ
+    if (prevStageRef.current !== stageNumber) {
+      prevStageRef.current = stageNumber;
 
-  }, [lastPlayerElimination, mySocketId]);
+      setStageOverlayNumber(stageNumber);
+      setShowStageOverlay(true);
 
-  useEffect(() => {
-    if (!lastPlayerElimination) {
-      setAllRanks([]);
-      return;
+      const t = setTimeout(() => setShowStageOverlay(false), 2000);
+      return () => clearTimeout(t);
     }
-
-    const groups = lastPlayerElimination.eliminationGroups;
-    const totalGroups = groups.length;
-
-    const ranks: { socketId: string; rank: number }[] = [];
-
-    groups.forEach((group, index) => {
-      const rank = totalGroups - index;
-
-      group.forEach(socketId => {
-        ranks.push({ socketId, rank });
-      });
-    });
-
-    setAllRanks(ranks);
-  }, [lastPlayerElimination]);
+  }, [stageNumber, finished, countdown, phase]);
 
   useEffect(() => {
     if (!gameSetScheduled) return;
 
     const deadTimer  = setTimeout(() => {
-      setAllPlayersDead(true);
-    }, 4000);
+      setGameSet(true);
+    }, 6000);
 
     const finishTimer = setTimeout(() => {
       setFinished(true); // QuizResult へ
-    }, 6000);
+    }, 8000);
 
     return () => {
-      clearTimeout(deadTimer);
       clearTimeout(finishTimer);
     };
   }, [gameSetScheduled]);
+
+  useEffect(() => {
+    // まだゲーム中のみ
+    if (finished) return;
+
+    // ステージ10到達でゲーム終了
+    if (correctCount >= 10) {
+      const deadTimer  = setTimeout(() => {
+        setGameSet(true);
+        setShowStageOverlay(false);
+      }, 6000);
+
+      const t = setTimeout(() => {
+        setFinished(true);   // 結果画面へ
+      }, 8000); // GAME SET を少し見せてから結果へ
+
+      return () => clearTimeout(t);
+    }
+  }, [correctCount, finished]);
   
   useEffect(() => {
     if (!finished) return;
 
-    // 勝者情報がまだ来てないなら待つ（1位ボーナス/予想的中に必要）
-    if (!lastPlayerElimination) return;
+    // ✅ 到達ステージに応じた獲得ポイント（10以上は10扱い）
+    const reachedStage = Math.min(10, Math.max(0, clearedStage));
+    const earned = stagePointMap[reachedStage] ?? 0;
 
     const base = correctCount * 20;
-
-    const groups = lastPlayerElimination.eliminationGroups ?? [];
-    const winnerGroup = groups.length ? groups[groups.length - 1] : [];
-    const isSoloWinner = winnerGroup.length === 1;
-    const amIWinner = winnerGroup.includes(mySocketId);
-
-    const firstBonus = (isSoloWinner && amIWinner) ? 500 : 0;
-
-    const predictionHit =
-      hasPredicted &&
-      predictedWinner &&
-      winnerGroup.includes(predictedWinner);
-
-    const predictionBonus = predictionHit ? 150 : 0;
-
-    const earned = base + firstBonus + predictionBonus;
+    const totalPoints = earned + base;
     const expEarned = correctCount * 20;
 
     setBasePoints(base);
@@ -982,22 +1035,17 @@ export default function QuizModePage() {
     }
 
     const payload: PendingAward = {
-      points: earned,
+      points: totalPoints,
       exp: expEarned,
       correctCount,
       basePoints: base,
-      hasPredicted,
-      predictedWinner,
-      winnerSocketIds: winnerGroup,
       createdAt: Date.now(),
     };
 
-    // ✅ まずpending保存（確実付与の要）
     savePendingAward(payload);
-
-    // ✅ その場で付与を試す（ログイン揺れでも ensureAuthedUserId が面倒みる）
     awardPointsAndExp(payload);
-  }, [finished,correctCount,lastPlayerElimination,mySocketId,hasPredicted,predictedWinner,]);
+
+  }, [finished,mySocketId,clearedStage,correctCount,]);
 
   useEffect(() => {
     const pending = loadPendingAward();
@@ -1033,6 +1081,72 @@ export default function QuizModePage() {
       document.removeEventListener("visibilitychange", onVis);
     };
   }, [supabase]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const onTeamVotesUpdate = (payload: TeamVotes) => {
+      setTeamVotes(payload);
+    };
+
+    socket.on("team_votes_update", onTeamVotesUpdate);
+
+    return () => {
+      socket.off("team_votes_update", onTeamVotesUpdate);
+    };
+  }, [socket]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const onTeamAnswerDecided = (payload: {
+      choice: "A" | "B";
+      a: number;
+      b: number;
+      answered: number;
+      total: number;
+      decidedBy: "majority" | "random";
+    }) => {
+      setTeamChoice(payload.choice);
+      setTeamChoiceDecidedBy(payload.decidedBy);
+
+      // 票数も確定値で揃えたいならここで上書きしてもOK
+      setTeamVotes({
+        a: payload.a,
+        b: payload.b,
+        answered: payload.answered,
+        total: payload.total,
+      });
+    };
+
+    socket.on("team_answer_decided", onTeamAnswerDecided);
+
+    return () => {
+      socket.off("team_answer_decided", onTeamAnswerDecided);
+    };
+  }, [socket]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const onQuestionStart = ({ deadline, index }: { deadline: number; index: number }) => {
+      setTeamChoice(null);
+      setTeamChoiceDecidedBy(null);
+
+      // 前問のオーバーレイを消す
+      setShowTeamJudgeOverlay(false);
+      setTeamJudge(null);
+    };
+
+    socket.on("question_start", onQuestionStart);
+    return () => {
+      socket.off("question_start", onQuestionStart);
+    };
+  }, [socket]);
+
+  useEffect(() => {
+    setTeamVotes(prev => ({ ...prev, total: maxPlayers }));
+  }, [maxPlayers]);
 
 
   useEffect(() => {
@@ -1070,7 +1184,7 @@ export default function QuizModePage() {
         setCountdown(null);
         setTimeLeft(totalTime);
         setDisplayLives({});
-        setAllPlayersDead(false);
+        setGameSet(false);
 
         // 新しいゲーム開始
         updateStartAt(startAt);
@@ -1102,8 +1216,23 @@ export default function QuizModePage() {
     };
   }, [socket]);
 
+  // A/B 投票送信（多数決モード用）
+  const submitMajorityVote = (choice: "A" | "B") => {
+    if (!socket || !roomCode) return;
+
+    // 念のため：質問中しか送らない
+    if (phase !== "question") return;
+    if (!canAnswer) return;
+
+    socket.emit("submit_majority_vote", { roomCode, choice });
+  };
+
   const checkAnswer = () => {
     if (userAnswer == null) return;
+
+    // ✅ 多数決：A/B投票を送る（ボード更新用）
+    if (userAnswer === 0) submitMajorityVote("A");
+    if (userAnswer === 1) submitMajorityVote("B");
 
     const correctAnswer = questions[currentIndex].quiz?.answer;
 
@@ -1297,6 +1426,21 @@ export default function QuizModePage() {
         </div>
       )}
 
+      {showStageOverlay && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80">
+          <motion.div
+            key={stageOverlayNumber}
+            initial={{ scale: 0.6, opacity: 0 }}
+            animate={{ scale: 1.1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="text-white text-5xl md:text-7xl font-extrabold drop-shadow"
+          >
+            ステージ{stageOverlayNumber}に挑戦！
+          </motion.div>
+        </div>
+      )}
+
       {timeUp && !finished && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
           <motion.div
@@ -1312,21 +1456,231 @@ export default function QuizModePage() {
 
       {!finished ? (
         <>
+          <div>
+            <p className="text-md md:text-xl text-white mb-3">チームで正解して全ステージクリアを目指そう！</p>
+          </div>
+          {/* =========================
+              🗳️ チームの回答ボード
+          ========================= */}
+          <div className="mx-auto max-w-[720px] mb-3">
+            <div className="flex items-center justify-center mb-2">
+              <motion.div
+                key={stageNumber}
+                initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
+                className="
+                  relative
+                  px-5 py-2
+                  rounded-full
+                  border-2 border-white/80
+                  shadow-xl
+                  text-white font-extrabold
+                  text-lg md:text-2xl
+                  tracking-wider
+                  bg-black/35
+                  backdrop-blur
+                "
+              >
+                {/* うっすら光る演出 */}
+                <span className="absolute inset-0 rounded-full blur-xl opacity-40 bg-white" />
+
+                <span className="relative flex items-center">
+                  <span className="drop-shadow">ステージ</span>
+                  <span className="inline-flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-full text-yellow-300">
+                    {stageNumber}
+                  </span>
+                </span>
+              </motion.div>
+            </div>
+
+            <div className="relative overflow-hidden rounded-2xl border-4 border-white shadow-xl">
+              <AnimatePresence>
+                {showTeamJudgeOverlay && teamJudge && (
+                  <motion.div
+                    key={teamJudge}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                    transition={{ duration: 0.25 }}
+                    className={`
+                      absolute inset-0 z-40
+                      flex items-center justify-center
+                      text-white font-extrabold
+                      text-4xl md:text-6xl
+                      drop-shadow-[0_6px_0_rgba(0,0,0,0.25)]
+                    `}
+                  >
+                    {/* 背景（正解/不正解で色を変える） */}
+                    <div
+                      className={`
+                        absolute inset-0
+                        ${teamJudge === "correct"
+                          ? "bg-gradient-to-br from-green-400 via-emerald-500 to-green-700"
+                          : "bg-gradient-to-br from-red-400 via-rose-500 to-red-700"}
+                        opacity-95
+                      `}
+                    />
+                    {/* キラっとした演出 */}
+                    <div className="absolute inset-0 opacity-30">
+                      <div className="absolute -top-10 -left-10 w-40 h-40 bg-white rounded-full blur-3xl" />
+                      <div className="absolute -bottom-10 right-10 w-52 h-52 bg-white rounded-full blur-3xl" />
+                    </div>
+
+                    {/* 文字 */}
+                    <div
+                      className={`
+                        relative
+                        px-8 py-4
+                        rounded-2xl
+                        border-4
+                        shadow-xl
+                        bg-white
+                        ${
+                          teamJudge === "correct"
+                            ? "border-green-500"
+                            : "border-red-500"
+                        }
+                      `}
+                    >
+                      {/* 追加：上の行（黒） */}
+                      <p className="text-black text-lg md:text-2xl font-extrabold mb-2">
+                        チームの回答は…
+                      </p>
+
+                      {/* 既存：正解/不正解 */}
+                      <div
+                        className={`
+                          text-4xl md:text-6xl font-extrabold
+                          ${teamJudge === "correct" ? "text-green-600" : "text-red-600"}
+                        `}
+                      >
+                        {teamJudge === "correct" ? "◎正解！🎉" : "×不正解…"}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* 背景（楽しい感じ） */}
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-pink-500 to-yellow-400" />
+              <div className="absolute inset-0 opacity-20">
+                <div className="absolute -top-6 -left-6 w-24 h-24 bg-white rounded-full blur-2xl" />
+                <div className="absolute top-4 right-6 w-16 h-16 bg-white rounded-full blur-2xl" />
+                <div className="absolute -bottom-8 left-1/2 w-32 h-32 bg-white rounded-full blur-3xl -translate-x-1/2" />
+              </div>
+
+              <div className="relative p-3 md:p-4">
+                {isResultPhase && (
+                  <>
+                    {/* 1行目：タイトル */}
+                    <p className="text-white font-extrabold text-lg md:text-2xl drop-shadow text-center">
+                      チームの回答
+                    </p>
+
+                    {/* 2行目：A / B */}
+                    <div className="mt-1 flex items-center justify-center gap-10 md:gap-16">
+                      {/* A */}
+                      <div
+                        className={`
+                          px-5 py-1 rounded-xl border-2 border-black shadow transition-all duration-300
+                          ${
+                            teamChoice === "A"
+                              ? "scale-110 ring-4 ring-yellow-400 bg-gradient-to-br from-yellow-200 via-yellow-300 to-orange-300 shadow-[0_0_20px_rgba(255,200,0,0.8)]"
+                              : "bg-white/95 opacity-80"
+                          }
+                        `}
+                      >
+                        <p className="text-3xl md:text-5xl font-extrabold text-gray-900">A</p>
+                      </div>
+
+                      {/* B */}
+                      <div
+                        className={`
+                          px-5 py-1 rounded-xl border-2 border-black shadow transition-all duration-300
+                          ${
+                            teamChoice === "B"
+                              ? "scale-110 ring-4 ring-yellow-400 bg-gradient-to-br from-yellow-200 via-yellow-300 to-orange-300 shadow-[0_0_20px_rgba(255,200,0,0.8)]"
+                              : "bg-white/95 opacity-80"
+                          }
+                        `}
+                      >
+                        <p className="text-3xl md:text-5xl font-extrabold text-gray-900">B</p>
+                      </div>
+                    </div>
+
+                    {teamChoice && (
+                      <p className="mt-2 text-white font-extrabold drop-shadow text-sm md:text-lg">
+                        チーム回答：{teamChoice}
+                        {teamChoiceDecidedBy === "random" && "（同数/未回答のためランダム）"}
+                      </p>
+                    )}
+                  </>
+                )}
+
+                {/* 3行目：A票/B票 をまとめて表示 */}
+                <div className="mt-2 mx-auto w-fit px-4 py-2 rounded-full bg-black/45 text-white font-extrabold text-lg md:text-2xl">
+                  A票：{teamVotes.a}　B票：{teamVotes.b}
+                </div>
+
+                {isQuestionPhase && (
+                  <>
+                    {/* 任意：ゲージ（見た目がさらに楽しくなる） */}
+                    <div className="mt-3 grid grid-cols-2 gap-2 md:gap-4">
+                      <div className="bg-white/95 rounded-xl border-2 border-black p-2 shadow">
+                        <div className="flex items-center justify-between">
+                          <span className="font-extrabold">A</span>
+                          <span className="font-bold">{teamVotes.a}票</span>
+                        </div>
+                        <div className="mt-2 h-4 rounded-full bg-gray-200 border border-black overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{
+                              width: `${teamVotes.total ? (teamVotes.a / teamVotes.total) * 100 : 0}%`,
+                            }}
+                            transition={{ type: "spring", stiffness: 120, damping: 14 }}
+                            className="h-full bg-green-400"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="bg-white/95 rounded-xl border-2 border-black p-2 shadow">
+                        <div className="flex items-center justify-between">
+                          <span className="font-extrabold">B</span>
+                          <span className="font-bold">{teamVotes.b}票</span>
+                        </div>
+                        <div className="mt-2 h-4 rounded-full bg-gray-200 border border-black overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{
+                              width: `${teamVotes.total ? (teamVotes.b / teamVotes.total) * 100 : 0}%`,
+                            }}
+                            transition={{ type: "spring", stiffness: 120, damping: 14 }}
+                            className="h-full bg-red-400"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+                
+
+                {/* 追加：回答済み人数（お好み） */}
+                {/* <div className="mt-2 text-center">
+                  <span className="inline-block px-3 py-1 rounded-full bg-white/90 border-2 border-black text-gray-900 font-bold text-sm md:text-lg">
+                    {teamVotes.answered}/{teamVotes.total} 回答済み
+                  </span>
+                </div> */}
+              </div>
+            </div>
+          </div>
+
           <div className="flex flex-col items-center">
             <div className="grid grid-cols-4 md:grid-cols-4 gap-1 md:gap-2 mb-1 justify-items-center">
               {orderedPlayers.map((p) => {
                 const isMe = p.socketId === mySocketId;
                 const change = scoreChanges[p.socketId];
                 const result = results.find(r => r.socketId === p.socketId); // ← 結果取得
-                const life = displayLives[p.socketId] ?? 3;
-                const lifeColor =
-                  life <= 0
-                    ? "text-red-700"
-                    : life === 1
-                    ? "text-red-500"
-                    : life === 2
-                    ? "text-orange-400"
-                    : "text-green-500";
                     
                 let borderColorClass = "border-gray-300"; // デフォルト（問題中）
                 if (phase === "result" && showDamageResult) {
@@ -1338,6 +1692,15 @@ export default function QuizModePage() {
                     borderColorClass = "border-red-500";
                   }
                 }
+
+                const statusClass =
+                  phase === "result" && showDamageResult
+                    ? result
+                      ? result.isCorrect
+                        ? "text-green-600"
+                        : "text-red-500"
+                      : "text-gray-500"
+                    : "text-gray-500";
                 
                 return (
                   <div
@@ -1348,12 +1711,7 @@ export default function QuizModePage() {
                       aspect-square
                       rounded-lg
                       shadow-md
-                      flex flex-col items-center justify-center
-                      ${
-                        life <= 0
-                          ? "bg-gray-500 border-gray-700" // 脱落したらグレー背景
-                          : `bg-white border-4 ${borderColorClass}` // 通常は白背景＋border
-                      }
+                      flex flex-col items-center justify-center bg-white border-4 ${borderColorClass}
                     `}
                   >
                     <p className="font-bold text-gray-800 text-lg md:text-xl text-center">
@@ -1361,29 +1719,8 @@ export default function QuizModePage() {
                     </p>
 
                     {/* 結果表示 */}
-                    <p
-                      className={`
-                        text-lg md:text-xl font-bold mt-1
-                        ${
-                          life <= 0
-                            ? "text-gray-100" // 脱落したら白文字
-                            : phase === "result"
-                            ? result?.isCorrect
-                              ? "text-green-600"
-                              : "text-red-600"
-                            : result
-                            ? "text-gray-800"
-                            : life === 1
-                            ? "text-red-500"
-                            : life === 2
-                            ? "text-orange-400"
-                            : "text-green-500"
-                        }
-                      `}
-                    >
-                      {life <= 0
-                        ? "脱落" // ライフ0なら脱落
-                        : phase === "result"
+                    <p className={`text-lg md:text-xl font-bold mt-1 ${statusClass}`}>
+                      {phase === "result"
                         ? showDamageResult
                           ? result
                             ? result.isCorrect
@@ -1391,9 +1728,7 @@ export default function QuizModePage() {
                               : "誤答×"
                             : "未回答"
                           : "　"
-                        : result
-                        ? "？"
-                        : `❤×${life}`}
+                        : "回答中"}
                     </p>
 
                     {/* 吹き出し表示 */}
@@ -1422,7 +1757,7 @@ export default function QuizModePage() {
             </div>
           </div>
 
-          {isGameOver && allPlayersDead && (
+          {gameSet && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
               <motion.div
                 initial={{ scale: 0.5, opacity: 0 }}
@@ -1435,7 +1770,7 @@ export default function QuizModePage() {
             </div>
           )}
   
-          {phase === "result" && !allPlayersDead &&(
+          {phase === "result" &&(
             <>
               <div>
                 {showAnswerText && (
@@ -1502,13 +1837,7 @@ export default function QuizModePage() {
                   {/* 回答フェーズ */}
                   {phase === "question" && (
                     <>
-                      {isDead ? (
-                        <div className="mt-4 space-y-3">
-                          <p className="text-xl md:text-2xl font-bold text-gray-800">
-                            脱落したため、回答できません
-                          </p>
-                        </div>
-                      ) : canAnswer ? (
+                      {canAnswer ? (
                         <button
                           onClick={checkAnswer}
                           className="px-6 py-3 bg-blue-500 text-white rounded-lg"
@@ -1551,11 +1880,7 @@ export default function QuizModePage() {
           rematchRequested={rematchRequested}
           handleNewMatch={handleNewMatch}
           handleRematch={handleRematch}
-          myRankState={myRankState}
-          eliminationGroups={lastPlayerElimination?.eliminationGroups ?? []}
           players={players}
-          predictedWinner={predictedWinner}
-          hasPredicted={hasPredicted}
           basePoints={basePoints}
           earnedPoints={earnedPoints}
           earnedExp={earnedExp}
@@ -1564,6 +1889,7 @@ export default function QuizModePage() {
           onGoLogin={() => router.push("/user/login")}
           isCodeMatch={mode === "code"}
           onShareX={handleShareX}
+          clearedStage={clearedStage}
         />
       )}
     </div>
