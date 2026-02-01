@@ -1457,7 +1457,7 @@ export default function QuizModePage() {
       {!finished ? (
         <>
           <div>
-            <p className="text-md md:text-xl text-white mb-3">チームで正解して全ステージクリアを目指そう！</p>
+            <p className="text-md md:text-xl text-white mb-3">チームで力を合わせてクイズに挑戦！全10ステージクリアを目指そう！</p>
           </div>
           {/* =========================
               🗳️ チームの回答ボード
