@@ -13,6 +13,32 @@ import { CharacterAcquireModal, type CharacterItem } from "../../components/Char
 import { getWeekStartJST } from "@/lib/week";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
 import type { Rarity } from "@/types/gacha";
+import confetti from "canvas-confetti";
+
+const fireConfetti = () => {
+  // 低負荷設定：粒数少なめ・短時間・一回だけ
+  confetti({
+    particleCount: 60,     // ここ増やすと重くなる
+    spread: 70,
+    startVelocity: 35,
+    ticks: 140,            // 表示時間（短いほど軽い）
+    gravity: 0.9,
+    scalar: 0.9,           // 粒サイズ（小さいほど軽い）
+    origin: { y: 0.6 },
+  });
+
+  // ちょい追加で気持ちよさUP（でも軽い）
+  confetti({
+    particleCount: 25,
+    spread: 120,
+    startVelocity: 20,
+    ticks: 120,
+    gravity: 1.1,
+    scalar: 0.8,
+    origin: { y: 0.6 },
+  });
+};
+
 
 // =====================
 // ポイント仕様（ステージ到達に応じて付与）
@@ -469,6 +495,14 @@ export default function QuizModePage() {
   const [escapeMessage, setEscapeMessage] = useState<string | null>(null);
   const [isFriendEnding, setIsFriendEnding] = useState(false);
   const [hideAfterButton, setHideAfterButton] = useState(false);
+  const [showSearchButton, setShowSearchButton] = useState(false);
+  const searchBtnTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (searchBtnTimerRef.current) window.clearTimeout(searchBtnTimerRef.current);
+    };
+  }, []);
 
   // ✅ イントロ表示（クリックで閉じる）
   const showEnemyIntro = () => {
@@ -479,20 +513,14 @@ export default function QuizModePage() {
     setShowStageIntro(false);
   };
 
-  // ✅ イントロ表示中は「どこクリックでも閉じる」
   useEffect(() => {
     if (!showStageIntro) return;
 
-    const onAnyPointerDown = () => {
-      closeEnemyIntro();
-    };
+    const t = window.setTimeout(() => {
+      setShowStageIntro(false);
+    }, 3000);
 
-    // capture で先に拾う（ボタン等を押しても確実に閉じる）
-    window.addEventListener("pointerdown", onAnyPointerDown, { capture: true, once: true });
-
-    return () => {
-      window.removeEventListener("pointerdown", onAnyPointerDown, { capture: true } as any);
-    };
+    return () => window.clearTimeout(t);
   }, [showStageIntro]);
 
   // 「リザルト突入時に一回だけ」発火させる用
@@ -560,6 +588,9 @@ export default function QuizModePage() {
     setIsFriendEnding(false);
     setEscapeMessage(null);
     setHideAfterButton(false);
+    setShowSearchButton(false);
+    if (searchBtnTimerRef.current) window.clearTimeout(searchBtnTimerRef.current);
+    searchBtnTimerRef.current = null;
 
     // 敵を新しく
     const nextEnemy = pickRandomEnemy();
@@ -820,16 +851,10 @@ export default function QuizModePage() {
 
   const StageIntro = ({ enemy }: { enemy: typeof enemies[0] }) => {
     return (
-      <div
-        className="fixed inset-0 bg-yellow-50 bg-opacity-70 flex flex-col items-center justify-center z-50"
-        onPointerDown={() => setShowStageIntro(false)}
-      >
+      <div className="fixed inset-0 bg-yellow-50 bg-opacity-70 flex flex-col items-center justify-center z-50">
         <img src={enemy.image} alt={enemy.name} className="w-40 h-40 md:w-60 md:h-60 mb-4 animate-bounce" />
         <p className="max-w-[340px] md:max-w-full text-4xl md:text-6xl font-extrabold text-yellow-500 drop-shadow-lg">
           {enemy.name} をみつけた！
-        </p>
-        <p className="mt-4 text-md md:text-2xl text-gray-400 font-bold animate-pulse">
-          画面をタップしてつづける
         </p>
       </div>
     );
@@ -1008,7 +1033,7 @@ export default function QuizModePage() {
               <div className="flex flex-col items-center md:flex-row justify-center md:gap-12 border-2 border-gray-200 rounded-xl p-3 bg-white">
                 {/* 敵キャラクター */}
                 <div className="flex flex-col items-center  gap-1 md:gap-2">
-                  <div className={`flex flex-col items-center gap-2 to-black p-3 rounded-xl transition-opacity duration-[5000ms] ${enemyVisible ? "opacity-100" : "opacity-0"}`}>
+                  <div className="flex flex-col items-center gap-2 to-black p-3 rounded-xl">
                     <div className="flex flex-col">
                       <p className="text-xl md:text-2xl font-bold text-yellow-500">
                         {escapeMessage
@@ -1104,6 +1129,7 @@ export default function QuizModePage() {
                           onClick={() => {
                             setHideAfterButton(true);  
                             setIsFriendEnding(true);
+                            fireConfetti();
                             window.setTimeout(() => {
                               setIsFriendEnding(false);
                               setHideAfterButton(false);
@@ -1127,22 +1153,13 @@ export default function QuizModePage() {
                             // ゆっくり消す
                             setEnemyVisible(false);
 
-                            // 5秒後に次の敵へ
-                            window.setTimeout(() => {
-                              const next = pickRandomEnemy(currentEnemy.no);
+                            // 2秒後に「もういっかいさがす」ボタンを出す
+                            setShowSearchButton(false);
+                            if (searchBtnTimerRef.current) window.clearTimeout(searchBtnTimerRef.current);
 
-                              setCurrentEnemy(next);
-                              setEnemyVisible(true);
-
-                              // 逃走状態リセット
-                              setEscapeMessage(null);
-
-                              showEnemyIntro();
-
-                              setIncorrectMessage(null);
-                              setHideAfterButton(false);
-                              nextQuestion();
-                            }, 5000);
+                            searchBtnTimerRef.current = window.setTimeout(() => {
+                              setShowSearchButton(true);
+                            }, 2000);
                           }}
                         >
                           OK
@@ -1150,6 +1167,32 @@ export default function QuizModePage() {
                       )}
                     </div>
                   </>
+                )}
+
+                {showSearchButton && escapeMessage && (
+                  <button
+                    className="mt-4 px-6 py-3 bg-yellow-500 text-white rounded-lg font-bold text-xl hover:bg-yellow-600 cursor-pointer"
+                    onClick={() => {
+                      setShowSearchButton(false);
+                      setHideAfterButton(false);
+
+                      // 次の敵へ
+                      const next = pickRandomEnemy(currentEnemy.no);
+                      setCurrentEnemy(next);
+                      setEnemyVisible(true);
+
+                      // 逃走状態リセット
+                      setEscapeMessage(null);
+
+                      // 次の問題へ（あなたの仕様だと不正解でも次の問題に進む）
+                      setIncorrectMessage(null);
+
+                      showEnemyIntro();
+                      nextQuestion();
+                    }}
+                  >
+                    もういっかいさがす
+                  </button>
                 )}
 
                 {/* 選択肢表示 */}
