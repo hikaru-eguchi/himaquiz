@@ -57,7 +57,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {/* ===== HEADER ===== */}
           <header className="py-3 text-center shadow-md bg-yellow-300">
             <div className="flex items-center justify-center md:gap-4">
-              <img src="/images/quiz.png" alt="みんなで遊べる暇つぶしクイズ" className="w-12 md:w-25 h-auto" />
+              <img src="/images/まる2.png" alt="みんなで遊べる暇つぶしクイズ" className="w-18 md:w-30 h-auto" />
               <div>
                 <Link href="/" className="no-underline group inline-block">
                   <h1
@@ -92,7 +92,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   </p>
                 </Link>
               </div>
-              <img src="/images/quiz2.png" alt="みんなで遊べる暇つぶしクイズ" className="w-12 md:w-25 h-auto" />
+              <img src="/images/ばつ2.png" alt="みんなで遊べる暇つぶしクイズ" className="w-18 md:w-30 h-auto" />
             </div>
 
             {/* ===== ジャンル＆難易度ボタン（ページ遷移型） ===== */}
