@@ -46,7 +46,7 @@ export default async function QuizBookPage({ params }: PageProps) {
     <div className="container max-w-[1000px] mx-auto p-6">
       <h1 className="text-3xl md:text-5xl font-extrabold mb-10 text-center">{meta.title}</h1>
 
-      <article className="prose prose-lg max-w-none text-center">
+      <article className="prose prose-lg max-w-none text-center quizbook-prose">
         <MDXRemote source={content} components={{ Answer }} />
       </article>
     </div>

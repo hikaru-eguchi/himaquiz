@@ -843,3 +843,41 @@ footer {
   80%  { transform: rotate(2deg); }
   100% { transform: rotate(0deg); }
 }
+
+.quizbook-prose {
+  font-size: 1.25rem;      /* 例：20px */
+  line-height: 2rem;       /* 例：32px */
+}
+
+/* もっと確実にpだけ */
+.quizbook-prose p {
+  font-size: 1.25rem;
+  line-height: 2rem;
+}
+
+/* --- 画像 --- */
+.quizbook-prose img {
+  @apply w-full max-w-md mx-auto rounded-xl shadow-xl;
+  border: 4px solid #FFCE54;
+}
+
+
+/* =========================
+   PC（768px以上）だけ拡大
+   ========================= */
+@media (min-width: 768px) {
+  .quizbook-prose {
+    font-size: 1.6rem;   /* 好きなサイズに */
+    line-height: 2.4rem;
+  }
+
+  .quizbook-prose p {
+    font-size: 1.6rem;
+    line-height: 2.4rem;
+  }
+
+  .quizbook-prose img {
+    @apply w-full max-w-xs mx-auto rounded-xl shadow-xl;
+    border: 4px solid #FFCE54;
+  }
+}
