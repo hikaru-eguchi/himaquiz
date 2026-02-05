@@ -168,7 +168,7 @@ export default function MyCharactersPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 md:py-10 bg-gradient-to-r from-pink-300 via-purple-200 via-blue-200 to-green-300 rounded-xl">
       {/* タイトル */}
-      <div className="text-center mb-6 md:mb-10">
+      <div className="text-center mb-4 md:mb-6">
         <h1
           className="
             text-3xl md:text-5xl font-extrabold tracking-wide
@@ -201,6 +201,15 @@ export default function MyCharactersPage() {
       {/* 中身 */}
       {!loading && !error && (
         <>
+          {/* --- コレクション数 --- */}
+          <div className="mb-4 md:mb-6 text-center">
+            <div className="inline-block bg-white/80 border border-black rounded-xl p-2 md:p-3 shadow">
+              <p className="text-lg md:text-2xl font-extrabold text-gray-800 whitespace-nowrap">
+                コレクション数：{ownedCount} / {totalCount}
+              </p>
+            </div>
+          </div>
+        
           {characters.length === 0 ? (
             <p className="text-center text-gray-500">
               まだキャラが登録されていません。
@@ -277,15 +286,6 @@ export default function MyCharactersPage() {
               })}
             </div>
           )}
-
-          {/* --- コレクション数 --- */}
-          <div className="mt-8 md:mt-12 text-center">
-            <div className="inline-block bg-white/80 border border-black rounded-xl p-2 md:p-3 shadow">
-              <p className="text-lg md:text-2xl font-extrabold text-gray-800 whitespace-nowrap">
-                コレクション数：{ownedCount} / {totalCount}
-              </p>
-            </div>
-          </div>
 
           {/* --- モーダル（拡大表示） --- */}
           <AnimatePresence>
