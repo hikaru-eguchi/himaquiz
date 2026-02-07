@@ -14,7 +14,7 @@ quiz:
     - "UNO！"
   answer: 3
   displayAnswer: "UNO！"
-  hint: "言わないとペナルティ…！"
+  hint: "ゲームタイトルをそのまま！"
   answerExplanation: "残り1枚になったら「UNO！」と言います。"
   trivia: "言い忘れると2枚引きなどのローカルルールがよくあります。"
 ---

@@ -14,7 +14,7 @@ quiz:
     - "電流×時間"
   answer: 0
   displayAnswer: "電圧×電流"
-  hint: "P=VI"
+  hint: "電圧×○○"
   answerExplanation: "電力Pは電圧V×電流Iです。"
   trivia: "家電の消費電力はこの関係の上にあります。"
 ---

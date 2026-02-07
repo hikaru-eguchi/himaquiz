@@ -14,7 +14,7 @@ quiz:
     - "水をたくさん飲む"
   answer: 0
   displayAnswer: "日光（紫外線）を浴びる"
-  hint: "日差し"
+  hint: "日差しが関係しています"
   answerExplanation: "皮膚が紫外線を受けることで合成が促されます。"
   trivia: "不足・過剰どちらも注意が必要で、生活環境で変わります。"
 ---

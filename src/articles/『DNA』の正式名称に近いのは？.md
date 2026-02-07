@@ -14,7 +14,7 @@ quiz:
     - "デンプン酸"
   answer: 0
   displayAnswer: "デオキシリボ核酸"
-  hint: "核酸"
+  hint: "核酸がつきます"
   answerExplanation: "DNAはデオキシリボ核酸の略です。"
   trivia: "RNAはリボ核酸で、Tの代わりにUを含みます。"
 ---
