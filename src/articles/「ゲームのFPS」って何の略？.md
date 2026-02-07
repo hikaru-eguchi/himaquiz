@@ -14,7 +14,7 @@ quiz:
     - "Final Power Stage"
   answer: 0
   displayAnswer: "First Person Shooter"
-  hint: "一人称視点"
+  hint: "一人称視点のゲームなので、、"
   answerExplanation: "一人称視点のシューティングを指すことが多いです。"
   trivia: "同じ略で“1秒あたりのフレーム数”を指すこともあります。"
 ---

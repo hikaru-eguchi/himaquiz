@@ -14,7 +14,7 @@ quiz:
     - "Ultra Fast Orb"
   answer: 1
   displayAnswer: "Unidentified Flying Object"
-  hint: "未確認"
+  hint: "未確認飛行物体を意味します"
   answerExplanation: "UFOは未確認飛行物体を意味します。"
   trivia: "未確認＝宇宙人確定ではないのがポイントです。"
 ---

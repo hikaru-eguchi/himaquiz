@@ -14,7 +14,7 @@ quiz:
     - "Active Interface"
   answer: 1
   displayAnswer: "Artificial Intelligence"
-  hint: "人工の知能"
+  hint: "「人工の知能」を訳すと、、？"
   answerExplanation: "AIは「Artificial Intelligence（人工知能）」の略です。"
   trivia: "日本語では「人工知能」と訳されます。"
 ---

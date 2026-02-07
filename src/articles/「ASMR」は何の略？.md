@@ -14,7 +14,7 @@ quiz:
     - "Active Sound Memory Recall"
   answer: 1
   displayAnswer: "Autonomous Sensory Meridian Response"
-  hint: "ぞわぞわする感覚"
+  hint: "ぞわぞわする感覚のことです"
   answerExplanation: "ASMRは「Autonomous Sensory Meridian Response」の略です。"
   trivia: "日本語では「自律感覚絶頂反応」と訳されることもあります。"
 ---

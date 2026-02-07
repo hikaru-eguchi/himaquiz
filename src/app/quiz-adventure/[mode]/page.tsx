@@ -1880,9 +1880,9 @@ export default function QuizModePage() {
                 </>
               ) : (
                 <>
-                  {phase !== "result" && (
+                  {/* {phase !== "result" && (
                     <p className="text-gray-600 mb-2">不正解の場合、ライフポイント（LP）が1減少します。</p>
-                  )}
+                  )} */}
 
                   {phase !== "result" && (
                     <p

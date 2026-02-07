@@ -14,7 +14,7 @@ quiz:
     - "Order Known"
   answer: 2
   displayAnswer: "Oll Korrect"
-  hint: "わざと綴りを崩した"
+  hint: "わざと綴りを崩したといわれています"
   answerExplanation: "19世紀の流行で「Oll Korrect」と崩して書いたのが由来説として有名です。"
   trivia: "諸説ありますが有力な由来の一つです。"
 ---

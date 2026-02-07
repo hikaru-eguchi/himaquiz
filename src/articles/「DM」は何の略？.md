@@ -14,7 +14,7 @@ quiz:
     - "Direct Message"
   answer: 3
   displayAnswer: "Direct Message"
-  hint: "個別メッセージ"
+  hint: "個別にメッセージをすることです"
   answerExplanation: "DMは「Direct Message」の略です。"
   trivia: "サービスによって呼び方が違うこともあります。"
 ---

@@ -14,7 +14,7 @@ quiz:
     - "No Gain"
   answer: 2
   displayAnswer: "No Good"
-  hint: "よくない"
+  hint: "「よくない」をそのまま英語にすると？"
   answerExplanation: "NGは「No Good」の略として使われます。"
   trivia: "日本独特の略語として定着しました。"
 ---

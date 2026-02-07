@@ -14,7 +14,7 @@ quiz:
     - "Personal Download Form"
   answer: 0
   displayAnswer: "Portable Document Format"
-  hint: "文書形式"
+  hint: "文書形式のことです"
   answerExplanation: "PDFは「Portable Document Format」の略です。"
   trivia: "環境が違ってもレイアウトが崩れにくいのが特徴です。"
 ---

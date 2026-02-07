@@ -14,7 +14,7 @@ quiz:
     - "Universal Serial Bus"
   answer: 3
   displayAnswer: "Universal Serial Bus"
-  hint: "接続規格"
+  hint: "接続規格です"
   answerExplanation: "USBは「Universal Serial Bus」の略です。"
   trivia: "左右どちらでも挿せるType-Cが普及しました。"
 ---

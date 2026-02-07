@@ -14,7 +14,7 @@ quiz:
     - "Safety Network Support"
   answer: 0
   displayAnswer: "Social Network Service"
-  hint: "交流サービス"
+  hint: "交流サービスを表しています"
   answerExplanation: "SNSは「Social Network Service」の略です。"
   trivia: "日本ではSNSという言い方が特に定着しています。"
 ---
