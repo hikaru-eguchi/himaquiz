@@ -14,7 +14,7 @@ quiz:
     - "be"
   answer: 0
   displayAnswer: "am"
-  hint: "I のときのbe動詞"
+  hint: "I のときのbe動詞が入ります"
   answerExplanation: "I のbe動詞は am です。"
   trivia: "You は are、He/She は is。"
 ---

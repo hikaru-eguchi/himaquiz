@@ -14,7 +14,7 @@ quiz:
     - "liked"
   answer: 1
   displayAnswer: "likes"
-  hint: "She は三単現"
+  hint: "She は動詞にsがつきます"
   answerExplanation: "She の現在形は動詞に s が付き、likes になります。"
   trivia: "主語が He/She/It だと s が付くことが多いです。"
 ---

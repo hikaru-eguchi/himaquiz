@@ -14,7 +14,7 @@ quiz:
     - "D"
   answer: 0
   displayAnswer: "G"
-  hint: "1つ飛ばし"
+  hint: "1つ飛ばしになっています"
   answerExplanation: "A→C→E→G→I と2文字ずつ進む並びです。"
   trivia: "こういう問題は“差”を見ると早いです。"
 ---
