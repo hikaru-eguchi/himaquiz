@@ -14,7 +14,7 @@ quiz:
     - "D"
   answer: 0
   displayAnswer: "G"
-  hint: "1つ飛ばしになっています"
-  answerExplanation: "A→C→E→G→I と2文字ずつ進む並びです。"
-  trivia: "こういう問題は“差”を見ると早いです。"
+  hint: "アルファベットを1つずつ飛ばして並んでいます"
+  answerExplanation: "A→C→E→G→I と、アルファベットを2文字ずつ進めた並びです。Eの次に来るのはGなので、答えはGになります。"
+  trivia: "このタイプの問題は、前後の“差”を見ると法則に気づきやすくなります。"
 ---

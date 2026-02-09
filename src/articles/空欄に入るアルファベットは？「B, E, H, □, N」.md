@@ -14,7 +14,7 @@ quiz:
     - "M"
   answer: 1
   displayAnswer: "K"
-  hint: "毎回3つ進んでいます"
-  answerExplanation: "B→E→H→K→N と3文字ずつ進みます。"
-  trivia: "アルファベットを番号（A=1）で考えると早いです。"
+  hint: "アルファベットが毎回3文字ずつ進んでいます"
+  answerExplanation: "B→E→H→K→N と、アルファベットを3文字ずつ進めた並びです。Hの次に来るのはKなので、空欄に入るのはKです。"
+  trivia: "アルファベットを A=1、B=2… のように番号で考えると、+3ずつ増えていると気づきやすくなります。"
 ---

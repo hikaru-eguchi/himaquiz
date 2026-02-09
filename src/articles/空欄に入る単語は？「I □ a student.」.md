@@ -14,7 +14,7 @@ quiz:
     - "be"
   answer: 0
   displayAnswer: "am"
-  hint: "I のときのbe動詞が入ります"
-  answerExplanation: "I のbe動詞は am です。"
-  trivia: "You は are、He/She は is。"
+  hint: "主語が I のときに使う be動詞です"
+  answerExplanation: "I のときに使う be動詞は am です。文は『I am a student.（私は学生です）』となります。"
+  trivia: "be動詞は I＝am、You/We/They＝are、He/She/It＝is と使い分けます。"
 ---

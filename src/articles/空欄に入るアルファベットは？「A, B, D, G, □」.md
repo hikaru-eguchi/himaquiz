@@ -14,7 +14,7 @@ quiz:
     - "L"
   answer: 2
   displayAnswer: "K"
-  hint: "+1,+2,+3..."
-  answerExplanation: "A→B(+1)、B→D(+2)、D→G(+3)、G→K(+4) です。"
-  trivia: "差が増えるタイプは“差の差”を見ると楽。"
+  hint: "進む数が1ずつ増えていきます"
+  answerExplanation: "A→Bは+1、B→Dは+2、D→Gは+3なので、次は+4でG→Kになります。"
+  trivia: "このような問題は「前との差」を見ると法則が見つけやすくなります。"
 ---
