@@ -133,6 +133,7 @@ export default function QuizMasterPage() {
             >
               知り合いと対戦
             </button>
+            <p className="text-sm mt-1">※2人でプレイできます。</p>
           </div>
         </div>
 
