@@ -15,6 +15,6 @@ quiz:
   answer: 0
   displayAnswer: "Portable Document Format"
   hint: "文書形式のことです"
-  answerExplanation: "PDFは「Portable Document Format」の略です。"
-  trivia: "環境が違ってもレイアウトが崩れにくいのが特徴です。"
+  answerExplanation: "PDFは「Portable Document Format（ポータブル・ドキュメント・フォーマット）」の略で、どのパソコンやスマホでも同じ見た目で表示できる文書ファイル形式のことです。"
+  trivia: "PDFは、パソコンでもスマホでも“見た目がほぼ同じ”になるのが強み。履歴書や学校のお知らせなど、大事な書類によく使われています。"
 ---

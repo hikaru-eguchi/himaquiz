@@ -15,6 +15,6 @@ quiz:
   answer: 0
   displayAnswer: "Role Playing Game"
   hint: "役割を演じるゲームを英語でいうと、、"
-  answerExplanation: "役割（ロール）を演じながら進めるゲームという意味です。"
-  trivia: "日本では“ストーリー重視の冒険ゲーム”のイメージが強いです。"
+  answerExplanation: "RPGは「Role Playing Game（ロール・プレイング・ゲーム）」の略で、プレイヤーが物語の登場人物になりきって役割（ロール）を演じながら進めるゲームを意味します。"
+  trivia: "海外ではテーブルトークRPG（紙とサイコロで遊ぶRPG）も含まれます。"
 ---

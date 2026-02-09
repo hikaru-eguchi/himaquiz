@@ -15,6 +15,6 @@ quiz:
   answer: 3
   displayAnswer: "Direct Message"
   hint: "個別にメッセージをすることです"
-  answerExplanation: "DMは「Direct Message」の略です。"
-  trivia: "サービスによって呼び方が違うこともあります。"
+  answerExplanation: "DMは「Direct Message（ダイレクト・メッセージ）」の略で、SNS上で特定の相手だけに直接送れるメッセージ機能のことです。"
+  trivia: "DMは、みんなに見える投稿ではなく“こっそり直接送れる手紙”のような機能です。SNSによっては「チャット」や「メッセージ」と呼ばれることもあります。"
 ---

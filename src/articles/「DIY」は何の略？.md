@@ -15,6 +15,6 @@ quiz:
   answer: 0
   displayAnswer: "Do It Yourself"
   hint: "「自分でやる」という意味です"
-  answerExplanation: "DIYは「Do It Yourself」の略です。"
-  trivia: "工作や修理など幅広く使われます。"
+  answerExplanation: "DIYは「Do It Yourself（ドゥ・イット・ユアセルフ）」の略で、「自分でやる」という意味です。"
+  trivia: "DIYは、棚づくりや部屋の飾りつけなどを自分でやる楽しみ方のこと。最近は100円ショップの材料だけで作る人も多く、“自分だけのオリジナル”を作れるのが魅力です。"
 ---

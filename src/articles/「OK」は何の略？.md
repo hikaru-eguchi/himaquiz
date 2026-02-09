@@ -15,6 +15,6 @@ quiz:
   answer: 2
   displayAnswer: "Oll Korrect"
   hint: "わざと綴りを崩したといわれています"
-  answerExplanation: "19世紀の流行で「Oll Korrect」と崩して書いたのが由来説として有名です。"
-  trivia: "諸説ありますが有力な由来の一つです。"
+  answerExplanation: "OKは、19世紀のアメリカで「All Correct（すべて正しい）」を「Oll Korrect」と書いた略が広まったのが有力な由来の一つです。"
+  trivia: "OKは、もともとジョークのように生まれた言葉ですが、今では世界中で通じる超万能ワード。「オッケー！」だけで会話が成立することもあります。"
 ---

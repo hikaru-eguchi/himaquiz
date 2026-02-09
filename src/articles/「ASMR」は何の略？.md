@@ -15,6 +15,6 @@ quiz:
   answer: 1
   displayAnswer: "Autonomous Sensory Meridian Response"
   hint: "ぞわぞわする感覚のことです"
-  answerExplanation: "ASMRは「Autonomous Sensory Meridian Response」の略です。"
-  trivia: "日本語では「自律感覚絶頂反応」と訳されることもあります。"
+  answerExplanation: "ASMRは「Autonomous Sensory Meridian Response（オートノマス・センサリー・メリディアン・レスポンス）」の略で、ささやき声や小さな音を聞いたときに、頭や背中がゾワゾワっと気持ちよくなる感覚のことを指します。"
+  trivia: "ASMRは、ささやき声やカリカリ音、ページをめくる音などを聞いてリラックスする動画ジャンルとして大人気。寝る前に見る人も多く、「音のマッサージ」と言われることもあります。"
 ---

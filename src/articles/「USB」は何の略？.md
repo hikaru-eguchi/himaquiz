@@ -14,7 +14,7 @@ quiz:
     - "Universal Serial Bus"
   answer: 3
   displayAnswer: "Universal Serial Bus"
-  hint: "接続規格です"
-  answerExplanation: "USBは「Universal Serial Bus」の略です。"
-  trivia: "左右どちらでも挿せるType-Cが普及しました。"
+  hint: "○○Busです"
+  answerExplanation: "USBは「Universal Serial Bus（ユニバーサル・シリアル・バス）」の略で、パソコンと周辺機器をつなぐための共通規格のことです。キーボードやマウス、スマホの充電など、さまざまな機器で使われています。"
+  trivia: "USBは、マウス・キーボード・スマホ充電まで何でもつなげる万能コネクタ。最近は裏表を気にせず挿せるType-Cが増えてきました。"
 ---

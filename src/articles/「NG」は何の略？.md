@@ -15,6 +15,6 @@ quiz:
   answer: 2
   displayAnswer: "No Good"
   hint: "「よくない」をそのまま英語にすると？"
-  answerExplanation: "NGは「No Good」の略として使われます。"
-  trivia: "日本独特の略語として定着しました。"
+  answerExplanation: "NGは「No Good（ノー・グッド）」の略で、「よくない」「失敗」という意味です。テレビや映画の撮影現場で、撮り直しになる場面を指す言葉として広まりました。"
+  trivia: "テレビのNG集は、失敗シーンをまとめた人気コーナー。海外ではあまり「NG」とは言わず、日本ならではの表現なんです。"
 ---

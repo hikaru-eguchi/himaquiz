@@ -15,6 +15,6 @@ quiz:
   answer: 0
   displayAnswer: "Social Network Service"
   hint: "交流サービスを表しています"
-  answerExplanation: "SNSは「Social Network Service」の略です。"
-  trivia: "日本ではSNSという言い方が特に定着しています。"
+  answerExplanation: "SNSは「Social Network Service（ソーシャル・ネットワーク・サービス）」の略で、人と人がインターネット上でつながり、投稿やメッセージ、写真などを共有して交流できるサービスのことです。"
+  trivia: "SNSは、写真を載せたりコメントしたりして“ネット上で友だちとつながる広場”のような存在。海外では「ソーシャルメディア」と呼ばれることもあります。"
 ---

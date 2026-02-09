@@ -15,6 +15,6 @@ quiz:
   answer: 0
   displayAnswer: "First Person Shooter"
   hint: "一人称視点のゲームなので、、"
-  answerExplanation: "一人称視点のシューティングを指すことが多いです。"
-  trivia: "同じ略で“1秒あたりのフレーム数”を指すこともあります。"
+  answerExplanation: "FPSは「First Person Shooter（ファースト・パーソン・シューター）」の略で、プレイヤーの視点が主人公の目線になる一人称視点のシューティングゲームを指します。"
+  trivia: "PSはゲームジャンルだけでなく、「Frames Per Second（1秒あたりのフレーム数）」という意味でも使われます。画面のなめらかさを表す指標です。"
 ---
