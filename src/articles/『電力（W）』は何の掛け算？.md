@@ -14,7 +14,7 @@ quiz:
     - "電流×時間"
   answer: 0
   displayAnswer: "電圧×電流"
-  hint: "電圧×○○"
-  answerExplanation: "電力Pは電圧V×電流Iです。"
-  trivia: "家電の消費電力はこの関係の上にあります。"
+  hint: "『電圧 × ○○』で表せます⚡"
+  answerExplanation: "電力P（ワット）は、電圧V（ボルト）×電流I（アンペア）で求められます。"
+  trivia: "ドライヤーや電子レンジの『○○W』という表示も、この計算がもとになっています！"
 ---

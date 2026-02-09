@@ -15,6 +15,6 @@ quiz:
   answer: 0
   displayAnswer: "デオキシリボ核酸"
   hint: "核酸がつきます"
-  answerExplanation: "DNAはデオキシリボ核酸の略です。"
-  trivia: "RNAはリボ核酸で、Tの代わりにUを含みます。"
+  answerExplanation: "DNAは『デオキシリボ核酸（Deoxyribonucleic Acid）』の略で、生き物の体の設計図となる遺伝情報を持つ物質です。"
+  trivia: "RNAは『リボ核酸』で、DNAと似ていますが構造や役割が少し異なります。"
 ---
