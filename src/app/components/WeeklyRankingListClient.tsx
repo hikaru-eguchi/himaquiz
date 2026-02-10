@@ -176,16 +176,9 @@ export default function WeeklyRankingListClient({
         <div className="absolute inset-0 opacity-25">
           <div className="w-full h-full bg-[radial-gradient(circle_at_10px_10px,rgba(0,0,0,0.35)_1.2px,transparent_1.3px)] [background-size:20px_20px]" />
         </div>
-
-        <div className="relative flex items-center justify-between">
-          <p className="font-extrabold text-lg tracking-tight">
-            🎖️ ユーザープロフィール
-          </p>
-
-          <span className="inline-flex items-center gap-1 rounded-full bg-white border-2 border-black px-3 py-1 text-xs font-black shadow">
-            TAPで閉じる
-          </span>
-        </div>
+        <p className="font-extrabold text-lg tracking-tight">
+          ユーザープロフィール👤
+        </p>
       </div>
 
       <div className="p-5">
@@ -205,9 +198,28 @@ export default function WeeklyRankingListClient({
           </div>
 
           {/* 名前（ポップ太字＋縁取りっぽい） */}
-          <p className="font-extrabold text-3xl md:text-4xl tracking-tight leading-none text-black">
-            {loading ? "読み込み中..." : selected?.username ?? "名無し"}
-          </p>
+          <div className="
+            flex items-center gap-5
+            px-4 py-2
+            rounded-full
+            border-3 border-black
+            bg-gradient-to-br from-yellow-100 via-amber-100 to-yellow-50
+          ">
+            <span className="
+              text-xs md:text-sm font-black
+              bg-gradient-to-r from-sky-300 to-blue-400
+              text-white
+              px-3 py-1
+              rounded-full
+              shadow-[0_1px_0_rgba(0,0,0,1)]
+            ">
+              👤 NAME
+            </span>
+
+            <p className="font-extrabold text-2xl md:text-3xl leading-none text-black">
+              {loading ? "読み込み中..." : selected?.username ?? "名無し"}　
+            </p>
+          </div>
 
           {/* レベルカード（ステッカー風） */}
           <div className="w-full rounded-3xl border-3 border-black bg-gradient-to-br from-white via-white to-yellow-50 p-4 shadow-[0_6px_0_rgba(0,0,0,1)]">

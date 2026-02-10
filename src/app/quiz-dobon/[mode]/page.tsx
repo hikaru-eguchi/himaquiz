@@ -312,35 +312,41 @@ const QuizResult = ({
                   Xで結果をシェア
                 </button>
 
-                <button
-                  onClick={handleRematch}
-                  className="
-                    w-full md:w-auto
-                    px-6 py-3
-                    bg-yellow-500 hover:bg-yellow-600
-                    text-white text-xl md:text-xl
-                    font-semibold
-                    rounded-lg shadow-md
-                    transition-all duration-300
-                  "
-                >
-                  もう一回対戦する
-                </button>
-  
-                <button
-                  onClick={handleNewMatch}
-                  className="
-                    w-full md:w-auto
-                    px-6 py-3
-                    bg-blue-500 hover:bg-blue-600
-                    text-white text-xl md:text-xl
-                    font-semibold
-                    rounded-lg shadow-md
-                    transition-all duration-300
-                  "
-                >
-                  別の人とマッチする
-                </button>
+                {/* 合言葉マッチだけ */}
+                {isCodeMatch && (
+                  <button
+                    onClick={handleRematch}
+                    className="
+                      w-full md:w-auto
+                      px-6 py-3
+                      bg-yellow-500 hover:bg-yellow-600
+                      text-white text-xl md:text-xl
+                      font-semibold
+                      rounded-lg shadow-md
+                      transition-all duration-300
+                    "
+                  >
+                    もう一回対戦する！
+                  </button>
+                )}
+
+                {/* ランダムだけ */}
+                {!isCodeMatch && (
+                  <button
+                    onClick={handleNewMatch}
+                    className="
+                      w-full md:w-auto
+                      px-6 py-3
+                      bg-blue-500 hover:bg-blue-600
+                      text-white text-xl md:text-xl
+                      font-semibold
+                      rounded-lg shadow-md
+                      transition-all duration-300
+                    "
+                  >
+                    もう一戦いく！
+                  </button>
+                )}
               </div>
             </div>
             {/* 対戦相手待ちメッセージを下に隔離 */}

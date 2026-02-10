@@ -30,24 +30,48 @@ type GachaItem = {
 /* ====== 下部のガチャコンポーネント ====== */
 const QuizGacha = ({
   points,
-  rollGacha,
+  rolling,
+  isPremiumRoll,
   gachaResult,
   setGachaResult,
   history,
   setHistory,
-  rolling,
-  rollGachaPremium,
-  isPremiumRoll,
+
+  gachaQueue,
+  setGachaQueue,
+  gachaIndex,
+  setGachaIndex,
+
+  gachaMode,
+  setGachaMode,
+  rollCount,
+  setRollCount,
+
+  onRoll,
+  cost,
 }: {
   points: number;
-  rollGacha: () => void;
+  rolling: boolean;
+  isPremiumRoll: boolean;
+
   gachaResult: null | GachaItem;
   setGachaResult: (v: null | GachaItem) => void;
+
   history: GachaItem[];
   setHistory: React.Dispatch<React.SetStateAction<GachaItem[]>>;
-  rolling: boolean;
-  rollGachaPremium: () => void;
-  isPremiumRoll: boolean;
+
+  gachaQueue: GachaItem[];
+  setGachaQueue: React.Dispatch<React.SetStateAction<GachaItem[]>>;
+  gachaIndex: number;
+  setGachaIndex: React.Dispatch<React.SetStateAction<number>>;
+
+  gachaMode: "normal" | "premium";
+  setGachaMode: React.Dispatch<React.SetStateAction<"normal" | "premium">>;
+  rollCount: 1 | 10;
+  setRollCount: React.Dispatch<React.SetStateAction<1 | 10>>;
+
+  onRoll: () => void;
+  cost: number;
 }) => {
   const [showOpen, setShowOpen] = useState(false);
   const [showEffect, setShowEffect] = useState(false);
@@ -130,6 +154,9 @@ const QuizGacha = ({
   const [showDark, setShowDark] = useState(false);
   const [showFlash, setShowFlash] = useState(false);
 
+  const isTenPull = gachaQueue.length > 0;
+  const progressText = isTenPull ? `(${gachaIndex + 1}/${gachaQueue.length})` : "";
+
   // ガチャ演出
   useEffect(() => {
     if (!gachaResult) return;
@@ -153,6 +180,15 @@ const QuizGacha = ({
     return () => clearTimeout(t);
   }, [gachaResult]);
 
+  // === UIロック判定（演出中は触れない）===
+  const uiLocked = !!gachaResult && phase !== "idle"; // drop/ready/opening/result中はtrue
+
+  // UI操作ロック（10連中はより強く）
+  const inputLocked = rolling || uiLocked || isTenPull;
+
+  // メインボタンが押せる条件
+  const canRollNow = points >= cost && !inputLocked;
+
   const canRoll = points >= 100 && !rolling;
 
   const showRainbowBg = !!gachaResult && phase !== "result";
@@ -172,66 +208,83 @@ const QuizGacha = ({
             </p>
           </div>
         </div>
-        <button
-          className={`
-            px-6 py-3 rounded-lg font-bold text-xl
-            transition-all duration-300 ease-in-out
-            ${
-              canRoll
-                ? "bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
-                : "bg-blue-500 text-white opacity-50 cursor-not-allowed pointer-events-none"
-            }
+        
+        {/* サブ説明 */}
+        <p className="mt-2 text-md md:text-lg text-white font-bold drop-shadow">
+          {gachaMode === "premium" ? "★4（激レア）以上が確定！" : "いろんなキャラが当たる！"}
+        </p>
+        
+        {/* タブ：通常 / ★4以上確定 */}
+        <div className="flex items-center justify-center gap-2 bg-white/70 p-2 rounded-xl border-2 border-black">
+          <button
+            className={`px-4 py-2 rounded-lg font-extrabold text-lg md:text-xl border-2 border-black transition
+              ${gachaMode === "normal" ? "bg-blue-500 text-white" : "bg-white text-gray-800 hover:bg-gray-100"}
             `}
-          onClick={rollGacha}
-          disabled={!canRoll}
-        >
-          {rolling ? "抽選中..." : "通常ガチャ（100P）"}
-        </button>
+            onClick={() => setGachaMode("normal")}
+            disabled={inputLocked}
+          >
+            通常
+          </button>
 
+          <button
+            className={`px-4 py-2 rounded-lg font-extrabold text-lg md:text-xl border-2 border-black transition
+              ${gachaMode === "premium" ? "bg-gradient-to-r from-yellow-400 via-pink-400 to-purple-500 text-white" : "bg-white text-gray-800 hover:bg-gray-100"}
+            `}
+            onClick={() => setGachaMode("premium")}
+            disabled={inputLocked}
+          >
+            ★4以上確定
+          </button>
+        </div>
+
+        {/* トグル：1回 / 10連 */}
+        <div className="mt-2 flex items-center justify-center">
+          <div className="flex rounded-xl border-2 border-black overflow-hidden">
+            <button
+              className={`px-6 py-2 font-extrabold text-lg md:text-xl transition
+                ${rollCount === 1 ? "bg-black text-white" : "bg-white text-gray-800 hover:bg-gray-100"}
+              `}
+              onClick={() => setRollCount(1)}
+              disabled={inputLocked}
+            >
+              1回
+            </button>
+            <button
+              className={`px-6 py-2 font-extrabold text-lg md:text-xl transition
+                ${rollCount === 10 ? "bg-black text-white" : "bg-white text-gray-800 hover:bg-gray-100"}
+              `}
+              onClick={() => setRollCount(10)}
+              disabled={inputLocked}
+            >
+              10連
+            </button>
+          </div>
+        </div>
+
+        {/* メインボタン：1つ */}
         <button
           className={`
-            relative px-6 py-3 rounded-lg font-extrabold text-xl border-2 border-yellow-200
-            transition-all duration-300 ease-in-out text-white
-            overflow-hidden w-full max-w-[246px] md:w-auto
-            ${
-              canRollPremium
-                ? "cursor-pointer"
-                : "opacity-50 cursor-not-allowed pointer-events-none"
-            }
+            mt-3 px-6 py-3 rounded-lg font-extrabold text-xl md:text-2xl
+            transition-all duration-300 ease-in-out
+            ${canRollNow ? "bg-blue-600 text-white hover:bg-blue-700" : "bg-blue-600 text-white opacity-50 cursor-not-allowed pointer-events-none"}
           `}
-          onClick={() => rollGachaPremium()}
-          disabled={!canRollPremium}
+          onClick={onRoll}
+          disabled={!canRollNow}
         >
-          {/* キラキラ用の薄い光（背景） */}
-          <span className="absolute inset-0 bg-gradient-to-r from-yellow-400 via-pink-400 to-purple-500 opacity-90" />
-          <span className="absolute inset-0 animate-pulse bg-white/20" />
-
-          {/* ボタン本体文字 */}
-          <span className="relative z-10 drop-shadow-[0_2px_0_rgba(0,0,0,0.6)]">
-            {rolling ? (
-              "抽選中..."
-            ) : (
-              <>
-                <span className="hidden md:inline">
-                  ★4以上確定ガチャ（600P）🌟
-                </span>
-
-                <span className="md:hidden block leading-tight">
-                  <span className="block">★4以上確定ガチャ</span>
-                  <span className="block">（600P）🌟</span>
-                </span>
-              </>
-            )}
-          </span>
+          {rolling
+            ? "抽選中..."
+            : rollCount === 10
+            ? `10連を回す（${cost}P）`
+            : `回す（${cost}P）`}
         </button>
 
-        {points < 100 && (
-          <p className="text-xl text-red-500 font-bold animate-pulse">
-            ポイントが足りないよ！
+        {points < cost && (
+          <p className="text-xl text-red-500 font-bold animate-pulse mt-2">
+            ポイントが足りないよ！（あと {cost - points}P）
           </p>
         )}
 
-        {points < 1000 && (
+        {gachaMode === "premium" && points < 600 && (
           <p className="text-sm md:text-lg text-yellow-100 font-bold drop-shadow mt-1">
             ★4以上確定は600P必要！
           </p>
@@ -376,8 +429,40 @@ const QuizGacha = ({
                 return;
               }
 
-              // 結果表示中：どこ押しても閉じる
               if (phase === "result") {
+                // 10連なら次へ
+                if (gachaQueue.length > 0) {
+                  const next = gachaIndex + 1;
+
+                  // まだ残りがある → 次のキャラ演出へ
+                  if (next < gachaQueue.length) {
+                    setShowOpen(false);
+                    setShowEffect(false);
+                    setShowResult(false);
+                    setPhase("idle");
+
+                    setGachaIndex(next);
+
+                    // gachaResult を次に差し替える（これで useEffect が走って drop→ready になる）
+                    setTimeout(() => {
+                      setGachaResult(gachaQueue[next]);
+                    }, 50);
+
+                    return;
+                  }
+
+                  // 最後まで終わった → キューも消して閉じる
+                  setShowOpen(false);
+                  setShowEffect(false);
+                  setShowResult(false);
+                  setGachaResult(null);
+                  setPhase("idle");
+                  setGachaQueue([]);
+                  setGachaIndex(0);
+                  return;
+                }
+
+                // 1回ガチャなら従来通り閉じる
                 setShowOpen(false);
                 setShowEffect(false);
                 setShowResult(false);
@@ -456,7 +541,7 @@ const QuizGacha = ({
                   animate={{ opacity: [0.4, 1, 0.4] }}
                   transition={{ duration: 1, repeat: Infinity }}
                 >
-                  タップで開封！
+                  タップで開封！{progressText}
                 </motion.p>
 
                 <motion.img
@@ -597,6 +682,16 @@ const QuizGacha = ({
                     )}
                   </p>
                 </motion.div>
+                {isTenPull && (
+                  <p className="mt-2 text-lg md:text-2xl font-extrabold text-white drop-shadow">
+                    タップで次へ！ ({gachaIndex + 1}/{gachaQueue.length})
+                  </p>
+                )}
+                {!isTenPull && (
+                  <p className="mt-2 text-lg md:text-2xl font-extrabold text-white drop-shadow">
+                    タップで閉じる
+                  </p>
+                )}
               </>
             )}
           </motion.div>
@@ -626,6 +721,19 @@ export default function QuizMasterPage() {
   const [points, setPoints] = useState(0);
   const [gachaResult, setGachaResult] = useState<GachaItem | null>(null);
   const [history, setHistory] = useState<GachaItem[]>([]);
+
+  type GachaMode = "normal" | "premium";
+  type RollCount = 1 | 10;
+
+  const [gachaMode, setGachaMode] = useState<GachaMode>("normal"); // タブ
+  const [rollCount, setRollCount] = useState<RollCount>(1);        // トグル
+
+  // 10連用キュー
+  const [gachaQueue, setGachaQueue] = useState<GachaItem[]>([]);
+  const [gachaIndex, setGachaIndex] = useState(0);
+
+  // characters.no -> characters.id の辞書
+  const [noToId, setNoToId] = useState<Map<string, string>>(new Map());
 
   // ★ 追加: プロフィールからポイント読み込み
   useEffect(() => {
@@ -662,8 +770,28 @@ export default function QuizMasterPage() {
       setOwnedCharacterIds(new Set((data ?? []).map((r) => r.character_id)));
     };
 
+    const fetchNoToId = async () => {
+      // no と id を全部取る（数が少ないので一括でOK）
+      const { data, error } = await supabase
+        .from("characters")
+        .select("id,no");
+
+      if (error) {
+        console.error("fetchNoToId error:", error);
+        return;
+      }
+
+      const map = new Map<string, string>();
+      for (const row of data ?? []) {
+        // no は string のはず
+        map.set(String(row.no), row.id);
+      }
+      setNoToId(map);
+    };
+
     fetchPoints();
     fetchOwned();
+    fetchNoToId();
   }, [user, userLoading, supabase, router]);
 
   const gachaCharacters: GachaCharacter[] = [
@@ -757,151 +885,50 @@ export default function QuizMasterPage() {
     { name: "きまぐれモンスター【アイドル】", image: "/images/きまぐれモンスター【アイドル】.png", rarity: "シークレット", weight: 0.01, no: "88" },
   ];
 
-  // ★ 修正: プロフィールの points を減らしてログを書き込んでからガチャ抽選
-  const rollGacha = async () => {
-    setIsPremiumRoll(false);
-    if (rolling) return;
-    setRolling(true);
-
-    // 3秒は必ず押せないようにする
-    const unlockTimer = setTimeout(() => {
-      setRolling(false);
-    }, 3000);
-
-    try {
-      if (!user) {
-        alert("ログインしてからガチャを回してね！");
-        return;
-      }
-
-      // 最新ポイントを DB から取得
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("points")
-        .eq("id", user.id)
-        .single();
-
-      if (profileError) {
-        console.error("get profile points error:", profileError);
-        alert("ポイントの取得に失敗しました。時間をおいてもう一度試してください。");
-        return;
-      }
-
-      const currentPoints = profile?.points ?? 0;
-      if (currentPoints < 100) {
-        alert("ポイントが足りません！（100P以上必要です）");
-        return;
-      }
-
-      const newPoints = currentPoints - 100;
-
-      // プロフィールのポイントを更新
-      const { data: updatedProfile, error: updateError } = await supabase
-        .from("profiles")
-        .update({ points: newPoints })
-        .eq("id", user.id)
-        .select("points")
-        .single();
-
-      if (updateError) {
-        console.error("update points error:", updateError);
-        alert("ポイントの更新に失敗しました。時間をおいてもう一度試してください。");
-        return;
-      }
-
-      // state も更新
-      setPoints(updatedProfile?.points ?? newPoints);
-
-      window.dispatchEvent(new Event("points:updated"));
-
-      // ポイントログを記録（-100）
-      const { error: logError } = await supabase.from("user_point_logs").insert({
-        user_id: user.id,
-        change: -100,
-        reason: "ガチャでポイント消費",
-      });
-
-      if (logError) {
-        console.error("insert user_point_logs error:", logError);
-        // ログ失敗は致命的ではないのでアラートまでは出さないでもOK
-      }
-
-      // ここからガチャ抽選処理
-      const totalWeight = gachaCharacters.reduce((sum, c) => sum + c.weight, 0);
-      let random = Math.random() * totalWeight;
-
-      for (const char of gachaCharacters) {
-        if (random < char.weight) {
-
-          // ① DBのcharacters.idを取る（noで紐付け）
-          const { data: characterRow, error: findError } = await supabase
-            .from("characters")
-            .select("id")
-            .eq("no", char.no)
-            .maybeSingle();
-
-          if (findError || !characterRow?.id) {
-            console.error("character lookup error:", findError, char.no);
-            return;
-          }
-
-          // ② NEW判定（引く前の所持セットで判定）
-          const isNew = !ownedCharacterIds.has(characterRow.id);
-
-          // ③ ガチャ結果に isNew を入れる
-          const result: GachaItem = {
-            name: char.name,
-            image: char.image,
-            rarity: char.rarity,
-            no: char.no,
-            characterId: characterRow.id,
-            isNew,
-          };
-          setGachaResult(result);
-
-          // ④ 履歴にも入れる（演出タイミングはそのまま）
-          setTimeout(() => {
-            setHistory((prev) => [...prev, result]);
-          }, 2000);
-
-          // ⑤ 取得保存（既存RPC）
-          const { error: rpcError } = await supabase.rpc("increment_user_character", {
-            p_user_id: user.id,
-            p_character_id: characterRow.id,
-          });
-          if (rpcError) console.error("increment_user_character rpc error:", rpcError);
-
-          // ⑥ NEWだったなら所持セットも更新（次からNEWにならない）
-          if (isNew) {
-            setOwnedCharacterIds((prev) => {
-              const next = new Set(prev);
-              next.add(characterRow.id);
-              return next;
-            });
-          }
-
-          return;
-        }
-        random -= char.weight;
-      }
-    } finally {
-      // 3秒固定ロックを優先するため、ここでは解除しない
-      // （失敗時に早く解除したいなら、ここで clearTimeout & setRolling(false) に変える）
-      // 今回は「必ず3秒押せない」が要件なのでこのまま。
-      // ただしコンポーネントがアンマウントされる可能性があるなら cleanup を入れるのが理想。
+  const pickByWeight = (pool: GachaCharacter[]) => {
+    const total = pool.reduce((sum, c) => sum + c.weight, 0);
+    let r = Math.random() * total;
+    for (const c of pool) {
+      if (r < c.weight) return c;
+      r -= c.weight;
     }
+    return pool[pool.length - 1];
   };
 
+  const NORMAL_COST = 100;
   const PREMIUM_COST = 600;
 
-  const rollGachaPremium = async () => {
-    if (rolling) return;
-    setRolling(true);
-    setIsPremiumRoll(true); // ★ プレミアム演出ON
+  const getCost = (mode: GachaMode, count: RollCount) => {
+    const base = mode === "normal" ? NORMAL_COST : PREMIUM_COST;
+    return base * count; // 1 or 10
+  };
 
-    const unlockTimer = setTimeout(() => {
-      setRolling(false);
-    }, 3500); // 通常よりちょい長く
+  const getPool = (mode: GachaMode) => {
+    if (mode === "normal") return gachaCharacters;
+    return gachaCharacters.filter((c) =>
+      ["激レア", "超激レア", "神レア", "シークレット"].includes(c.rarity)
+    );
+  };
+
+  const rollGachaUnified = async () => {
+    if (rolling) return;
+
+    // Mapができてないときは回せない（初回ロード対策）
+    if (noToId.size === 0) {
+      alert("準備中です。少し待ってからもう一度お試しください。");
+      return;
+    }
+
+    setRolling(true);
+    setIsPremiumRoll(gachaMode === "premium");
+
+    // ロック時間：10連は少し長めでもOK
+    const lockMs = rollCount === 10 ? 3500 : 3000;
+    setTimeout(() => setRolling(false), lockMs);
+
+    // 10連状態リセット
+    setGachaQueue([]);
+    setGachaIndex(0);
 
     try {
       if (!user) {
@@ -909,7 +936,9 @@ export default function QuizMasterPage() {
         return;
       }
 
-      // 最新ポイントを DB から取得
+      const cost = getCost(gachaMode, rollCount);
+
+      // 最新ポイント
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("points")
@@ -923,14 +952,14 @@ export default function QuizMasterPage() {
       }
 
       const currentPoints = profile?.points ?? 0;
-      if (currentPoints < PREMIUM_COST) {
-        alert("ポイントが足りません！（600P以上必要です）");
+      if (currentPoints < cost) {
+        alert(`ポイントが足りません！（${cost}P以上必要です）`);
         return;
       }
 
-      const newPoints = currentPoints - PREMIUM_COST;
+      const newPoints = currentPoints - cost;
 
-      // プロフィールのポイントを更新
+      // ポイント減算
       const { data: updatedProfile, error: updateError } = await supabase
         .from("profiles")
         .update({ points: newPoints })
@@ -947,76 +976,78 @@ export default function QuizMasterPage() {
       setPoints(updatedProfile?.points ?? newPoints);
       window.dispatchEvent(new Event("points:updated"));
 
-      // ポイントログ（-600）
+      // ログ
       await supabase.from("user_point_logs").insert({
         user_id: user.id,
-        change: -PREMIUM_COST,
-        reason: "★4以上確定ガチャでポイント消費",
+        change: -cost,
+        reason:
+          gachaMode === "normal"
+            ? rollCount === 10
+              ? "通常10連ガチャでポイント消費"
+              : "通常ガチャでポイント消費"
+            : rollCount === 10
+            ? "★4以上確定10連ガチャでポイント消費"
+            : "★4以上確定ガチャでポイント消費",
       });
 
-      // ✅ ★4以上だけ抽選（激レア/超激レア/神レア/シークレット）
-      const premiumPool = gachaCharacters.filter((c) =>
-        ["激レア", "超激レア", "神レア", "シークレット"].includes(c.rarity)
-      );
+      // 抽選（1回 or 10回）
+      const pool = getPool(gachaMode);
 
-      const totalWeight = premiumPool.reduce((sum, c) => sum + c.weight, 0);
-      let random = Math.random() * totalWeight;
+      // NEW判定用：10連中に当たった分も反映させる
+      const tempOwned = new Set(ownedCharacterIds);
 
-      for (const char of premiumPool) {
-        if (random < char.weight) {
+      const results: GachaItem[] = [];
 
-          // ① DBのcharacters.idを取る（noで紐付け）
-          const { data: characterRow, error: findError } = await supabase
-            .from("characters")
-            .select("id")
-            .eq("no", char.no)
-            .maybeSingle();
+      for (let i = 0; i < rollCount; i++) {
+        const char = pickByWeight(pool);
 
-          if (findError || !characterRow?.id) {
-            console.error("character lookup error:", findError, char.no);
-            return;
-          }
-
-          // ② NEW判定
-          const isNew = !ownedCharacterIds.has(characterRow.id);
-
-          // ③ GachaItem を作る（ここが重要）
-          const result: GachaItem = {
-            name: char.name,
-            image: char.image,
-            rarity: char.rarity,
-            no: char.no,
-            characterId: characterRow.id,
-            isNew,
-          };
-
-          // ④ 画面表示・履歴
-          setGachaResult(result);
-          setTimeout(() => setHistory((prev) => [...prev, result]), 2000);
-
-          // ⑤ 取得保存（既存RPC）
-          const { error: rpcError } = await supabase.rpc("increment_user_character", {
-            p_user_id: user.id,
-            p_character_id: characterRow.id,
-          });
-          if (rpcError) console.error("increment_user_character rpc error:", rpcError);
-
-          // ⑥ NEWだったなら所持セットも更新
-          if (isNew) {
-            setOwnedCharacterIds((prev) => {
-              const next = new Set(prev);
-              next.add(characterRow.id);
-              return next;
-            });
-          }
-
+        const characterId = noToId.get(char.no);
+        if (!characterId) {
+          console.error("noToId missing:", char.no);
           return;
         }
-        random -= char.weight;
+
+        const isNew = !tempOwned.has(characterId);
+        if (isNew) tempOwned.add(characterId);
+
+        results.push({
+          name: char.name,
+          image: char.image,
+          rarity: char.rarity,
+          no: char.no,
+          characterId,
+          isNew,
+        });
       }
+
+      // 取得保存（10回でも順にRPC）
+      for (const r of results) {
+        const { error: rpcError } = await supabase.rpc("increment_user_character", {
+          p_user_id: user.id,
+          p_character_id: r.characterId,
+        });
+        if (rpcError) console.error("increment_user_character rpc error:", rpcError);
+      }
+
+      // owned 更新（まとめて）
+      setOwnedCharacterIds(tempOwned);
+
+      // 履歴（今回は「今回の入手キャラ」なので、引いた瞬間にまとめて追加でOK）
+      // 演出に合わせたいなら後で「1体ずつpush」もできます
+      setHistory((prev) => [...prev, ...results]);
+
+      // 演出開始
+      if (rollCount === 1) {
+        setGachaResult(results[0]);
+        return;
+      }
+
+      // 10連：キューに入れて1体目を表示
+      setGachaQueue(results);
+      setGachaIndex(0);
+      setGachaResult(results[0]);
     } finally {
-      // 固定ロック優先のためここでは解除しない（既存方針と同じ）
-      // clearTimeout(unlockTimer) したいならここで
+      // 固定ロック優先なので解除はしない（あなたの方針踏襲）
     }
   };
 
@@ -1160,14 +1191,30 @@ export default function QuizMasterPage() {
       <div className="container mx-auto px-4 pb-10">
         <QuizGacha
           points={points}
-          rollGacha={rollGacha}
-          rollGachaPremium={rollGachaPremium}
-          isPremiumRoll={isPremiumRoll} 
+          rolling={rolling}
+          isPremiumRoll={isPremiumRoll}
           gachaResult={gachaResult}
           setGachaResult={setGachaResult}
           history={history}
           setHistory={setHistory}
-          rolling={rolling}
+
+          // 10連用
+          gachaQueue={gachaQueue}
+          setGachaQueue={setGachaQueue}
+          gachaIndex={gachaIndex}
+          setGachaIndex={setGachaIndex}
+
+          // UI選択
+          gachaMode={gachaMode}
+          setGachaMode={setGachaMode}
+          rollCount={rollCount}
+          setRollCount={setRollCount}
+
+          // 実行
+          onRoll={rollGachaUnified}
+
+          // 表示用
+          cost={getCost(gachaMode, rollCount)}
         />
       </div>
     </div>
