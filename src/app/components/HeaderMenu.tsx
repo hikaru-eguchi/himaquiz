@@ -177,22 +177,51 @@ export default function HeaderMenu() {
 
           {/* ログイン済み：ユーザー名＆ポイント */}
           {user && (
-            <div className="text-center text-lg font-bold text-gray-700 pb-2 border-b space-y-1">
-              <div className="flex justify-center">
-                <img
-                  src={avatarUrl}
-                  alt="icon"
-                  className="w-24 h-24 md:w-28 md:h-28 rounded-full border-2 border-white bg-white object-contain shadow-lg"
-                  onClick={() => !confirmOpen && setAvatarPreviewOpen(true)}
-                />
-              </div>
-              <div className="text-xl mt-2">{username ? `${username} さん` : "ユーザー"}</div>
-              <div className="text-md px-2 py-0.5 rounded text-amber-500">
-                ユーザーレベル： Lv. {level ?? 1}
-              </div>
-              <div className="text-md text-blue-500">
-                所持ポイント：
-                <span className="font-extrabold"> {points ?? 0}</span> P
+            <div className="pb-3 border-b-3 border-black">
+              <div className="rounded-[22px] overflow-hidden bg-white">
+                <div className="p-4 grid place-items-center gap-3">
+                  {/* アバター（オーラ＋バッジ） */}
+                  <button
+                    type="button"
+                    onClick={() => !confirmOpen && setAvatarPreviewOpen(true)}
+                    className="relative"
+                  >
+                    <div className="absolute -inset-3 rounded-full blur-[6px] opacity-70 bg-gradient-to-br from-yellow-200 via-pink-200 to-sky-200" />
+                    <div className="relative w-28 h-28 md:w-30 md:h-30 rounded-full bg-white overflow-hidden border-3 border-black shadow-[0_5px_0_rgba(0,0,0,1)]">
+                      <img
+                        src={avatarUrl}
+                        alt="icon"
+                        className="w-full h-full object-contain bg-white"
+                      />
+                    </div>
+                  </button>
+
+                  {/* 名前 */}
+                  <div className="text-center">
+                    <p className="text-xl md:text-2xl font-extrabold tracking-tight leading-none my-2">
+                      {username ? `${username} さん` : "ユーザー"}
+                    </p>
+                    <p className="mt-1 text-xs font-bold text-gray-600">
+                      アイコンをタップで拡大＆変更
+                    </p>
+                  </div>
+
+                  {/* ステータス（ミニカード2枚） */}
+                  <div className="w-full grid grid-cols-2 gap-2">
+                    <div className="rounded-2xl border-3 border-black bg-white p-3 shadow-[0_6px_0_rgba(0,0,0,1)]">
+                      <p className="text-xs font-black text-gray-600">ユーザーレベル🌟</p>
+                      <p className="text-lg font-extrabold">{`Lv.${level ?? 1}`}</p>
+                    </div>
+
+                    <div className="rounded-2xl border-3 border-black bg-white p-3 shadow-[0_6px_0_rgba(0,0,0,1)]">
+                      <p className="text-xs font-black text-gray-600">所持ポイント💰</p>
+                      <p className="text-lg font-extrabold">
+                        {points ?? 0}
+                        <span className="text-sm font-black ml-1">P</span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}

@@ -20,6 +20,7 @@ type PublicProfile = {
   username: string | null;
   avatar_url: string | null;
   level: number | null;
+  character_count: number | null;
 };
 
 export default function WeeklyRankingListClient({
@@ -53,14 +54,14 @@ export default function WeeklyRankingListClient({
 
     const { data, error } = await supabase
       .from("user_public_profiles")
-      .select("user_id, username, avatar_url, level")
+      .select("user_id, username, avatar_url, level, character_count")
       .eq("user_id", userId)
       .single();
 
     setLoading(false);
 
     if (error) {
-      setSelected({ user_id: userId, username: null, avatar_url: null, level: null });
+      setSelected({ user_id: userId, username: null, avatar_url: null, level: null, character_count: null, });
       return;
     }
 
@@ -68,7 +69,7 @@ export default function WeeklyRankingListClient({
   };
 
   const top3 = rows.slice(0, 3);
-  const rest = rows.slice(3, 5);
+  const rest = rows.slice(3, 10); // ✅ 4〜10位
 
   return (
     <>
@@ -107,13 +108,17 @@ export default function WeeklyRankingListClient({
                 <div className={`rounded-xl ${topBg} ${podiumH} grid place-items-center p-2 md:p-3 shadow ${ring}`}>
                 <p className="text-2xl md:text-3xl">{medal}</p>
 
-                <div className="mt-1 w-14 h-14 md:w-16 md:h-16 rounded-full border-2 border-black bg-white overflow-hidden shadow">
-                    <img
-                    src={u?.avatar_url ?? "/images/初期アイコン.png"}
-                    alt={u?.username ?? "user"}
-                    className="w-full h-full object-cover"
-                    />
-                </div>
+                 <div className="mt-1 relative">
+                    {/* オーラ（プロフィールと同系統） */}
+                    <div className="absolute -inset-2 rounded-full" />
+                    <div className="relative w-14 h-14 md:w-16 md:h-16 rounded-full bg-white overflow-hidden border-[2px] border-black shadow-[0_4px_0_rgba(0,0,0,1)]">
+                      <img
+                        src={u?.avatar_url ?? "/images/初期アイコン.png"}
+                        alt={u?.username ?? "user"}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
 
                 <p className="mt-2 text-xs md:text-sm font-extrabold truncate w-full px-1">
                     {u?.username ?? "---"}
@@ -139,12 +144,12 @@ export default function WeeklyRankingListClient({
             >
             <div className="flex items-center gap-2 min-w-0">
                 <p className="font-extrabold w-10">{idx + 4}位</p>
-                <div className="w-9 h-9 rounded-full border-2 border-black bg-white overflow-hidden">
-                <img
+                <div className="relative w-9 h-9 rounded-full bg-white overflow-hidden border-[2px] border-black shadow-[0_3px_0_rgba(0,0,0,1)]">
+                  <img
                     src={u.avatar_url ?? "/images/初期アイコン.png"}
                     alt={u.username ?? "user"}
                     className="w-full h-full object-cover"
-                />
+                  />
                 </div>
                 <p className="font-bold truncate">{u.username ?? "名無し"}</p>
             </div>
@@ -154,40 +159,85 @@ export default function WeeklyRankingListClient({
         </div>
 
       {open && (
-        <button
-          type="button"
-          onClick={() => {
-            setOpen(false);
-            setSelected(null);
-            setLoading(false);
-          }}
-          className="fixed inset-0 z-[999] bg-black/50 grid place-items-center p-4"
-        >
-          <div
-            className="w-full max-w-sm bg-white rounded-2xl border-2 border-black p-5 shadow-2xl"
-          >
-            <p className="text-xl md:text-2xl font-extrabold mb-3 text-center">ユーザープロフィール</p>
+  <button
+    type="button"
+    onClick={() => {
+      setOpen(false);
+      setSelected(null);
+      setLoading(false);
+    }}
+    className="fixed inset-0 z-[999] bg-black/60 backdrop-blur-[2px] grid place-items-center p-4"
+  >
+    {/* クリック伝播を止めたいならここで stopPropagation も可 */}
+    <div className="w-full max-w-sm rounded-[28px] overflow-hidden shadow-[0_8px_0_rgba(0,0,0,1)] border-3 border-black bg-white">
+      {/* ヘッダー帯（ポップ） */}
+      <div className="relative px-5 pt-5 pb-4 border-b-3 border-black bg-gradient-to-r from-yellow-200 via-pink-200 to-sky-200">
+        {/* ドット柄っぽい演出 */}
+        <div className="absolute inset-0 opacity-25">
+          <div className="w-full h-full bg-[radial-gradient(circle_at_10px_10px,rgba(0,0,0,0.35)_1.2px,transparent_1.3px)] [background-size:20px_20px]" />
+        </div>
 
-            <div className="grid place-items-center gap-3">
-              <div className="w-35 h-35 md:w-50 md:h-50 rounded-full border-2 border-black bg-white overflow-hidden">
-                <img
-                  src={selected?.avatar_url ?? "/images/初期アイコン.png"}
-                  alt={selected?.username ?? "user"}
-                  className="w-full h-full object-cover"
-                />
-              </div>
+        <div className="relative flex items-center justify-between">
+          <p className="font-extrabold text-lg tracking-tight">
+            🎖️ ユーザープロフィール
+          </p>
 
-              <p className="font-extrabold text-3xl md:text-4xl">{loading ? "読み込み中..." : selected?.username ?? "名無し"}</p>
+          <span className="inline-flex items-center gap-1 rounded-full bg-white border-2 border-black px-3 py-1 text-xs font-black shadow">
+            TAPで閉じる
+          </span>
+        </div>
+      </div>
 
-              <p className="text-xl md:text-2xl font-bold text-gray-700">
-                ユーザーレベル：Lv.{loading ? "..." : selected?.level ?? "--"}
-              </p>
-
-              <p className="text-sm md:text-lg text-gray-500">※画面をタップすると閉じます</p>
+      <div className="p-5">
+        <div className="grid place-items-center gap-4">
+          {/* アバター（オーラ＋バッジ） */}
+          <div className="relative">
+            {/* オーラ */}
+            <div className="absolute -inset-4 rounded-full blur-[6px] opacity-70 bg-gradient-to-br from-yellow-200 via-pink-200 to-sky-200" />
+            {/* 本体 */}
+            <div className="relative w-36 h-36 md:w-44 md:h-44 rounded-full bg-white overflow-hidden border-3 border-black shadow-[0_6px_0_rgba(0,0,0,1)]">
+              <img
+                src={selected?.avatar_url ?? "/images/初期アイコン.png"}
+                alt={selected?.username ?? "user"}
+                className="w-full h-full object-cover"
+              />
             </div>
           </div>
-        </button>
-      )}
+
+          {/* 名前（ポップ太字＋縁取りっぽい） */}
+          <p className="font-extrabold text-3xl md:text-4xl tracking-tight leading-none text-black">
+            {loading ? "読み込み中..." : selected?.username ?? "名無し"}
+          </p>
+
+          {/* レベルカード（ステッカー風） */}
+          <div className="w-full rounded-3xl border-3 border-black bg-gradient-to-br from-white via-white to-yellow-50 p-4 shadow-[0_6px_0_rgba(0,0,0,1)]">
+            <p className="text-sm md:text-base font-black text-gray-700">
+              🌟 ユーザーレベル 🌟
+            </p>
+            <p className="mt-1 text-3xl md:text-4xl font-extrabold">
+              {loading ? "..." : `Lv.${selected?.level ?? "--"}`}
+            </p>
+          </div>
+
+          {/* 所持キャラ数カード（ステッカー風） */}
+          <div className="w-full rounded-3xl border-3 border-black bg-white p-4 shadow-[0_6px_0_rgba(0,0,0,1)]">
+            <p className="text-sm md:text-base font-black text-gray-700">📚 所持キャラ数 📚</p>
+            <p className="mt-1 text-3xl md:text-4xl font-extrabold">
+              {loading ? "..." : `${selected?.character_count ?? "--"}体`}
+            </p>
+          </div>
+
+          {/* 吹き出し案内 */}
+          <div className="relative">
+            <div className="rounded-2xl bg-white border-2 border-black px-4 py-2 font-bold text-sm text-gray-700 shadow">
+              画面をタップすると閉じます
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </button>
+)}
     </>
   );
 }
