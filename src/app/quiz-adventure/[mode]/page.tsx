@@ -643,6 +643,7 @@ export default function QuizModePage() {
     sendMessage,
     resetMatch,
     updateStartAt,
+    leaveRoom,
     players: rawPlayers,
     questionIds,
     matched,
@@ -770,6 +771,12 @@ export default function QuizModePage() {
   };
 
   const handleNewMatch = () => {
+    const old = roomCode;   // ★今の部屋
+    if (old) leaveRoom(old); // ★抜ける（emit）
+
+    setRoomCode(""); 
+
+    setBattleKey((prev) => prev + 1);
     // ★ ここで roomLocked をリセット
     setRoomLocked(false);
     roomLockedRef.current = false;
@@ -795,6 +802,7 @@ export default function QuizModePage() {
     setEarnedExp(0);
     sentRef.current = false;
     clearPendingAward();
+    setAllPlayersDead(false);
 
     setReadyToStart(false);
 
@@ -1088,7 +1096,7 @@ export default function QuizModePage() {
       const explanationTimer = setTimeout(() => setShowExplanation(true), 2000);
 
       // 正解人数表示
-      const correctCountTimer = setTimeout(() => setShowCorrectCount(true), 3000);
+      // const correctCountTimer = setTimeout(() => setShowCorrectCount(true), 3000);
 
       // ダメージ表示
       const damageTimer = setTimeout(() => setShowDamageResult(true), 3000);
@@ -1097,7 +1105,7 @@ export default function QuizModePage() {
         clearTimeout(answerTextTimer);
         clearTimeout(answerTimer);
         clearTimeout(explanationTimer);
-        clearTimeout(correctCountTimer);
+        // clearTimeout(correctCountTimer);
         clearTimeout(damageTimer);
       };
     }
@@ -1772,7 +1780,7 @@ export default function QuizModePage() {
                           : "　"
                         : result
                         ? "？"
-                        : `LP: ${life}`}
+                        : `❤: ${life}`}
                     </p>
 
                     {/* 吹き出し表示（そのまま） */}
@@ -1850,11 +1858,11 @@ export default function QuizModePage() {
                   </p>
                 )}
               </div>
-              {showCorrectCount && (
+              {/* {showCorrectCount && (
                 <p className="mt-1 text-xl md:text-2xl font-bold text-black mt-4">
                   正解人数：{results.filter(r => r.isCorrect).length}人
                 </p>
-              )}
+              )} */}
               {showDamageResult && (
                 <p className="mb-2 text-xl md:text-2xl font-bold text-red-600 drop-shadow-lg">
                   与えたダメージ：{damage}

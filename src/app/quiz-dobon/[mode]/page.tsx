@@ -718,6 +718,7 @@ export default function QuizModePage() {
   };
 
   const handleNewMatch = () => {
+    setBattleKey((prev) => prev + 1);
     // 状態をリセット
     // ★ ここで roomLocked をリセット
     setRoomLocked(false);

@@ -468,6 +468,7 @@ export default function QuizModePage() {
     sendMessage,
     resetMatch,
     updateStartAt,
+    leaveRoom,
     players: rawPlayers,
     questionIds,
     bothReady,
@@ -624,6 +625,12 @@ export default function QuizModePage() {
   };
 
   const handleNewMatch = () => {
+    const old = roomCode;   // ★今の部屋
+    if (old) leaveRoom(old); // ★抜ける（emit）
+
+    setRoomCode(""); 
+
+    setBattleKey((prev) => prev + 1);
     // 状態をリセット
     // ★ ここで roomLocked をリセット
     setRoomLocked(false);

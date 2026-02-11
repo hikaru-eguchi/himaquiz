@@ -330,9 +330,9 @@ export const useBattle = (playerName: string) => {
     const type = options?.gameType ?? "quiz";
     setGameType(type)
     socket.emit("join_random", { playerName, maxPlayers, gameType: type });
-    socket.on("start_game", ({ roomCode: code }) => {
+    socket.once("start_game", ({ roomCode: code }: { roomCode: string }) => {
       setRoomCode(code);
-      if (onJoined) onJoined(code);
+      onJoined?.(code);
     });
   };
 
@@ -349,6 +349,20 @@ export const useBattle = (playerName: string) => {
       count,
       gameType: type,
     });
+  };
+
+  const leaveRoom = (code?: string) => {
+    if (!socket) return;
+    const target = code ?? roomCode;
+    if (!target) return;
+
+    socket.emit("leave_room", { roomCode: target });
+
+    // クライアント側の部屋情報も一旦クリア（任意だけどおすすめ）
+    setRoomCode(null);
+    setMatched(false);
+    setBothReady(false);
+    setStartAt(null);
   };
 
   /* =========================
@@ -408,6 +422,7 @@ export const useBattle = (playerName: string) => {
 
   return {
     joinRandom,
+    leaveRoom,
     joinWithCode,
     updateScore,
     sendReady,
