@@ -300,6 +300,19 @@ export default function NavButtons() {
                           多数決クイズ
                         </button>
                       </Link>
+
+                      {/* <Link
+                        href="/quiz-mind"
+                        onClick={() => handleNavClick("/quiz-mind")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-gradient-to-r from-pink-600 via-rose-500 to-amber-200 text-white ring-2 ring-rose-500 md:hover:scale-110 ${
+                            activeUrl === "/quiz-mind" ? activeStyle : ""
+                          }`}
+                        >
+                          心理当てバトル
+                        </button>
+                      </Link> */}
                     </div>
                   </div>
 

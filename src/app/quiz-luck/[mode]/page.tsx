@@ -202,18 +202,10 @@ export default function QuizModePage() {
   const genre = searchParams?.get("genre") || "";
   const level = searchParams?.get("level") || "";
 
-  type GamePhase = "intro" | "playing" | "between" | "finished";
+  type GamePhase = "intro" | "playing" | "between" | "roulette" | "finished";
   const CHALLENGE_TARGETS = [2, 3, 5] as const; // 1回目2連続 / 2回目3連続 / 3回目5連続
 
   const randChoice = <T,>(arr: readonly T[]) => arr[Math.floor(Math.random() * arr.length)];
-  const randInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
-
-  // 第2以降の倍率用（第1はベース報酬決定）
-  const getMulRange = (idx: number) => {
-    // idx: 0=第1, 1=第2, 2=第3
-    if (idx === 1) return { min: 2, max: 3 }; // 第2
-    return { min: 2, max: 4 };               // 第3(とそれ以外)
-  };
 
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const { user, loading: userLoading } = useSupabaseUser();
@@ -252,6 +244,11 @@ export default function QuizModePage() {
   const finishedRef = useRef(finished);
   const showCorrectRef = useRef(showCorrectMessage);
   const rewardAppliedRef = useRef<{ [k: number]: boolean }>({});
+
+  // ★ ルーレット倍率（betweenで決める）
+  const [mulRolling, setMulRolling] = useState(false);
+  const [mulCandidate, setMulCandidate] = useState<number>(2); // 表示中の数字
+  const [mulLocked, setMulLocked] = useState<number | null>(null); // タップで確定した倍率
 
   // ============================
   // ✅ 取りこぼし防止：pending key
@@ -358,6 +355,16 @@ export default function QuizModePage() {
     }
   };
 
+  const getFailFinalReward = () => {
+    // ルーレット後（倍率を適用した直後のチャレンジ中）なら
+    // prevReward = 倍率を掛ける前の報酬 が入ってる
+    if (lastMultiplier != null && prevReward != null) {
+      return Math.floor(prevReward / 2);
+    }
+    // それ以外（1回目など）は今まで通り
+    return Math.floor(reward / 2);
+  };
+
   const titles = [
     { threshold: 3, title: "優等生" },
     { threshold: 5, title: "異端児" },
@@ -455,6 +462,78 @@ export default function QuizModePage() {
     setQuestions((prev) => shuffleArray(prev));
   };
 
+  const lockMul = () => {
+    if (!mulRolling) return;
+
+    // いま表示中の数字で確定
+    setMulRolling(false);
+    setMulLocked(mulCandidate);
+
+    // interval 停止
+    if (mulTimerRef.current) {
+      window.clearInterval(mulTimerRef.current);
+      mulTimerRef.current = null;
+    }
+  };
+
+  const startNextChallengeFromRoulette = () => {
+    if (mulLocked == null) return;
+    if (challengeIndex >= 2) return;
+
+    const mul = mulLocked;
+
+    // 倍率反映
+    setLastMultiplier(mul);
+    setReward((r) => {
+      setPrevReward(r);
+      const next = r * mul;
+      setFailReward(Math.floor(next / 2));
+      return next;
+    });
+
+    // 次チャレンジ準備
+    setChallengeIndex((v) => v + 1);
+    setStreakInChallenge(0);
+    setShowCorrectMessage(false);
+    setIncorrectMessage(null);
+    setTimeLeft(30);
+
+    // 次の問題へ
+    setCurrentIndex((i) => i + 1);
+
+    // playingへ
+    setPhase("playing");
+  };
+
+  const mulTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const shouldRoulette = phase === "roulette" && challengeIndex < 2 && mulLocked == null;
+
+    if (!shouldRoulette) {
+      if (mulTimerRef.current) {
+        window.clearInterval(mulTimerRef.current);
+        mulTimerRef.current = null;
+      }
+      setMulRolling(false);
+      return;
+    }
+
+    setMulRolling(true);
+    setMulCandidate(2);
+
+    mulTimerRef.current = window.setInterval(() => {
+      setMulCandidate((prev) => (prev === 2 ? 3 : prev === 3 ? 4 : prev === 4 ? 5 : 2));
+    }, 90);
+
+    return () => {
+      if (mulTimerRef.current) {
+        window.clearInterval(mulTimerRef.current);
+        mulTimerRef.current = null;
+      }
+    };
+  }, [phase, challengeIndex, mulLocked]);
+
   useEffect(() => {
     finishedRef.current = finished;
   }, [finished]);
@@ -529,7 +608,7 @@ export default function QuizModePage() {
         if (t <= 1) {
           clearInterval(timer);
           setFinished(true);
-          setFinalReward(Math.floor(reward / 4)); // 時間切れは失敗扱い：半分→4分の1（※1回目はreward=0なので0）
+          setFinalReward(getFailFinalReward()); // 時間切れは失敗扱い：半分→4分の1（※1回目はreward=0なので0）
           setPhase("finished");
           return 0;
         }
@@ -558,22 +637,11 @@ export default function QuizModePage() {
             rewardAppliedRef.current[challengeIndex] = true;
 
             if (challengeIndex === 0) {
-              const base = randChoice([100, 200, 300] as const);
+              const base = randChoice([100, 200, 300, 400] as const);
               setBaseReward(base);
               setReward(base);
-              setFailReward(Math.floor(base / 4));
+              setFailReward(Math.floor(base / 2));
               setLastMultiplier(null);
-            } else {
-              const { min, max } = getMulRange(challengeIndex);
-              const mul = randInt(min, max);
-              setLastMultiplier(mul);
-
-              setReward((r) => {
-                setPrevReward(r);
-                const next = r * mul;
-                setFailReward(Math.floor(next / 4));
-                return next;
-              });
             }
           });
 
@@ -589,9 +657,8 @@ export default function QuizModePage() {
       // ❌ 不正解：失敗
       setIncorrectMessage(`ざんねん！\n答えは" ${displayAnswer} "でした！`);
 
-      // 失敗時の確定報酬（半分→4分の1）
-      const half = Math.floor(reward / 4);
-      setFinalReward(half);
+      // 倍率“前”の半分を確定にしたい
+      setFinalReward(getFailFinalReward());
     }
 
     setUserAnswer(null);
@@ -610,7 +677,7 @@ export default function QuizModePage() {
 
     // 通常：次の問題
     if (currentIndex + 1 >= questions.length) {
-      setFinalReward(Math.floor(reward / 4));
+      setFinalReward(Math.floor(reward / 2));
       setFinished(true);
       setPhase("finished");
     } else {
@@ -625,19 +692,12 @@ export default function QuizModePage() {
   };
 
   const goNextChallenge = () => {
-    // 次チャレンジへ
     if (challengeIndex >= 2) return;
 
-    setChallengeIndex((v) => v + 1);
-    setStreakInChallenge(0);
-    setShowCorrectMessage(false);
+    // ここでは何も進めない！rouletteへ行くだけ
     setIncorrectMessage(null);
-    setTimeLeft(30);
-
-    // 次の問題へ進める
-    setCurrentIndex((i) => i + 1);
-
-    setPhase("playing");
+    setMulLocked(null);     // 念のため
+    setPhase("roulette");
   };
 
   const takeRewardAndFinish = () => {
@@ -868,6 +928,57 @@ export default function QuizModePage() {
           >
             終了して報酬を受け取る
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  // =========================
+  // roulette 画面（倍率を決める）
+  // =========================
+  if (phase === "roulette") {
+    return (
+      <div className="container mx-auto p-8 text-center bg-gradient-to-b from-green-200 via-green-100 to-green-200">
+        <p className="text-3xl md:text-5xl font-extrabold text-gray-800 mb-4">
+          報酬倍率ルーレット！🎰
+        </p>
+
+        <p className="text-lg md:text-2xl font-bold text-gray-700 mb-6">
+          タップで倍率を決定！決まったら「スタート！」で次の問題へ！
+        </p>
+
+        <div className="mx-auto max-w-[520px]">
+          <button
+            onClick={() => {
+              if (mulLocked == null) lockMul(); // まず確定
+            }}
+            className={[
+              "w-full rounded-3xl border-2 border-black shadow-xl px-6 py-8",
+              "bg-gradient-to-r from-pink-300 via-yellow-200 to-green-200",
+              "hover:scale-[1.02] active:scale-[0.98] transition",
+            ].join(" ")}
+          >
+            <div className="text-sm md:text-lg font-bold text-gray-700">
+              {mulLocked == null ? "👆 タップで決定！（止めてね）" : "✅ これに決定！"}
+            </div>
+
+            <div className="mt-3 text-6xl md:text-8xl font-extrabold text-gray-900 drop-shadow">
+              ×{mulLocked ?? mulCandidate}
+            </div>
+
+            {mulLocked == null && (
+              <div className="mt-3 text-xs md:text-sm text-gray-600">2〜5のどれか！</div>
+            )}
+          </button>
+
+          {mulLocked != null && (
+            <button
+              onClick={startNextChallengeFromRoulette}
+              className="mt-6 px-8 py-4 bg-blue-500 text-white text-2xl md:text-3xl font-extrabold rounded-full border-2 border-black shadow-lg hover:bg-blue-600 hover:scale-105 transition"
+            >
+              スタート！
+            </button>
+          )}
         </div>
       </div>
     );

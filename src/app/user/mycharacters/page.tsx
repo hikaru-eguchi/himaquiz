@@ -180,7 +180,7 @@ export default function MyCharactersPage() {
           マイキャラ図鑑
         </h1>
         <p className="mt-2 md:mt-3 text-sm md:text-lg text-gray-700 drop-shadow-sm">
-          ガチャで当てたキャラがここにコレクションされていくよ！
+          ゲットしたキャラがここにコレクションされていくよ！
         </p>
       </div>
 
