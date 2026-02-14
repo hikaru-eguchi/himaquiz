@@ -263,6 +263,19 @@ export default function NavButtons() {
                       </Link>
 
                       <Link
+                        href="/quiz-royal"
+                        onClick={() => handleNavClick("/quiz-royal")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-gradient-to-r from-yellow-500 via-amber-300 to-blue-500 text-white ring-2 ring-yellow-500 md:hover:scale-110 ${
+                            activeUrl === "/quiz-royal" ? activeStyle : ""
+                          }`}
+                        >
+                          クイズロワイヤル
+                        </button>
+                      </Link>
+
+                      <Link
                         href="/quiz-adventure"
                         onClick={() => handleNavClick("/quiz-adventure")}
                       >

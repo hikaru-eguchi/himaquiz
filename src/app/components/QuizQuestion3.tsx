@@ -8,10 +8,10 @@ interface Props {
   setUserAnswer: (val: number) => void;
 }
 
-const AB = ["A", "B"] as const;
+const ABC = ["A", "B", "C"] as const;
 
 export default function QuizQuestion3({ quiz, userAnswer, setUserAnswer }: Props) {
-  const choices = (quiz.choices ?? []).slice(0, 3); // 念のため3つに制限
+  const choices = (quiz.choices ?? []).slice(0, 3); // 最大3択
 
   return (
     <div className="my-3 text-center bg-white border border-black rounded-lg p-6 max-w-md mx-auto">
@@ -38,7 +38,7 @@ export default function QuizQuestion3({ quiz, userAnswer, setUserAnswer }: Props
                 ${isSelected ? "border-blue-600 bg-blue-50" : "border-gray-300 bg-white hover:bg-gray-50"}
               `}
             >
-              {/* A / B バッジ */}
+              {/* A / B / C バッジ */}
               <span
                 className={`
                   inline-flex items-center justify-center
@@ -48,7 +48,7 @@ export default function QuizQuestion3({ quiz, userAnswer, setUserAnswer }: Props
                   ${isSelected ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}
                 `}
               >
-                {AB[idx]}
+                {ABC[idx]}
               </span>
 
               {/* 選択肢本文 */}
@@ -56,7 +56,7 @@ export default function QuizQuestion3({ quiz, userAnswer, setUserAnswer }: Props
                 {choice}
               </span>
 
-              {/* 右端にチェック風 */}
+              {/* 右端にチェック */}
               <span className="ml-auto text-xl">
                 {isSelected ? "✅" : ""}
               </span>

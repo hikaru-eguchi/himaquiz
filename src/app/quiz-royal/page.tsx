@@ -17,7 +17,7 @@ export default function QuizMasterPage() {
   // ★ 入力された制限時間（クエリで渡す）
   const [limitTime, setLimitTime] = useState<number | null>(2);
 
-  // ★ PC用キャラ（全3枚）
+  // ★ PC用キャラ（全6枚）
   const allCharacters = [
     "/images/quiz_man.png",
     "/images/quiz.png",
@@ -54,16 +54,17 @@ export default function QuizMasterPage() {
 
   // ▼ 全てのクイズから出題（time をクエリに付ける）
   const handleRandomQuizStart = () => {
-    router.push(`/quiz-battle/random?time=${limitTime}`);
+    router.push(`/quiz-royal/random?time=${limitTime}`);
   };
 
   // ▼ あいことば対戦
   const [showCodeInput, setShowCodeInput] = useState(false);
   const [battleCode, setBattleCode] = useState("");
   const [codeError, setCodeError] = useState<string | null>(null);
+  const [playerCount, setPlayerCount] = useState<number | null>(2);
 
   return (
-    <div className="container mx-auto px-4 py-8 text-center bg-gradient-to-b from-pink-500 via-yellow-400 to-green-500">
+    <div className="container mx-auto px-4 py-8 text-center bg-gradient-to-b from-yellow-400 via-amber-300 to-blue-400">
       <h1
         className="text-5xl md:text-7xl font-extrabold mb-6 text-center"
         style={{
@@ -87,17 +88,17 @@ export default function QuizMasterPage() {
         }}
       >
         <span className="block md:hidden leading-tight">
-          クイズ<br />バトル
+          クイズ<br />ロワイヤル
         </span>
-        <span className="hidden md:block">クイズバトル</span>
+        <span className="hidden md:block">クイズロワイヤル</span>
       </h1>
 
       <>
         <p className="text-md md:text-2xl font-semibold text-white mb-2 md:mb-4">
-          ＜2人対戦クイズゲーム＞
+          ＜みんなで遊べるクイズゲーム＞
         </p>
         <p className="text-md md:text-2xl font-semibold text-white mb-8">
-          どれだけ高得点を狙えるか誰かと対戦！相手よりもハイスコアを目指そう！
+          みんなで2分間のクイズロワイヤル！正解を積み上げて王冠をつかみ取れ！
         </p>
 
         {/* ★ スマホは2枚、PCは3枚 */}
@@ -120,29 +121,52 @@ export default function QuizMasterPage() {
           <div>
             <button
               onClick={handleRandomQuizStart}
-              className="w-full md:w-80 px-6 py-2 md:px-8 md:py-4 bg-sky-500 text-white rounded-full hover:bg-sky-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
+              className="w-full md:w-80 px-6 py-2 md:px-8 md:py-4 bg-blue-500 text-white rounded-full hover:bg-blue-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
             >
               オンラインでだれかと対戦
             </button>
-            <p className="text-sm text-white mt-1">※一定時間マッチしないとCPUとの対戦になります</p>
+            <p className="text-sm text-gray-100 mt-1">※一定時間マッチしないとCPUとの対戦になります</p>
           </div>
           <div>
             <button
               onClick={() => setShowCodeInput(true)}
-              className="w-full md:w-80 px-6 py-2 md:px-8 md:py-4 bg-pink-500 text-white rounded-full hover:bg-pink-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
+              className="w-full md:w-80 px-6 py-2 md:px-8 md:py-4 bg-yellow-500 text-white rounded-full hover:bg-yellow-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
             >
               知り合いと対戦
             </button>
-            <p className="text-sm text-white mt-1">※2人でプレイできます。</p>
+            <p className="text-sm text-gray-100 mt-1">※2人〜8人でプレイできます。</p>
           </div>
         </div>
 
         {showCodeInput && (
           <div className="mt-6 bg-white p-4 rounded-xl max-w-md mx-auto border-2 border-black">
+            {/* 参加人数 */}
+            <p className="text-xl font-bold mb-2">
+              参加人数を入力してください（2〜8人）
+            </p>
+            <input
+              type="number"
+              min={2}
+              max={8}
+              value={playerCount ?? ""} // nullish coalescing で空文字を許可
+              onChange={(e) => {
+                const valStr = e.target.value;
+                setPlayerCount(valStr === "" ? null : Number(valStr)); // 空文字も許可
+                setCodeError(null);
+              }}
+              onBlur={() => {
+                // フォーカスアウト時に範囲チェック
+                if (playerCount === null) return;
+                if (playerCount < 2) setPlayerCount(2);
+                if (playerCount > 8) setPlayerCount(8);
+              }}
+              className="border px-2 py-1 text-lg w-full mb-4"
+            />
+
+            {/* あいことば */}
             <p className="text-xl font-bold mb-2">
               あいことばを入力してください
             </p>
-
             <input
               type="text"
               value={battleCode}
@@ -161,12 +185,16 @@ export default function QuizMasterPage() {
 
             <button
               onClick={() => {
+                if (!playerCount || playerCount < 2 || playerCount > 8) {
+                  setCodeError("参加人数は2〜8人で入力してください");
+                  return;
+                }
                 if (!battleCode.trim()) {
                   setCodeError("対戦コードを入力してください");
                   return;
                 }
                 router.push(
-                  `/quiz-battle/code?time=${limitTime}&code=${battleCode}`
+                  `/quiz-royal/code?time=${limitTime}&code=${battleCode}&count=${playerCount}`
                 );
               }}
               className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded font-bold"
@@ -197,12 +225,12 @@ export default function QuizMasterPage() {
             ref={descriptionRef}
             className="text-gray-700 text-md md:text-lg text-center px-4 py-2"
           >
-            「クイズバトル」は、だれかと正解数や得点を競う対戦型クイズゲームです。<br />
-            制限時間は 2分間。その間にどれだけ正解できるかで勝負します。<br />
-            問題の難易度に応じて獲得ポイントが変わります：かんたん…50P、ふつう…100P、むずかしい…150P。<br />
+            「クイズロワイヤル」は、みんなで正解数や得点を競い合う頂上決戦クイズゲームです。<br />
+            制限時間は 2分間。その短い時間でどれだけ正解を積み上げられるかが勝負のカギ！<br />
+            問題の難易度に応じて獲得ポイントが変化します：かんたん…50P、ふつう…100P、むずかしい…150P。<br />
             ただし油断は禁物！3問連続で間違えると、得点が100ポイント減ってしまいます。<br />
-            近くの友達とあいことばを合わせてマッチすることも、ネット上の誰かと対戦することも可能です。<br />
-            相手よりも高得点を目指して、全力で挑戦しよう！<br />
+            近くの友達とあいことばを合わせてマッチすることも、ネット上のライバルと戦うことも可能です。<br />
+            正解を重ね、ハイスコアを叩き出し、王者の座をつかみ取れ！👑<br />
             ※オンラインで対戦相手が見つからない場合は、CPU（コンピュータ）との対戦になります。
           </p>
         </div>

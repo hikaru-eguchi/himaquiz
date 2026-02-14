@@ -68,16 +68,16 @@ const QuizResult = ({
   onRetry: () => void;
 }) => {
   const [showScore, setShowScore] = useState(false);
-  const [showText, setShowText] = useState(false);
+  // const [showText, setShowText] = useState(false);
   const [showRank, setShowRank] = useState(false);
   const [showButton, setShowButton] = useState(false);
 
   useEffect(() => {
     const timers: NodeJS.Timeout[] = [];
     timers.push(setTimeout(() => setShowScore(true), 500));
-    timers.push(setTimeout(() => setShowText(true), 1000));
-    timers.push(setTimeout(() => setShowRank(true), 1500));
-    timers.push(setTimeout(() => setShowButton(true), 1500));
+    // timers.push(setTimeout(() => setShowText(true), 1000));
+    timers.push(setTimeout(() => setShowRank(true), 1000));
+    timers.push(setTimeout(() => setShowButton(true), 1000));
     return () => timers.forEach(clearTimeout);
   }, []);
 
@@ -92,15 +92,15 @@ const QuizResult = ({
       {showRank && (
         <>
           <div className="mx-auto inline-block mb-6">
-  <div className="bg-gradient-to-b from-yellow-100 via-white to-yellow-200 rounded-3xl px-8 py-5 md:px-12 md:py-7 shadow-xl">
-    <p className="text-xl md:text-3xl font-extrabold text-gray-900">
-      ✨ 今回の報酬 ✨
-    </p>
-    <p className="mt-1 text-4xl md:text-6xl font-extrabold text-green-600 drop-shadow">
-      {earnedPoints}P！
-    </p>
-  </div>
-</div>
+            <div className="bg-gradient-to-b from-yellow-100 via-white to-yellow-200 rounded-3xl px-8 py-5 md:px-12 md:py-7 shadow-xl">
+              <p className="text-xl md:text-3xl font-extrabold text-gray-900">
+                ✨ 今回の報酬 ✨
+              </p>
+              <p className="mt-1 text-4xl md:text-6xl font-extrabold text-green-600 drop-shadow">
+                {earnedPoints}P！
+              </p>
+            </div>
+          </div>
           <div className="flex flex-col md:flex-row items-center justify-center mb-10 gap-4 md:gap-10">
             <img
               src="/images/quiz.png"
@@ -203,7 +203,7 @@ export default function QuizModePage() {
   const level = searchParams?.get("level") || "";
 
   type GamePhase = "intro" | "playing" | "between" | "roulette" | "finished";
-  const CHALLENGE_TARGETS = [2, 3, 5] as const; // 1回目2連続 / 2回目3連続 / 3回目5連続
+  const CHALLENGE_TARGETS = [2, 3, 5, 10, 20] as const; // 1回目2連続 / 2回目3連続 / 3回目5連続
 
   const randChoice = <T,>(arr: readonly T[]) => arr[Math.floor(Math.random() * arr.length)];
 
@@ -359,10 +359,10 @@ export default function QuizModePage() {
     // ルーレット後（倍率を適用した直後のチャレンジ中）なら
     // prevReward = 倍率を掛ける前の報酬 が入ってる
     if (lastMultiplier != null && prevReward != null) {
-      return Math.floor(prevReward / 2);
+      return Math.floor(prevReward / 4);
     }
     // それ以外（1回目など）は今まで通り
-    return Math.floor(reward / 2);
+    return Math.floor(reward / 4);
   };
 
   const titles = [
@@ -478,7 +478,7 @@ export default function QuizModePage() {
 
   const startNextChallengeFromRoulette = () => {
     if (mulLocked == null) return;
-    if (challengeIndex >= 2) return;
+    if (challengeIndex >= 4) return;
 
     const mul = mulLocked;
 
@@ -487,7 +487,7 @@ export default function QuizModePage() {
     setReward((r) => {
       setPrevReward(r);
       const next = r * mul;
-      setFailReward(Math.floor(next / 2));
+      setFailReward(Math.floor(next / 4));
       return next;
     });
 
@@ -508,7 +508,7 @@ export default function QuizModePage() {
   const mulTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
-    const shouldRoulette = phase === "roulette" && challengeIndex < 2 && mulLocked == null;
+    const shouldRoulette = phase === "roulette" && challengeIndex < 4 && mulLocked == null;
 
     if (!shouldRoulette) {
       if (mulTimerRef.current) {
@@ -523,7 +523,8 @@ export default function QuizModePage() {
     setMulCandidate(2);
 
     mulTimerRef.current = window.setInterval(() => {
-      setMulCandidate((prev) => (prev === 2 ? 3 : prev === 3 ? 4 : prev === 4 ? 5 : 2));
+      // setMulCandidate((prev) => (prev === 2 ? 3 : prev === 3 ? 4 : prev === 4 ? 5 : 2));
+      setMulCandidate((prev) => (prev === 2 ? 3 : prev === 3 ? 4 : 2));
     }, 90);
 
     return () => {
@@ -637,10 +638,10 @@ export default function QuizModePage() {
             rewardAppliedRef.current[challengeIndex] = true;
 
             if (challengeIndex === 0) {
-              const base = randChoice([100, 200, 300, 400] as const);
+              const base = randChoice([100, 200, 300] as const);
               setBaseReward(base);
               setReward(base);
-              setFailReward(Math.floor(base / 2));
+              setFailReward(Math.floor(base / 4));
               setLastMultiplier(null);
             }
           });
@@ -677,7 +678,7 @@ export default function QuizModePage() {
 
     // 通常：次の問題
     if (currentIndex + 1 >= questions.length) {
-      setFinalReward(Math.floor(reward / 2));
+      setFinalReward(Math.floor(reward / 4));
       setFinished(true);
       setPhase("finished");
     } else {
@@ -692,7 +693,7 @@ export default function QuizModePage() {
   };
 
   const goNextChallenge = () => {
-    if (challengeIndex >= 2) return;
+    if (challengeIndex >= 4) return;
 
     // ここでは何も進めない！rouletteへ行くだけ
     setIncorrectMessage(null);
@@ -860,7 +861,7 @@ export default function QuizModePage() {
   // =========================
   if (phase === "between") {
     const nextIndex = challengeIndex + 1;
-    const hasNext = nextIndex <= 2;
+    const hasNext = nextIndex <= 4;
     const nextNeed = hasNext ? CHALLENGE_TARGETS[nextIndex] : null;
 
     return (
@@ -966,9 +967,9 @@ export default function QuizModePage() {
               ×{mulLocked ?? mulCandidate}
             </div>
 
-            {mulLocked == null && (
-              <div className="mt-3 text-xs md:text-sm text-gray-600">2〜5のどれか！</div>
-            )}
+            {/* {mulLocked == null && (
+              <div className="mt-3 text-xs md:text-sm text-gray-600">2〜4のどれか！</div>
+            )} */}
           </button>
 
           {mulLocked != null && (
@@ -987,7 +988,7 @@ export default function QuizModePage() {
   const need = CHALLENGE_TARGETS[challengeIndex];
   const remaining = Math.max(0, need - streakInChallenge);
   const label =
-    challengeIndex === 2 ? "最終チャレンジ" : `第${challengeIndex + 1}チャレンジ`;
+    challengeIndex === 4 ? "最終チャレンジ" : `${challengeIndex + 1}回目のチャレンジ`;
 
   return (
     <div className="container mx-auto p-8 text-center bg-gradient-to-b from-green-50 via-green-100 to-green-200">

@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
-import QuizQuestion from "../../components/QuizQuestion";
-import { QuizData } from "@/lib/articles";
+import QuizQuestion3 from "../../components/QuizQuestion3";
+import { QuizData } from "@/lib/articles3";
 import { motion, AnimatePresence } from "framer-motion";
 import { useBattle } from "../../../hooks/useBattle";
 import { useQuestionPhase } from "../../../hooks/useQuestionPhase";
@@ -779,7 +779,7 @@ export default function QuizModePage() {
 
   useEffect(() => {
     const fetchArticles = async () => {
-      const res = await fetch("/api/articles");
+      const res = await fetch("/api/articles3");
       const data: ArticleData[] = await res.json();
       let all = data;
       if (mode === "genre" && genre) all = all.filter(a => a.quiz?.genre === genre);
@@ -1688,7 +1688,7 @@ export default function QuizModePage() {
                   )}
                 
                   {phase !== "result" && (
-                    <QuizQuestion
+                    <QuizQuestion3
                       quiz={questions[currentIndex].quiz}
                       userAnswer={userAnswer}
                       setUserAnswer={setUserAnswer}
@@ -1772,7 +1772,7 @@ export default function QuizModePage() {
           <div className="flex flex-col items-center mt-2 md:mt-3">
             {/* メッセージボタン */}
             <div className="text-center border border-black p-1 rounded-xl bg-white">
-              {["よろしく👋", "やったね✌", "ヒントは？👀", "ありがとう❤"].map((msg) => (
+              {["よろしく👋", "やったね✌", "たぶんこれ！👉", "ありがとう❤"].map((msg) => (
                 <button
                   key={msg}
                   onClick={() => sendMessage(msg)}

@@ -25,6 +25,7 @@ type GachaItem = {
   no: string;
   characterId: string;
   isNew: boolean;
+  isGuarantee?: boolean;
 };
 
 /* ====== 下部のガチャコンポーネント ====== */
@@ -49,6 +50,7 @@ const QuizGacha = ({
 
   onRoll,
   cost,
+  remain,
 }: {
   points: number;
   rolling: boolean;
@@ -72,11 +74,11 @@ const QuizGacha = ({
 
   onRoll: () => void;
   cost: number;
+  remain: number
 }) => {
   const [showOpen, setShowOpen] = useState(false);
-  const [showEffect, setShowEffect] = useState(false);
   const [showResult, setShowResult] = useState(false);
-  const [capsuleSet, setCapsuleSet] = useState<1 | 2 | 3>(1);
+  const [capsuleSet, setCapsuleSet] = useState<1 | 2 | 3 | 99>(1);
   type Phase = "idle" | "drop" | "ready" | "openingHold" | "opening" | "result";
   const [phase, setPhase] = useState<Phase>("idle");
   const handleOpen = () => {
@@ -161,7 +163,11 @@ const QuizGacha = ({
   useEffect(() => {
     if (!gachaResult) return;
 
-    setCapsuleSet((Math.floor(Math.random() * 3) + 1) as 1 | 2 | 3);
+    if (gachaResult?.isGuarantee) {
+      setCapsuleSet(99);
+    } else {
+      setCapsuleSet((Math.floor(Math.random() * 3) + 1) as 1|2|3);
+    }
 
     // 状態リセット
     setShowOpen(false);
@@ -189,10 +195,10 @@ const QuizGacha = ({
   // メインボタンが押せる条件
   const canRollNow = points >= cost && !inputLocked;
 
-  const canRoll = points >= 100 && !rolling;
-
   const showRainbowBg = !!gachaResult && phase !== "result";
   const showPremiumBg = isPremiumRoll && !!gachaResult && phase !== "result";
+
+  const isGoldCapsule = capsuleSet === 99;
 
   const PREMIUM_COST = 600;
   const canRollPremium = points >= PREMIUM_COST && !rolling;
@@ -289,6 +295,10 @@ const QuizGacha = ({
             ★4以上確定は600P必要！
           </p>
         )}
+
+        <p className="text-green-500 text-md md:text-lg font-bold">
+          あと {remain} 回で★6以上確定！
+        </p>
       </div>
 
       {/* 入手キャラ履歴 */}
@@ -437,7 +447,6 @@ const QuizGacha = ({
                   // まだ残りがある → 次のキャラ演出へ
                   if (next < gachaQueue.length) {
                     setShowOpen(false);
-                    setShowEffect(false);
                     setShowResult(false);
                     setPhase("idle");
 
@@ -453,7 +462,6 @@ const QuizGacha = ({
 
                   // 最後まで終わった → キューも消して閉じる
                   setShowOpen(false);
-                  setShowEffect(false);
                   setShowResult(false);
                   setGachaResult(null);
                   setPhase("idle");
@@ -464,7 +472,6 @@ const QuizGacha = ({
 
                 // 1回ガチャなら従来通り閉じる
                 setShowOpen(false);
-                setShowEffect(false);
                 setShowResult(false);
                 setGachaResult(null);
                 setPhase("idle");
@@ -472,8 +479,27 @@ const QuizGacha = ({
               }
             }}
           >
+            {/* 金カプセルは真っ黒背景 */}
+            {showRainbowBg && isGoldCapsule && (
+              <>
+                <div className="fixed inset-0 z-0 bg-black" />
+                <motion.div
+                  className="fixed inset-0 z-10 pointer-events-none"
+                  initial={{ opacity: 0.2, scale: 0.98 }}
+                  animate={{ opacity: [0.15, 0.55, 0.15], scale: [0.98, 1.02, 0.98] }}
+                  transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+                  style={{
+                    background:
+                      "radial-gradient(circle at 50% 50%, rgba(255,243,160,0.9) 0%, rgba(255,243,160,0.0) 55%)",
+                    willChange: "opacity, transform",
+                  }}
+                />
+              </>
+            )}
+
             {/* 落下〜待機〜開封中の背景を虹にする */}
-            {showRainbowBg && (
+            {/* 通常虹背景 */}
+            {showRainbowBg && !isGoldCapsule && (
               <div
                 className="fixed inset-0 z-0"
                 style={{
@@ -521,7 +547,12 @@ const QuizGacha = ({
             )}
             {(phase === "drop") && (
               <motion.img
-                src={`/images/gacha_close${capsuleSet === 1 ? "" : capsuleSet}.png`}
+                // src={`/images/gacha_close${capsuleSet === 1 ? "" : capsuleSet}.png`}
+                src={
+                capsuleSet === 99
+                  ? "/images/gacha_close_gold.png"
+                  : `/images/gacha_close${capsuleSet === 1 ? "" : capsuleSet}.png`
+                }
                 className="w-70 h-70 md:w-150 md:h-150 z-50 cursor-pointer select-none"
                 initial={{ y: "-120vh", scale: 0.6 }}
                 animate={{ y: 0, scale: 0.6 }}
@@ -545,7 +576,12 @@ const QuizGacha = ({
                 </motion.p>
 
                 <motion.img
-                  src={`/images/gacha_close${capsuleSet === 1 ? "" : capsuleSet}.png`}
+                  // src={`/images/gacha_close${capsuleSet === 1 ? "" : capsuleSet}.png`}
+                  src={
+                  capsuleSet === 99
+                    ? "/images/gacha_close_gold.png"
+                    : `/images/gacha_close${capsuleSet === 1 ? "" : capsuleSet}.png`
+                  }
                   className="w-70 h-70 md:w-150 md:h-150 z-50 cursor-pointer select-none"
                   initial={{ scale: 0.6 }}
                   animate={{
@@ -564,7 +600,12 @@ const QuizGacha = ({
 
             {phase === "openingHold" && (
               <motion.img
-                src={`/images/gacha_close${capsuleSet === 1 ? "" : capsuleSet}.png`}
+                // src={`/images/gacha_close${capsuleSet === 1 ? "" : capsuleSet}.png`}
+                src={
+                capsuleSet === 99
+                  ? "/images/gacha_close_gold.png"
+                  : `/images/gacha_close${capsuleSet === 1 ? "" : capsuleSet}.png`
+                }
                 className="w-70 h-70 md:w-150 md:h-150 z-50 cursor-pointer select-none"
                 initial={{ scale: 0.6, y: 0 }}
                 animate={{ scale: 0.6, y: 6 }}
@@ -574,7 +615,12 @@ const QuizGacha = ({
 
             {(phase === "opening") && (
               <motion.img
-                src={`/images/gacha_open${capsuleSet === 1 ? "" : capsuleSet}.png`}
+                // src={`/images/gacha_open${capsuleSet === 1 ? "" : capsuleSet}.png`}
+                src={
+                capsuleSet === 99
+                  ? "/images/gacha_open_gold.png"
+                  : `/images/gacha_open${capsuleSet === 1 ? "" : capsuleSet}.png`
+                }
                 className="z-50"
                 initial={{ scale: 0.55 }}
                 animate={{ scale: 0.7 }}
@@ -735,6 +781,8 @@ export default function QuizMasterPage() {
   // characters.no -> characters.id の辞書
   const [noToId, setNoToId] = useState<Map<string, string>>(new Map());
 
+  const [gachaCount, setGachaCount] = useState(0);
+
   // ★ 追加: プロフィールからポイント読み込み
   useEffect(() => {
     if (userLoading) return;
@@ -746,7 +794,7 @@ export default function QuizMasterPage() {
     const fetchPoints = async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("points")
+        .select("points, normal_gacha_count, premium_gacha_count")
         .eq("id", user.id)
         .single();
 
@@ -755,6 +803,11 @@ export default function QuizMasterPage() {
         return;
       }
       setPoints(data?.points ?? 0);
+      setGachaCount(
+        gachaMode === "normal"
+          ? data?.normal_gacha_count ?? 0
+          : data?.premium_gacha_count ?? 0
+      );
     };
 
     const fetchOwned = async () => {
@@ -903,6 +956,16 @@ export default function QuizMasterPage() {
     return base * count; // 1 or 10
   };
 
+  const getRemaining = (mode: GachaMode, count: number) => {
+    if (mode === "normal") {
+      const next = (Math.floor(count / 100) + 1) * 100; // 次の100の倍数
+      return next - count; // 例: 201なら 300-201=99
+    } else {
+      const next = (Math.floor(count / 50) + 1) * 50;   // premiumは50刻み
+      return next - count;
+    }
+  };
+
   const getPool = (mode: GachaMode) => {
     if (mode === "normal") return gachaCharacters;
     return gachaCharacters.filter((c) =>
@@ -941,7 +1004,7 @@ export default function QuizMasterPage() {
       // 最新ポイント
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
-        .select("points")
+        .select("points, normal_gacha_count, premium_gacha_count")
         .eq("id", user.id)
         .single();
 
@@ -952,6 +1015,11 @@ export default function QuizMasterPage() {
       }
 
       const currentPoints = profile?.points ?? 0;
+      const normalCount = profile?.normal_gacha_count ?? 0;
+      const premiumCount = profile?.premium_gacha_count ?? 0;
+
+      let currentCount =
+        gachaMode === "normal" ? normalCount : premiumCount;
       if (currentPoints < cost) {
         alert(`ポイントが足りません！（${cost}P以上必要です）`);
         return;
@@ -990,8 +1058,28 @@ export default function QuizMasterPage() {
             : "★4以上確定ガチャでポイント消費",
       });
 
-      // 抽選（1回 or 10回）
-      const pool = getPool(gachaMode);
+      const getGuaranteeType = (
+        mode: GachaMode,
+        nextCount: number
+      ): "secret" | "god" | null => {
+        if (mode === "normal") {
+          if (nextCount % 300 === 0) return "secret";
+          if (nextCount % 100 === 0) return "god";
+        } else {
+          if (nextCount % 150 === 0) return "secret";
+          if (nextCount % 50 === 0) return "god";
+        }
+        return null;
+      };
+
+      const getGuaranteePool = (type: "god" | "secret") => {
+        if (type === "secret") {
+          return gachaCharacters.filter(c => c.rarity === "シークレット");
+        }
+        return gachaCharacters.filter(c =>
+          ["神レア","シークレット"].includes(c.rarity)
+        );
+      };
 
       // NEW判定用：10連中に当たった分も反映させる
       const tempOwned = new Set(ownedCharacterIds);
@@ -999,7 +1087,15 @@ export default function QuizMasterPage() {
       const results: GachaItem[] = [];
 
       for (let i = 0; i < rollCount; i++) {
-        const char = pickByWeight(pool);
+        currentCount++;
+
+        const guarantee = getGuaranteeType(gachaMode, currentCount);
+
+        const rollPool = guarantee
+          ? getGuaranteePool(guarantee)
+          : getPool(gachaMode);
+
+        const char = pickByWeight(rollPool);
 
         const characterId = noToId.get(char.no);
         if (!characterId) {
@@ -1017,8 +1113,26 @@ export default function QuizMasterPage() {
           no: char.no,
           characterId,
           isNew,
+          isGuarantee: !!guarantee
         });
       }
+
+      setGachaCount(currentCount);
+
+      const newNormalCount =
+        gachaMode === "normal" ? currentCount : normalCount;
+
+      const newPremiumCount =
+        gachaMode === "premium" ? currentCount : premiumCount;
+
+      await supabase
+        .from("profiles")
+        .update({
+          normal_gacha_count: newNormalCount,
+          premium_gacha_count: newPremiumCount,
+        })
+        .eq("id", user.id);
+
 
       // 取得保存（10回でも順にRPC）
       for (const r of results) {
@@ -1122,14 +1236,14 @@ export default function QuizMasterPage() {
           </h1>
           <p
             className="
-              text-2xl md:text-4xl font-extrabold mb-3
+              text-2xl md:text-3xl font-extrabold mb-3
               text-white
             "
           >
-            ポイントを使ってガチャを回そう！超レアキャラが飛び出すかも…！？
+            ポイントでガチャ！レアキャラGETなるか！？✨
           </p>
           <p className="text-md md:text-xl text-white mb-2">
-            ※当たったキャラは右上メニューの「マイキャラ図鑑」で確認できます
+            ★当たったキャラは右上メニューの「マイキャラ図鑑」で確認できます
           </p>
 
           {/* 説明ボタン */}
@@ -1204,6 +1318,7 @@ export default function QuizMasterPage() {
           setGachaResult={setGachaResult}
           history={history}
           setHistory={setHistory}
+          remain={getRemaining(gachaMode, gachaCount)}
 
           // 10連用
           gachaQueue={gachaQueue}
