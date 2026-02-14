@@ -117,7 +117,7 @@ const QuizResult = ({
   
   return (
     <motion.div
-      className={`text-center mt-6 p-8 rounded-lg`}
+      className={`text-center mt-6 md:p-8 rounded-lg`}
     >
 
       {/* ============================
@@ -172,7 +172,7 @@ const QuizResult = ({
             {ranks.map((r) => (
               <div
                 key={r.socketId}
-                className="flex items-center gap-4 px-3 py-2 bg-white rounded-lg shadow max-w-sm mx-auto"
+                className="flex items-center gap-4 px-3 py-2 bg-white rounded-lg shadow w-full max-w-md mx-auto"
               >
                 <span className={`font-extrabold text-lg md:text-xl w-14 text-center ${
                   r.rank === 1 ? "text-yellow-400" :
