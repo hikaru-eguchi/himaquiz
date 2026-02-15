@@ -314,6 +314,19 @@ export default function NavButtons() {
                         </button>
                       </Link>
 
+                      <Link
+                        href="/quiz-quick"
+                        onClick={() => handleNavClick("/quiz-quick")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-gradient-to-r from-cyan-400 via-sky-300 to-sky-200 text-white ring-2 ring-cyan-500 md:hover:scale-110 ${
+                            activeUrl === "/quiz-quick" ? activeStyle : ""
+                          }`}
+                        >
+                          瞬発力クイズ
+                        </button>
+                      </Link>
+
                       {/* <Link
                         href="/quiz-mind"
                         onClick={() => handleNavClick("/quiz-mind")}

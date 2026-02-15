@@ -524,7 +524,8 @@ export default function QuizModePage() {
 
     mulTimerRef.current = window.setInterval(() => {
       // setMulCandidate((prev) => (prev === 2 ? 3 : prev === 3 ? 4 : prev === 4 ? 5 : 2));
-      setMulCandidate((prev) => (prev === 2 ? 3 : prev === 3 ? 4 : 2));
+      // setMulCandidate((prev) => (prev === 2 ? 3 : prev === 3 ? 4 : 2));
+      setMulCandidate((prev) => (prev === 2 ? 3 : 2));
     }, 90);
 
     return () => {
@@ -901,7 +902,7 @@ export default function QuizModePage() {
         {hasNext ? (
           <p className="text-md md:text-2xl font-bold text-gray-700 mb-10 whitespace-pre-line">
             次のチャレンジは <span className="text-red-500">{nextNeed}問連続正解</span>で成功！{"\n"}
-            成功すると報酬が2〜4倍のどれかにアップ！{"\n"}
+            成功すると報酬が2〜3倍のどれかにアップ！{"\n"}
             ただし失敗したら <span className="text-orange-600">{failReward}P</span> に下がるよ。
           </p>
         ) : (
