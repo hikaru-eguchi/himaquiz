@@ -84,10 +84,10 @@ export default function AllTimeRankingListClient({
               rank === 1 ? "order-1 sm:order-2" : rank === 2 ? "order-2 sm:order-1" : "order-3 sm:order-3";
 
              const podiumH = rank === 1
-               ? "h-44 sm:h-56 md:h-64"
+               ? "min-h-[180px] sm:h-56 md:h-64"
                : rank === 2
-               ? "h-42 sm:h-52 md:h-60"
-               : "h-40 sm:h-48 md:h-56";
+               ? "min-h-[180px] sm:h-52 md:h-60"
+               : "min-h-[180px] sm:h-48 md:h-56";
 
             const ring =
             rank === 1

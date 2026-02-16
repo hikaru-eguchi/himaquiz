@@ -33,14 +33,14 @@ export default async function AllTimeStreakRankingCard({
   const list = (data ?? []) as Row[];
 
   return (
-    <div className={`max-w-[700px] mx-auto border-2 border-black rounded-xl m-5 p-5 bg-gradient-to-b ${bgClass}`}>
+    <div className={`max-w-[700px] mx-auto border-2 border-gray-300 rounded-xl m-5 p-5 bg-gradient-to-b ${bgClass}`}>
       <div className="flex flex-col items-center text-center gap-2">
         <div>
           <p className="text-2xl md:text-4xl font-extrabold drop-shadow-xl">
             {title}{icon}
           </p>
           <p className="text-xs md:text-sm text-gray-700">
-            歴代最高連続正解のランキング！
+            連続正解数の歴代ランキング！君も伝説に名を刻めるか！？
           </p>
 
           {moreHref && (

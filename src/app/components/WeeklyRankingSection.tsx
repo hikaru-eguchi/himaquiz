@@ -25,10 +25,10 @@ export default async function WeeklyRankingSection() {
               border-3 border-white
               shadow-lg
             ">
-              ひまQランキング🏅
+              ひまQランキング🏆
             </p>
             <p className="text-md md:text-xl text-gray-700 mt-1 md:mt-2">
-              ひまQのトッププレイヤーをチェック！
+              ひまQのトッププレイヤーたちをチェックしよう！
             </p>
           </div>
 
@@ -51,7 +51,7 @@ export default async function WeeklyRankingSection() {
         {/* 中身（3カード） */}
         <div className="mt-2 md:mt-5">
           <AllTimeStreakRankingCard
-            title="歴代 連続正解ランキング"
+            title="歴代 連続正解数"
             icon="🔥"
             bgClass="from-emerald-50 via-emerald-100 to-emerald-200"
           />
@@ -73,9 +73,9 @@ export default async function WeeklyRankingSection() {
           /> */}
 
           <MonthlyRankingCard
-            title="今月の正解数ランキング"
+            title="今月の正解数"
             icon="✅"
-            bgClass="from-orange-50 via-orange-100 to-orange-200"
+            bgClass="from-orange-50 via-orange-100 to-orange-200 border-yellow-600"
             orderBy="correct_count"
             valueLabel={(r) => `${r.correct_count}問`}
           />
