@@ -53,7 +53,7 @@ export default async function WeeklyRankingSection() {
           <AllTimeStreakRankingCard
             title="歴代 連続正解数"
             icon="🔥"
-            bgClass="from-emerald-50 via-emerald-100 to-emerald-200"
+            bgClass="from-yellow-200 via-amber-300 to-orange-300"
           />
 
           {/* <WeeklyRankingCard
@@ -75,7 +75,7 @@ export default async function WeeklyRankingSection() {
           <MonthlyRankingCard
             title="今月の正解数"
             icon="✅"
-            bgClass="from-orange-50 via-orange-100 to-orange-200 border-yellow-600"
+            bgClass="from-orange-50 via-orange-100 to-orange-200 border-gray-200"
             orderBy="correct_count"
             valueLabel={(r) => `${r.correct_count}問`}
           />
