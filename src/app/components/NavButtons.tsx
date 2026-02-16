@@ -211,13 +211,26 @@ export default function NavButtons() {
                         onClick={() => handleNavClick("/quiz-kimagure")}
                       >
                         <button
-                          className={`${baseStyle} bg-gradient-to-r from-yellow-500 to-yellow-300 text-white ring-2 ring-yellow-400 md:hover:scale-110 ${
+                          className={`${baseStyle} bg-gradient-to-r from-yellow-400 to-yellow-300 text-white ring-2 ring-yellow-400 md:hover:scale-110 ${
                             activeUrl === "/quiz-kimagure" ? activeStyle : ""
                           }`}
                         >
                           きまぐれクイズ
                         </button>
                       </Link>
+
+                      {/* <Link
+                        href="/quiz-badge"
+                        onClick={() => handleNavClick("/quiz-badge")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-gradient-to-r from-yellow-500 via-amber-600 to-slate-800 text-white ring-2 ring-yellow-900 md:hover:scale-110 ${
+                            activeUrl === "/quiz-badge" ? activeStyle : ""
+                          }`}
+                        >
+                          バッジハンター
+                        </button>
+                      </Link> */}
 
                       <Link
                         href="/quiz-luck"

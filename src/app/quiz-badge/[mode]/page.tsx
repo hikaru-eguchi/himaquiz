@@ -945,7 +945,7 @@ export default function QuizModePage() {
           p_score_add: 0,
           p_correct_add: correctCount,
           p_play_add: 1,
-          p_best_streak: 0,
+          p_best_streak: correctCount,
         });
 
         if (weeklyErr) {
@@ -960,7 +960,7 @@ export default function QuizModePage() {
           p_score_add: 0,
           p_correct_add: correctCount,
           p_play_add: 1,
-          p_best_streak: 0,
+          p_best_streak: correctCount,
         });
         if (monthlyErr) console.log("upsert_monthly_stats error:", monthlyErr);
 

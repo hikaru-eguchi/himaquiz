@@ -10,6 +10,7 @@ import { submitGameResult, calcTitle } from "@/lib/gameResults";
 import { buildResultModalPayload } from "@/lib/resultMessages";
 import { useResultModal } from "../../components/ResultModalProvider";
 import { getWeekStartJST } from "@/lib/week";
+import { getMonthStartJST } from "@/lib/month";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
 
 interface ArticleData {
@@ -203,7 +204,7 @@ export default function QuizModePage() {
   const level = searchParams?.get("level") || "";
 
   type GamePhase = "intro" | "playing" | "between" | "roulette" | "finished";
-  const CHALLENGE_TARGETS = [2, 3, 5, 10, 20] as const; // 1回目2連続 / 2回目3連続 / 3回目5連続
+  const CHALLENGE_TARGETS = [3, 5, 10, 20, 30] as const; // 1回目2連続 / 2回目3連続 / 3回目5連続
 
   const randChoice = <T,>(arr: readonly T[]) => arr[Math.floor(Math.random() * arr.length)];
 
@@ -776,6 +777,7 @@ export default function QuizModePage() {
     (async () => {
       try {
         const weekStart = getWeekStartJST();
+        const monthStart = getMonthStartJST();
 
         // ✅ 週間ランキングに反映したい値を決める
         // score: 今回獲得ポイントを加算、correct: 正解数、play: 1回、best_streak: max更新
@@ -792,6 +794,17 @@ export default function QuizModePage() {
           console.log("upsert_weekly_stats error:", weeklyErr);
           // ランキング保存失敗してもゲームは止めない
         }
+
+        // ✅ 月
+        const { error: monthlyErr } = await supabase.rpc("upsert_monthly_stats", {
+          p_user_id: user!.id,
+          p_month_start: monthStart,
+          p_score_add: 0,
+          p_correct_add: correctCount,
+          p_play_add: 1,
+          p_best_streak: correctCount,
+        });
+        if (monthlyErr) console.log("upsert_monthly_stats error:", monthlyErr);
 
         // 連続正解数から称号を計算
         const title = calcTitle(titles, correctCount);

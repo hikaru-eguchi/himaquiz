@@ -1,4 +1,4 @@
-// WeeklyRankingListClient.tsx
+// AllTimeRankingListClient.tsx
 "use client";
 
 import { useMemo, useState } from "react";
@@ -24,7 +24,7 @@ type PublicProfile = {
   character_count: number | null;
 };
 
-export default function WeeklyRankingListClient({
+export default function AllTimeRankingListClient({
   rows,
   labelType,
 }: {
@@ -76,13 +76,18 @@ export default function WeeklyRankingListClient({
   return (
     <>
       {/* ✅ 1〜3位 */}
-        <div className="mt-4 grid grid-cols-3 gap-2 items-end">
-        {[1, 0, 2].map((i) => {
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-2 items-stretch sm:items-end">
+        {[0, 1, 2].map((i) => {
             const u = top3[i];
             const rank = i + 1;
+            const orderClass =
+              rank === 1 ? "order-1 sm:order-2" : rank === 2 ? "order-2 sm:order-1" : "order-3 sm:order-3";
 
-            const podiumH =
-            rank === 1 ? "h-48 md:h-52" : rank === 2 ? "h-44 md:h-48" : "h-40 md:h-44";
+             const podiumH = rank === 1
+               ? "h-44 sm:h-56 md:h-64"
+               : rank === 2
+               ? "h-42 sm:h-52 md:h-60"
+               : "h-40 sm:h-48 md:h-56";
 
             const ring =
             rank === 1
@@ -91,7 +96,7 @@ export default function WeeklyRankingListClient({
                 ? "ring-2 ring-gray-300"
                 : "ring-2 ring-amber-600/40";
 
-            const medal = rank === 1 ? "👑" : rank === 2 ? "🥈" : "🥉";
+            const medal = rank === 1 ? "🥇" : rank === 2 ? "🥈" : "🥉";
 
             const topBg =
             rank === 1
@@ -101,42 +106,123 @@ export default function WeeklyRankingListClient({
                 : "bg-gradient-to-b from-amber-50 via-orange-100 to-white";
 
             return (
-            <button
+              <button
                 type="button"
                 key={rank}
                 onClick={() => u?.user_id && toggleUser(u.user_id)}
-                className="text-center"
-            >
-                <div className={`rounded-xl ${topBg} ${podiumH} grid place-items-center p-2 md:p-3 shadow ${ring}`}>
-                <p className="text-2xl md:text-3xl">{medal}</p>
+                className={`text-center group ${orderClass}`}
+              >
+                <div
+                  className={[
+                    "relative rounded-2xl grid place-items-center p-2 md:p-3 shadow-xl overflow-hidden",
+                    podiumH,
+                    // ベースの枠（太く・立体）
+                    "border-[3px] border-black",
+                    // 触った時ちょい豪華
+                    "transition-transform duration-200 group-hover:-translate-y-[2px] group-hover:shadow-2xl",
+                    // 1位/2位/3位で背景変える
+                    rank === 1
+                      ? "bg-gradient-to-b from-yellow-200 via-amber-100 to-white"
+                      : rank === 2
+                      ? "bg-gradient-to-b from-slate-100 via-white to-white"
+                      : "bg-gradient-to-b from-orange-100 via-amber-50 to-white",
+                  ].join(" ")}
+                >
+                  {/* ふわっとしたオーラ */}
+                  <div
+                    className={[
+                      "absolute -inset-6 blur-xl opacity-70",
+                      rank === 1
+                        ? "bg-[radial-gradient(circle,rgba(255,215,0,0.65)_0%,transparent_60%)]"
+                        : rank === 2
+                        ? "bg-[radial-gradient(circle,rgba(200,200,220,0.6)_0%,transparent_60%)]"
+                        : "bg-[radial-gradient(circle,rgba(255,150,80,0.55)_0%,transparent_60%)]",
+                    ].join(" ")}
+                  />
 
-                 <div className="mt-1 relative">
-                    {/* オーラ（プロフィールと同系統） */}
-                    <div className="absolute -inset-2 rounded-full" />
-                    <div className="relative w-14 h-14 md:w-16 md:h-16 rounded-full bg-white overflow-hidden border-[2px] border-black shadow-[0_4px_0_rgba(0,0,0,1)]">
-                      <img
-                        src={u?.avatar_url ?? "/images/初期アイコン.png"}
-                        alt={u?.username ?? "user"}
-                        className="w-full h-full object-cover"
-                      />
+                  {/* キラキラ（ドット） */}
+                  <div className="absolute inset-0 opacity-25">
+                    <div className="w-full h-full bg-[radial-gradient(circle_at_10px_10px,rgba(0,0,0,0.35)_1.2px,transparent_1.3px)] [background-size:18px_18px]" />
+                  </div>
+
+                  {/* リボン（順位ラベル） */}
+                  <div
+                    className={[
+                      "absolute top-2 sm:top-3 left-1/2 -translate-x-1/2 px-2 sm:px-3 py-1 rounded-full",
+                      "border-2 border-black shadow-[0_3px_0_rgba(0,0,0,1)]",
+                      "text-[10px] sm:text-xs md:text-sm font-black text-white",
+                      rank === 1
+                        ? "bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-300"
+                        : rank === 2
+                        ? "bg-gradient-to-r from-slate-400 via-gray-300 to-slate-200"
+                        : "bg-gradient-to-r from-orange-500 via-amber-400 to-orange-300",
+                    ].join(" ")}
+                  >
+                    {rank}位
+                  </div>
+
+                  {/* アバター：金属フレーム＋光 */}
+                  <div className="mt-8 sm:mt-10 relative">
+                    {/* 外側の輝き */}
+                    <div
+                      className={[
+                        "absolute -inset-3 rounded-full blur-[8px] opacity-80",
+                        rank === 1
+                          ? "bg-gradient-to-br from-yellow-300 via-amber-200 to-transparent"
+                          : rank === 2
+                          ? "bg-gradient-to-br from-slate-300 via-gray-200 to-transparent"
+                          : "bg-gradient-to-br from-orange-300 via-amber-200 to-transparent",
+                      ].join(" ")}
+                    />
+                    {/* 金属っぽい枠 */}
+                    <div
+                      className={[
+                        "relative w-16 h-16 md:w-20 md:h-20 rounded-full p-[3px]",
+                        "border-2 border-black shadow-[0_5px_0_rgba(0,0,0,1)]",
+                        rank === 1
+                          ? "bg-gradient-to-br from-yellow-400 via-amber-300 to-yellow-200"
+                          : rank === 2
+                          ? "bg-gradient-to-br from-slate-300 via-gray-200 to-slate-100"
+                          : "bg-gradient-to-br from-orange-400 via-amber-300 to-orange-200",
+                      ].join(" ")}
+                    >
+                      <div className="w-full h-full rounded-full bg-white overflow-hidden">
+                        <img
+                          src={u?.avatar_url ?? "/images/初期アイコン.png"}
+                          alt={u?.username ?? "user"}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
                     </div>
                   </div>
 
-                <p className="mt-2 text-xs md:text-sm font-extrabold truncate w-full px-1">
+                  {/* 名前：豪華プレート */}
+                  <p className="mt-3 text-sm md:text-base font-black truncate w-full px-2 leading-tight">
                     {u?.username ?? "---"}
-                </p>
+                  </p>
 
-                <p className="text-xs md:text-sm font-bold">
+                  {/* 値：バッジ化 */}
+                  <div
+                    className={[
+                      "mt-2 px-3 py-1 rounded-full",
+                      "border-2 border-black bg-white",
+                      "shadow-[0_3px_0_rgba(0,0,0,1)]",
+                      "text-xs md:text-sm font-extrabold",
+                    ].join(" ")}
+                  >
                     {u ? formatValue(u) : "--"}
-                </p>
+                  </div>
+
+                  {/* 角のキラッ */}
+                  <div className="absolute right-3 bottom-3 text-xl opacity-80">✨</div>
                 </div>
-            </button>
+              </button>
             );
         })}
         </div>
 
         {/* ✅ 4位〜5位 */}
-        <div className="mt-4 space-y-2">
+        {/* <div className="mt-4 space-y-2">
         {rest.map((u, idx) => (
             <button
             type="button"
@@ -158,7 +244,7 @@ export default function WeeklyRankingListClient({
             <p className="font-extrabold">{formatValue(u)}</p>
             </button>
         ))}
-        </div>
+        </div> */}
 
       {open && (
   <button

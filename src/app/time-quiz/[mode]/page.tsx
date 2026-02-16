@@ -11,6 +11,7 @@ import { submitGameResult, calcTitle } from "@/lib/gameResults";
 import { buildResultModalPayload } from "@/lib/resultMessages";
 import { useResultModal } from "../../components/ResultModalProvider";
 import { getWeekStartJST } from "@/lib/week";
+import { getMonthStartJST } from "@/lib/month";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
 
 interface ArticleData {
@@ -649,6 +650,7 @@ export default function QuizModePage() {
     (async () => {
       try {
         const weekStart = getWeekStartJST();
+        const monthStart = getMonthStartJST();
 
         // ✅ 週間ランキングに反映したい値を決める
         const { error: weeklyErr } = await supabase.rpc("upsert_weekly_stats", {
@@ -659,10 +661,22 @@ export default function QuizModePage() {
           p_play_add: 1,
           p_best_streak: 0,
         });
-
+        
         if (weeklyErr) {
           console.log("upsert_weekly_stats error:", weeklyErr);
         }
+
+        // ✅ 月
+        const { error: monthlyErr } = await supabase.rpc("upsert_monthly_stats", {
+          p_user_id: user!.id,
+          p_month_start: monthStart,
+          p_score_add: score,
+          p_correct_add: correctCount,
+          p_play_add: 1,
+          p_best_streak: 0,
+        });
+
+        if (monthlyErr) console.log("upsert_monthly_stats error:", monthlyErr);
 
         const title = calcTitle(titles, score);
 

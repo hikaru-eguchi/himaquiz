@@ -12,6 +12,7 @@ import { submitGameResult } from "@/lib/gameResults";
 import { buildResultModalPayload } from "@/lib/resultMessages";
 import { useResultModal } from "../../components/ResultModalProvider";
 import { getWeekStartJST } from "@/lib/week";
+import { getMonthStartJST } from "@/lib/month";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
 
 type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
@@ -984,6 +985,7 @@ export default function QuizModePage() {
         const firstPlace = won; 
 
         const weekStart = getWeekStartJST();
+        const monthStart = getMonthStartJST();
 
         // ✅ 週間ランキングに反映したい値を決める
         // score: 今回獲得ポイントを加算、correct: 正解数、play: 1回、best_streak: max更新
@@ -1000,6 +1002,17 @@ export default function QuizModePage() {
           console.log("upsert_weekly_stats error:", weeklyErr);
           // ランキング保存失敗してもゲームは止めない
         }
+
+        // ✅ 月
+        const { error: monthlyErr } = await supabase.rpc("upsert_monthly_stats", {
+          p_user_id: user!.id,
+          p_month_start: monthStart,
+          p_score_add: score,
+          p_correct_add: correctCount,
+          p_play_add: 1,
+          p_best_streak: 0,
+        });
+        if (monthlyErr) console.log("upsert_monthly_stats error:", monthlyErr);
 
         const res = await submitGameResult(supabase, {
           game: "battle", // ←あなたの識別子に合わせて（例: quiz / battle / quiz2p 等）

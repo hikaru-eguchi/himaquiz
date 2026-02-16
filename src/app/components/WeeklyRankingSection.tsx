@@ -1,18 +1,34 @@
-import WeeklyRankingCard from "./WeeklyRankingCard";
+import MonthlyRankingCard from "./MonthlyRankingCard";
+import AllTimeStreakRankingCard from "./AllTimeStreakRankingCard";
 import Link from "next/link";
 
 export default async function WeeklyRankingSection() {
   return (
     <section className="max-w-[700px] mx-auto my-8">
       {/* セクション見出し */}
-      <div className="border-2 border-black rounded-2xl bg-amber-50 shadow p-4 md:p-6">
+      <div className="
+        border-2 border-gray-500 rounded-2xl
+        bg-gradient-to-br from-yellow-100 via-pink-100 to-sky-100
+        shadow-xl
+        p-4 md:p-6
+        relative
+        overflow-hidden
+      ">
         <div className="flex flex-col items-center text-center gap-3">
           <div>
-            <p className="text-2xl md:text-4xl font-extrabold drop-shadow">
-              週間ランキング🏅
+            <p className="
+              text-2xl md:text-4xl font-extrabold drop-shadow
+              bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-300
+              text-white
+              px-6 py-2
+              rounded-full
+              border-3 border-white
+              shadow-lg
+            ">
+              ひまQランキング🏅
             </p>
-            <p className="text-sm md:text-md text-gray-700 mt-1">
-              今週のトッププレイヤーをチェック！
+            <p className="text-md md:text-xl text-gray-700 mt-1 md:mt-2">
+              ひまQのトッププレイヤーをチェック！
             </p>
           </div>
 
@@ -23,17 +39,23 @@ export default async function WeeklyRankingSection() {
         </div>
 
         {/* ログイン案内（固定でここに出す） */}
-        <div className="mt-1 md:mt-3 border-2 border-black rounded-xl bg-white px-3 py-2 text-center">
+        {/* <div className="mt-1 md:mt-3 border-2 border-black rounded-xl bg-white px-3 py-2 text-center">
           <p className="text-sm md:text-md font-bold text-gray-800">
             🔔 ログインするとプレイ結果がランキングに反映されます
           </p>
-          {/* <p className="text-sm md:text-md text-gray-700">
+          <p className="text-sm md:text-md text-gray-700">
             ※未ログインのプレイはランキング集計に入りません
-          </p> */}
-        </div>
+          </p>
+        </div> */}
 
         {/* 中身（3カード） */}
         <div className="mt-2 md:mt-5">
+          <AllTimeStreakRankingCard
+            title="歴代 連続正解ランキング"
+            icon="🔥"
+            bgClass="from-emerald-50 via-emerald-100 to-emerald-200"
+          />
+
           {/* <WeeklyRankingCard
             title="今週のスコア"
             icon="🏆"
@@ -50,10 +72,10 @@ export default async function WeeklyRankingSection() {
             valueLabel={(r) => `${r.play_count}回`}
           /> */}
 
-          <WeeklyRankingCard
-            title="今週の正解数"
+          <MonthlyRankingCard
+            title="今月の正解数ランキング"
             icon="✅"
-            bgClass="from-yellow-50 via-yellow-100 to-yellow-200"
+            bgClass="from-orange-50 via-orange-100 to-orange-200"
             orderBy="correct_count"
             valueLabel={(r) => `${r.correct_count}問`}
           />

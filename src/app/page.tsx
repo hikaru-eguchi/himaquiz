@@ -334,7 +334,7 @@ export default async function HomePage({
           {/* きまぐれクイズ */}
           <div className="text-center max-w-[260px]">
             <Link href="/quiz-kimagure" className="w-full md:w-auto flex justify-center">
-              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-yellow-500 to-yellow-300  text-white hover:scale-110 transition-all">
+              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-yellow-400 to-yellow-300  text-white hover:scale-110 transition-all">
                 きまぐれクイズ☁
               </button>
             </Link>
@@ -345,6 +345,20 @@ export default async function HomePage({
               何種類みつけられる？
             </p>
           </div>
+          {/* バッジハンター */}
+          {/* <div className="text-center max-w-[260px]">
+            <Link href="/quiz-badge" className="w-full md:w-auto flex justify-center">
+              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-yellow-400 via-amber-600 to-slate-800 text-white hover:scale-110 transition-all">
+                バッジハンター⭐
+              </button>
+            </Link>
+            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
+              いろんなジャンルのクイズに挑戦して、バッジを集めよう！
+            </p>
+            <p className="text-sm md:text-base text-gray-700 leading-tight">
+              君はいくつゲットできるかな？
+            </p>
+          </div> */}
           {/* 運命のクイズ */}
           <div className="text-center max-w-[260px]">
             <Link href="/quiz-luck" className="w-full md:w-auto flex justify-center">

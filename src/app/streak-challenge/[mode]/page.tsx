@@ -9,6 +9,7 @@ import { submitGameResult, calcTitle } from "@/lib/gameResults";
 import { buildResultModalPayload } from "@/lib/resultMessages";
 import { useResultModal } from "../../components/ResultModalProvider";
 import { getWeekStartJST } from "@/lib/week";
+import { getMonthStartJST } from "@/lib/month";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
 
 interface ArticleData {
@@ -645,6 +646,7 @@ export default function QuizModePage() {
 
       try {
         const weekStart = getWeekStartJST();
+        const monthStart = getMonthStartJST();
 
         const { error: weeklyErr } = await supabase.rpc("upsert_weekly_stats", {
           p_user_id: uid,
@@ -658,6 +660,17 @@ export default function QuizModePage() {
         if (weeklyErr) {
           console.log("upsert_weekly_stats error:", weeklyErr);
         }
+
+        // ✅ 月
+        const { error: monthlyErr } = await supabase.rpc("upsert_monthly_stats", {
+          p_user_id: uid,
+          p_month_start: monthStart,
+          p_score_add: 0,
+          p_correct_add: correctCount,
+          p_play_add: 1,
+          p_best_streak: correctCount,
+        });
+        if (monthlyErr) console.log("upsert_monthly_stats error:", monthlyErr);
 
         const title = calcTitle(titles, correctCount);
 

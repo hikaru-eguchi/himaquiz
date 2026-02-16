@@ -12,6 +12,7 @@ import { submitGameResult } from "@/lib/gameResults";
 import { buildResultModalPayload } from "@/lib/resultMessages";
 import { useResultModal } from "../../components/ResultModalProvider";
 import { getWeekStartJST } from "@/lib/week";
+import { getMonthStartJST } from "@/lib/month";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
 
 type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
@@ -1134,6 +1135,7 @@ export default function QuizModePage() {
         const firstPlace = myRankNow === 1;   // ★ 1位ならtrue
 
         const weekStart = getWeekStartJST();
+        const monthStart = getMonthStartJST();
 
         const { error: weeklyErr } = await supabase.rpc("upsert_weekly_stats", {
           p_user_id: user!.id,
@@ -1147,6 +1149,17 @@ export default function QuizModePage() {
         if (weeklyErr) {
           console.log("upsert_weekly_stats error:", weeklyErr);
         }
+
+        // ✅ 月
+        const { error: monthlyErr } = await supabase.rpc("upsert_monthly_stats", {
+          p_user_id: user!.id,
+          p_month_start: monthStart,
+          p_score_add: score,
+          p_correct_add: correctCount,
+          p_play_add: 1,
+          p_best_streak: 0,
+        });
+        if (monthlyErr) console.log("upsert_monthly_stats error:", monthlyErr);
 
         const res = await submitGameResult(supabase, {
           game: "battle",
