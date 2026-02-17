@@ -586,26 +586,26 @@ export default function QuizModePage() {
       1: 10,
       2: 50,
       3: 100,
-      4: 200,
-      5: 300,
-      6: 400,
-      7: 500,
-      8: 600,
-      9: 700,
-      10: 850,
-      11: 1000,
-      12: 1200,
-      13: 1500,
-      14: 2000,
-      15: 3000,
-      16: 4000,
-      17: 5000,
-      18: 6000,
-      19: 8000,
-      20: 10000,
-      21: 12000,
-      22: 15000,
-      23: 15000,
+      4: 150,
+      5: 200,
+      6: 250,
+      7: 300,
+      8: 350,
+      9: 400,
+      10: 450,
+      11: 500,
+      12: 600,
+      13: 700,
+      14: 800,
+      15: 900,
+      16: 1200,
+      17: 1500,
+      18: 2000,
+      19: 3000,
+      20: 4000,
+      21: 5000,
+      22: 6000,
+      23: 6000,
     };
     return table[Math.min(stage, 23)] ?? 0;
   };
@@ -1155,7 +1155,7 @@ export default function QuizModePage() {
   useEffect(() => {
     if (!finished) return;
 
-    const base = correctCount * 20;             // ✅ 1問20P
+    const base = correctCount * 10;             // ✅ 1問20P
     const bonus = calcStageBonus(stageCount);  // ✅ ステージボーナス
     const earned = base + bonus;
 

@@ -98,7 +98,7 @@ export default function QuizMasterPage() {
           ＜みんなで遊べるクイズゲーム＞
         </p>
         <p className="text-md md:text-2xl font-semibold text-white mb-8">
-          みんなで2分間のクイズロワイヤル！正解を積み上げて王冠をつかみ取れ！
+          みんなで2分間のクイズバトル！正解を積み上げて王冠をつかみ取れ！
         </p>
 
         {/* ★ スマホは2枚、PCは3枚 */}

@@ -360,10 +360,10 @@ export default function QuizModePage() {
     // ルーレット後（倍率を適用した直後のチャレンジ中）なら
     // prevReward = 倍率を掛ける前の報酬 が入ってる
     if (lastMultiplier != null && prevReward != null) {
-      return Math.floor(prevReward / 4);
+      return Math.floor(prevReward / 5);
     }
     // それ以外（1回目など）は今まで通り
-    return Math.floor(reward / 4);
+    return Math.floor(reward / 5);
   };
 
   const titles = [
@@ -488,7 +488,7 @@ export default function QuizModePage() {
     setReward((r) => {
       setPrevReward(r);
       const next = r * mul;
-      setFailReward(Math.floor(next / 4));
+      setFailReward(Math.floor(next / 5));
       return next;
     });
 
@@ -640,10 +640,10 @@ export default function QuizModePage() {
             rewardAppliedRef.current[challengeIndex] = true;
 
             if (challengeIndex === 0) {
-              const base = randChoice([100, 200, 300] as const);
+              const base = randChoice([50, 100, 150] as const);
               setBaseReward(base);
               setReward(base);
-              setFailReward(Math.floor(base / 4));
+              setFailReward(Math.floor(base / 5));
               setLastMultiplier(null);
             }
           });
@@ -680,7 +680,7 @@ export default function QuizModePage() {
 
     // 通常：次の問題
     if (currentIndex + 1 >= questions.length) {
-      setFinalReward(Math.floor(reward / 4));
+      setFinalReward(Math.floor(reward / 5));
       setFinished(true);
       setPhase("finished");
     } else {

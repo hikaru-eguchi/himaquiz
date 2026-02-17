@@ -346,13 +346,13 @@ export default function QuizModePage() {
   const { user, loading: userLoading } = useSupabaseUser();
 
   const BONUS_TABLE: Record<number, number[]> = {
-    2: [300],
-    3: [400, 200],
-    4: [500, 250, 125],
-    5: [700, 350, 175, 85],
-    6: [900, 450, 225, 110, 55],
-    7: [1200, 600, 300, 150, 75, 35],
-    8: [1500, 750, 375, 180, 90, 45, 20],
+    2: [150],
+    3: [200, 100],
+    4: [250, 125, 60],
+    5: [350, 175, 85, 40],
+    6: [450, 225, 110, 55, 25],
+    7: [600, 300, 150, 75, 35, 15],
+    8: [750, 375, 180, 90, 45, 20, 10],
   };
 
   const calcPlacementBonusSafe = (
@@ -1114,7 +1114,7 @@ export default function QuizModePage() {
     const bonusNow = calcPlacementBonusSafe(playersMemo.length, ranksNow, mySocketId);
     setBonus(bonusNow);
 
-    const base = correctCount * 20;
+    const base = correctCount * 10;
     const points = base + bonusNow;
     const exp = correctCount * 20;
 

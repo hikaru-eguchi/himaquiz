@@ -45,9 +45,9 @@ const fireConfetti = () => {
 // ポイント仕様（ステージ到達に応じて付与）
 // =====================
 const stagePointMap: Record<number, number> = {
-  1: 100,
-  2: 200,
-  3: 300,
+  1: 20,
+  2: 40,
+  3: 60,
 };
 
 const RARITIES: Rarity[] = [

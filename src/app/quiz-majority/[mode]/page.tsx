@@ -15,16 +15,16 @@ import { openXShare, buildTopUrl } from "@/lib/shareX";
 type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
 
 const stagePointMap: Record<number, number> = {
-  1: 100,
-  2: 150,
-  3: 250,
-  4: 400,
-  5: 600,
-  6: 850,
-  7: 1150,
-  8: 1500,
-  9: 1900,
-  10: 3000,
+  1: 10,
+  2: 20,
+  3: 30,
+  4: 40,
+  5: 50,
+  6: 60,
+  7: 80,
+  8: 100,
+  9: 200,
+  10: 300,
 };
 
 const stageMessages: Record<number, string> = {
@@ -1033,7 +1033,7 @@ export default function QuizModePage() {
     const reachedStage = Math.min(10, Math.max(0, clearedStage));
     const earned = stagePointMap[reachedStage] ?? 0;
 
-    const base = correctCount * 20;
+    const base = correctCount * 10;
     const totalPoints = earned + base;
     const expEarned = correctCount * 20;
 

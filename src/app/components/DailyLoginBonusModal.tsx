@@ -11,7 +11,6 @@ export function DailyLoginBonusModal() {
   const [open, setOpen] = useState(false);
   const [added, setAdded] = useState(0);
 
-  // 二重実行防止
   const calledRef = useRef(false);
 
   useEffect(() => {
@@ -30,7 +29,8 @@ export function DailyLoginBonusModal() {
 
       const row = Array.isArray(data) ? data[0] : data;
       if (row?.awarded) {
-        setAdded(row.added_points ?? 500);
+        // ✅ 表示のデフォルトも 100 に
+        setAdded(row.added_points ?? 100);
         setOpen(true);
 
         window.dispatchEvent(new Event("points:updated"));
@@ -43,41 +43,73 @@ export function DailyLoginBonusModal() {
   if (!open) return null;
 
   return (
-    // ▼ 画面全体（背景＋カード）を押したら閉じる
     <div
-      className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60"
+      className="fixed inset-0 z-[999] grid place-items-center p-4"
       onClick={() => setOpen(false)}
     >
+      {/* 背景（グラデ＋ぼかし＋ドット） */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
+      <div className="absolute inset-0 opacity-25">
+        <div className="w-full h-full bg-[radial-gradient(circle_at_12px_12px,rgba(255,255,255,0.35)_1.2px,transparent_1.3px)] [background-size:22px_22px]" />
+      </div>
+
+      {/* カード */}
       <div
         className="
-          bg-white rounded-2xl p-6 w-[320px] md:w-[420px]
-          shadow-2xl text-center cursor-pointer
+          relative w-full max-w-[420px]
+          rounded-[28px] overflow-hidden
+          border-[3px] border-black
+          bg-white
+          shadow-[0_10px_0_rgba(0,0,0,1)]
         "
       >
-        <p
-          className="
-            text-2xl md:text-4xl font-extrabold mb-2
-            text-yellow-400
-            drop-shadow-[0_0_8px_rgba(255,215,0,0.9)]
-          "
-        >
-          🎁 デイリーボーナス！
-        </p>
+        {/* ヘッダー帯 */}
+        <div className="relative px-5 pt-5 pb-4 border-b-[3px] border-black bg-gradient-to-r from-yellow-200 via-pink-200 to-sky-200 text-center">
+          <div className="absolute inset-0 opacity-25">
+            <div className="w-full h-full bg-[radial-gradient(circle_at_10px_10px,rgba(0,0,0,0.35)_1.2px,transparent_1.3px)] [background-size:20px_20px]" />
+          </div>
 
-        <p className="text-md md:text-xl text-gray-600">
-          今日のログインありがとう！
-        </p>
-        <p className="text-md md:text-xl text-gray-600 mb-2">
-          ポイントでひまQガチャを回してみよう！
-        </p>
+          <p className="relative text-3xl md:text-4xl font-black tracking-tight">
+            🎁 デイリーボーナス！
+          </p>
+          <p className="relative mt-1 md:mt-2 text-lg md:text-xl font-bold text-gray-700">
+            今日のログインありがとう！
+          </p>
+        </div>
 
-        <p className="text-xl md:text-3xl font-bold text-green-600 mb-4">
-          +{added}P
-        </p>
+        <div className="p-5">
+          {/* 目立つ報酬バッジ */}
+          <div className="grid place-items-center">
+            <div className="relative">
+              <div className="absolute -inset-4 rounded-full blur-[10px] opacity-70 bg-[radial-gradient(circle,rgba(255,215,0,0.65)_0%,transparent_60%)]" />
+              <div
+                className="
+                  relative inline-flex items-center gap-2
+                  px-5 py-3 rounded-full
+                  border-[3px] border-black
+                  bg-gradient-to-r from-yellow-300 via-amber-200 to-yellow-100
+                  shadow-[0_6px_0_rgba(0,0,0,1)]
+                "
+              >
+                <span className="text-lg md:text-xl">✨</span>
+                <span className="text-3xl md:text-4xl font-black text-green-600">
+                  +{added}P
+                </span>
+              </div>
+            </div>
+          </div>
 
-        <p className="text-sm text-gray-500">
-          ※ 画面をタップすると閉じます
-        </p>
+          <p className="mt-4 text-lg md:text-xl text-gray-700 font-bold text-center">
+            ポイントで <span className="font-black">ひまQガチャ</span> を回してみよう！
+          </p>
+
+          <p className="mt-6 text-md md:text-lg text-gray-500 text-center">
+            ※ タップすると閉じます
+          </p>
+        </div>
+
+        {/* 右下キラッ */}
+        <div className="absolute right-4 bottom-4 text-xl opacity-80">✨</div>
       </div>
     </div>
   );

@@ -372,13 +372,13 @@ export default function QuizModePage() {
   const totalTime = parseInt(timeParam) * 60;
 
   const BONUS_TABLE: Record<number, number[]> = {
-    2: [300],
-    3: [400, 200],
-    4: [500, 250, 125],
-    5: [700, 350, 175, 85],
-    6: [900, 450, 225, 110, 55],
-    7: [1200, 600, 300, 150, 75, 35],
-    8: [1500, 750, 375, 180, 90, 45, 20],
+    2: [150],
+    3: [200, 100],
+    4: [250, 125, 60],
+    5: [350, 175, 85, 40],
+    6: [450, 225, 110, 55, 25],
+    7: [600, 300, 150, 75, 35, 15],
+    8: [750, 375, 180, 90, 45, 20, 10],
   };
 
   // ranks: buildRanks(players) の結果を渡す
@@ -1045,7 +1045,7 @@ export default function QuizModePage() {
 
     const bonus = calcPlacementBonus(players.length, ranksNow, mySocketId);
     setBonus(bonus);
-    const points = Math.floor(myScore / 5) + bonus;
+    const points = Math.floor(myScore / 10) + bonus;
     const exp = correctCount * 20;
 
     setEarnedPoints(points);

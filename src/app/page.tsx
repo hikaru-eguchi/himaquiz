@@ -7,7 +7,7 @@ import { DailyLoginBonusModal } from "../app/components/DailyLoginBonusModal";
 import WeeklyRankingSection from "@/app/components/WeeklyRankingSection";
 
 export const metadata = {
-  title: "みんなで遊べる暇つぶしクイズ｜ひまQ",
+  title: "無料で遊べる暇つぶしクイズ｜ひまQ",
   description:
     "ひまQは、空き時間にみんなで盛り上がれる暇つぶしクイズサイト。友達や家族とワイワイ楽しめるクイズが無料で遊べます。",
 };
@@ -145,23 +145,46 @@ export default async function HomePage({
     <div className="container mx-auto px-4 py-2 sm:py-8">
       <DailyLoginBonusModal />
 
-      <p className="text-center text-md md:text-xl font-extrabold text-gray-800 leading-relaxed -mt-2 mb-6">
-        みんなで遊べる暇つぶしクイズ『ひまQ』は、暇つぶしにぴったりな、ひとりでも、みんなでも盛り上がれる楽しいクイズが満載です。
+      <div className="text-center">
+        <h1
+          className="
+            inline-block
+            text-xl md:text-3xl
+            font-bold
+            mb-2
+            text-center
+            leading-tight
+            px-1 py-1
+            rounded-lg
+            shadow-md
+            bg-gradient-to-r
+            from-yellow-100
+            via-yellow-200
+            to-sky-100
+            md:mb-3
+          "
+          style={{
+            backgroundClip: "padding-box",
+          }}
+        >
+          <span
+            style={{
+              background: "linear-gradient(90deg, #007BFF, #4C6EF5, #845EF7)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            無料で遊べる暇つぶしクイズ『ひまQ』
+          </span>
+        </h1>
+      </div>
+
+      <p className="text-center text-md md:text-xl font-extrabold text-gray-800 leading-relaxed -mt-2 md:mb-3">
+        ひとりでも、みんなでも楽しめる！対戦や協力でも盛り上がれる無料クイズサイト。
       </p>
 
-      <h1
-        className="text-3xl font-bold mb-2 text-center leading-tight sr-only"
-        style={{
-          background: "linear-gradient(90deg, #007BFF, #4C6EF5, #845EF7)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-        }}
-      >
-        みんなで遊べる暇つぶしクイズ
-      </h1>
-
       {/* 今日のクイズ表示 */}
-      <div className='max-w-[700px] mx-auto border-2 border-black rounded-xl m-5 p-5 bg-gradient-to-b from-red-0 via-red-100 to-red-200'>
+      <div className='max-w-[700px] mx-auto border-2 border-black rounded-xl m-5 mt-2 p-5 bg-gradient-to-b from-red-0 via-red-100 to-red-200'>
         <h2 className="
           text-2xl md:text-4xl 
           font-extrabold 
@@ -186,7 +209,7 @@ export default async function HomePage({
 
       <WeeklyRankingSection />
 
-      <div className="max-w-[700px] mx-auto border-2 border rounded-xl m-5 p-5 mb-10 bg-gradient-to-b from-red-50 via-red-100 to-red-200">
+      {/* <div className="max-w-[700px] mx-auto border-2 border rounded-xl m-5 p-5 mb-10 bg-gradient-to-b from-red-50 via-red-100 to-red-200">
         <p className="text-2xl md:text-4xl font-extrabold mt-2 mb-4 text-center text-red-500">
           📖クイズ問題集📖
         </p>
@@ -194,7 +217,7 @@ export default async function HomePage({
           面白クイズや脳トレクイズの問題集！ひとりでもみんなとでも楽しめる！
         </p>
         <div className="flex justify-center gap-3 md:gap-5 flex-wrap">
-          {/* クイズ集一覧 */}
+          クイズ集一覧
           <div className="text-center max-w-[260px]">
             <Link href="/quizbooks" className="w-full md:w-auto flex justify-center">
               <button className="text-xl md:text-2xl px-3 py-1 md:px-5 md:py-2 bg-white border-2 border-black rounded-full font-bold hover:scale-105 transition-all">
@@ -203,9 +226,9 @@ export default async function HomePage({
             </Link>
           </div>
         </div>
-      </div>
+      </div> */}
 
-      <div className="
+      {/* <div className="
         max-w-[700px] 
         mx-auto 
         border-2 border-black 
@@ -279,14 +302,14 @@ export default async function HomePage({
             </Link>
           </div>
         </div>
-      </div>
+      </div> */}
 
       <div className="max-w-[700px] mx-auto border-2 border-black rounded-xl m-5 p-5 bg-gradient-to-b from-purple-0 via-purple-100 to-purple-200">
         <p className="text-2xl md:text-4xl font-extrabold mb-2 text-center leading-tight drop-shadow-xl text-purple-500">
-          🎮一人で遊べるクイズゲーム🎮
+          🎮ひとりで遊べるクイズゲーム🎮
         </p>
         <p className="text-lg md:text-xl mb-2 text-center leading-tight mb-4">
-          腕試しをしたい人にオススメ！
+          気軽に挑戦！ひとりクイズタイム！
         </p>
         <div className="flex justify-center gap-3 md:gap-5 flex-wrap">
           {/* 連続正解チャレンジ */}
@@ -381,7 +404,7 @@ export default async function HomePage({
           🌐みんなで遊べるクイズゲーム🌐
         </p>
         <p className="text-lg md:text-xl mb-2 text-center leading-tight mb-4">
-          ネットの誰かと！友達や家族と！みんなで一緒に遊ぼう🎉
+          ネットの誰かと！友達や家族と！みんなでワイワイ遊ぼう🎉
         </p>
         <div className="flex justify-center gap-3 md:gap-5 flex-wrap">
           {/* 対戦クイズ */}
@@ -406,7 +429,7 @@ export default async function HomePage({
               </button>
             </Link>
             <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
-              みんなで2分間のクイズロワイヤル！
+              みんなで2分間のクイズバトル！
             </p>
             <p className="text-sm md:text-base text-gray-700 leading-tight">
               正解を積み上げて王冠をつかみ取れ！

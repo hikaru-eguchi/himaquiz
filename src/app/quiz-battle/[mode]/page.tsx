@@ -899,7 +899,7 @@ export default function QuizModePage() {
     const opponentScore = opponent?.score ?? 0;
     const isWinLocal = myScore > opponentScore;
 
-    const points = Math.floor(myScore / 5) + (isWinLocal ? 300 : 0);
+    const points = Math.floor(myScore / 10) + (isWinLocal ? 150 : 0);
     const exp = correctCount * 20;
 
     setEarnedPoints(points);
