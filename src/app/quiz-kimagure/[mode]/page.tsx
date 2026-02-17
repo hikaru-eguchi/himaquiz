@@ -174,6 +174,8 @@ const pickRandomEnemy = (excludeNo?: string): Enemy => {
   return pool[Math.floor(Math.random() * pool.length)];
 };
 
+const shouldEscape = () => Math.random() < 1 / 3; // 1/3で逃げる
+
 interface ArticleData {
   id: string;
   title: string;
@@ -498,6 +500,7 @@ export default function QuizModePage() {
   const [hideAfterButton, setHideAfterButton] = useState(false);
   const [showSearchButton, setShowSearchButton] = useState(false);
   const searchBtnTimerRef = useRef<number | null>(null);
+  const [openSearchConfirm, setOpenSearchConfirm] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -1009,6 +1012,26 @@ export default function QuizModePage() {
     );
   }
 
+  // ✅ 共通：次のモンスターを探す（逃げられた後と同じ挙動）
+  const searchAnotherMonster = () => {
+    setShowSearchButton(false);
+    setHideAfterButton(false);
+
+    // 次の敵へ
+    const next = pickRandomEnemy(currentEnemy.no);
+    setCurrentEnemy(next);
+    setEnemyVisible(true);
+
+    // 逃走状態リセット
+    setEscapeMessage(null);
+
+    // 表示リセット（不正解メッセージ等を消す）
+    setIncorrectMessage(null);
+
+    showEnemyIntro();
+    nextQuestion();
+  };
+
   // Xシェア機能
   const handleShareX = () => {
     const enemyName = resultEnemy?.name ?? "モンスター";
@@ -1027,6 +1050,44 @@ export default function QuizModePage() {
 
   return (
     <>
+      {/* 他のモンスター探索：確認モーダル */}
+      {openSearchConfirm && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center">
+          {/* 背景 */}
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setOpenSearchConfirm(false)}
+          />
+          {/* 本体 */}
+          <div className="relative w-[92%] max-w-[460px] rounded-2xl border-2 border-black bg-white p-5 shadow-xl">
+            <p className="text-2xl md:text-3xl font-extrabold text-yellow-600 drop-shadow mb-2 text-center">
+              次のモンスターをさがす？
+            </p>
+            <p className="text-base md:text-lg text-gray-700 font-bold text-center">
+              いまのモンスターとはお別れして、次のモンスターを探しにいくよ。
+            </p>
+
+            <div className="mt-5 flex gap-3 justify-center">
+              <button
+                className="px-5 py-3 rounded-lg font-extrabold text-lg border-2 border-black bg-gray-100 hover:opacity-90"
+                onClick={() => setOpenSearchConfirm(false)}
+              >
+                やめる
+              </button>
+              <button
+                className="px-6 py-3 rounded-lg font-extrabold text-lg border-2 border-black bg-yellow-400 hover:bg-yellow-500"
+                onClick={() => {
+                  setOpenSearchConfirm(false);
+                  searchAnotherMonster(); // ✅ 逃げられた後と同じ処理
+                }}
+              >
+                そうする
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <CharacterAcquireModal
         open={acquireOpen}
         item={acquired}
@@ -1160,19 +1221,35 @@ export default function QuizModePage() {
                           onClick={() => {
                             setHideAfterButton(true);
 
-                            // 逃走開始
-                            setEscapeMessage("逃げてしまった…");
+                            // 逃げるかどうか判定（1/3）
+                            const escaped = shouldEscape();
 
-                            // ゆっくり消す
-                            setEnemyVisible(false);
+                            // 共通：まずメッセージ出す
+                            setEscapeMessage(escaped ? "逃げてしまった…" : "逃げなかった！まだこっちをみている…");
 
-                            // 2秒後に「もういっかいさがす」ボタンを出す
-                            setShowSearchButton(false);
-                            if (searchBtnTimerRef.current) window.clearTimeout(searchBtnTimerRef.current);
+                            if (escaped) {
+                              // ✅ 逃走：ゆっくり消す + 2秒後に「もういっかいさがす」表示
+                              setEnemyVisible(false);
 
-                            searchBtnTimerRef.current = window.setTimeout(() => {
-                              setShowSearchButton(true);
-                            }, 2000);
+                              setShowSearchButton(false);
+                              if (searchBtnTimerRef.current) window.clearTimeout(searchBtnTimerRef.current);
+
+                              searchBtnTimerRef.current = window.setTimeout(() => {
+                                setShowSearchButton(true);
+                              }, 2000);
+                            } else {
+                              // ✅ 逃げない：敵は消さない、2秒だけ表示して元に戻す（ボタンは出さない）
+                              setEnemyVisible(true);
+
+                              if (searchBtnTimerRef.current) window.clearTimeout(searchBtnTimerRef.current);
+
+                              searchBtnTimerRef.current = window.setTimeout(() => {
+                                setEscapeMessage(null);   // 表示を消す
+                                setIncorrectMessage(null); 
+                                setHideAfterButton(false); // 次の操作に戻す（必要なら）
+                                nextQuestion();
+                              }, 3000);
+                            }
                           }}
                         >
                           OK
@@ -1218,16 +1295,37 @@ export default function QuizModePage() {
                   />
                 )}
 
-                {/* 回答ボタン */}
-                {!showCorrectMessage && !incorrectMessage && !isAttacking && (
-                  <button
-                    className="px-5 py-3 md:px-6 bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-2 hover:bg-blue-600 cursor-pointer"
-                    onClick={checkAnswer}
-                    disabled={userAnswer === null}
-                  >
-                    回答
-                  </button>
-                )}
+                <div>
+                  {/* 回答ボタン */}
+                  {!showCorrectMessage && !incorrectMessage && !isAttacking && (
+                    <button
+                      className="px-5 py-3 md:px-6 bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-2 hover:bg-blue-600 cursor-pointer"
+                      onClick={checkAnswer}
+                      disabled={userAnswer === null}
+                    >
+                      回答
+                    </button>
+                  )}
+                </div>
+
+                <div className="mt-3">
+                  {/* 他のモンスターを探す（回答ボタンの下） */}
+                  {!showCorrectMessage && !incorrectMessage && !isAttacking && (
+                    <button
+                      type="button"
+                      className={[
+                        "mt-3 px-6 py-3 rounded-full font-extrabold text-lg md:text-xl text-yellow-600",
+                        "border-4 border-yellow-400",
+                        "bg-gradient-to-b from-yellow-100 via-white to-yellow-200",
+                        "shadow-[0_10px_0_0_rgba(0,0,0,0.12)] hover:opacity-90 active:translate-y-[2px] active:shadow-[0_8px_0_0_rgba(0,0,0,0.12)]",
+                        "transition",
+                      ].join(" ")}
+                      onClick={() => setOpenSearchConfirm(true)}
+                    >
+                      次のモンスターをさがす
+                    </button>
+                  )}
+                </div>
               </>
             )}
           </>
