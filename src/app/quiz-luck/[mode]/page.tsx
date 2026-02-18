@@ -1103,7 +1103,7 @@ export default function QuizModePage() {
         </p>
 
         <p className="text-lg md:text-2xl font-bold text-gray-700 mb-6">
-          タップで倍率を決定！決まったら「スタート！」で次の問題へ！
+          タップで倍率を決定しよう！
         </p>
 
         <div className="mx-auto max-w-[520px]">
@@ -1135,7 +1135,7 @@ export default function QuizModePage() {
               onClick={startNextChallengeFromRoulette}
               className="mt-6 px-8 py-4 bg-blue-500 text-white text-2xl md:text-3xl font-extrabold rounded-full border-2 border-black shadow-lg hover:bg-blue-600 hover:scale-105 transition"
             >
-              スタート！
+              OK！
             </button>
           )}
         </div>
