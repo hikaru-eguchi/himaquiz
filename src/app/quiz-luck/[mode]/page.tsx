@@ -203,7 +203,7 @@ export default function QuizModePage() {
   const genre = searchParams?.get("genre") || "";
   const level = searchParams?.get("level") || "";
 
-  type GamePhase = "intro" | "playing" | "between" | "roulette" | "finished";
+  type GamePhase = "intro" | "playing" | "between" | "rouletteIntro" | "roulette" | "baseRoulette" | "finished";
   const CHALLENGE_TARGETS = [3, 5, 10, 20, 30] as const; // 1回目2連続 / 2回目3連続 / 3回目5連続
 
   const randChoice = <T,>(arr: readonly T[]) => arr[Math.floor(Math.random() * arr.length)];
@@ -250,6 +250,13 @@ export default function QuizModePage() {
   const [mulRolling, setMulRolling] = useState(false);
   const [mulCandidate, setMulCandidate] = useState<number>(2); // 表示中の数字
   const [mulLocked, setMulLocked] = useState<number | null>(null); // タップで確定した倍率
+
+  // ✅ 最初の報酬ルーレット（50/100/150）
+  const BASE_LIST = [50, 100, 150] as const;
+  const [baseRolling, setBaseRolling] = useState(false);
+  const [baseCandidate, setBaseCandidate] = useState<number>(BASE_LIST[0]);
+  const [baseLocked, setBaseLocked] = useState<number | null>(null);
+  const baseTimerRef = useRef<number | null>(null);
 
   // ============================
   // ✅ 取りこぼし防止：pending key
@@ -423,6 +430,9 @@ export default function QuizModePage() {
     setFailReward(0);
     setLastMultiplier(null);
     setFinalReward(0);
+    setBaseRolling(false);
+    setBaseCandidate(BASE_LIST[0]);
+    setBaseLocked(null);
 
     // リザルト関連
     setEarnedPoints(0);
@@ -458,6 +468,8 @@ export default function QuizModePage() {
     setShowCorrectMessage(false);
     setIncorrectMessage(null);
     setTimeLeft(30);
+    setBaseRolling(false);
+    setBaseLocked(null);
 
     // シャッフル（任意だけどおすすめ）
     setQuestions((prev) => shuffleArray(prev));
@@ -479,11 +491,9 @@ export default function QuizModePage() {
 
   const startNextChallengeFromRoulette = () => {
     if (mulLocked == null) return;
-    if (challengeIndex >= 4) return;
 
     const mul = mulLocked;
 
-    // 倍率反映
     setLastMultiplier(mul);
     setReward((r) => {
       setPrevReward(r);
@@ -492,24 +502,17 @@ export default function QuizModePage() {
       return next;
     });
 
-    // 次チャレンジ準備
-    setChallengeIndex((v) => v + 1);
-    setStreakInChallenge(0);
-    setShowCorrectMessage(false);
-    setIncorrectMessage(null);
-    setTimeLeft(30);
-
-    // 次の問題へ
-    setCurrentIndex((i) => i + 1);
-
-    // playingへ
-    setPhase("playing");
+    // ✅ ここでは次チャレンジを開始しない（betweenへ戻す）
+    setPhase("between");
   };
 
   const mulTimerRef = useRef<number | null>(null);
 
+  // ルーレット倍率候補
+  const MUL_LIST = [2, 2.5, 3] as const;
+
   useEffect(() => {
-    const shouldRoulette = phase === "roulette" && challengeIndex < 4 && mulLocked == null;
+    const shouldRoulette = phase === "roulette" && mulLocked == null;
 
     if (!shouldRoulette) {
       if (mulTimerRef.current) {
@@ -521,12 +524,13 @@ export default function QuizModePage() {
     }
 
     setMulRolling(true);
-    setMulCandidate(2);
+    setMulCandidate(MUL_LIST[0]);
 
     mulTimerRef.current = window.setInterval(() => {
-      // setMulCandidate((prev) => (prev === 2 ? 3 : prev === 3 ? 4 : prev === 4 ? 5 : 2));
-      // setMulCandidate((prev) => (prev === 2 ? 3 : prev === 3 ? 4 : 2));
-      setMulCandidate((prev) => (prev === 2 ? 3 : 2));
+      setMulCandidate((prev) => {
+        const idx = MUL_LIST.indexOf(prev as any);
+        return MUL_LIST[(idx + 1) % MUL_LIST.length];
+      });
     }, 90);
 
     return () => {
@@ -535,7 +539,66 @@ export default function QuizModePage() {
         mulTimerRef.current = null;
       }
     };
-  }, [phase, challengeIndex, mulLocked]);
+  }, [phase, mulLocked]);
+
+  const lockBase = () => {
+    if (!baseRolling) return;
+    setBaseRolling(false);
+    setBaseLocked(baseCandidate);
+
+    if (baseTimerRef.current) {
+      window.clearInterval(baseTimerRef.current);
+      baseTimerRef.current = null;
+    }
+  };
+
+  const applyBaseAndGoBetween = () => {
+    if (baseLocked == null) return;
+
+    setBaseReward(baseLocked);
+    setReward(baseLocked);
+    setFailReward(Math.floor(baseLocked / 5));
+    setLastMultiplier(null);
+
+    // ✅ 次は「between（続ける/やめる選択）」へ
+    setPhase("between");
+  };
+
+  const startBaseRoulette = () => {
+    // すでに確定済み/回転中なら何もしない
+    if (baseLocked != null) return;
+    if (baseRolling) return;
+
+    setBaseCandidate(BASE_LIST[0]);
+    setBaseRolling(true); // ✅ これで useEffect が回し始める
+  };
+
+  useEffect(() => {
+    // ✅ baseRolling が true のときだけ回す（= ボタン押した後）
+    const should = phase === "baseRoulette" && baseRolling && baseLocked == null;
+
+    if (!should) {
+      if (baseTimerRef.current) {
+        window.clearInterval(baseTimerRef.current);
+        baseTimerRef.current = null;
+      }
+      return;
+    }
+
+    baseTimerRef.current = window.setInterval(() => {
+      setBaseCandidate((prev) => {
+        const idx = BASE_LIST.indexOf(prev as any);
+        return BASE_LIST[(idx + 1) % BASE_LIST.length];
+      });
+    }, 90);
+
+    return () => {
+      if (baseTimerRef.current) {
+        window.clearInterval(baseTimerRef.current);
+        baseTimerRef.current = null;
+      }
+    };
+  }, [phase, baseRolling, baseLocked]);
 
   useEffect(() => {
     finishedRef.current = finished;
@@ -627,40 +690,17 @@ export default function QuizModePage() {
     const displayAnswer = questions[currentIndex].quiz?.displayAnswer;
 
     if (userAnswer === correctAnswer) {
-      // ✅ 正解
       setCorrectCount((c) => c + 1);
 
       setStreakInChallenge((prev) => {
         const nextStreak = prev + 1;
-        const need = CHALLENGE_TARGETS[challengeIndex];
-
-        if (nextStreak >= need) {
-          queueMicrotask(() => {
-            if (rewardAppliedRef.current[challengeIndex]) return;
-            rewardAppliedRef.current[challengeIndex] = true;
-
-            if (challengeIndex === 0) {
-              const base = randChoice([50, 100, 150] as const);
-              setBaseReward(base);
-              setReward(base);
-              setFailReward(Math.floor(base / 5));
-              setLastMultiplier(null);
-            }
-          });
-
-          setShowCorrectMessage(true);
-        } else {
-          setShowCorrectMessage(true);
-        }
-
+        // ✅ ここでは phase を変えない（成功しても画面はそのまま）
         return nextStreak;
       });
 
+      setShowCorrectMessage(true);
     } else {
-      // ❌ 不正解：失敗
       setIncorrectMessage(`ざんねん！\n答えは" ${displayAnswer} "でした！`);
-
-      // 倍率“前”の半分を確定にしたい
       setFinalReward(getFailFinalReward());
     }
 
@@ -672,8 +712,20 @@ export default function QuizModePage() {
 
     const need = CHALLENGE_TARGETS[challengeIndex];
 
-    // ✅ チャレンジ達成後なら「between」へ
     if (streakInChallenge >= need) {
+      // ✅ 1回目成功 → 最初の報酬ルーレット（今まで通り）
+      if (challengeIndex === 0 && reward === 0) {
+        setPhase("baseRoulette");
+        return;
+      }
+
+      // ✅ 2回目以降の成功 → 倍率ルーレット案内へ（まだ回さない）
+      if (challengeIndex >= 1 && challengeIndex <= 3) {
+        setPhase("rouletteIntro");
+        return;
+      }
+
+      // ✅ 最終成功（challengeIndex===4）などは通常betweenへ
       setPhase("between");
       return;
     }
@@ -697,10 +749,18 @@ export default function QuizModePage() {
   const goNextChallenge = () => {
     if (challengeIndex >= 4) return;
 
-    // ここでは何も進めない！rouletteへ行くだけ
+    // ✅ 次のチャレンジ開始（ルーレットは成功後にやる）
+    setChallengeIndex((v) => v + 1);
+    setStreakInChallenge(0);
+    setShowCorrectMessage(false);
     setIncorrectMessage(null);
-    setMulLocked(null);     // 念のため
-    setPhase("roulette");
+    setTimeLeft(30);
+
+    setMulLocked(null); // 念のため
+    setPhase("playing");
+
+    // 次の問題へ（between の時点の問題はもう終わってるので次へ進める）
+    setCurrentIndex((i) => i + 1);
   };
 
   const takeRewardAndFinish = () => {
@@ -857,7 +917,7 @@ export default function QuizModePage() {
         </p>
 
         <p className="text-xl md:text-3xl font-bold text-gray-700 mb-10">
-          間違えずに <span className="text-red-500">2問連続</span>で正解したらチャレンジ成功！
+          間違えずに <span className="text-red-500">3問連続</span>で正解したらチャレンジ成功！
         </p>
 
         <button
@@ -944,6 +1004,90 @@ export default function QuizModePage() {
             終了して報酬を受け取る
           </button>
         </div>
+      </div>
+    );
+  }
+
+  if (phase === "baseRoulette") {
+    const isStarted = baseRolling || baseLocked != null;
+
+    return (
+      <div className="container mx-auto p-8 text-center bg-gradient-to-b from-green-200 via-green-100 to-green-200">
+        <p className="text-4xl md:text-6xl font-extrabold text-orange-500 drop-shadow mb-4">
+          最初のチャレンジ成功！✨
+        </p>
+
+        <p className="text-lg md:text-2xl font-bold text-gray-700 mb-6">
+          ルーレットを回して報酬を決めよう！
+        </p>
+
+        {/* ✅ まだ開始してないとき：開始ボタン */}
+        {!isStarted && (
+          <button
+            onClick={startBaseRoulette}
+            className="px-8 py-4 bg-blue-500 text-white text-2xl md:text-3xl font-extrabold rounded-full border-2 border-black shadow-lg hover:bg-blue-600 hover:scale-105 transition"
+          >
+            ルーレットを回す
+          </button>
+        )}
+
+        {/* ✅ 開始後：ルーレット本体 */}
+        {isStarted && (
+          <div className="mx-auto max-w-[520px] mt-6">
+            <button
+              onClick={() => {
+                // 回転中だけ止められる
+                if (baseLocked == null) lockBase();
+              }}
+              className={[
+                "w-full rounded-3xl border-2 border-black shadow-xl px-6 py-8",
+                "bg-gradient-to-r from-yellow-200 via-white to-yellow-100",
+                "hover:scale-[1.02] active:scale-[0.98] transition",
+              ].join(" ")}
+            >
+              <div className="text-sm md:text-lg font-bold text-gray-700">
+                {baseLocked == null ? "👆 タップでストップ！（止めてね）" : "✅ これに決定！"}
+              </div>
+
+              <div className="mt-3 text-6xl md:text-8xl font-extrabold text-gray-900 drop-shadow">
+                {baseLocked ?? baseCandidate}P
+              </div>
+            </button>
+
+            {baseLocked != null && (
+              <button
+                onClick={applyBaseAndGoBetween}
+                className="mt-6 px-8 py-4 bg-blue-500 text-white text-2xl md:text-3xl font-extrabold rounded-full border-2 border-black shadow-lg hover:bg-blue-600 hover:scale-105 transition"
+              >
+                OK！
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (phase === "rouletteIntro") {
+    return (
+      <div className="container mx-auto p-8 text-center bg-gradient-to-b from-green-200 via-green-100 to-green-200">
+        <p className="text-4xl md:text-6xl font-extrabold text-orange-500 drop-shadow mb-4">
+          チャレンジ成功！✨
+        </p>
+
+        <p className="text-lg md:text-2xl font-bold text-gray-700 mb-6">
+          ルーレットを回して倍率を決めよう！
+        </p>
+
+        <button
+          onClick={() => {
+            setMulLocked(null);   // 念のため
+            setPhase("roulette"); // ✅ ここで初めて回転開始（今の useEffect が回す）
+          }}
+          className="px-8 py-4 bg-blue-500 text-white text-2xl md:text-3xl font-extrabold rounded-full border-2 border-black shadow-lg hover:bg-blue-600 hover:scale-105 transition"
+        >
+          ルーレットを回す
+        </button>
       </div>
     );
   }
