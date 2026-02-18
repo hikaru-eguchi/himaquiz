@@ -87,82 +87,15 @@ export default function NavButtons() {
         >
           <div className="flex flex-col gap-3 md:gap-4">
             {/* ①②：スマホ縦 / PC横 */}
-            <div className="flex flex-col md:flex-row gap-3 md:gap-4">
-              <fieldset
-                className={`${groupBox} bg-gradient-to-br from-white via-slate-50 to-slate-100 md:flex-1`}
-              >
-                <legend className={groupLegend}>クイズ問題集</legend>
-                <p className="text-xs md:text-sm text-black/70">
-                  面白いクイズ問題集が勢ぞろい。気になるテーマを解いてみよう！
-                </p>
-                <div className={rowWrap}>
-                  <Link
-                    href="/quizbooks"
-                    onClick={() => handleNavClick("/quizbooks")}
-                  >
-                    <button
-                      className={`${baseStyle} bg-white text-black ${
-                        activeUrl === "/quizbooks" ? activeStyle : ""
-                      }`}
-                    >
-                      漢字穴埋めクイズ
-                    </button>
-                  </Link>
-                </div>
-              </fieldset>
-
-              <fieldset
-                className={`${groupBox} bg-gradient-to-br from-emerald-50 via-sky-50 to-yellow-50 md:flex-1`}
-              >
-                <legend className={groupLegend}>4択クイズ</legend>
-                <p className="text-xs md:text-sm text-black/70">
-                  サクッと遊べる4択クイズ。スキマ時間に脳トレ＆腕試し！
-                </p>
-                <div className={rowWrap}>
-                  <Link
-                    href="/quizzes"
-                    onClick={() => handleNavClick("/quizzes")}
-                  >
-                    <button
-                      className={`${baseStyle} bg-white text-black ${
-                        activeUrl === "/quizzes" ? activeStyle : ""
-                      }`}
-                    >
-                      全て
-                    </button>
-                  </Link>
-
-                  {genres.map((genre) => {
-                    const url = genreMap[genre];
-                    const isActive = activeUrl === url;
-                    return (
-                      <Link
-                        key={genre}
-                        href={url}
-                        onClick={() => handleNavClick(url)}
-                      >
-                        <button
-                          className={`${baseStyle} ${genreBgMap[genre]} text-black ${
-                            isActive ? activeStyle : ""
-                          }`}
-                        >
-                          {genre}
-                        </button>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </fieldset>
-            </div>
 
             {/* ✅ ここがポイント：
                 スマホは縦 / PCは横並びで「1人」「みんな」「ガチャ」を並べる */}
             <div className="flex flex-col md:flex-row gap-3 md:gap-4">
               {/* 1人で遊べる */}
               <fieldset className={`${groupBox} ${bgSolo} md:flex-1`}>
-                <legend className={groupLegend}>1人で遊べるクイズゲーム</legend>
+                <legend className={groupLegend}>ひとりで遊べるクイズゲーム</legend>
                 <p className="text-xs md:text-sm text-black/70">
-                  1人でじっくり挑戦。自己ベスト更新を目指そう！
+                  気軽に挑戦！ひとりクイズタイム！
                 </p>
                 <div className="mx-auto w-full max-w-[300px] md:max-w-none">
                   <div className={gameScrollOuter}>
@@ -257,7 +190,7 @@ export default function NavButtons() {
               <fieldset className={`${groupBox} ${bgMulti} md:flex-1`}>
                 <legend className={groupLegend}>みんなで遊べるクイズゲーム</legend>
                 <p className="text-xs md:text-sm text-black/70">
-                  友だちとワイワイ対戦・協力！みんなで盛り上がろう。
+                  ネットの誰かと！友達や家族と！みんなでワイワイ遊ぼう🎉
                 </p>
                 <div className="mx-auto w-full max-w-[300px] md:max-w-none">
                   <div className={gameScrollOuter}>
@@ -380,6 +313,74 @@ export default function NavButtons() {
                   </Link>
                 </div>
               </fieldset> */}
+            </div>
+
+            <div className="flex flex-col md:flex-row gap-3 md:gap-4">
+              <fieldset
+                className={`${groupBox} bg-gradient-to-br from-white via-slate-50 to-slate-100 md:flex-1`}
+              >
+                <legend className={groupLegend}>クイズ問題集</legend>
+                <p className="text-xs md:text-sm text-black/70">
+                  面白いクイズ問題集が勢ぞろい。気になるテーマを解いてみよう！
+                </p>
+                <div className={rowWrap}>
+                  <Link
+                    href="/quizbooks"
+                    onClick={() => handleNavClick("/quizbooks")}
+                  >
+                    <button
+                      className={`${baseStyle} bg-white text-black ${
+                        activeUrl === "/quizbooks" ? activeStyle : ""
+                      }`}
+                    >
+                      漢字穴埋めクイズ
+                    </button>
+                  </Link>
+                </div>
+              </fieldset>
+
+              <fieldset
+                className={`${groupBox} bg-gradient-to-br from-emerald-50 via-sky-50 to-yellow-50 md:flex-1`}
+              >
+                <legend className={groupLegend}>4択クイズ</legend>
+                <p className="text-xs md:text-sm text-black/70">
+                  サクッと遊べる4択クイズ。スキマ時間に脳トレ＆腕試し！
+                </p>
+                <div className={rowWrap}>
+                  <Link
+                    href="/quizzes"
+                    onClick={() => handleNavClick("/quizzes")}
+                  >
+                    <button
+                      className={`${baseStyle} bg-white text-black ${
+                        activeUrl === "/quizzes" ? activeStyle : ""
+                      }`}
+                    >
+                      全て
+                    </button>
+                  </Link>
+
+                  {genres.map((genre) => {
+                    const url = genreMap[genre];
+                    const isActive = activeUrl === url;
+                    return (
+                      <Link
+                        key={genre}
+                        href={url}
+                        onClick={() => handleNavClick(url)}
+                      >
+                        <button
+                          className={`${baseStyle} ${genreBgMap[genre]} text-black ${
+                            isActive ? activeStyle : ""
+                          }`}
+                        >
+                          {genre}
+                        </button>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </fieldset>
             </div>
           </div>
         </div>
