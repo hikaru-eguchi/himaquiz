@@ -96,7 +96,7 @@ export default function ContactPage() {
         <div className="text-center">
           <button
             type="submit"
-            className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 px-6 rounded-lg transform hover:scale-105 transition-transform"
+            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transform hover:scale-105 transition-transform"
           >
             送信
           </button>

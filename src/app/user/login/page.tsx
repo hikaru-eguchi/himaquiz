@@ -4,6 +4,7 @@ import { FormEvent, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { Session } from "@supabase/supabase-js";
+import Link from "next/link";
 
 type ApiResponse =
   | { ok: true; session: Session }
@@ -178,6 +179,15 @@ export default function LoginPage() {
         >
           {loading ? "ログイン中..." : "ログイン"}
         </button>
+
+        <div className="flex justify-center">
+          <Link
+            href="/user/forgot-password"
+            className="text-sm md:text-base text-blue-600 hover:underline mt-2"
+          >
+            パスワードを忘れた方はこちら
+          </Link>
+        </div>
       </form>
     </div>
   );
