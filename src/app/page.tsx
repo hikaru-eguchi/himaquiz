@@ -492,7 +492,7 @@ export default async function HomePage({
             </p>
           </div>
           {/* サイコロクイズ */}
-          {/* <div className="text-center max-w-[260px]">
+          <div className="text-center max-w-[260px]">
             <Link href="/quiz-dice" className="w-full md:w-auto flex justify-center">
               <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-green-700 via-emerald-500 to-amber-300 text-white hover:scale-110 transition-all">
                 サイコロクイズ🎲
@@ -504,7 +504,7 @@ export default async function HomePage({
             <p className="text-sm md:text-base text-gray-700 leading-tight">
               運も実力も試されるドキドキクイズ！
             </p>
-          </div> */}
+          </div>
           {/* 心理当てバトル */}
           {/* <div className="text-center max-w-[260px]">
             <Link href="/quiz-mind" className="w-full md:w-auto flex justify-center">

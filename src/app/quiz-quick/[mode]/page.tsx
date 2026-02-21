@@ -194,7 +194,7 @@ const QuizResult = ({
         <div className="mx-auto max-w-[520px] bg-white border-2 border-black rounded-xl p-4 shadow mt-6">
           <>
               <div className="mb-2 text-lg md:text-xl text-gray-700 font-bold">
-                <p className="text-blue-500">正解数ポイント：{basePoints}P（{correctCount}問 × 20P）</p>
+                <p className="text-blue-500">正解数ポイント：{basePoints}P（{correctCount}問 × 10P）</p>
                 {bonus > 0 && (
                   <p className="text-md md:text-xl font-bold text-yellow-500 mb-1">
                     順位ボーナス： {bonus} P✨

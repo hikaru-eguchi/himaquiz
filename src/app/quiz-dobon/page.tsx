@@ -190,7 +190,7 @@ export default function QuizMasterPage() {
                   return;
                 }
                 if (!battleCode.trim()) {
-                  setCodeError("対戦コードを入力してください");
+                  setCodeError("あいことばを入力してください");
                   return;
                 }
                 router.push(

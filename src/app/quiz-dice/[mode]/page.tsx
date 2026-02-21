@@ -19,6 +19,15 @@ import Image from "next/image";
 
 type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
 
+type ItemType = "DOUBLE" | "FORCE_6" | "PLUS_3";
+
+type SelectedItem = {
+  type: ItemType;
+  label: string;
+  // 4問目で選んだ、という情報（ズレ防止用）
+  chosenAtQuestionIndex: number; // 3 固定になる想定
+};
+
 function DiceOverlay({
   open,
   onSubmit,
@@ -36,6 +45,11 @@ function DiceOverlay({
   const faceRef = useRef(1);
   const submittedRef = useRef(false);
 
+  const lockedRef = useRef(false);
+  useEffect(() => {
+    lockedRef.current = locked;
+  }, [locked]);
+
   useEffect(() => {
     faceRef.current = face;
   }, [face]);
@@ -43,91 +57,217 @@ function DiceOverlay({
   useEffect(() => {
     if (!open) return;
 
-    // 初期化
     submittedRef.current = false;
     setLocked(false);
     setRolling(true);
     setRemain(deadlineMs);
 
-    // 高速ランダム切替
     const rollTimer = setInterval(() => {
-      const n = Math.floor(Math.random() * 6) + 1;
-      setFace(n);
+      setFace(Math.floor(Math.random() * 6) + 1);
     }, 80);
 
-    // 残り時間カウント
     const start = Date.now();
     const remainTimer = setInterval(() => {
       const r = Math.max(0, deadlineMs - (Date.now() - start));
       setRemain(r);
       if (r <= 0) {
-        // 強制確定
-        forceSubmit();
+        forceSubmit(); // 時間切れで確定
       }
     }, 100);
 
     const forceSubmit = () => {
       if (submittedRef.current) return;
       submittedRef.current = true;
+
       setLocked(true);
       setRolling(false);
+
       clearInterval(rollTimer);
       clearInterval(remainTimer);
+
+      // 親へ「確定した面」を通知（閉じるのは親が担当）
       onSubmit(faceRef.current);
     };
 
-    // タップ確定
-    const handle = () => {
-      if (locked) return;
-      forceSubmit();
-    };
+    // どこでもタップで確定
+    const handlePointerDown = () => {
+    if (lockedRef.current) return;
+    forceSubmit();
+  };
 
-    // ここでは overlay 内ボタンで確定するので addEventListener は不要でもOK
-    // （必要なら overlay 全体クリックでも確定にできる）
+    // overlay開いている間だけ有効にする
+    window.addEventListener("pointerdown", handlePointerDown, { passive: true });
 
     return () => {
       clearInterval(rollTimer);
       clearInterval(remainTimer);
+      window.removeEventListener("pointerdown", handlePointerDown);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [open, deadlineMs]);
 
   if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80">
-      <div className="bg-white rounded-2xl p-6 w-[320px] text-center shadow-2xl border-4 border-black">
-        <p className="text-2xl font-extrabold mb-2">サイコロを止めよう！🎲</p>
-        <p className="text-md text-gray-600 mb-4">
-          タップで確定（残り {Math.ceil(remain / 1000)} 秒）
-        </p>
+      <div className="relative w-[360px] md:w-[420px] text-center">
+        {/* キラキラ背景（装飾） */}
+        <div className="absolute -inset-3 rounded-[28px] bg-gradient-to-r from-yellow-300 via-pink-300 to-sky-300 opacity-70" />
 
-        <div className="mx-auto w-[140px] h-[140px] flex items-center justify-center">
-          <Image
-            src={`/images/dice${face}.png`} // 例: public/images/dice1.png〜6.png
-            alt={`dice ${face}`}
-            width={140}
-            height={140}
-            className={rolling ? "animate-pulse" : ""}
-            priority
-          />
+        {/* 本体カード */}
+        <div className="relative bg-white/95 backdrop-blur rounded-[26px] p-6 md:p-8 shadow-2xl border-4 border-black overflow-hidden">
+          {/* 上の装飾ライン */}
+          <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-emerald-400 via-yellow-300 to-pink-400" />
+
+          <p className="text-2xl md:text-3xl font-extrabold mb-2 drop-shadow">
+            {locked ? "🎉 確定！！" : "🎲 サイコロを止めよう！"}
+          </p>
+
+          <p className="text-sm md:text-base text-gray-700 mb-4 font-bold">
+            {locked ? "結果を反映中…" : `画面どこでもタップで確定！ 残り ${Math.ceil(remain / 1000)} 秒`}
+          </p>
+
+          {/* サイコロを大きく */}
+          <div className="mx-auto w-[240px] h-[240px] md:w-[280px] md:h-[280px] flex items-center justify-center">
+            <div
+              className={`rounded-2xl ${
+                locked ? "animate-bounce" : "animate-pulse"
+              }`}
+            >
+              <Image
+                src={`/images/dice${face}.png`}
+                alt={`dice ${face}`}
+                width={280}
+                height={280}
+                className="select-none"
+                priority
+              />
+            </div>
+          </div>
+
+          <p className="mt-4 text-lg md:text-2xl font-extrabold">
+            {locked ? "✅ OK！" : "タップでストップ！"}
+          </p>
+
+          {locked && (
+            <p className="mt-2 text-sm md:text-base text-gray-600 font-bold">
+              （2秒後に自動で閉じます）
+            </p>
+          )}
+
+          {/* 下の小さい装飾 */}
+          <div className="absolute -bottom-8 -right-8 w-28 h-28 rounded-full bg-yellow-200 opacity-60" />
+          <div className="absolute -bottom-10 -left-10 w-32 h-32 rounded-full bg-sky-200 opacity-60" />
         </div>
+      </div>
+    </div>
+  );
+}
 
-        <button
-          onClick={() => {
-            if (locked) return;
-            setLocked(true);
-            setRolling(false);
-            onSubmit(face);
-          }}
-          className="mt-5 w-full py-3 bg-green-600 hover:bg-green-700 text-white font-extrabold rounded-xl text-xl"
-        >
-          {locked ? "確定！" : "止める！"}
-        </button>
+type ItemResult = {
+  itemId: string;
+  label: string;
+  // 例：効果（お好みで）
+  bonusPoints?: number;
+  bonusExp?: number;
+  // 例：演出用
+  rarity?: "N" | "R" | "SR";
+};
 
-        <p className="mt-3 text-lg font-bold">
-          獲得：<span className="text-emerald-700">{face * 100}P</span>
-        </p>
+function ItemChanceOverlay({
+  open,
+  deadlineMs = 8000,
+  onSubmit,
+}: {
+  open: boolean;
+  deadlineMs?: number;
+  onSubmit: (item: SelectedItem) => void;
+}) {
+  const [locked, setLocked] = useState(false);
+  const [remain, setRemain] = useState(deadlineMs);
+  const submittedRef = useRef(false);
+
+  const choices: SelectedItem[] = [
+    { type: "DOUBLE", label: "次の出目2倍🔥", chosenAtQuestionIndex: 3 },
+    { type: "FORCE_6", label: "次の出目6確定🎯", chosenAtQuestionIndex: 3 },
+    { type: "PLUS_3", label: "次の出目+3💪", chosenAtQuestionIndex: 3 },
+  ];
+
+  useEffect(() => {
+    if (!open) return;
+
+    submittedRef.current = false;
+    setLocked(false);
+    setRemain(deadlineMs);
+
+    const start = Date.now();
+    const t = setInterval(() => {
+      const r = Math.max(0, deadlineMs - (Date.now() - start));
+      setRemain(r);
+      if (r <= 0) {
+        // 時間切れのデフォルト（任意）：DOUBLEなど
+        if (!submittedRef.current) {
+          submittedRef.current = true;
+          setLocked(true);
+          // onSubmit(choices[0]);
+        }
+      }
+    }, 100);
+
+    return () => clearInterval(t);
+  }, [open, deadlineMs]);
+
+  if (!open) return null;
+
+  const pick = (item: SelectedItem) => {
+    if (locked) return;
+    if (submittedRef.current) return;
+    submittedRef.current = true;
+
+    setLocked(true);
+    onSubmit(item);
+  };
+
+  return (
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/80">
+      <div className="relative w-[360px] md:w-[420px] text-center">
+        <div className="absolute -inset-3 rounded-[28px] bg-gradient-to-r from-pink-300 via-yellow-300 to-sky-300 opacity-70" />
+        <div className="relative bg-white/95 backdrop-blur rounded-[26px] p-6 md:p-8 shadow-2xl border-4 border-black overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-yellow-300 via-emerald-300 to-pink-300" />
+
+          <p className="text-2xl md:text-3xl font-extrabold mb-2">
+            {locked ? "✅ 選択OK！" : "🎁 アイテムチャンス（3択）"}
+          </p>
+
+          {!locked && (
+            <p className="text-sm md:text-base text-gray-700 mb-4 font-bold">
+              選んだ効果は「5問目に正解したら」発動！ 残り {Math.ceil(remain / 1000)} 秒
+            </p>
+          )}
+
+          <div className="mt-3 grid grid-cols-1 gap-3">
+            {choices.map((c) => (
+              <button
+                key={c.type}
+                onClick={() => pick(c)}
+                className="
+                  w-full py-3 rounded-xl border-4 border-black
+                  bg-gradient-to-b from-white to-yellow-100
+                  text-xl font-extrabold hover:scale-[1.02] transition
+                "
+                disabled={locked}
+              >
+                {c.label}
+              </button>
+            ))}
+          </div>
+
+          {locked && (
+            <p className="mt-4 text-lg md:text-xl font-extrabold">
+              5問目に正解したら発動するよ🔥
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -178,6 +318,7 @@ interface QuizResultProps {
   onGoLogin: () => void;
   isCodeMatch: boolean;
   onShareX: () => void;
+  playerPoints: Record<string, number>;
 }
 
 const QuizResult = ({
@@ -203,6 +344,7 @@ const QuizResult = ({
   onGoLogin,
   isCodeMatch,
   onShareX,
+  playerPoints,
 }: QuizResultProps) => {
   const [showText1, setShowText1] = useState(false);
   const [showText2, setShowText2] = useState(false);
@@ -285,6 +427,7 @@ const QuizResult = ({
 
             return group.map(socketId => {
               const player = players.find(p => p.socketId === socketId);
+              const pts = playerPoints?.[socketId] ?? 0;
               if (!player) return null;
 
               return (
@@ -311,27 +454,15 @@ const QuizResult = ({
                   <span className="font-bold text-base truncate flex-1 text-center">
                     {player.playerName}
                   </span>
+
+                  {/* ✅ 右端：点数 */}
+                  <span className="font-extrabold text-base text-emerald-700 whitespace-nowrap w-16 text-right">
+                    {pts}点
+                  </span>
                 </div>
               );
             });
           })}
-        </div>
-      )}
-      {showText5 && predictedWinner && hasPredicted && (
-        <div className="mt-6 p-4 bg-white rounded-xl shadow max-w-sm mx-auto">
-          <p className="text-xl font-bold mb-2">
-            あなたの1位予想
-          </p>
-
-          {eliminationGroups[eliminationGroups.length - 1]?.includes(predictedWinner) ? (
-            <p className="text-3xl font-extrabold text-green-600">
-              的中！🎯
-            </p>
-          ) : (
-            <p className="text-2xl font-bold text-gray-500">
-              はずれ…
-            </p>
-          )}
         </div>
       )}
 
@@ -339,13 +470,9 @@ const QuizResult = ({
         <div className="mx-auto max-w-[520px] bg-white border-2 border-black rounded-xl p-4 shadow mt-6">
           <>
               <div className="mb-2 text-lg md:text-xl text-gray-700 font-bold">
-                <p className="text-blue-500">正解数ポイント：{basePoints}P（{correctCount}問 × 20P）</p>
+                <p className="text-blue-500">正解数ポイント：{basePoints}P（{correctCount}問 × 10P）</p>
                 {firstBonusPoints > 0 && (
-                  <p className="text-yellow-500">1位ボーナス✨：{firstBonusPoints}P</p>
-                )}
-
-                {predictionBonusPoints > 0 && (
-                  <p className="text-pink-500">予想的中ボーナス🎉：{predictionBonusPoints}P</p>
+                  <p className="text-yellow-500">順位ボーナス✨：{firstBonusPoints}P</p>
                 )}
               </div>
 
@@ -490,6 +617,37 @@ export default function QuizModePage() {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const { user, loading: userLoading } = useSupabaseUser();
 
+  const BONUS_TABLE: Record<number, number[]> = {
+    2: [150],
+    3: [200, 100],
+    4: [250, 125, 60],
+    5: [350, 175, 85, 40],
+    6: [450, 225, 110, 55, 25],
+    7: [600, 300, 150, 75, 35, 15],
+    8: [750, 375, 180, 90, 45, 20, 10],
+  };
+
+  // eliminationGroups から作った allRanks を使ってボーナス計算（同率は0、最下位は0）
+  const calcPlacementBonusFromAllRanks = (
+    playerCount: number,
+    allRanksNow: { socketId: string; rank: number }[],
+    mySocketId: string
+  ) => {
+    const table = BONUS_TABLE[playerCount] ?? [];
+    const me = allRanksNow.find(r => r.socketId === mySocketId);
+    if (!me) return 0;
+
+    // 最下位はボーナス無し
+    if (me.rank >= playerCount) return 0;
+
+    // 同率はボーナス無し（その順位が1人だけのときのみ）
+    const sameRankCount = allRanksNow.filter(r => r.rank === me.rank).length;
+    if (sameRankCount !== 1) return 0;
+
+    // table[0]=1位, table[1]=2位...
+    return table[me.rank - 1] ?? 0;
+  };
+
   // =====================
   // ✅ pending（付与待ち）管理：確実付与用
   // =====================
@@ -583,9 +741,8 @@ export default function QuizModePage() {
 
       // ログ（＋）※失敗しても致命的ではない
       const reasonPoint =
-        `サバイバルクイズ獲得: 正解${payload.correctCount}問=${payload.basePoints}P` +
-        (payload.firstBonusPoints ? ` / 1位ボーナス${payload.firstBonusPoints}P` : "") +
-        (payload.predictionBonusPoints ? ` / 予想的中${payload.predictionBonusPoints}P` : "");
+        `サイコロクイズ獲得: 正解${payload.correctCount}問=${payload.basePoints}P` +
+        (payload.firstBonusPoints ? ` / 順位ボーナス${payload.firstBonusPoints}P` : "");
 
       if (payload.points > 0) {
         const { error: logError } = await supabase.from("user_point_logs").insert({
@@ -600,7 +757,7 @@ export default function QuizModePage() {
         const { error: logError2 } = await supabase.from("user_exp_logs").insert({
           user_id: authedUserId,
           change: payload.exp,
-          reason: `サバイバルクイズEXP獲得: 正解${payload.correctCount}問 → ${payload.exp}EXP`,
+          reason: `サイコロクイズEXP獲得: 正解${payload.correctCount}問 → ${payload.exp}EXP`,
         });
         if (logError2) console.log("insert user_exp_logs error raw:", logError2);
       }
@@ -630,6 +787,20 @@ export default function QuizModePage() {
   const [diceOpen, setDiceOpen] = useState(false);
   const [diceEligible, setDiceEligible] = useState(false); // 自分が振れるか（=今回正解か）
   const diceSubmittedRef = useRef(false);
+  const [itemOpen, setItemOpen] = useState(false);
+  const [itemEligible, setItemEligible] = useState(false);
+  const itemSubmittedRef = useRef(false);
+  const [selectedItem, setSelectedItem] = useState<SelectedItem | null>(null);
+  const selectedItemRef = useRef<SelectedItem | null>(null);
+  useEffect(() => { selectedItemRef.current = selectedItem; }, [selectedItem]);
+  const itemShownRef = useRef(false); // 4問目で1回だけ出す用
+
+  const [lastItem, setLastItem] = useState<ItemResult | null>(null);
+
+  type ServerItemId = "double" | "force6" | "plus3";
+
+  const [roomItemChoices, setRoomItemChoices] = useState<Record<string, ServerItemId>>({});
+  const [itemDeadlineMs, setItemDeadlineMs] = useState(8000);
 
   const [questions, setQuestions] = useState<{ id: string; quiz: QuizData }[]>([]);
   const [correctCount, setCorrectCount] = useState(0);
@@ -678,6 +849,13 @@ export default function QuizModePage() {
 
   const [predictedWinner, setPredictedWinner] = useState<string | null>(null);
   const [hasPredicted, setHasPredicted] = useState(false);
+  const [showDiceWaitMessage, setShowDiceWaitMessage] = useState(false);
+
+  const pendingDiceOpenRef = useRef<{
+    correctSocketIds: string[];
+    deadlineMs: number;
+    questionIndex: number;
+  } | null>(null);
 
   const titles = [
     { threshold: 2, title: "クイズ戦士" },
@@ -734,6 +912,9 @@ export default function QuizModePage() {
   const submitAnswer = questionPhase?.submitAnswer ?? (() => {});
   const [displayLives, setDisplayLives] = useState<Record<string, number>>({});
   const [showStartButton, setShowStartButton] = useState(false);
+  const [diceDeadlineMs, setDiceDeadlineMs] = useState(4000);
+  const [playerLastDiceFace, setPlayerLastDiceFace] = useState<Record<string, number>>({});
+  const diceQuestionIndexRef = useRef(0);
   
   const players: Player[] = rawPlayers.map((p) => ({
     socketId: p.socketId,
@@ -744,8 +925,6 @@ export default function QuizModePage() {
   const opponent = players.find(p => p.socketId !== mySocketId);
 
   const allPlayersReady = roomPlayers.length >= maxPlayers;
-  const myLife = playerLives[mySocketId] ?? 3;
-  const isDead = myLife <= 0;
 
   // --- プレイヤー人数監視 ---
   useEffect(() => {
@@ -832,6 +1011,17 @@ export default function QuizModePage() {
     setEarnedExp(0);
     sentRef.current = false;
     clearPendingAward();
+    setPlayerPoints({});
+    setDiceOpen(false);
+    setDiceEligible(false);
+    diceSubmittedRef.current = false;
+    setDiceDeadlineMs(4000);
+    diceQuestionIndexRef.current = 0;
+    setSelectedItem(null);
+    selectedItemRef.current = null;
+    itemShownRef.current = false;
+    setItemOpen(false);
+    setRoomItemChoices({});
   };
 
   const handleNewMatch = () => {
@@ -864,6 +1054,17 @@ export default function QuizModePage() {
     setEarnedExp(0);
     sentRef.current = false;
     clearPendingAward();
+    setPlayerPoints({});
+    setDiceOpen(false);
+    setDiceEligible(false);
+    diceSubmittedRef.current = false;
+    setDiceDeadlineMs(4000);
+    diceQuestionIndexRef.current = 0;
+    setSelectedItem(null);
+    selectedItemRef.current = null;
+    itemShownRef.current = false;
+    setItemOpen(false);
+    setRoomItemChoices({});
 
     setReadyToStart(false);
 
@@ -933,16 +1134,11 @@ export default function QuizModePage() {
   useEffect(() => {
     if (!isGameOver) return;
 
-    const deadTimer  = setTimeout(() => {
-      setAllPlayersDead(true);
-    }, 4000);
-
     const finishTimer  = setTimeout(() => {
       setFinished(true);
-    }, 6000); // ← 正解発表演出のあと
+    }, 4000); // ← 正解発表演出のあと
 
     return () => {
-      clearTimeout(deadTimer);
       clearTimeout(finishTimer);
     };
   }, [phase, isGameOver]);
@@ -1028,6 +1224,7 @@ export default function QuizModePage() {
       setShowAnswerText(false);
       setShowAnswer(false);
       setShowExplanation(false);
+      setShowDiceWaitMessage(false);
       setShowCorrectCount(false);
       setShowDamageResult(false);
       
@@ -1043,6 +1240,8 @@ export default function QuizModePage() {
       // 正解人数表示
       const correctCountTimer = setTimeout(() => setShowCorrectCount(true), 3000);
 
+      const diceWaitTimer = setTimeout(() => setShowDiceWaitMessage(true), 6000);
+
       // ダメージ表示
       const damageTimer = setTimeout(() => setShowDamageResult(true), 3000);
 
@@ -1050,9 +1249,48 @@ export default function QuizModePage() {
         clearTimeout(answerTextTimer);
         clearTimeout(answerTimer);
         clearTimeout(explanationTimer);
+        clearTimeout(diceWaitTimer);
         clearTimeout(correctCountTimer);
         clearTimeout(damageTimer);
       };
+    }
+  }, [phase]);
+
+  useEffect(() => {
+    // result中で、解説表示が出たタイミングだけ
+    if (phase !== "result") return;
+    if (!showExplanation) return;
+
+    const pending = pendingDiceOpenRef.current;
+    if (!pending) return;
+
+    const { correctSocketIds, deadlineMs, questionIndex } = pending;
+
+    // この問題indexの dice_open だけ開く（ズレ防止）
+    if (questionIndex !== currentIndex) return;
+
+    // 自分が正解者か？
+    const ok = correctSocketIds.includes(mySocketId);
+    setDiceEligible(ok);
+
+    diceSubmittedRef.current = false;
+
+    if (ok) {
+      setDiceOpen(true);
+      diceQuestionIndexRef.current = questionIndex;
+      setDiceDeadlineMs(deadlineMs);
+    }
+
+    // ✅ 消費（同じ問題で二回開かない）
+    pendingDiceOpenRef.current = null;
+  }, [phase, showExplanation, currentIndex, mySocketId]);
+
+  useEffect(() => {
+    if (phase === "question") {
+      setDiceOpen(false);
+      setDiceEligible(false);
+      diceSubmittedRef.current = false;
+      pendingDiceOpenRef.current = null; // ✅ 追加
     }
   }, [phase]);
 
@@ -1145,60 +1383,55 @@ export default function QuizModePage() {
   
   useEffect(() => {
     if (!finished) return;
-
-    // 勝者情報がまだ来てないなら待つ（1位ボーナス/予想的中に必要）
     if (!lastPlayerElimination) return;
 
+    const playerCountNow = players.length; // 基本4人なら 4 でもOK
     const base = correctCount * 10;
 
-    const groups = lastPlayerElimination.eliminationGroups ?? [];
-    const winnerGroup = groups.length ? groups[groups.length - 1] : [];
-    const isSoloWinner = winnerGroup.length === 1;
-    const amIWinner = winnerGroup.includes(mySocketId);
+    // allRanks はあなたがすでに作ってる state（socketId, rank）
+    const bonus = calcPlacementBonusFromAllRanks(playerCountNow, allRanks, mySocketId);
 
-    const firstBonus = (isSoloWinner && amIWinner) ? 300 : 0;
-
-    const predictionHit =
-      hasPredicted &&
-      predictedWinner &&
-      winnerGroup.includes(predictedWinner);
-
-    const predictionBonus = predictionHit ? 100 : 0;
-
-    const earned = base + firstBonus + predictionBonus;
+    const points = base + bonus;
     const expEarned = correctCount * 20;
 
     setBasePoints(base);
-    setFirstBonusPoints(firstBonus);
-    setPredictionBonusPoints(predictionBonus);
-    setEarnedPoints(earned);
+    setFirstBonusPoints(bonus);
+    setPredictionBonusPoints(0);
+
+    setEarnedPoints(points);
     setEarnedExp(expEarned);
 
-    if (earned <= 0 && expEarned <= 0) {
+    if (points <= 0 && expEarned <= 0) {
       setAwardStatus("idle");
       clearPendingAward();
       return;
     }
 
     const payload: PendingAward = {
-      points: earned,
+      points,
       exp: expEarned,
       correctCount,
       basePoints: base,
-      firstBonusPoints: firstBonus,
-      predictionBonusPoints: predictionBonus,
+      firstBonusPoints: bonus,
+      predictionBonusPoints: 0,
       predictedWinner,
       hasPredicted,
-      winnerSocketIds: winnerGroup,
+      winnerSocketIds: (lastPlayerElimination.eliminationGroups ?? []).slice(-1)[0] ?? [],
       createdAt: Date.now(),
     };
 
-    // ✅ まずpending保存（ここが重要）
     savePendingAward(payload);
-
-    // ✅ その場で付与を試す（ログイン揺れでも ensureAuthedUserId が面倒みる）
     awardPointsAndExp(payload);
-  }, [finished,correctCount,lastPlayerElimination,mySocketId,hasPredicted,predictedWinner,]);
+  }, [
+    finished,
+    lastPlayerElimination,
+    correctCount,
+    players.length,
+    allRanks,
+    mySocketId,
+    hasPredicted,
+    predictedWinner,
+  ]);
 
   useEffect(() => {
     const pending = loadPendingAward();
@@ -1374,6 +1607,129 @@ export default function QuizModePage() {
       socket.off("question_start");
     };
   }, [socket]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const onScoreUpdate = ({
+      socketId,
+      score,
+      face,
+    }: {
+      socketId: string;
+      score: number;
+      face?: number;
+    }) => {
+      setPlayerPoints(prev => ({ ...prev, [socketId]: score }));
+
+      if (typeof face === "number") {
+        // ① まず表示
+        setPlayerLastDiceFace(prev => ({ ...prev, [socketId]: face }));
+
+        // ② 数秒後に消す（上書き対策で face が変わってたら消さない）
+        const shownFace = face;
+        setTimeout(() => {
+          setPlayerLastDiceFace(prev => {
+            if (prev[socketId] !== shownFace) return prev; // 途中で更新されたら維持
+            const next = { ...prev };
+            delete next[socketId];
+            return next;
+          });
+        }, 3000); // ← 表示時間（お好みで）
+      }
+    };
+
+    socket.on("score_update", onScoreUpdate);
+    return () => {
+      socket.off("score_update", onScoreUpdate);
+    };
+  }, [socket]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const onLocked = ({ choices }: { choices: Record<string, ServerItemId> }) => {
+      setRoomItemChoices(choices ?? {});
+    };
+
+    socket.on("item_chance_locked", onLocked);
+    return () => {
+      socket.off("item_chance_locked", onLocked);
+    };
+  }, [socket]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const onOpen = ({ deadlineMs }: { deadlineMs: number }) => {
+      // サーバーが「今からアイテム選択」と言ったら開く
+      setItemDeadlineMs(deadlineMs);
+      setItemOpen(true);
+
+      // ここで「4問目で出した」扱いにしたいなら
+      itemShownRef.current = true;
+    };
+
+    socket.on("item_chance_open", onOpen);
+    return () => {
+      socket.off("item_chance_open", onOpen);
+    };
+  }, [socket]);
+
+  useEffect(() => {
+    if (phase === "question") {
+      setPlayerLastDiceFace({});
+    }
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase === "question") {
+      setDiceOpen(false);
+      setDiceEligible(false);
+      diceSubmittedRef.current = false;
+      pendingDiceOpenRef.current = null;
+
+      // ✅ アイテムもリセット
+      setItemOpen(false);
+      setItemEligible(false);
+      itemSubmittedRef.current = false;
+    }
+  }, [phase]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const onDiceOpen = ({ correctSocketIds, deadlineMs, questionIndex, openAt }: {
+      correctSocketIds: string[];
+      deadlineMs: number;
+      questionIndex: number;
+      openAt: number;
+    }) => {
+      // 問題index確認（ズレ防止）
+      if (questionIndex !== currentIndex) {
+        // ただし currentIndex は hooks の値なので、ここは ref を使うのがより安全
+      }
+
+      const ok = correctSocketIds.includes(mySocketId);
+      setDiceEligible(ok);
+      diceSubmittedRef.current = false;
+
+      if (!ok) return;
+
+      diceQuestionIndexRef.current = questionIndex;
+      setDiceDeadlineMs(deadlineMs);
+
+      const delay = Math.max(0, openAt - Date.now());
+      setTimeout(() => {
+        setDiceOpen(true);
+      }, delay);
+    };
+
+    socket.on("dice_open", onDiceOpen);
+    return () => {
+      socket.off("dice_open", onDiceOpen);
+    };
+  }, [socket, mySocketId]);
 
   const checkAnswer = () => {
     if (userAnswer == null) return;
@@ -1554,8 +1910,81 @@ export default function QuizModePage() {
     openXShare({ text, url: buildTopUrl() }); // ✅トップへ
   };
 
+  const applyItemToFace = (face: number, item: SelectedItem | null) => {
+    if (!item) return face;
+
+    switch (item.type) {
+      case "FORCE_6":
+        return 6;
+      case "PLUS_3":
+        return Math.min(6, face + 3);
+      case "DOUBLE":
+        // 2倍（例：目を2倍、上限6）
+        return Math.min(6, face * 2);
+      default:
+        return face;
+    }
+  };
+
+  const itemImageSrc = (id?: "double" | "force6" | "plus3") => {
+    if (!id) return null;
+    if (id === "double") return "/images/dice_double.png";
+    if (id === "force6") return "/images/dice_force6.png";
+    if (id === "plus3") return "/images/dice_plus3.png";
+    return null;
+  };
+
+  const toServerItemId = (t: ItemType): ServerItemId => {
+    if (t === "DOUBLE") return "double";
+    if (t === "FORCE_6") return "force6";
+    return "plus3";
+  };
+
   return (
     <div className="container mx-auto p-8 text-center bg-gradient-to-b from-green-300 via-amber-200 to-emerald-300" key={battleKey}>
+      <DiceOverlay
+        open={diceOpen}
+        deadlineMs={diceDeadlineMs}
+        onSubmit={(face) => {
+          if (!socket) return;
+          if (!diceEligible) { setDiceOpen(false); return; }
+          if (diceSubmittedRef.current) return;
+          diceSubmittedRef.current = true;
+
+          const qIndex = diceQuestionIndexRef.current;
+
+          socket.emit("dice_submit", {
+            roomCode,
+            face,
+            questionIndex: qIndex,
+          });
+
+          if (qIndex === 4) {
+            setSelectedItem(null);
+            selectedItemRef.current = null;
+          }
+
+          setTimeout(() => setDiceOpen(false), 2000);
+        }}
+      />
+
+      <ItemChanceOverlay
+        open={itemOpen}
+        deadlineMs={itemDeadlineMs}
+        onSubmit={(item) => {
+          setSelectedItem(item);
+          setItemOpen(false);
+
+          socket?.emit("item_select", {
+            roomCode,
+            itemId: toServerItemId(item.type),
+          });
+
+          // ✅ 自分だけ即表示したいなら先に埋めておく（lockedが来るまでの保険）
+          setRoomItemChoices(prev => ({ ...prev, [mySocketId]: toServerItemId(item.type) }));
+        }}
+      />
+
       {countdown !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
           <motion.div
@@ -1574,20 +2003,30 @@ export default function QuizModePage() {
       {!finished ? (
         <>
           <div className="flex flex-col items-center">
+            {/* 第◯問ラベル */}
+            <div className="
+              inline-flex items-center gap-2
+              px-5 py-2 md:px-7 md:py-3
+              rounded-full
+              bg-white/95
+              border-4 border-gray-200
+              text-lg md:text-2xl
+              font-extrabold
+              text-gray-900
+              mb-3
+            ">
+              <span className="whitespace-nowrap">
+                🎯第{currentIndex + 1}問
+              </span>
+              <span className="text-gray-500 text-base md:text-xl font-bold">
+                / 全5問
+              </span>
+            </div>
             <div className="grid grid-cols-4 md:grid-cols-4 gap-1 md:gap-2 mb-1 justify-items-center">
               {orderedPlayers.map((p) => {
                 const isMe = p.socketId === mySocketId;
                 const change = scoreChanges[p.socketId];
                 const result = results.find(r => r.socketId === p.socketId); // ← 結果取得
-                const life = displayLives[p.socketId] ?? 3;
-                const lifeColor =
-                  life <= 0
-                    ? "text-red-700"
-                    : life === 1
-                    ? "text-red-500"
-                    : life === 2
-                    ? "text-orange-400"
-                    : "text-green-500";
                     
                 let borderColorClass = "border-gray-300"; // デフォルト（問題中）
                 if (phase === "result" && showDamageResult) {
@@ -1601,6 +2040,8 @@ export default function QuizModePage() {
                 }
                 
                 const pts = playerPoints[p.socketId] ?? 0;
+                const itemId = roomItemChoices[p.socketId]; // "double" | "force6" | "plus3" | undefined
+                const itemSrc = itemImageSrc(itemId);
 
                 return (
                   <div
@@ -1612,55 +2053,73 @@ export default function QuizModePage() {
                       rounded-lg
                       shadow-md
                       flex flex-col items-center justify-center
-                      ${
-                        life <= 0
-                          ? "bg-gray-500 border-gray-700" // 脱落したらグレー背景
-                          : `bg-white border-4 ${borderColorClass}` // 通常は白背景＋border
-                      }
+                      bg-white
+                      border-4
+                      ${borderColorClass}
                     `}
                   >
                     <p className="font-bold text-gray-800 text-lg md:text-xl text-center">
                       {p.playerName.length > 5 ? p.playerName.slice(0, 5) + "..." : p.playerName}
                     </p>
 
-                    <p className="text-sm md:text-base font-extrabold text-emerald-700">
+                    <p className="text-md md:text-lg font-extrabold text-emerald-700">
                       {pts}P
                     </p>
+
+                    {itemSrc ? (
+                      <div className="mt-1">
+                        <Image
+                          src={itemSrc}
+                          alt={`item ${itemId}`}
+                          width={36}
+                          height={36}
+                          className="select-none"
+                        />
+                      </div>
+                    ) : (
+                      <div className="mt-1 h-[36px]" /> // レイアウト崩れ防止（任意）
+                    )}
 
                     {/* 結果表示 */}
                     <p
                       className={`
                         text-lg md:text-xl font-bold mt-1
                         ${
-                          life <= 0
-                            ? "text-gray-100" // 脱落したら白文字
-                            : phase === "result"
+                          phase === "result"
                             ? result?.isCorrect
                               ? "text-green-600"
                               : "text-red-600"
                             : result
                             ? "text-gray-800"
-                            : life === 1
-                            ? "text-red-500"
-                            : life === 2
-                            ? "text-orange-400"
-                            : "text-green-500"
+                            : "text-gray-600"
                         }
                       `}
                     >
-                      {life <= 0
-                        ? "脱落" // ライフ0なら脱落
-                        : phase === "result"
-                        ? showDamageResult
-                          ? result
-                            ? result.isCorrect
-                              ? "正解〇"
-                              : "誤答×"
-                            : "未回答"
-                          : "　"
-                        : result
-                        ? "？"
-                        : `❤×${life}`}
+                      {
+                        phase === "result" && playerLastDiceFace[p.socketId] ? (
+                          <span className="inline-flex items-center justify-center">
+                            <Image
+                              src={`/images/dice${playerLastDiceFace[p.socketId]}.png`}
+                              alt="last dice"
+                              width={36}
+                              height={36}
+                              className="select-none"
+                            />
+                          </span>
+                        ) : (
+                          phase === "result"
+                            ? showDamageResult
+                              ? result
+                                ? result.isCorrect
+                                  ? "正解〇"
+                                  : "誤答×"
+                                : "未回答"
+                              : "　"
+                            : result
+                            ? "？"
+                            : ""
+                        )
+                      }
                     </p>
 
                     {/* 吹き出し表示 */}
@@ -1689,7 +2148,7 @@ export default function QuizModePage() {
             </div>
           </div>
 
-          {isGameOver && allPlayersDead && (
+          {isGameOver && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
               <motion.div
                 initial={{ scale: 0.5, opacity: 0 }}
@@ -1720,6 +2179,12 @@ export default function QuizModePage() {
                 {showExplanation && (
                   <p className="mt-2 mb-3 text-md md:text-xl text-gray-600">
                     {questions[currentIndex].quiz.answerExplanation}
+                  </p>
+                )}
+
+                {phase === "result" && showDiceWaitMessage && (
+                  <p className="mt-2 text-lg md:text-2xl font-extrabold text-gray-700 animate-pulse">
+                    他の人がサイコロを振ってます…🎲
                   </p>
                 )}
               </div>
@@ -1769,60 +2234,7 @@ export default function QuizModePage() {
                   {/* 回答フェーズ */}
                   {phase === "question" && (
                     <>
-                      {isDead ? (
-                        <div className="mt-4 space-y-3">
-                          <p className="text-xl md:text-2xl font-bold text-gray-800">
-                            脱落したため、回答できません
-                          </p>
-
-                          {!hasPredicted && (
-                            <>
-                              <p className="text-lg md:text-xl font-bold text-green-500">
-                                1位を予想しよう！
-                              </p>
-
-                              <div className="space-y-2">
-                                {players
-                                  .filter(p => p.socketId !== mySocketId) // 自分以外
-                                  .map(p => (
-                                    <button
-                                      key={p.socketId}
-                                      onClick={() => setPredictedWinner(p.socketId)}
-                                      className={`
-                                        w-full max-w-xs mx-auto block px-4 py-2 rounded-lg border
-                                        ${
-                                          predictedWinner === p.socketId
-                                            ? "bg-green-500 text-white font-bold"
-                                            : "bg-white"
-                                        }
-                                      `}
-                                    >
-                                      {p.playerName}
-                                    </button>
-                                  ))}
-                              </div>
-
-                              <button
-                                disabled={!predictedWinner}
-                                onClick={() => setHasPredicted(true)}
-                                className="
-                                  mt-3 px-6 py-2
-                                  bg-blue-600 disabled:bg-gray-400
-                                  text-white font-bold rounded-lg
-                                "
-                              >
-                                この人にする
-                              </button>
-                            </>
-                          )}
-
-                          {hasPredicted && (
-                            <p className="text-lg md:text-xl font-bold text-gray-600">
-                              予想を受け付けました！
-                            </p>
-                          )}
-                        </div>
-                      ) : canAnswer ? (
+                      {canAnswer ? (
                         <button
                           onClick={checkAnswer}
                           className="px-6 py-3 bg-blue-500 text-white rounded-lg"
@@ -1880,6 +2292,7 @@ export default function QuizModePage() {
           onGoLogin={() => router.push("/user/login")}
           isCodeMatch={mode === "code"}
           onShareX={handleShareX}
+          playerPoints={playerPoints}
         />
       )}
     </div>
