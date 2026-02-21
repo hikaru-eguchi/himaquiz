@@ -236,12 +236,12 @@ function ItemChanceOverlay({
           <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-yellow-300 via-emerald-300 to-pink-300" />
 
           <p className="text-2xl md:text-3xl font-extrabold mb-2">
-            {locked ? "✅ 選択OK！" : "🎁 アイテムチャンス（3択）"}
+            {locked ? "✅ アイテム決定！" : "🎁 アイテムチャンス！"}
           </p>
 
           {!locked && (
             <p className="text-sm md:text-base text-gray-700 mb-4 font-bold">
-              選んだ効果は「5問目に正解したら」発動！ 残り {Math.ceil(remain / 1000)} 秒
+              選んだ効果が5問目で発動するよ！ <span className="text-blue-400">残り {Math.ceil(remain / 1000)} 秒</span>
             </p>
           )}
 
@@ -411,7 +411,7 @@ const QuizResult = ({
           className="
             text-4xl md:text-6xl
             font-extrabold
-            text-yellow-300
+            text-yellow-400
             drop-shadow-[0_0_20px_gold]
           "
         >
@@ -1917,10 +1917,9 @@ export default function QuizModePage() {
       case "FORCE_6":
         return 6;
       case "PLUS_3":
-        return Math.min(6, face + 3);
+        return face + 3;
       case "DOUBLE":
-        // 2倍（例：目を2倍、上限6）
-        return Math.min(6, face * 2);
+        return face * 2;
       default:
         return face;
     }
@@ -2002,6 +2001,9 @@ export default function QuizModePage() {
 
       {!finished ? (
         <>
+          <div className="mb-2 md:text-xl">
+            <p>正解してサイコロを振ろう！出目×100 が点数に入るよ 🎲</p>
+          </div>
           <div className="flex flex-col items-center">
             {/* 第◯問ラベル */}
             <div className="
@@ -2063,10 +2065,10 @@ export default function QuizModePage() {
                     </p>
 
                     <p className="text-md md:text-lg font-extrabold text-emerald-700">
-                      {pts}P
+                      {pts}点
                     </p>
 
-                    {itemSrc ? (
+                    {itemSrc && (
                       <div className="mt-1">
                         <Image
                           src={itemSrc}
@@ -2076,8 +2078,6 @@ export default function QuizModePage() {
                           className="select-none"
                         />
                       </div>
-                    ) : (
-                      <div className="mt-1 h-[36px]" /> // レイアウト崩れ防止（任意）
                     )}
 
                     {/* 結果表示 */}
