@@ -14,6 +14,7 @@ type Profile = {
   exp: number | null;
   avatar_character_id: string | null;
   avatar_url: string | null;
+  friend_code: string | null;
 };
 
 export default function MyPage() {
@@ -37,9 +38,15 @@ export default function MyPage() {
       setLoading(true);
 
       try {
+        // friend_codeが無いユーザーもいる可能性があるので先に保証
+        const { data: ensuredCode, error: ensureErr } = await supabase.rpc("ensure_friend_code");
+        if (ensureErr) {
+          console.warn("ensure_friend_code error:", ensureErr);
+        }
+
         const { data, error } = await supabase
           .from("profiles")
-          .select("username, user_id, recovery_email, points, level, exp, avatar_character_id, avatar_url")
+          .select("username, user_id, recovery_email, points, level, exp, avatar_character_id, avatar_url, friend_code")
           .eq("id", user.id)
           .single();
 
@@ -124,6 +131,47 @@ export default function MyPage() {
             <span className="text-md md:text-xl">{profile?.user_id ?? "(未設定)"}</span>
           </p>
 
+          <div className="pt-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* ラベル */}
+              <p className="font-medium text-md md:text-xl whitespace-nowrap">
+                フレンドID：
+              </p>
+
+              {/* コード */}
+              <span className="text-md md:text-xl font-bold tracking-widest">
+                {profile?.friend_code ?? "----"}
+              </span>
+
+              {/* コピーボタン */}
+              <button
+                type="button"
+                onClick={async () => {
+                  const code = profile?.friend_code;
+                  if (!code) return;
+                  try {
+                    await navigator.clipboard.writeText(code);
+                    alert("フレンドIDをコピーしました！");
+                  } catch {
+                    alert("コピーに失敗しました…");
+                  }
+                }}
+                className="
+                  px-3 py-1 rounded-lg font-extrabold
+                  bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-500
+                  text-white shadow
+                  hover:brightness-110 active:scale-95
+                  transition
+                "
+              >
+                コピー
+              </button>
+            </div>
+
+            <p className="text-xs md:text-sm text-gray-500 mt-1">
+              友達追加画面でこのIDを入力してもらうとフレンド申請できます👥
+            </p>
+          </div>
           <p>
             <span className="font-medium text-md md:text-xl">
               復旧用メールアドレス：
@@ -182,37 +230,44 @@ export default function MyPage() {
 
         <button
           onClick={() => router.push("/user/mypage/edit")}
-          className="w-full bg-yellow-500 text-white py-2 rounded cursor-pointer"
+          className="w-full bg-yellow-500 text-white py-2 rounded cursor-pointer font-bold"
         >
-          プロフィールを編集
+          プロフィールを編集✏️
+        </button>
+
+        <button
+          onClick={() => router.push("/user/friends")}
+          className="w-full bg-sky-400 text-white py-2 rounded cursor-pointer font-bold"
+        >
+          フレンド👥
         </button>
 
         <button
           onClick={() => router.push("/user/mypage/points-history")}
-          className="w-full bg-blue-500 text-white py-2 rounded cursor-pointer"
+          className="w-full bg-blue-500 text-white py-2 rounded cursor-pointer font-bold"
         >
-          ポイント履歴
+          ポイント履歴💰
         </button>
 
         <button
           onClick={() => router.push("/user/mypage/records")}
-          className="w-full bg-green-500 text-white py-2 rounded cursor-pointer"
+          className="w-full bg-green-500 text-white py-2 rounded cursor-pointer font-bold"
         >
-          プレイ記録
+          プレイ記録🎮
         </button>
 
         <button
           onClick={() => router.push("/user/mypage/titles")}
-          className="w-full bg-purple-500 text-white py-2 rounded cursor-pointer"
+          className="w-full bg-purple-500 text-white py-2 rounded cursor-pointer font-bold"
         >
-          称号コレクション
+          称号コレクション🏅
         </button>
 
         <button
           onClick={() => router.push("/user/change-password")}
-          className="w-full bg-red-500 text-white py-2 rounded cursor-pointer"
+          className="w-full bg-red-500 text-white py-2 rounded cursor-pointer font-bold"
         >
-          パスワードを変更
+          パスワードを変更🔑
         </button>
       </div>
 
