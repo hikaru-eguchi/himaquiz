@@ -365,6 +365,127 @@ const QuizResult = ({
   );
 };
 
+function EndConfirmModal({
+  open,
+  disabled,
+  onClose,
+  onConfirm,
+}: {
+  open: boolean;
+  disabled: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  if (!open) return null;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        className="fixed inset-0 z-[999] flex items-center justify-center p-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        aria-modal="true"
+        role="dialog"
+      >
+        {/* backdrop */}
+        <button
+          type="button"
+          onClick={disabled ? undefined : onClose}
+          className="absolute inset-0 bg-black/60"
+          aria-label="閉じる"
+        />
+
+        {/* modal */}
+        <motion.div
+          initial={{ scale: 0.92, opacity: 0, y: 10 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.96, opacity: 0, y: 8 }}
+          transition={{ duration: 0.18 }}
+          className="
+            relative z-10 w-full max-w-md
+            rounded-2xl bg-white
+            border-4 border-white
+            shadow-2xl
+            overflow-hidden
+          "
+        >
+          {/* header */}
+          <div className="px-5 py-4 bg-gradient-to-r from-red-500 via-orange-500 to-amber-400 text-white">
+            <p className="text-xl md:text-2xl font-extrabold">
+              本当に終了しますか？
+            </p>
+          </div>
+
+          {/* body */}
+          <div className="px-5 py-4">
+            <p className="text-gray-800 text-base md:text-lg font-bold">
+              ここで終了すると敵はリセットされてしまいます。
+            </p>
+            <p className="text-gray-600 text-sm md:text-base mt-2">
+              ※リザルトに移動し、進行中のバトルは終了します。
+            </p>
+
+            {/* actions */}
+            <div className="mt-5 flex flex-col md:flex-row gap-3">
+              {/* 続ける */}
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={disabled}
+                className={`
+                  w-full md:flex-1
+                  px-5 py-3
+                  rounded-xl
+                  font-extrabold text-lg
+                  border-2 border-gray-300
+                  bg-white text-gray-800
+                  hover:bg-gray-50
+                  transition
+                  ${disabled ? "opacity-40 cursor-not-allowed" : ""}
+                `}
+              >
+                まだ続ける
+              </button>
+
+              {/* 終了する */}
+              <button
+                type="button"
+                onClick={onConfirm}
+                disabled={disabled}
+                className={`
+                  w-full md:flex-1
+                  px-5 py-3
+                  rounded-xl
+                  font-extrabold text-lg text-white
+                  bg-gradient-to-r from-red-600 via-orange-600 to-amber-500
+                  shadow-lg
+                  hover:shadow-2xl hover:scale-[1.02]
+                  active:scale-[0.98]
+                  transition-all duration-200
+                  ${disabled ? "opacity-40 cursor-not-allowed hover:scale-100 hover:shadow-lg" : ""}
+                `}
+              >
+                終了する
+              </button>
+            </div>
+          </div>
+
+          {/* 右上× */}
+          <button
+            type="button"
+            onClick={disabled ? undefined : onClose}
+            className="absolute top-3 right-3 text-white/90 hover:text-white text-2xl font-extrabold"
+            aria-label="閉じる"
+          >
+            ×
+          </button>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 export default function QuizModePage() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -551,6 +672,7 @@ export default function QuizModePage() {
   const [allPlayersDead, setAllPlayersDead] = useState(false);
   const [allGameClear, setAllGameClear] = useState(false);
   const [battleKey, setBattleKey] = useState(0);
+  const [clearedStageCount, setClearedStageCount] = useState(0);
 
   const roomLockedRef = useRef(false);
   useEffect(() => {
@@ -583,16 +705,16 @@ export default function QuizModePage() {
 
   const calcStageBonus = (stage: number) => {
     const table: Record<number, number> = {
-      1: 10,
-      2: 50,
-      3: 100,
-      4: 150,
-      5: 200,
-      6: 250,
-      7: 300,
-      8: 350,
-      9: 400,
-      10: 450,
+      1: 5,
+      2: 10,
+      3: 25,
+      4: 50,
+      5: 75,
+      6: 100,
+      7: 150,
+      8: 200,
+      9: 300,
+      10: 400,
       11: 500,
       12: 600,
       13: 700,
@@ -826,6 +948,26 @@ export default function QuizModePage() {
     setRematchRequested(true); // 自分が再戦希望を出した状態
     console.log("sending send_ready"); 
     socket?.emit("send_ready", { roomCode });
+  };
+
+  const [showEndConfirm, setShowEndConfirm] = useState(false);
+
+  // ✅ 途中終了（リザルトへ）
+  const handleEndNow = () => {
+    // すでに終了状態なら何もしない
+    if (finished) return;
+
+    // もし正解発表中なら押せないようにしたい場合（任意）
+    // if (phase === "result") return;
+
+    // ルームから抜けたいなら（任意）
+    if (roomCode) leaveRoom(roomCode);
+
+    // タイムアップ演出が出てたら消す（任意）
+    setTimeUp(false);
+
+    // リザルトへ
+    setFinished(true);
   };
 
   /* ---------- クイズ取得 ---------- */
@@ -1156,7 +1298,15 @@ export default function QuizModePage() {
     if (!finished) return;
 
     const base = correctCount * 10;             // ✅ 1問20P
-    const bonus = calcStageBonus(stageCount);  // ✅ ステージボーナス
+    // const bonus = calcStageBonus(stageCount);  // ✅ ステージボーナス
+    const clearedStage =
+      isGameClear
+        ? stageCount
+        : Math.max(stageCount - 1, 0);
+
+    setClearedStageCount(clearedStage);
+
+    const bonus = calcStageBonus(clearedStage);
     const earned = base + bonus;
 
     setBasePoints(base);
@@ -1177,7 +1327,7 @@ export default function QuizModePage() {
       points: earned,
       exp: expEarned,
       correctCount,
-      stageCount,
+      stageCount: clearedStage,
       basePoints: base,
       stageBonusPoints: bonus,
       createdAt: Date.now(),
@@ -1395,7 +1545,7 @@ export default function QuizModePage() {
     "fuck", "shit", "bastard", "idiot", "asshole",
   ]
 
-  if (!joined) {
+  if (!finished && !joined) {
     return (
       <div className="container p-8 text-center">
         <h2 className="text-3xl md:text-5xl mb-2 md:mb-4">あなたのニックネームを入力してください</h2>
@@ -1445,7 +1595,7 @@ export default function QuizModePage() {
     );
   }
 
-  if (!allPlayersReady) {
+  if (!finished && !allPlayersReady) {
     return (
       <>
         <div className="text-center">
@@ -1465,7 +1615,7 @@ export default function QuizModePage() {
     );
   }
 
-  if (allPlayersReady && !bothReady) {
+  if (!finished && allPlayersReady && !bothReady) {
     return (
       <div className="container p-8 text-center">
         <div>
@@ -1556,6 +1706,15 @@ export default function QuizModePage() {
 
   return (
     <div className="container mx-auto p-8 text-center bg-gradient-to-b from-indigo-300 via-slate-300 to-sky-300" key={battleKey}>
+      <EndConfirmModal
+        open={showEndConfirm}
+        disabled={phase === "result"}
+        onClose={() => setShowEndConfirm(false)}
+        onConfirm={() => {
+          setShowEndConfirm(false);
+          handleEndNow();
+        }}
+      />
       {countdown !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
           <motion.div
@@ -1968,11 +2127,38 @@ export default function QuizModePage() {
               ))}
             </div>
           </div>
+
+          {/* ✅ 途中終了ボタン（問題表示中だけ） */}
+          <div className="mt-15 flex justify-center">
+            <button
+              onClick={() => setShowEndConfirm(true)}
+              disabled={phase === "result"}
+              className={`
+                w-full max-w-[200px]
+                px-6 py-3
+                rounded-full
+                text-lg md:text-xl
+                font-extrabold
+                text-white
+                bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500
+                border-4 border-white
+                shadow-lg
+                hover:shadow-2xl hover:scale-[1.03]
+                active:scale-[0.98]
+                transition-all duration-200
+                ${phase === "result"
+                  ? "opacity-40 cursor-not-allowed hover:scale-100 hover:shadow-lg"
+                  : "cursor-pointer"}
+              `}
+            >
+              冒険を終了する
+            </button>
+          </div>
         </>
       ) : (
         <QuizResult
           correctCount={correctCount}
-          stageCount={stageCount}
+          stageCount={clearedStageCount}
           getTitle={getTitle}
           titles={titles}
           onRetry={handleRetry}

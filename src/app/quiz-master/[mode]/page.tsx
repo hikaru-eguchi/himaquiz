@@ -19,16 +19,16 @@ import type { Rarity } from "@/types/gacha";
 // ポイント仕様（ステージ到達に応じて付与）
 // =====================
 const stagePointMap: Record<number, number> = {
-  1: 10,
-  2: 50,
-  3: 100,
-  4: 150,
-  5: 200,
-  6: 250,
-  7: 300,
-  8: 350,
-  9: 400,
-  10: 450,
+  1: 5,
+  2: 10,
+  3: 25,
+  4: 50,
+  5: 75,
+  6: 100,
+  7: 150,
+  8: 200,
+  9: 300,
+  10: 400,
   11: 500,
   12: 600,
   13: 700,
@@ -2411,6 +2411,30 @@ export default function QuizModePage() {
                   >
                     回答
                   </button>
+                )}
+
+                {!showCorrectMessage && !incorrectMessage && !isAttacking && (
+                  <div>
+  <button
+    className="
+      px-5 py-2.5 md:px-6 md:py-3
+      mt-18
+      rounded-full
+      font-extrabold text-white text-lg md:text-xl
+      bg-gradient-to-r from-blue-500 via-sky-500 to-cyan-400
+      hover:from-blue-600 hover:via-sky-600 hover:to-cyan-500
+      active:scale-95
+      transition-all duration-200
+      cursor-pointer
+    "
+    onClick={() => {
+      const ok = window.confirm("冒険を終了しますか？（ここまでの結果でリザルトになります）");
+      if (ok) finishQuiz();
+    }}
+  >
+    冒険を終了する
+  </button>
+</div>
                 )}
               </>
             )}
