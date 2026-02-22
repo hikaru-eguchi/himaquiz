@@ -2097,7 +2097,7 @@ export default function QuizModePage() {
                       ) : canAnswer ? (
                         <button
                           onClick={checkAnswer}
-                          className="px-6 py-3 bg-blue-500 text-white rounded-lg"
+                          className="px-6 py-3 bg-blue-500 text-white rounded-lg font-extrabold"
                         >
                           回答
                         </button>
@@ -2129,7 +2129,7 @@ export default function QuizModePage() {
           </div>
 
           {/* ✅ 途中終了ボタン（問題表示中だけ） */}
-          <div className="mt-15 flex justify-center">
+          <div className="mt-20 flex justify-center">
             <button
               onClick={() => setShowEndConfirm(true)}
               disabled={phase === "result"}
@@ -2138,10 +2138,9 @@ export default function QuizModePage() {
                 px-6 py-3
                 rounded-full
                 text-lg md:text-xl
-                font-extrabold
+                font-bold
                 text-white
-                bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500
-                border-4 border-white
+                bg-gradient-to-r from-sky-800 via-blue-800 to-indigo-800
                 shadow-lg
                 hover:shadow-2xl hover:scale-[1.03]
                 active:scale-[0.98]

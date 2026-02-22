@@ -1236,7 +1236,7 @@ export default function QuizModePage() {
                     setUserAnswer={setUserAnswer}
                   />
                   <button
-                    className="px-5 py-3 md:px-6 md:py-3 bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-4 hover:bg-blue-600 cursor-pointer"
+                    className="px-5 py-3 md:px-6 md:py-3 bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-4 hover:bg-blue-600 cursor-pointer font-extrabold"
                     onClick={checkAnswer}
                     disabled={userAnswer === null}
                   >

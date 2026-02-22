@@ -1299,7 +1299,7 @@ export default function QuizModePage() {
                   {/* 回答ボタン */}
                   {!showCorrectMessage && !incorrectMessage && !isAttacking && (
                     <button
-                      className="px-5 py-3 md:px-6 bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-2 hover:bg-blue-600 cursor-pointer"
+                      className="px-5 py-3 md:px-6 bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-2 hover:bg-blue-600 cursor-pointer font-extrabold"
                       onClick={checkAnswer}
                       disabled={userAnswer === null}
                     >

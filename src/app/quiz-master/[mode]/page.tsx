@@ -665,6 +665,72 @@ const QuizResult = ({
   );
 };
 
+function ConfirmExitModal({
+  open,
+  onClose,
+  onConfirm,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  if (!open) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-[999] flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+    >
+      {/* overlay */}
+      <button
+        aria-label="閉じる"
+        className="absolute inset-0 bg-black/60"
+        onClick={onClose}
+      />
+
+      {/* modal */}
+      <div className="relative w-full max-w-md rounded-2xl border-2 border-black bg-white shadow-2xl">
+        <div className="p-5 md:p-6 text-center">
+          <p className="text-2xl md:text-3xl font-extrabold text-gray-900">
+            冒険を終了しますか？
+          </p>
+          <p className="mt-2 text-sm md:text-base text-gray-600 whitespace-pre-line">
+            ここまでの結果でリザルトになります
+          </p>
+
+          <div className="mt-6 flex gap-3">
+            <button
+              className="
+                flex-1 px-4 py-3 rounded-xl font-extrabold
+                border-2 border-black bg-white hover:bg-gray-100
+                active:scale-95 transition
+              "
+              onClick={onClose}
+            >
+              キャンセル
+            </button>
+
+            <button
+              className="
+                flex-1 px-4 py-3 rounded-xl font-extrabold text-white
+                border-2 border-black
+                bg-gradient-to-r from-blue-500 via-sky-500 to-cyan-400
+                hover:from-blue-600 hover:via-sky-600 hover:to-cyan-500
+                shadow-lg shadow-blue-300
+                active:scale-95 transition
+              "
+              onClick={onConfirm}
+            >
+              終了する
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function QuizModePage() {
   const router = useRouter();
   const pathname = usePathname();
@@ -835,6 +901,7 @@ export default function QuizModePage() {
   const [enemyVisible, setEnemyVisible] = useState(true);
   const [miracleSeedCount, setMiracleSeedCount] = useState(0); // 所持数
   const [miracleSeedMessage, setMiracleSeedMessage] = useState<string | null>(null); // ドロップメッセージ
+  const [exitOpen, setExitOpen] = useState(false);
   // ====== シークレット討伐：獲得モーダル用 ======
   const [ownedCharacterIds, setOwnedCharacterIds] = useState<Set<string>>(new Set());
   const [acquired, setAcquired] = useState<CharacterItem | null>(null);
@@ -2042,6 +2109,14 @@ export default function QuizModePage() {
 
   return (
     <>
+      <ConfirmExitModal
+        open={exitOpen}
+        onClose={() => setExitOpen(false)}
+        onConfirm={() => {
+          setExitOpen(false);
+          finishQuiz();
+        }}
+      />
       <CharacterAcquireModal
         open={acquireOpen}
         item={acquired}
@@ -2405,7 +2480,7 @@ export default function QuizModePage() {
                 {/* 回答ボタン */}
                 {!showCorrectMessage && !incorrectMessage && !isAttacking && (
                   <button
-                    className="px-5 py-3 md:px-6 bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-2 hover:bg-blue-600 cursor-pointer"
+                    className="px-5 py-3 md:px-6 bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-2 hover:bg-blue-600 cursor-pointer font-extrabold"
                     onClick={checkAnswer}
                     disabled={userAnswer === null}
                   >
@@ -2415,26 +2490,23 @@ export default function QuizModePage() {
 
                 {!showCorrectMessage && !incorrectMessage && !isAttacking && (
                   <div>
-  <button
-    className="
-      px-5 py-2.5 md:px-6 md:py-3
-      mt-18
-      rounded-full
-      font-extrabold text-white text-lg md:text-xl
-      bg-gradient-to-r from-blue-500 via-sky-500 to-cyan-400
-      hover:from-blue-600 hover:via-sky-600 hover:to-cyan-500
-      active:scale-95
-      transition-all duration-200
-      cursor-pointer
-    "
-    onClick={() => {
-      const ok = window.confirm("冒険を終了しますか？（ここまでの結果でリザルトになります）");
-      if (ok) finishQuiz();
-    }}
-  >
-    冒険を終了する
-  </button>
-</div>
+                    <button
+                      className="
+                        px-5 py-2.5 md:px-6 md:py-3
+                        mt-20
+                        rounded-full
+                        font-extrabold text-white text-lg md:text-xl
+                        bg-gradient-to-r from-sky-800 via-blue-800 to-indigo-800
+                        hover:shadow-2xl hover:scale-[1.03]
+                        active:scale-95
+                        transition-all duration-200
+                        cursor-pointer
+                      "
+                      onClick={() => setExitOpen(true)}
+                    >
+                      冒険を終了する
+                    </button>
+                  </div>
                 )}
               </>
             )}
