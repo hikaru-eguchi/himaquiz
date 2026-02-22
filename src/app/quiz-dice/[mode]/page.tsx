@@ -62,12 +62,25 @@ function DiceOverlay({
     setRolling(true);
     setRemain(deadlineMs);
 
-    const rollTimer = setInterval(() => {
+    let rollTimer: ReturnType<typeof setInterval> | null = null;
+    let remainTimer: ReturnType<typeof setInterval> | null = null;
+
+    // ✅ 減速中に使うtimeoutを全部管理して、クリーンアップできるようにする
+    const slowTimeouts: ReturnType<typeof setTimeout>[] = [];
+    let cancelled = false;
+
+    const clearAll = () => {
+      if (rollTimer) clearInterval(rollTimer);
+      if (remainTimer) clearInterval(remainTimer);
+      slowTimeouts.forEach(clearTimeout);
+    };
+
+    rollTimer = setInterval(() => {
       setFace(Math.floor(Math.random() * 6) + 1);
     }, 80);
 
     const start = Date.now();
-    const remainTimer = setInterval(() => {
+    remainTimer = setInterval(() => {
       const r = Math.max(0, deadlineMs - (Date.now() - start));
       setRemain(r);
       if (r <= 0) {
@@ -75,36 +88,118 @@ function DiceOverlay({
       }
     }, 100);
 
+    // ✅ ここがポイント：止める前に「減速して止まる」演出を入れる
+    const slowStopThenSubmit = (finalFace: number) => {
+      // 高速ロールは停止（ここからは “減速” の更新に切り替える）
+      if (rollTimer) clearInterval(rollTimer);
+      if (remainTimer) clearInterval(remainTimer);
+
+      const steps = 4;          // 何回面を切り替えるか
+      const baseDelay = 60;      // 最初の待ち時間
+      const delayIncrease = 500;  // だんだん遅くする（ここを大きくすると減速が強くなる）
+
+      for (let i = 0; i < steps; i++) {
+        const isLast = i === steps - 1;
+        const delay = baseDelay + i * delayIncrease;
+
+        const t = setTimeout(() => {
+          if (cancelled) return;
+
+          const nextFace = isLast
+            ? finalFace
+            : Math.floor(Math.random() * 6) + 1;
+
+          setFace(nextFace);
+          faceRef.current = nextFace;
+
+          if (isLast) {
+            setRolling(false);
+            setLocked(true); // 「確定!!」表示
+            onSubmit(finalFace); // 親へ確定通知
+          }
+        }, delay);
+
+        slowTimeouts.push(t);
+      }
+    };
+
     const forceSubmit = () => {
       if (submittedRef.current) return;
       submittedRef.current = true;
 
-      setLocked(true);
-      setRolling(false);
+      // いま見えてる面を「最終面」として採用（ここは好みで random でもOK）
+      const final = faceRef.current;
 
-      clearInterval(rollTimer);
-      clearInterval(remainTimer);
-
-      // 親へ「確定した面」を通知（閉じるのは親が担当）
-      onSubmit(faceRef.current);
+      // ✅ ピタ止めじゃなく、減速してから確定
+      slowStopThenSubmit(final);
     };
 
-    // どこでもタップで確定
     const handlePointerDown = () => {
-    if (lockedRef.current) return;
-    forceSubmit();
-  };
+      if (lockedRef.current) return;
+      forceSubmit();
+    };
 
-    // overlay開いている間だけ有効にする
     window.addEventListener("pointerdown", handlePointerDown, { passive: true });
 
     return () => {
-      clearInterval(rollTimer);
-      clearInterval(remainTimer);
+      cancelled = true;
+      clearAll();
       window.removeEventListener("pointerdown", handlePointerDown);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, deadlineMs]);
+
+  // useEffect(() => {
+  //   if (!open) return;
+
+  //   submittedRef.current = false;
+  //   setLocked(false);
+  //   setRolling(true);
+  //   setRemain(deadlineMs);
+
+  //   const rollTimer = setInterval(() => {
+  //     setFace(Math.floor(Math.random() * 6) + 1);
+  //   }, 80);
+
+  //   const start = Date.now();
+  //   const remainTimer = setInterval(() => {
+  //     const r = Math.max(0, deadlineMs - (Date.now() - start));
+  //     setRemain(r);
+  //     if (r <= 0) {
+  //       forceSubmit(); // 時間切れで確定
+  //     }
+  //   }, 100);
+
+  //   const forceSubmit = () => {
+  //     if (submittedRef.current) return;
+  //     submittedRef.current = true;
+
+  //     setLocked(true);
+  //     setRolling(false);
+
+  //     clearInterval(rollTimer);
+  //     clearInterval(remainTimer);
+
+  //     // 親へ「確定した面」を通知（閉じるのは親が担当）
+  //     onSubmit(faceRef.current);
+  //   };
+
+  //   // どこでもタップで確定
+  //   const handlePointerDown = () => {
+  //   if (lockedRef.current) return;
+  //   forceSubmit();
+  // };
+
+  //   // overlay開いている間だけ有効にする
+  //   window.addEventListener("pointerdown", handlePointerDown, { passive: true });
+
+  //   return () => {
+  //     clearInterval(rollTimer);
+  //     clearInterval(remainTimer);
+  //     window.removeEventListener("pointerdown", handlePointerDown);
+  //   };
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [open, deadlineMs]);
 
   if (!open) return null;
 
@@ -188,9 +283,9 @@ function ItemChanceOverlay({
   const submittedRef = useRef(false);
 
   const choices: SelectedItem[] = [
-    { type: "DOUBLE", label: "次の出目2倍🔥", chosenAtQuestionIndex: 3 },
-    { type: "FORCE_6", label: "次の出目6確定🎯", chosenAtQuestionIndex: 3 },
-    { type: "PLUS_3", label: "次の出目+3💪", chosenAtQuestionIndex: 3 },
+    { type: "DOUBLE", label: "次の出目を2倍🔥", chosenAtQuestionIndex: 3 },
+    { type: "FORCE_6", label: "次の出目が6確定🎯", chosenAtQuestionIndex: 3 },
+    { type: "PLUS_3", label: "次の出目に+3💪", chosenAtQuestionIndex: 3 },
   ];
 
   useEffect(() => {
@@ -2100,7 +2195,7 @@ export default function QuizModePage() {
                           <span className="inline-flex items-center justify-center">
                             <Image
                               src={`/images/dice${playerLastDiceFace[p.socketId]}.png`}
-                              alt="last dice"
+                              alt=""
                               width={36}
                               height={36}
                               className="select-none"
