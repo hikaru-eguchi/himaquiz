@@ -14,6 +14,7 @@ import { getWeekStartJST } from "@/lib/week";
 import { getMonthStartJST } from "@/lib/month";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
 import type { Rarity } from "@/types/gacha";
+import DungeonRankingTop10 from "../../components/DungeonRankingTop10";
 
 // =====================
 // ポイント仕様（ステージ到達に応じて付与）
@@ -511,6 +512,7 @@ const QuizResult = ({
   secretTitle,
   secretComment,
   secretCleared,
+  rankingRows,
 }: {
   correctCount: number;
   getTitle: () => string;
@@ -528,6 +530,7 @@ const QuizResult = ({
   secretTitle?: string;
   secretComment?: string;
   secretCleared: boolean;
+  rankingRows: { user_id: string; username: string | null; avatar_url: string | null; best_stage: number }[];
 }) => {
   const [showScore, setShowScore] = useState(false);
   const [showText, setShowText] = useState(false);
@@ -644,22 +647,34 @@ const QuizResult = ({
       )}
 
       {showButton && (
-        <div className="flex flex-col md:flex-row justify-center items-center gap-4 mt-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <button
-              className="px-6 py-3 bg-black text-white border border-black rounded-lg font-bold text-xl hover:opacity-80 cursor-pointer"
-              onClick={onShareX}
-            >
-              Xで結果をシェア
-            </button>
-            <button
-              className="px-6 py-3 bg-green-500 text-white rounded-lg font-bold text-xl hover:bg-green-600 cursor-pointer"
-              onClick={onRetry}
-            >
-              もう一回挑戦する
-            </button>
+        <>
+          <div className="flex flex-col md:flex-row justify-center items-center gap-4 mt-6">
+            <div className="flex flex-col md:flex-row gap-4">
+              <button
+                className="px-6 py-3 bg-black text-white border border-black rounded-lg font-bold text-xl hover:opacity-80 cursor-pointer"
+                onClick={onShareX}
+              >
+                Xで結果をシェア
+              </button>
+              <button
+                className="px-6 py-3 bg-green-500 text-white rounded-lg font-bold text-xl hover:bg-green-600 cursor-pointer"
+                onClick={onRetry}
+              >
+                もう一回挑戦する
+              </button>
+            </div>
           </div>
-        </div>
+
+          <div className="mt-6">
+            {!isLoggedIn && (
+              <p className="mx-auto max-w-[720px] text-sm md:text-base font-bold text-gray-700 mb-2">
+                ※ログイン（無料）すると、あなたの最高記録もランキングに反映されます！
+              </p>
+            )}
+  
+            <DungeonRankingTop10 rows={rankingRows} />
+          </div>
+        </>
       )}
     </div>
   );
@@ -921,6 +936,9 @@ export default function QuizModePage() {
   const awardedOnceRef = useRef(false);
   const sentRef = useRef(false); // ★ 成績保存の二重送信防止
   const { pushModal } = useResultModal();
+  const [rankingRows, setRankingRows] = useState<
+    { user_id: string; username: string | null; avatar_url: string | null; best_stage: number }[]
+  >([]);
 
   const isSecret = course === "secret";
   const secretEnemy = isSecret ? getSecretEnemy(boss || "ancient_dragon", variant) : null;
@@ -1047,6 +1065,26 @@ export default function QuizModePage() {
   useEffect(() => {
     isAttackingRef.current = isAttacking;
   }, [isAttacking]);
+
+  useEffect(() => {
+    if (!finished) return;
+
+    (async () => {
+      const { data, error } = await supabase
+        .from("user_public_profiles")
+        .select("user_id, username, avatar_url, best_stage")
+        .order("best_stage", { ascending: false })
+        .limit(10);
+
+      if (error) {
+        console.error("fetch dungeon ranking error:", error);
+        setRankingRows([]);
+        return;
+      }
+
+      setRankingRows((data ?? []) as any);
+    })();
+  }, [finished, supabase]);
 
   // ✅ NEW判定用：所持キャラIDを取得
   useEffect(() => {
@@ -2044,6 +2082,25 @@ export default function QuizModePage() {
 
         const modal = buildResultModalPayload("dungeon", res);
         if (modal) pushModal(modal);
+
+        const refetchRankingTop10 = async () => {
+          const { data, error } = await supabase
+            .from("user_public_profiles")
+            .select("user_id, username, avatar_url, best_stage")
+            .order("best_stage", { ascending: false })
+            .limit(10);
+
+          if (!error) setRankingRows((data ?? []) as any);
+        };
+
+        const { error: bsErr } = await supabase.rpc("update_best_stage", {
+          p_user_id: user!.id,
+          p_best_stage: clearedStage,
+        });
+
+        if (!bsErr) {
+          await refetchRankingTop10(); // ✅ これで即反映
+        }
       } catch (e) {
         console.error("[dungeon] submitGameResult error:", e);
       }
@@ -2528,6 +2585,7 @@ export default function QuizModePage() {
             secretTitle={secretRes?.title}
             secretComment={secretRes?.comment}
             secretCleared={secretCleared}
+            rankingRows={rankingRows}
           />
         )}
       </div>

@@ -119,7 +119,8 @@ export default function RecordsPage() {
 
       const { data, error } = await supabase
         .from("user_game_stats")
-        .select("game,best_streak,best_score,best_stage,wins,first_places,updated_at");
+        .select("game,best_streak,best_score,best_stage,wins,first_places,updated_at")
+        .eq("user_id", user.id);
 
       if (error) {
         setError(error.message);

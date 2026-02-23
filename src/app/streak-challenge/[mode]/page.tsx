@@ -11,6 +11,7 @@ import { useResultModal } from "../../components/ResultModalProvider";
 import { getWeekStartJST } from "@/lib/week";
 import { getMonthStartJST } from "@/lib/month";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
+import StreakRankingTop10 from "../../components/StreakRankingTop10";
 
 interface ArticleData {
   id: string;
@@ -90,6 +91,13 @@ const rankComments = [
 
 type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
 
+type StreakRankRow = {
+  user_id: string;
+  username: string | null;
+  avatar_url: string | null;
+  best_streak: number;
+};
+
 const QuizResult = ({
   correctCount,
   earnedPoints,
@@ -101,6 +109,8 @@ const QuizResult = ({
   onGoLogin,
   onShareX,
   onRetry,
+  streakTop10,
+  rankLoading,
 }: {
   correctCount: number;
   earnedPoints: number;
@@ -112,6 +122,8 @@ const QuizResult = ({
   onGoLogin: () => void;
   onShareX: () => void;
   onRetry: () => void;
+  streakTop10: { user_id: string; username: string | null; avatar_url: string | null; best_streak: number }[];
+  rankLoading: boolean;
 }) => {
   const [showScore, setShowScore] = useState(false);
   const [showText, setShowText] = useState(false);
@@ -230,6 +242,22 @@ const QuizResult = ({
           </div>
         </div>
       )}
+
+      {showButton && (
+        <div className="mt-6">
+          {!isLoggedIn && (
+            <p className="mx-auto max-w-[720px] text-sm md:text-base font-bold text-gray-700 mb-2">
+              ※ログイン（無料）すると、あなたの最高記録もランキングに反映されます！
+            </p>
+          )}
+
+          {rankLoading ? (
+            <p className="text-gray-600 font-bold">ランキング読み込み中...</p>
+          ) : (
+            <StreakRankingTop10 rows={streakTop10} />
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -261,6 +289,8 @@ export default function QuizModePage() {
   const awardedOnceRef = useRef(false); // 二重加算防止
   const sentRef = useRef(false); // ★ 成績/称号送信用（二重送信防止）
   const { pushModal } = useResultModal();
+  const [streakTop10, setStreakTop10] = useState<StreakRankRow[]>([]);
+  const [rankLoading, setRankLoading] = useState(false);
 
   const finishedRef = useRef(finished);
   const showCorrectRef = useRef(showCorrectMessage);
@@ -631,6 +661,34 @@ export default function QuizModePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const fetchStreakRanking = async () => {
+    setRankLoading(true);
+    try {
+      const res = await fetch("/api/rankings/streak", { cache: "no-store" });
+      const data = (await res.json()) as StreakRankRow[];
+      setStreakTop10(Array.isArray(data) ? data : []);
+    } catch {
+      setStreakTop10([]);
+    } finally {
+      setRankLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!finished) return;
+    fetchStreakRanking();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [finished]);
+
+  useEffect(() => {
+    const onUpdated = () => {
+      if (finished) fetchStreakRanking();
+    };
+    window.addEventListener("ranking:updated", onUpdated);
+    return () => window.removeEventListener("ranking:updated", onUpdated);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [finished]);
+
   // ★ 連続正解チャレンジ：成績(最高連続正解数)＆称号を保存 → 新記録/新称号ならモーダル
   useEffect(() => {
     if (!finished) return;
@@ -685,6 +743,15 @@ export default function QuizModePage() {
 
         const modal = buildResultModalPayload("streak", res);
         if (modal) pushModal(modal);
+
+        const { error: bsErr } = await supabase.rpc("update_best_streak", {
+          p_user_id: uid,
+          p_best_streak: correctCount,
+        });
+        if (bsErr) console.log("update_best_streak error:", bsErr);
+
+        // （必要ならランキング更新イベントを飛ばす）
+        window.dispatchEvent(new Event("ranking:updated"));
       } catch (e) {
         console.error("[streak] submitGameResult error:", e);
       }
@@ -817,6 +884,8 @@ export default function QuizModePage() {
           onGoLogin={() => router.push("/user/login")}
           onShareX={handleShareX}
           onRetry={resetGame}
+          streakTop10={streakTop10}
+          rankLoading={rankLoading}
         />
       )}
     </div>

@@ -130,7 +130,7 @@ export default function QuizMasterPage() {
           <div>
             <button
               onClick={() => setShowCodeInput(true)}
-              className="w-full md:w-80 px-6 py-2 md:px-8 md:py-4 bg-pink-500 text-white rounded-full hover:bg-pink-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
+              className="w-full md:w-80 px-6 py-2 md:px-8 md:py-4 bg-blue-500 text-white rounded-full hover:bg-blue-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
             >
               知り合いと遊ぶ
             </button>
