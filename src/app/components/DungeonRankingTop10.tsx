@@ -10,7 +10,7 @@ type Row = {
 export default function DungeonRankingTop10({ rows }: { rows: Row[] }) {
   const list = rows.slice(0, 10);
 
-  const formatValue = (u: Row) => `ステージ${u.best_stage ?? 0}`;
+  const formatValue = (u: Row) => `${u.best_stage ?? 0}階`;
 
   return (
     <div className="mt-6">
@@ -40,8 +40,8 @@ export default function DungeonRankingTop10({ rows }: { rows: Row[] }) {
                     ${rank <= 3 ? "border-yellow-400 bg-yellow-50/50" : "border-gray-400"}
                   `}
                 >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <p className="font-extrabold w-12">
+                  <div className="flex items-center gap-1 md:gap-4 min-w-0">
+                    <p className="font-extrabold md:w-12">
                       {medal ? medal : `${rank}位`}
                     </p>
 
@@ -64,7 +64,7 @@ export default function DungeonRankingTop10({ rows }: { rows: Row[] }) {
 
           {rows.length === 0 && (
             <p className="mt-4 text-gray-600 font-bold">
-              まだランキングがありません。最初の記録を作ろう！🏰
+              ランキングを読み込み中…
             </p>
           )}
         </div>

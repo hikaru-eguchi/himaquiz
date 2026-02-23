@@ -10,7 +10,7 @@ type Row = {
 export default function StreakRankingTop10({ rows }: { rows: Row[] }) {
   const list = rows.slice(0, 10);
 
-  const formatValue = (u: Row) => `${u.best_streak ?? 0}問連続`;
+  const formatValue = (u: Row) => `${u.best_streak ?? 0}問`;
 
   return (
     <div className="mt-8">
@@ -47,7 +47,7 @@ export default function StreakRankingTop10({ rows }: { rows: Row[] }) {
                     `}
                 >
                     <div className="flex items-center gap-1 md:gap-4 min-w-0">
-                    <p className="font-extrabold w-12">
+                    <p className="font-extrabold md:w-12">
                         {medal ? `${medal}` : `${rank}位`}
                     </p>
 
@@ -70,7 +70,7 @@ export default function StreakRankingTop10({ rows }: { rows: Row[] }) {
 
           {rows.length === 0 && (
             <p className="mt-4 text-gray-600 font-bold">
-              まだランキングがありません。最初の記録を作ろう！🔥
+              ランキングを読み込み中…
             </p>
           )}
         </div>
