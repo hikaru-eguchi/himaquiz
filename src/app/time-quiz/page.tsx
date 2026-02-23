@@ -166,28 +166,29 @@ export default function QuizMasterPage() {
             onClick={handleRandomQuizStart}
             className="w-full md:w-70 px-6 py-2 md:px-8 md:py-4 bg-blue-500 text-white rounded-full hover:bg-blue-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
           >
-            全てのクイズから出題
+            {/* 全てのクイズから出題 */}
+            ゲームスタート
           </button>
 
           {/* ▼ 難易度 */}
-          <button
+          {/* <button
             className="flex-1 w-full px-6 py-2 md:px-8 md:py-4 bg-red-500 text-white rounded-full hover:bg-red-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
             onClick={() => setShowLevelButtons((prev) => !prev)}
           >
             難易度を選んで出題
-          </button>
+          </button> */}
 
           {/* ▼ ジャンル */}
-          <button
+          {/* <button
             className="flex-1 w-full px-6 py-2 md:px-8 md:py-4 bg-green-500 text-white rounded-full hover:bg-green-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
             onClick={() => setShowGenreButtons((prev) => !prev)}
           >
             ジャンルを選んで出題
-          </button>
+          </button> */}
         </div>
 
         {/* ▼ 難易度選択（time付きリンク） */}
-        {showLevelButtons && (
+        {/* {showLevelButtons && (
           <div className="flex flex-col justify-center items-center mt-3 md:mt-5">
             <div className="mb-2 md:mb-3 text-lg md:text-2xl">
               <p>難易度を選んでください</p>
@@ -210,10 +211,10 @@ export default function QuizMasterPage() {
               </Link>
             </div>
           </div>
-        )}
+        )} */}
 
         {/* ▼ ジャンル選択（time付きリンク） */}
-        {showGenreButtons && (
+        {/* {showGenreButtons && (
           <div className="flex flex-col justify-center items-center mt-3 md:mt-5">
             <div className="mb-2 md:mb-3 text-lg md:text-2xl">
               <p>ジャンルを選んでください</p>
@@ -236,7 +237,7 @@ export default function QuizMasterPage() {
               </Link>
             </div>
           </div>
-        )}
+        )} */}
 
         {/* ▼ 説明ボタン */}
         <button

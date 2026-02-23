@@ -116,28 +116,29 @@ export default function QuizMasterPage() {
         <div className="flex flex-col md:flex-row justify-center gap-3 md:gap-4 max-w-4xl mx-auto">
           <Link href="/streak-challenge/random" className="flex-1">
             <button className="w-full md:w-70 px-6 py-2 md:px-8 md:py-4 bg-blue-500 text-white rounded-full hover:bg-blue-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black">
-              全てのクイズから出題
+              {/* 全てのクイズから出題 */}
+              ゲームスタート
             </button>
           </Link>
 
           {/* 難易度 */}
-          <button
+          {/* <button
             className="flex-1 w-full px-6 py-2 md:px-8 md:py-4 bg-red-500 text-white rounded-full hover:bg-red-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
             onClick={() => setShowLevelButtons((prev) => !prev)}
           >
             難易度を選んで出題
-          </button>
+          </button> */}
 
           {/* ジャンル */}
-          <button
+          {/* <button
             className="flex-1 w-full px-6 py-2 md:px-8 md:py-4 bg-green-500 text-white rounded-full hover:bg-green-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
             onClick={() => setShowGenreButtons((prev) => !prev)}
           >
             ジャンルを選んで出題
-          </button>
+          </button> */}
         </div>
 
-        {showLevelButtons && (
+        {/* {showLevelButtons && (
           <div className="flex flex-col justify-center items-center mt-3 md:mt-5">
             <div className="mb-2 md:mb-3 text-lg md:text-2xl">
               <p>難易度を選んでください</p>
@@ -160,9 +161,9 @@ export default function QuizMasterPage() {
               </Link>
             </div>
           </div>
-        )}
+        )} */}
 
-        {showGenreButtons && (
+        {/* {showGenreButtons && (
           <div className="flex flex-col justify-center items-center mt-3 md:mt-5">
             <div className="mb-2 md:mb-3 text-lg md:text-2xl">
               <p>ジャンルを選んでください</p>
@@ -185,7 +186,7 @@ export default function QuizMasterPage() {
               </Link>
             </div>
           </div>
-        )}
+        )} */}
 
         {/* 説明ボタン */}
         <button
@@ -209,7 +210,7 @@ export default function QuizMasterPage() {
             className="text-gray-700 text-md md:text-lg text-center px-4 py-2"
           >
             「連続正解チャレンジ」は、どれだけクイズに連続正解できるかを競うクイズゲームです。<br />
-            1問あたりの制限時間は60秒。<br />
+            1問あたりの制限時間は30秒。<br />
             1問でも間違えた時点でチャレンジ終了となります。<br />
             連続正解数が増えるほど、あなたの称号もランクアップ！<br />
             最高ランクの称号を目指して挑戦してみましょう。<br />

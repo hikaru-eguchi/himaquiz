@@ -93,7 +93,6 @@ const QuizResult = ({
   const [showText2, setShowText2] = useState(false);
   const [showText3, setShowText3] = useState(false);
   const [showText4, setShowText4] = useState(false);
-  const [showText5, setShowText5] = useState(false);
   const [showButton, setShowButton] = useState(false);
 
   useEffect(() => {
@@ -106,7 +105,6 @@ const QuizResult = ({
     timers.push(setTimeout(() => setShowText2(true), 1500));
     timers.push(setTimeout(() => setShowText3(true), 2500));
     timers.push(setTimeout(() => setShowText4(true), 3000));
-    timers.push(setTimeout(() => setShowText5(true), 3500));
     timers.push(setTimeout(() => setShowButton(true), 3500));
     return () => timers.forEach(clearTimeout);
   }, []);
@@ -202,23 +200,6 @@ const QuizResult = ({
           })}
         </div>
       )}
-      {showText5 && predictedWinner && hasPredicted && (
-        <div className="mt-6 p-4 bg-white rounded-xl shadow max-w-sm mx-auto">
-          <p className="text-xl font-bold mb-2">
-            あなたの1位予想
-          </p>
-
-          {eliminationGroups[eliminationGroups.length - 1]?.includes(predictedWinner) ? (
-            <p className="text-3xl font-extrabold text-green-600">
-              的中！🎯
-            </p>
-          ) : (
-            <p className="text-2xl font-bold text-gray-500">
-              はずれ…
-            </p>
-          )}
-        </div>
-      )}
 
       {showButton && (
         <div className="mx-auto max-w-[520px] bg-white border-2 border-black rounded-xl p-4 shadow mt-6">
@@ -226,11 +207,7 @@ const QuizResult = ({
               <div className="mb-2 text-lg md:text-xl text-gray-700 font-bold">
                 <p className="text-blue-500">正解数ポイント：{basePoints}P（{correctCount}問 × 10P）</p>
                 {firstBonusPoints > 0 && (
-                  <p className="text-yellow-500">1位ボーナス✨：{firstBonusPoints}P</p>
-                )}
-
-                {predictionBonusPoints > 0 && (
-                  <p className="text-pink-500">予想的中ボーナス🎉：{predictionBonusPoints}P</p>
+                  <p className="text-yellow-500">順位ボーナス✨：{firstBonusPoints}P</p>
                 )}
               </div>
 
@@ -470,9 +447,8 @@ export default function QuizModePage() {
 
       // ログ（＋）※失敗しても致命的ではない
       const reasonPoint =
-        `サバイバルクイズ獲得: 正解${payload.correctCount}問=${payload.basePoints}P` +
-        (payload.firstBonusPoints ? ` / 1位ボーナス${payload.firstBonusPoints}P` : "") +
-        (payload.predictionBonusPoints ? ` / 予想的中${payload.predictionBonusPoints}P` : "");
+        `心理当てバトル獲得: 正解${payload.correctCount}問=${payload.basePoints}P` +
+        (payload.firstBonusPoints ? ` / 順位ボーナス${payload.firstBonusPoints}P` : "");
 
       if (payload.points > 0) {
         const { error: logError } = await supabase.from("user_point_logs").insert({
@@ -1494,47 +1470,14 @@ export default function QuizModePage() {
         </div>
       )}
 
-      {timeUp && !finished && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
-          <motion.div
-            initial={{ scale: 0.5, opacity: 0 }}
-            animate={{ scale: 1.3, opacity: 1 }}
-            transition={{ duration: 0.6 }}
-            className="text-white text-6xl md:text-8xl font-extrabold"
-          >
-            TIME UP！
-          </motion.div>
-        </div>
-      )}
-
       {!finished ? (
         <>
-          {dungeonStart && (
-            <>
-              <div className="flex flex-col items-center">
-                <p className={`w-[280px] md:w-[400px] text-2xl md:text-4xl font-extrabold mb-1 md:mb-2 px-4 py-2 rounded-lg shadow-lg 
-                              ${timeLeft <= 30 ? 'bg-red-700 text-white animate-pulse' : 'bg-white text-black border-2 border-black'}`}>
-                  制限時間: {Math.floor(timeLeft / 60)}分 {timeLeft % 60}秒
-                </p>
-              </div>
-            </>
-          )}
-
           <div className="flex flex-col items-center">
             <div className="grid grid-cols-4 md:grid-cols-4 gap-1 md:gap-2 mb-1 justify-items-center">
               {orderedPlayers.map((p) => {
                 const isMe = p.socketId === mySocketId;
                 const change = scoreChanges[p.socketId];
                 const result = results.find(r => r.socketId === p.socketId); // ← 結果取得
-                const life = displayLives[p.socketId] ?? 3;
-                const lifeColor =
-                  life <= 0
-                    ? "text-red-700"
-                    : life === 1
-                    ? "text-red-500"
-                    : life === 2
-                    ? "text-orange-400"
-                    : "text-green-500";
                     
                 let borderColorClass = "border-gray-300"; // デフォルト（問題中）
                 if (phase === "result" && showDamageResult) {
@@ -1557,11 +1500,7 @@ export default function QuizModePage() {
                       rounded-lg
                       shadow-md
                       flex flex-col items-center justify-center
-                      ${
-                        life <= 0
-                          ? "bg-gray-500 border-gray-700" // 脱落したらグレー背景
-                          : `bg-white border-4 ${borderColorClass}` // 通常は白背景＋border
-                      }
+                      bg-white border-4 ${borderColorClass}
                     `}
                   >
                     <p className="font-bold text-gray-800 text-lg md:text-xl text-center">
@@ -1573,35 +1512,29 @@ export default function QuizModePage() {
                       className={`
                         text-lg md:text-xl font-bold mt-1
                         ${
-                          life <= 0
-                            ? "text-gray-100" // 脱落したら白文字
-                            : phase === "result"
+                          phase === "result"
                             ? result?.isCorrect
                               ? "text-green-600"
                               : "text-red-600"
                             : result
                             ? "text-gray-800"
-                            : life === 1
-                            ? "text-red-500"
-                            : life === 2
-                            ? "text-orange-400"
                             : "text-green-500"
                         }
                       `}
                     >
-                      {life <= 0
-                        ? "脱落" // ライフ0なら脱落
-                        : phase === "result"
-                        ? showDamageResult
-                          ? result
-                            ? result.isCorrect
-                              ? "正解〇"
-                              : "誤答×"
-                            : "未回答"
-                          : "　"
-                        : result
-                        ? "？"
-                        : `❤×${life}`}
+                      {
+                        phase === "result"
+                          ? showDamageResult
+                            ? result
+                              ? result.isCorrect
+                                ? "正解〇"
+                                : "誤答×"
+                              : "未回答"
+                            : "　"
+                          : result
+                          ? "？"
+                          : ""
+                      }
                     </p>
 
                     {/* 吹き出し表示 */}
@@ -1710,60 +1643,7 @@ export default function QuizModePage() {
                   {/* 回答フェーズ */}
                   {phase === "question" && (
                     <>
-                      {isDead ? (
-                        <div className="mt-4 space-y-3">
-                          <p className="text-xl md:text-2xl font-bold text-gray-800">
-                            脱落したため、回答できません
-                          </p>
-
-                          {!hasPredicted && (
-                            <>
-                              <p className="text-lg md:text-xl font-bold text-green-500">
-                                1位を予想しよう！
-                              </p>
-
-                              <div className="space-y-2">
-                                {players
-                                  .filter(p => p.socketId !== mySocketId) // 自分以外
-                                  .map(p => (
-                                    <button
-                                      key={p.socketId}
-                                      onClick={() => setPredictedWinner(p.socketId)}
-                                      className={`
-                                        w-full max-w-xs mx-auto block px-4 py-2 rounded-lg border
-                                        ${
-                                          predictedWinner === p.socketId
-                                            ? "bg-green-500 text-white font-bold"
-                                            : "bg-white"
-                                        }
-                                      `}
-                                    >
-                                      {p.playerName}
-                                    </button>
-                                  ))}
-                              </div>
-
-                              <button
-                                disabled={!predictedWinner}
-                                onClick={() => setHasPredicted(true)}
-                                className="
-                                  mt-3 px-6 py-2
-                                  bg-blue-600 disabled:bg-gray-400
-                                  text-white font-bold rounded-lg
-                                "
-                              >
-                                この人にする
-                              </button>
-                            </>
-                          )}
-
-                          {hasPredicted && (
-                            <p className="text-lg md:text-xl font-bold text-gray-600">
-                              予想を受け付けました！
-                            </p>
-                          )}
-                        </div>
-                      ) : canAnswer ? (
+                      {canAnswer ? (
                         <button
                           onClick={checkAnswer}
                           className="px-6 py-3 bg-blue-500 text-white rounded-lg font-extrabold"

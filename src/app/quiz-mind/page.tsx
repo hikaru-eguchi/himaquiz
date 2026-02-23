@@ -118,7 +118,7 @@ export default function QuizMasterPage() {
         </div>
 
         <div className="flex flex-col md:flex-row justify-center gap-3 md:gap-4 max-w-4xl mx-auto">
-          <div>
+          {/* <div>
             <button
               onClick={handleRandomQuizStart}
               className="w-full md:w-80 px-6 py-2 md:px-8 md:py-4 bg-blue-500 text-white rounded-full hover:bg-blue-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
@@ -126,11 +126,11 @@ export default function QuizMasterPage() {
               オンラインでだれかと遊ぶ
             </button>
             <p className="text-sm text-gray-100 mt-1">※一定時間マッチしないとCPUと対戦になります</p>
-          </div>
+          </div> */}
           <div>
             <button
               onClick={() => setShowCodeInput(true)}
-              className="w-full md:w-80 px-6 py-2 md:px-8 md:py-4 bg-green-500 text-white rounded-full hover:bg-green-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
+              className="w-full md:w-80 px-6 py-2 md:px-8 md:py-4 bg-pink-500 text-white rounded-full hover:bg-pink-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
             >
               知り合いと遊ぶ
             </button>
@@ -225,13 +225,13 @@ export default function QuizMasterPage() {
             ref={descriptionRef}
             className="text-gray-700 text-md md:text-lg text-center px-4 py-2"
           >
-            「心理当てバトル」は、相手の心を読み合う対戦ゲームです。<br />
-            各ターンで代表プレイヤーが選択肢の中から、自分の心理にいちばん近いものを選びます。他のプレイヤーは、その代表の”選択”を当てることができれば得点が入ります。<br />
-            各問題は3択。代表プレイヤーはその中から、「大アタリ」と「大ハズレ」をそれぞれ1つずつ選びます。<br />
-            他のプレイヤーは「大アタリ」を選べば100点！「大ハズレ」を選ぶと その場で脱落…！どちらでもない選択肢は 50点 が入ります。<br />
-            全員が代表を3回ずつ担当するか、最後の1人になるとゲーム終了。終了時にもっとも得点が高いプレイヤーが勝利となります。<br />
-            心理を読むか、読まれるか――ドキドキの心理戦バトルに挑戦してみましょう！✨<br />
-            ※オンラインでチーム仲間が見つからない場合は、CPU（コンピュータ）との対戦になります。
+              「心理当てバトル」は、みんなの心を読み合うドキドキ心理戦ゲーム！🧠✨<br />
+              各ターンでは代表プレイヤーが「いちばん自分の気持ちに近い選択」をこっそり選びます。<br />
+              他のプレイヤーは、その“本音の選択”をズバリ当てられればポイントGET！🎯<br />
+              読み切るか？それとも読まれるか！？心理戦が勝負のカギ！<br />
+              最後にいちばんポイントが高いプレイヤーが勝利です！🏆<br />
+              ワイワイ盛り上がれる、ひまQらしいドキドキバトルを楽しもう！🔥<br />
+              ※知り合いとのみの対戦となります。
           </p>
         </div>
       </>
