@@ -212,7 +212,7 @@ const QuizResult = ({
               Xで結果をシェア
             </button>
             <button
-              className="px-6 py-3 bg-green-500 text-white rounded-lg font-bold text-xl hover:bg-green-600 cursor-pointer"
+              className="px-6 py-3 bg-green-500 text-white rounded-lg font-bold text-xl hover:bg-green-600 cursor-pointer animate-pulse"
               onClick={() => onRetry()}
             >
               もう一回挑戦する
@@ -247,6 +247,12 @@ export default function QuizModePage() {
   const timeParam = searchParams?.get("time") || "1";
   const totalTime = parseInt(timeParam) * 60;
   const [timeLeft, setTimeLeft] = useState(totalTime);
+
+    // ✅ 出題開始ゲート（カウントダウンが終わるまで問題＆タイマーを止める）
+  const [ready, setReady] = useState(false);
+
+  // ✅ 3,2,1,START! 表示用（null=非表示, 3..0=表示）
+  const [countdown, setCountdown] = useState<number | null>(3);
 
   const [score, setScore] = useState(0);
   const [wrongStreak, setWrongStreak] = useState(0);
@@ -459,6 +465,8 @@ export default function QuizModePage() {
 
     // タイマーリセット
     setTimeLeft(totalTime);
+    setReady(false);
+    setCountdown(3);
 
     // リザルト関連
     setEarnedPoints(0);
@@ -472,7 +480,6 @@ export default function QuizModePage() {
 
     // 問題をシャッフルし直す（同じ問題順を避けたい場合）
     setQuestions((prev) => shuffleArray(prev));
-    startTimer();
   };
 
   useEffect(() => {
@@ -513,12 +520,19 @@ export default function QuizModePage() {
 
   // タイマー（0になったら強制終了）
   useEffect(() => {
+    // readyになるまでタイマー開始しない
+    if (!ready) return;
+    if (finished) return;
+
     startTimer();
+
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [ready, finished]);
 
   const checkAnswer = () => {
     const correctAnswer = questions[currentIndex].quiz?.answer;
@@ -573,6 +587,42 @@ export default function QuizModePage() {
     });
     return title;
   };
+
+  useEffect(() => {
+    // finished中はやらない
+    if (finished) return;
+
+    // 問題がまだないなら待つ
+    if (questions.length === 0) return;
+
+    // 既にreadyなら何もしない
+    if (ready) return;
+
+    // countdownを3から開始
+    setCountdown(3);
+
+    const interval = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev === null) return null;
+
+        if (prev === 1) {
+          clearInterval(interval);
+
+          // START! を一瞬見せてから開始
+          setTimeout(() => {
+            setCountdown(null);
+            setReady(true); // ✅ ここで出題解禁
+          }, 800);
+
+          return 0; // 0 を START! 表示に使う
+        }
+
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [questions.length, finished, ready]);
 
   // ============================
   // ✅ 取りこぼし防止：マウント時に pending を拾う
@@ -714,6 +764,19 @@ export default function QuizModePage() {
 
   return (
     <div className="container mx-auto p-8 text-center bg-gradient-to-b from-red-50 via-red-100 to-red-200">
+      {countdown !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+          <motion.div
+            key={countdown}
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1.2, opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="text-white text-6xl md:text-8xl font-extrabold"
+          >
+            {countdown === 0 ? "START!" : countdown}
+          </motion.div>
+        </div>
+      )}
       {!finished ? (
         <>
           <h2 className="text-5xl md:text-6xl font-extrabold mb-6 text-black drop-shadow-lg">
@@ -822,18 +885,26 @@ export default function QuizModePage() {
 
               {!showCorrectMessage && !incorrectMessage && (
                 <>
-                  <QuizQuestion
-                    quiz={questions[currentIndex].quiz}
-                    userAnswer={userAnswer}
-                    setUserAnswer={setUserAnswer}
-                  />
-                  <button
-                    className="px-5 py-3 md:px-6 md:py-3 bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-4 hover:bg-blue-600 cursor-pointer font-extrabold"
-                    onClick={checkAnswer}
-                    disabled={userAnswer === null}
-                  >
-                    回答
-                  </button>
+                  {!ready ? (
+                    <p className="text-2xl md:text-3xl font-bold text-gray-700 mt-8">
+                      準備中…
+                    </p>
+                  ) : (
+                    <>
+                      <QuizQuestion
+                        quiz={questions[currentIndex].quiz}
+                        userAnswer={userAnswer}
+                        setUserAnswer={setUserAnswer}
+                      />
+                      <button
+                        className="px-5 py-3 md:px-6 md:py-3 bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-4 hover:bg-blue-600 cursor-pointer font-extrabold"
+                        onClick={checkAnswer}
+                        disabled={userAnswer === null}
+                      >
+                        回答
+                      </button>
+                    </>
+                  )}
                 </>
               )}
             </>
