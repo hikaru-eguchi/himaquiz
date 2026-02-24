@@ -6,7 +6,6 @@ import QuizQuestion3 from "../../components/QuizQuestion3";
 import { QuizData } from "@/lib/articles3";
 import { motion, AnimatePresence } from "framer-motion";
 import { useBattle } from "../../../hooks/useBattle";
-import { useQuestionPhase } from "../../../hooks/useQuestionPhase";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useSupabaseUser } from "../../../hooks/useSupabaseUser";
 import { submitGameResult, calcTitle } from "@/lib/gameResults";
@@ -15,6 +14,54 @@ import { useResultModal } from "../../components/ResultModalProvider";
 import { getWeekStartJST } from "@/lib/week";
 import { getMonthStartJST } from "@/lib/month";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
+import { useCallback } from "react";
+
+type RankRow = { socketId: string; name: string; score: number; rank: number };
+
+const buildRanksFromScores = (players: Player[], scores: Record<string, number>): RankRow[] => {
+  const rows = players.map(p => ({
+    socketId: p.socketId,
+    name: p.playerName,
+    score: scores[p.socketId] ?? 0,
+  }));
+
+  const sorted = [...rows].sort((a, b) => b.score - a.score);
+
+  let lastScore: number | null = null;
+  let lastRank = 0;
+
+  return sorted.map((p, i) => {
+    const rank = (lastScore === p.score) ? lastRank : (i + 1);
+    lastScore = p.score;
+    lastRank = rank;
+    return { ...p, rank };
+  });
+};
+
+const BONUS_TABLE: Record<number, number[]> = {
+  2: [150],
+  3: [200, 100],
+  4: [250, 125, 60],
+  5: [350, 175, 85, 40],
+  6: [450, 225, 110, 55, 25],
+  7: [600, 300, 150, 75, 35, 15],
+  8: [750, 375, 180, 90, 45, 20, 10],
+};
+
+const calcPlacementBonus = (playerCount: number, ranksNow: RankRow[], mySocketId: string) => {
+  const table = BONUS_TABLE[playerCount] ?? [];
+  const me = ranksNow.find(r => r.socketId === mySocketId);
+  if (!me) return 0;
+
+  // 最下位はボーナス無し
+  if (me.rank >= playerCount) return 0;
+
+  // 同順位が1人だけのときのみ
+  const sameRankCount = ranksNow.filter(r => r.rank === me.rank).length;
+  if (sameRankCount !== 1) return 0;
+
+  return table[me.rank - 1] ?? 0;
+};
 
 type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
 
@@ -48,8 +95,6 @@ interface QuizResultProps {
   rematchRequested : boolean;
   handleNewMatch: () => void;
   handleRematch: () => void;
-  myRankState: number | null;
-  eliminationGroups: string[][];
   players: Player[];
   predictedWinner: string | null;
   hasPredicted: boolean;
@@ -63,6 +108,8 @@ interface QuizResultProps {
   onGoLogin: () => void;
   isCodeMatch: boolean;
   onShareX: () => void;
+  myRankNow: number | null;
+  finalRanks: RankRow[];
 }
 
 const QuizResult = ({
@@ -73,8 +120,6 @@ const QuizResult = ({
   rematchRequested,
   handleNewMatch,
   handleRematch,
-  myRankState,
-  eliminationGroups,
   players,
   predictedWinner,
   hasPredicted,
@@ -88,16 +133,14 @@ const QuizResult = ({
   onGoLogin,
   isCodeMatch,
   onShareX,
+  myRankNow,
+  finalRanks,
 }: QuizResultProps) => {
   const [showText1, setShowText1] = useState(false);
   const [showText2, setShowText2] = useState(false);
   const [showText3, setShowText3] = useState(false);
   const [showText4, setShowText4] = useState(false);
   const [showButton, setShowButton] = useState(false);
-
-  useEffect(() => {
-    console.log("eliminationGroups", eliminationGroups);
-  }, [eliminationGroups]);
 
   useEffect(() => {
     const timers: NodeJS.Timeout[] = [];
@@ -128,23 +171,23 @@ const QuizResult = ({
 
       {showText2 && <p className="text-xl md:text-2xl text-gray-600 mb-2">あなたの順位は…</p>}
 
-      {showText3 && myRankState !== null && myRankState !== 1 && (
+      {showText3 && myRankNow !== null && myRankNow !== 1 && (
         <p
           className={`text-4xl md:text-6xl font-bold ${
-            myRankState === 1
-              ? "text-yellow-400"   // 1位：最後まで残った人
-              : myRankState === 2
-              ? "text-gray-400"     // 2位
-              : myRankState === 3
-              ? "text-orange-600"   // 3位
-              : "text-blue-600"     // その他
+            myRankNow === 1
+              ? "text-yellow-400"
+              : myRankNow === 2
+              ? "text-gray-400"
+              : myRankNow === 3
+              ? "text-orange-600"
+              : "text-blue-600"
           }`}
         >
-           {myRankState} 位！
+          {myRankNow} 位！
         </p>
       )}
 
-      {showText3 && myRankState === 1 && (
+      {showText3 && myRankNow === 1 && (
         <motion.p
           initial={{ scale: 0.5, rotate: -10 }}
           animate={{ scale: [1.2, 1], rotate: 0 }}
@@ -161,43 +204,40 @@ const QuizResult = ({
       )}
 
       {showText4 && <p className="text-xl md:text-2xl text-gray-600 mt-6">みんなの順位</p>}
-      {showText4 && eliminationGroups.length > 0 && (
+
+      {showText4 && finalRanks.length > 0 && (
         <div className="mt-2 space-y-2">
-          {[...eliminationGroups].reverse().map((group, reverseIndex) => {
-            const rank = reverseIndex + 1; // 1位から順に
+          {finalRanks.map((r) => (
+            <div
+              key={r.socketId}
+              className="flex items-center gap-4 px-3 py-2 bg-white rounded-lg shadow w-full max-w-md mx-auto"
+            >
+              {/* 何位 */}
+              <span
+                className={`font-extrabold text-lg w-10 text-center ${
+                  r.rank === 1
+                    ? "text-yellow-400"
+                    : r.rank === 2
+                    ? "text-gray-400"
+                    : r.rank === 3
+                    ? "text-orange-500"
+                    : "text-blue-500"
+                }`}
+              >
+                {r.rank}位
+              </span>
 
-            return group.map(socketId => {
-              const player = players.find(p => p.socketId === socketId);
-              if (!player) return null;
+              {/* 名前 */}
+              <span className="font-bold text-base truncate flex-1 text-center">
+                {r.name}
+              </span>
 
-              return (
-                <div
-                  key={`${rank}-${socketId}`}
-                  className="flex items-center gap-4 px-3 py-2 bg-white rounded-lg shadow w-full max-w-md mx-auto"
-                >
-                  {/* 何位 */}
-                  <span
-                    className={`font-extrabold text-lg w-10 text-center ${
-                      rank === 1
-                        ? "text-yellow-400"
-                        : rank === 2
-                        ? "text-gray-400"
-                        : rank === 3
-                        ? "text-orange-500"
-                        : "text-blue-500"
-                    }`}
-                  >
-                    {rank}位
-                  </span>
-
-                  {/* 名前 */}
-                  <span className="font-bold text-base truncate flex-1 text-center">
-                    {player.playerName}
-                  </span>
-                </div>
-              );
-            });
-          })}
+              {/* 点数 */}
+              <span className="font-extrabold text-base w-16 text-right">
+                {r.score}点
+              </span>
+            </div>
+          ))}
         </div>
       )}
 
@@ -297,7 +337,7 @@ const QuizResult = ({
                     className="
                       w-full md:w-auto
                       px-6 py-3
-                      bg-yellow-500 hover:bg-yellow-600
+                      bg-blue-500 hover:bg-blue-600
                       text-white text-xl md:text-xl
                       font-semibold
                       rounded-lg shadow-md
@@ -340,6 +380,21 @@ const QuizResult = ({
   );
 };
 
+type MindSlotOpenPayload = { deadlineMs: number; totalRounds: number };
+type MindOrderDecidedPayload = {
+  order: string[];
+  slotValues: Record<string, number>;
+  totalRounds: number;
+};
+type MindRepStartPayload = {
+  repId: string;
+  roundIndex: number;
+  totalRounds: number;
+  questionIndex: number;
+};
+type MindGuessStartPayload = { repId: string };
+type MindRoundResultPayload = { scores: Record<string, number> };
+
 export default function QuizModePage() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -363,12 +418,11 @@ export default function QuizModePage() {
     points: number;
     exp: number;
     correctCount: number;
-    basePoints: number;
-    firstBonusPoints: number;
-    predictionBonusPoints: number;
-    predictedWinner: string | null;
-    hasPredicted: boolean;
-    winnerSocketIds: string[]; // 勝者判定ログ用（winnerGroup）
+    basePoints: number;          // correctCount*10
+    firstBonusPoints: number;    // ここに順位ボーナスを入れる（名前はそのままでOK）
+    predictionBonusPoints: number; // 0固定でOK（UI崩したくなければ残す）
+    myRank: number;
+    playerCount: number;
     createdAt: number;
   };
 
@@ -448,7 +502,7 @@ export default function QuizModePage() {
       // ログ（＋）※失敗しても致命的ではない
       const reasonPoint =
         `心理当てバトル獲得: 正解${payload.correctCount}問=${payload.basePoints}P` +
-        (payload.firstBonusPoints ? ` / 順位ボーナス${payload.firstBonusPoints}P` : "");
+        (payload.firstBonusPoints ? ` / 順位ボーナス${payload.firstBonusPoints}P（${payload.playerCount}人中${payload.myRank}位）` : "");
 
       if (payload.points > 0) {
         const { error: logError } = await supabase.from("user_point_logs").insert({
@@ -463,7 +517,7 @@ export default function QuizModePage() {
         const { error: logError2 } = await supabase.from("user_exp_logs").insert({
           user_id: authedUserId,
           change: payload.exp,
-          reason: `サバイバルクイズEXP獲得: 正解${payload.correctCount}問 → ${payload.exp}EXP`,
+          reason: `心理当てバトルEXP獲得: 正解${payload.correctCount}問 → ${payload.exp}EXP`,
         });
         if (logError2) console.log("insert user_exp_logs error raw:", logError2);
       }
@@ -476,6 +530,66 @@ export default function QuizModePage() {
       setAwardStatus("error");
     }
   };
+
+  type MindPhase = "slot" | "orderReveal" | "repIntro" | "repQuestion" | "guess" | "revealWait" | "revealAnswer" | "roundResult" | "end" | "idle";
+  type MindChoice = "A" | "B" | "C";
+  type MindFrameResult = {
+    isCorrect: boolean;
+    text: string;
+  };
+
+  // 制限時間（秒）
+  const REP_LIMIT_SEC = 15;
+  const GUESS_LIMIT_SEC = 15;
+
+  // カウントダウン表示用
+  const [repSecondsLeft, setRepSecondsLeft] = useState<number>(0);
+  const [guessSecondsLeft, setGuessSecondsLeft] = useState<number>(0);
+
+  // タイマー制御
+  const phaseDeadlineAtRef = useRef<number | null>(null);
+  const countdownTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // 追加：タイマーを握って前のを消せるようにする（連続イベント対策）
+  const revealTimersRef = useRef<NodeJS.Timeout[]>([]);
+
+  const clearRevealTimers = () => {
+    revealTimersRef.current.forEach(t => clearTimeout(t));
+    revealTimersRef.current = [];
+  };
+
+  const [mindFrameResults, setMindFrameResults] =
+    useState<Record<string, MindFrameResult>>({});
+
+  const [mindPhase, setMindPhase] = useState<MindPhase>("idle");
+  const [mindOrder, setMindOrder] = useState<string[]>([]);
+  const [mindSlotValues, setMindSlotValues] = useState<Record<string, number>>({});
+  const [mindRepId, setMindRepId] = useState<string | null>(null);
+  const [mindRoundIndex, setMindRoundIndex] = useState(0);
+  const [mindTotalRounds, setMindTotalRounds] = useState(0);
+  const [mindQuestionIndex, setMindQuestionIndex] = useState(0);
+
+  const [slotSpinningValue, setSlotSpinningValue] = useState(1);
+  const [slotStopped, setSlotStopped] = useState(false);
+
+  const [repChoice, setRepChoice] = useState<MindChoice | null>(null);
+  const [guessChoice, setGuessChoice] = useState<MindChoice | null>(null);
+
+  const [scores, setScores] = useState<Record<string, number>>({});
+  const [displayScores, setDisplayScores] = useState<Record<string, number>>({});
+
+  const [slotSecondsLeft, setSlotSecondsLeft] = useState<number>(0);
+  const [slotFinalValue, setSlotFinalValue] = useState<number | null>(null);
+
+  const [repUserAnswer, setRepUserAnswer] = useState<number | null>(null);
+  const [guessUserAnswer, setGuessUserAnswer] = useState<number | null>(null);
+
+  const [revealedRepAnswer, setRevealedRepAnswer] = useState<"A"|"B"|"C"|null>(null);
+  const [showRevealText, setShowRevealText] = useState(false);
+
+
+  const pendingOrderDecidedRef = useRef<MindOrderDecidedPayload | null>(null);
+  const [slotStoppedAt, setSlotStoppedAt] = useState<number | null>(null);
 
 
   const [awardStatus, setAwardStatus] = useState<AwardStatus>("idle");
@@ -502,8 +616,8 @@ export default function QuizModePage() {
   const [playerName, setPlayerName] = useState("");
   const [joined, setJoined] = useState(false);
   const [nameError, setNameError] = useState<string | null>(null);
-  const [countdown, setCountdown] = useState<number | null>(null);
   const [timeUp, setTimeUp] = useState(false);
+  const [showGameSet, setShowGameSet] = useState(false);
   const [visibleMessages, setVisibleMessages] = useState<{ fromId: string; message: string }[]>([]);
   const [rematchRequested, setRematchRequested] = useState(false);
   const [rematchAvailable, setRematchAvailable] = useState(false);
@@ -538,6 +652,18 @@ export default function QuizModePage() {
 
   const [predictedWinner, setPredictedWinner] = useState<string | null>(null);
   const [hasPredicted, setHasPredicted] = useState(false);
+
+  const questionsRef = useRef<{ id: string; quiz: QuizData }[]>([]);
+  useEffect(() => {
+    questionsRef.current = questions;
+  }, [questions]);
+
+  const roomCodeRef = useRef<string>("");
+  useEffect(() => {
+    roomCodeRef.current = roomCode;
+  }, [roomCode]);
+
+  const lastOrderDecidedKeyRef = useRef<string | null>(null);
 
   const titles = [
     { threshold: 2, title: "クイズ戦士" },
@@ -576,29 +702,143 @@ export default function QuizModePage() {
     gameSetScheduled,
   } = useBattle(playerName);
 
-  const questionPhase = useQuestionPhase(
-    socket,
-    roomCode
-  );
-
   const groups = lastPlayerElimination?.eliminationGroups ?? [];
   const winnerGroup = groups.length ? groups[groups.length - 1] : [];
   const isSoloWinner = winnerGroup.length === 1;          // 単独勝者か
   const amIWinner = winnerGroup.includes(mySocketId);     // 自分が勝者か
   const firstBonus = (isSoloWinner && amIWinner) ? 300 : 0;
-  const phase = questionPhase?.phase ?? "question";
-  const results = questionPhase?.results ?? [];
-  const canAnswer = questionPhase?.canAnswer ?? false;
-  const currentIndex = questionPhase?.currentIndex ?? 0;
-  const questionTimeLeft = questionPhase?.questionTimeLeft ?? 20;
-  const submitAnswer = questionPhase?.submitAnswer ?? (() => {});
   const [displayLives, setDisplayLives] = useState<Record<string, number>>({});
   const [showStartButton, setShowStartButton] = useState(false);
+
+  const slotValueRef = useRef(1);
+  const slotStoppedRef = useRef(false);
+
+  const mindPhaseRef = useRef<MindPhase>("idle");
+  useEffect(() => {
+    mindPhaseRef.current = mindPhase;
+  }, [mindPhase]);
+
+  const slotStoppedAtRef = useRef<number | null>(null);
+  useEffect(() => {
+    slotStoppedAtRef.current = slotStoppedAt;
+  }, [slotStoppedAt]);
+
+  useEffect(() => {
+    slotValueRef.current = slotSpinningValue;
+  }, [slotSpinningValue]);
+
+  useEffect(() => {
+    slotStoppedRef.current = slotStopped;
+  }, [slotStopped]);
+
+  useEffect(() => {
+    // 既存タイマーを止める
+    if (countdownTimerRef.current) {
+      clearInterval(countdownTimerRef.current);
+      countdownTimerRef.current = null;
+    }
+
+    // フェーズに応じて開始
+    if (mindPhase === "repQuestion") {
+      phaseDeadlineAtRef.current = Date.now() + REP_LIMIT_SEC * 1000;
+
+      const tick = () => {
+        const msLeft = (phaseDeadlineAtRef.current ?? 0) - Date.now();
+        const secLeft = Math.max(0, Math.ceil(msLeft / 1000));
+        setRepSecondsLeft(secLeft);
+
+        if (secLeft <= 0) {
+          // 表示停止（ここでは “表示を止めるだけ”）
+          if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
+          countdownTimerRef.current = null;
+        }
+      };
+
+      tick();
+      countdownTimerRef.current = setInterval(tick, 200);
+      return;
+    }
+
+    if (mindPhase === "guess") {
+      phaseDeadlineAtRef.current = Date.now() + GUESS_LIMIT_SEC * 1000;
+
+      const tick = () => {
+        const msLeft = (phaseDeadlineAtRef.current ?? 0) - Date.now();
+        const secLeft = Math.max(0, Math.ceil(msLeft / 1000));
+        setGuessSecondsLeft(secLeft);
+
+        if (secLeft <= 0) {
+          if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
+          countdownTimerRef.current = null;
+        }
+      };
+
+      tick();
+      countdownTimerRef.current = setInterval(tick, 200);
+      return;
+    }
+
+    // それ以外のフェーズでは表示をリセット
+    setRepSecondsLeft(0);
+    setGuessSecondsLeft(0);
+    phaseDeadlineAtRef.current = null;
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mindPhase, mindRoundIndex, mindQuestionIndex, mindRepId]);
+
   
   const players: Player[] = rawPlayers.map((p) => ({
     socketId: p.socketId,
     playerName: p.name,
   }));
+
+  const ranksNow = useMemo(() => buildRanksFromScores(players, scores), [players, scores]);
+  const myRankNow = ranksNow.find(r => r.socketId === mySocketId)?.rank ?? null;
+
+  // =====================
+  // ✅ 「周」表示用（1周＝全員が1回主役）
+  // =====================
+  const playerCountNow = Math.max(1, players.length);
+
+  const totalCycles = useMemo(() => {
+    if (playerCountNow <= 3) return 3;   // 2-3人 => 3周
+    if (playerCountNow <= 5) return 2;   // 4-5人 => 2周
+    return 1;                             // 6-8人 => 1周
+  }, [playerCountNow]);
+
+  const cycleNow = useMemo(() => {
+    return Math.min(totalCycles, Math.floor(mindRoundIndex / playerCountNow) + 1);
+  }, [mindRoundIndex, playerCountNow, totalCycles]);
+
+  const turnInCycle = useMemo(() => {
+    return (mindRoundIndex % playerCountNow) + 1; // 今周の「何人目の主役」か
+  }, [mindRoundIndex, playerCountNow]);
+
+  const finalRanks = useMemo(() => {
+    return buildRanksFromScores(players, scores);
+  }, [players, scores]);
+
+  const myFinalRank = useMemo(() => {
+    return finalRanks.find(r => r.socketId === mySocketId)?.rank ?? null;
+  }, [finalRanks, mySocketId]);
+  
+  const orderedPlayers = useMemo(() => {
+    if (mindOrder.length > 0) {
+      const map = new Map(players.map(p => [p.socketId, p]));
+      return mindOrder.map(id => map.get(id)).filter(Boolean) as Player[];
+    }
+    // 既存：自分左
+    return [...players].sort((a, b) => {
+      if (a.socketId === mySocketId) return -1;
+      if (b.socketId === mySocketId) return 1;
+      return 0;
+    });
+  }, [players, mySocketId, mindOrder]);
+
+  const playersRef = useRef<Player[]>([]);
+  useEffect(() => {
+    playersRef.current = players;
+  }, [players]);
   
   const me = players.find(p => p.socketId === mySocketId);
   const opponent = players.find(p => p.socketId !== mySocketId);
@@ -670,6 +910,35 @@ export default function QuizModePage() {
     }
   };
 
+  const resetMindState = () => {
+    clearRevealTimers();
+
+    setScores({});
+    setMindFrameResults({});
+    setRevealedRepAnswer(null);
+
+    setMindPhase("idle");
+    setMindOrder([]);
+    setMindSlotValues({});
+    setMindRepId(null);
+    setMindRoundIndex(0);
+    setMindTotalRounds(0);
+    setMindQuestionIndex(0);
+
+    setSlotSpinningValue(1);
+    setSlotStopped(false);
+    setSlotSecondsLeft(0);
+    setSlotFinalValue(null);
+    setSlotStoppedAt(null);
+
+    setRepUserAnswer(null);
+    setGuessUserAnswer(null);
+    setRepChoice(null);
+    setGuessChoice(null);
+    setScores({});
+    setDisplayScores({});
+  };
+
   const handleRetry = () => {
     setCorrectCount(0);
     setFinished(false);
@@ -692,6 +961,7 @@ export default function QuizModePage() {
     setEarnedExp(0);
     sentRef.current = false;
     clearPendingAward();
+    resetMindState();
   };
 
   const handleNewMatch = () => {
@@ -706,7 +976,6 @@ export default function QuizModePage() {
     setMatchEnded(false);
     setTimeUp(false);
     setFinished(false);
-    setCountdown(null);
     setTimeLeft(totalTime);
     setCorrectCount(0);
     setWrongStreak(0);
@@ -726,6 +995,7 @@ export default function QuizModePage() {
     setEarnedExp(0);
     sentRef.current = false;
     clearPendingAward();
+    resetMindState();
 
     setReadyToStart(false);
 
@@ -751,8 +1021,68 @@ export default function QuizModePage() {
     socket?.emit("send_ready", { roomCode });
   };
 
+  const sendRepAnswer = (choice: MindChoice) => {
+    if (!mindRepId || mySocketId !== mindRepId) return;
+    const q = questions[mindQuestionIndex]?.quiz;
+    if (!q) return;
+
+    // choice を 実際の選択肢に変換する（あなたのQuizQuestion3が number answer なら整える）
+    // ここはQuizQuestion3の仕様次第なので、例だけ：
+    const isCorrect = (() => {
+      // A/B/C -> choices[0/1/2]
+      const idx = choice === "A" ? 0 : choice === "B" ? 1 : 2;
+      const selected = q.choices?.[idx];
+      // q.answer が number なら String比較など調整
+      return String(selected) === String(q.answer);
+    })();
+
+    socket?.emit("mind_rep_answer", { roomCode, choice, isCorrect });
+  };
+
+  const applyRepStart = useCallback(
+    ({ repId, roundIndex, totalRounds, questionIndex }: MindRepStartPayload) => {
+      setMindRepId(repId);
+      setMindRoundIndex(roundIndex);
+      setMindTotalRounds(totalRounds);
+      setMindQuestionIndex(questionIndex);
+      setRevealedRepAnswer(null);
+      setShowRevealText(false);
+
+      setRepChoice(null);
+      setGuessChoice(null);
+
+      setMindPhase("repIntro");
+
+      setTimeout(() => {
+        setMindPhase("repQuestion");
+      }, 2500);
+    },
+    []
+  );
+
   /* ---------- クイズ取得 ---------- */
   const [allQuestions, setAllQuestions] = useState<{ id: string; quiz: QuizData }[]>([]);
+
+  const pendingRepStartRef = useRef<MindRepStartPayload | null>(null);
+
+  const onRepStart = useCallback((payload: MindRepStartPayload) => {
+    const phase = mindPhaseRef.current;
+
+    // ✅ ここが重要：問題がまだ準備できてないなら保留
+    const q = questionsRef.current[payload.questionIndex];
+    if (!q?.quiz) {
+      pendingRepStartRef.current = payload;
+      console.log("[mind] repStart pending (question not ready)", payload);
+      return;
+    }
+
+    if (phase === "orderReveal" || phase === "revealAnswer" || phase === "revealWait") {
+      pendingRepStartRef.current = payload;
+      return;
+    }
+
+    applyRepStart(payload);
+  }, [applyRepStart]);
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -841,34 +1171,7 @@ export default function QuizModePage() {
       clearTimeout(deadTimer);
       clearTimeout(finishTimer);
     };
-  }, [phase, isGameOver]);
-
-  useEffect(() => {
-    if (!bothReady) return;
-
-    setCountdown(3);
-
-    const interval = setInterval(() => {
-      setCountdown(prev => {
-        if (prev === null) return null;
-        if (prev === 1) {
-          clearInterval(interval);
-
-          setTimeout(() => {
-            setCountdown(null);
-            setDungeonStart(true);
-            setShowStageEvent(true);
-          }, 800);
-          setShowStageEvent(false);
-
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [bothReady]);
+  }, [isGameOver]);
 
   useEffect(() => {
     if (!socket) return;
@@ -888,83 +1191,243 @@ export default function QuizModePage() {
   }, [socket]);
 
   useEffect(() => {
-    if (!bothReadyState) return;
+    if (!socket) return;
 
-    const resetLives: Record<string, number> = {};
-    players.forEach(p => {
-      resetLives[p.socketId] = 3;
-    });
+    const onSlotOpen = ({ deadlineMs, totalRounds }: MindSlotOpenPayload) => {
+      setMindPhase("slot");
+      setMindTotalRounds(totalRounds);
 
-    setDisplayLives(resetLives);
+      setSlotStopped(false);
+      setSlotFinalValue(null);
+      slotStoppedRef.current = false;
 
-    // まず3秒にリセット
-    setCountdown(3);
+      setRepChoice(null);
+      setGuessChoice(null);
 
-    const interval = setInterval(() => {
-      setCountdown(prev => {
-        if (prev === null) return null;
-        if (prev === 1) {
-          clearInterval(interval);
+      // ✅ カウントダウン初期化（例: 10秒）
+      setSlotSecondsLeft(Math.ceil(deadlineMs / 1000));
+
+      // ✅ 数字回転
+      const t = setInterval(() => {
+        setSlotSpinningValue(prev => {
+          const next = prev >= 10 ? 1 : prev + 1;
+          slotValueRef.current = next;
+          return next;
+        });
+      }, 80);
+
+      // ✅ 1秒ごとカウントダウン
+      const countdown = setInterval(() => {
+        setSlotSecondsLeft(prev => Math.max(0, prev - 1));
+      }, 1000);
+
+      // ✅ 自動停止
+      const auto = setTimeout(() => {
+        // ここで全部止める
+        clearInterval(t);
+        clearInterval(countdown);
+
+        if (!slotStoppedRef.current) {
+          slotStoppedRef.current = true;
+          setSlotStopped(true);
+          const final = slotValueRef.current;
+          setSlotFinalValue(final);
+          setSlotStoppedAt(Date.now());
+          socket.emit("mind_slot_stop", { roomCode, value: final });
+        }
+      }, deadlineMs);
+
+      // ✅ クリック側から止められるよう保存
+      (socket as any).__mindSlotTimers = { t, auto, countdown };
+    };
+
+    const onOrderDecided = (payload: MindOrderDecidedPayload) => {
+      // ✅ 同じ order/slotValues の重複通知を無視
+      const key = JSON.stringify({
+        order: payload.order,
+        slotValues: payload.slotValues,
+        totalRounds: payload.totalRounds,
+      });
+
+      if (lastOrderDecidedKeyRef.current === key) {
+        console.log("[mind_order_decided] duplicate ignored");
+        return;
+      }
+      lastOrderDecidedKeyRef.current = key;
+
+      const justStopped =
+        slotStoppedAtRef.current != null &&
+        Date.now() - slotStoppedAtRef.current < 2000;
+
+      const showOrderReveal = (p: MindOrderDecidedPayload) => {
+        setMindOrder(p.order);
+        setMindSlotValues(p.slotValues);
+        setMindTotalRounds(p.totalRounds);
+        setMindPhase("orderReveal");
+
+        // ✅ orderReveal を閉じる
+        clearRevealTimers();
+        revealTimersRef.current.push(setTimeout(() => {
+          setMindPhase("idle");
+
+          const pending = pendingRepStartRef.current;
+          if (pending) {
+            pendingRepStartRef.current = null;
+            applyRepStart(pending);
+          }
+        }, 2000));
+      };
+
+      if (mindPhaseRef.current === "slot" && justStopped) {
+        pendingOrderDecidedRef.current = payload;
+
+        setTimeout(() => {
+          const p = pendingOrderDecidedRef.current;
+          if (!p) return;
+          pendingOrderDecidedRef.current = null;
+
+          showOrderReveal(p); // ✅ 出す & 閉じる
+        }, 2000);
+
+        return;
+      }
+
+      showOrderReveal(payload); // ✅ 通常ルートも同じ関数へ
+    };
+
+    const onGuessStart = ({ repId }: MindGuessStartPayload) => {
+      setMindPhase("guess");
+      setMindRepId(repId);
+      setGuessChoice(null);
+    };
+
+    const choiceToIndex = (c: "A" | "B" | "C") => (c === "A" ? 0 : c === "B" ? 1 : 2);
+
+    const buildRepPickedText = (repAnswer: "A" | "B" | "C") => {
+      const q = questions[mindQuestionIndex]?.quiz;
+      if (!q?.choices) return repAnswer;
+      const idx = choiceToIndex(repAnswer);
+      return String(q.choices[idx] ?? repAnswer);
+    };
+
+    const onMindRoundResult = (payload: any) => {
+      const { scores, repAnswer, repId, guesses, repIsCorrect, roundIndex, totalRounds } = payload;
+
+      // =====================
+      // ✅ 自分が正解したか判定
+      // =====================
+      const myGuess = guesses?.[mySocketId];
+
+      if (myGuess && myGuess === repAnswer) {
+        setCorrectCount(prev => prev + 1);
+      }
+
+      clearRevealTimers();
+
+      setRevealedRepAnswer(repAnswer);
+      setScores(scores);
+
+      // 枠の正誤表示用map
+      const currentPlayers = playersRef.current;
+      const map: Record<string, MindFrameResult> = {};
+       
+      currentPlayers.forEach((p) => {
+        if (p.socketId === repId) {
+          map[p.socketId] = { isCorrect: !!repIsCorrect, text: "主役" };
+          return;
+        } const g = guesses?.[p.socketId];
+        if (!g) map[p.socketId] = { isCorrect: false, text: "未回答" };
+        else if (g === repAnswer) map[p.socketId] = { isCorrect: true, text: "正解〇" };
+        else map[p.socketId] = { isCorrect: false, text: "誤答×" };
+      }); setMindFrameResults(map);
+      
+      // ▼ ここから演出タイミング
+      setShowRevealText(false); // 「『〇〇』」は一旦隠す
+      setShowDamageResult(false); // 正誤枠も一旦隠す
+      setMindPhase("revealAnswer"); // 「○○さんが選んだのは、、」を出す
+
+      // 1) 1秒後に回答表示
+      revealTimersRef.current.push(setTimeout(() => setShowRevealText(true), 1000));
+
+      // 2) 2.5秒後に正誤表示
+      revealTimersRef.current.push(setTimeout(() => setShowDamageResult(true), 2500));
+      
+      // 2) 2.5秒後にスコア反映
+      revealTimersRef.current.push(setTimeout(() => {
+        setDisplayScores(scores);
+      }, 2500));
+
+      const isLastRound = typeof roundIndex === "number" && typeof totalRounds === "number"
+        ? roundIndex >= totalRounds - 1
+        : false;
+
+      // 3) 5秒後に閉じる（通常）
+      revealTimersRef.current.push(setTimeout(() => {
+        setShowRevealText(false);
+        setShowDamageResult(false);
+
+        if (isLastRound) {
+          // ★最後だけ：GAME SET → finished
+          setShowGameSet(true);
 
           setTimeout(() => {
-            setCountdown(null);
-          }, 800);
+            setShowGameSet(false);
+            setMindPhase("end");
+            setFinished(true);
+          }, 2000);
 
-          return 0;
+          return;
         }
-        return prev - 1;
-      });
-    }, 1000);
 
-    return () => clearInterval(interval); // ★ intervalは必ずクリーンアップ
-  }, [bothReadyState]);
+        setMindPhase("idle");
+      }, 5000));
+    };
 
-  useEffect(() => {
-    if (phase === "result") {
-      setShowAnswerText(false);
-      setShowAnswer(false);
-      setShowExplanation(false);
-      setShowCorrectCount(false);
-      setShowDamageResult(false);
-      
-      // 正解は、、を表示
-      const answerTextTimer = setTimeout(() => setShowAnswerText(true), 200);
+    const onEnd = () => {
+      setMindPhase("end");
+      // setFinished(true);
+    };
 
-      // 答えを表示
-      const answerTimer = setTimeout(() => setShowAnswer(true), 1000);
+    socket.on("mind_slot_open", onSlotOpen);
+    socket.on("mind_order_decided", onOrderDecided);
+    socket.on("mind_guess_start", onGuessStart);
+    socket.on("mind_round_result", onMindRoundResult);
+    socket.on("mind_game_end", onEnd);
 
-      // 解説を表示
-      const explanationTimer = setTimeout(() => setShowExplanation(true), 2000);
+    return () => {
+      socket.off("mind_slot_open", onSlotOpen);
+      socket.off("mind_order_decided", onOrderDecided);
+      socket.off("mind_guess_start", onGuessStart);
+      socket.off("mind_round_result", onMindRoundResult);
+      socket.off("mind_game_end", onEnd);
 
-      // 正解人数表示
-      const correctCountTimer = setTimeout(() => setShowCorrectCount(true), 3000);
-
-      // ダメージ表示
-      const damageTimer = setTimeout(() => setShowDamageResult(true), 3000);
-
-      return () => {
-        clearTimeout(answerTextTimer);
-        clearTimeout(answerTimer);
-        clearTimeout(explanationTimer);
-        clearTimeout(correctCountTimer);
-        clearTimeout(damageTimer);
-      };
-    }
-  }, [phase]);
+      const timers = (socket as any).__mindSlotTimers;
+      if (timers?.t) clearInterval(timers.t);
+      if (timers?.auto) clearTimeout(timers.auto);
+      if (timers?.countdown) clearInterval(timers.countdown);
+    };
+  }, [socket, roomCode]);
 
   useEffect(() => {
-    if (phase !== "result") return;
+    if (!socket) return;
 
-    const timer = setTimeout(() => {
-      setDisplayLives(playerLives);
-    }, 600); // ← 正解発表演出のあと
+    socket.off("mind_rep_question_start", onRepStart);
+    socket.on("mind_rep_question_start", onRepStart);
 
-    return () => clearTimeout(timer);
-  }, [phase, playerLives]);
+    return () => {
+      socket.off("mind_rep_question_start", onRepStart);
+    };
+  }, [socket, onRepStart]);
 
   useEffect(() => {
-    setShowDamageResult(false);
-  }, [phase]);
+    if (mindPhase !== "idle") return;
+
+    const pending = pendingRepStartRef.current;
+    if (!pending) return;
+
+    pendingRepStartRef.current = null;
+    applyRepStart(pending);
+  }, [mindPhase]);
 
   useEffect(() => {
     if (allPlayersReady && !bothReady) {
@@ -1042,31 +1505,24 @@ export default function QuizModePage() {
   useEffect(() => {
     if (!finished) return;
 
-    // 勝者情報がまだ来てないなら待つ（1位ボーナス/予想的中に必要）
-    if (!lastPlayerElimination) return;
+    // ランキング（scores）から最終順位を計算
+    const ranksNow = finalRanks; // buildRanksFromScores(players, scores) の結果
+    const myRankNow = ranksNow.find(r => r.socketId === mySocketId)?.rank ?? null;
 
-    const base = correctCount * 20;
+    // mySocketId がまだ無い/順位が取れないなら待つ
+    if (!mySocketId || !myRankNow) return;
 
-    const groups = lastPlayerElimination.eliminationGroups ?? [];
-    const winnerGroup = groups.length ? groups[groups.length - 1] : [];
-    const isSoloWinner = winnerGroup.length === 1;
-    const amIWinner = winnerGroup.includes(mySocketId);
+    const base = correctCount * 10; // ✅ 1問10P
 
-    const firstBonus = (isSoloWinner && amIWinner) ? 500 : 0;
+    // ✅ 順位ボーナス（ロワイヤルと同じ）
+    const bonus = calcPlacementBonus(players.length, ranksNow, mySocketId);
 
-    const predictionHit =
-      hasPredicted &&
-      predictedWinner &&
-      winnerGroup.includes(predictedWinner);
-
-    const predictionBonus = predictionHit ? 150 : 0;
-
-    const earned = base + firstBonus + predictionBonus;
+    const earned = base + bonus;
     const expEarned = correctCount * 20;
 
     setBasePoints(base);
-    setFirstBonusPoints(firstBonus);
-    setPredictionBonusPoints(predictionBonus);
+    setFirstBonusPoints(bonus);        // ← UIの「順位ボーナス✨」に出る
+    setPredictionBonusPoints(0);       // 使わないなら0固定
     setEarnedPoints(earned);
     setEarnedExp(expEarned);
 
@@ -1081,20 +1537,19 @@ export default function QuizModePage() {
       exp: expEarned,
       correctCount,
       basePoints: base,
-      firstBonusPoints: firstBonus,
-      predictionBonusPoints: predictionBonus,
-      predictedWinner,
-      hasPredicted,
-      winnerSocketIds: winnerGroup,
+      firstBonusPoints: bonus,
+      predictionBonusPoints: 0,
+      myRank: myRankNow,
+      playerCount: players.length,
       createdAt: Date.now(),
     };
 
-    // ✅ まずpending保存（ここが重要）
+    // ✅ まずpending保存
     savePendingAward(payload);
 
-    // ✅ その場で付与を試す（ログイン揺れでも ensureAuthedUserId が面倒みる）
+    // ✅ その場で付与を試す
     awardPointsAndExp(payload);
-  }, [finished,correctCount,lastPlayerElimination,mySocketId,hasPredicted,predictedWinner,]);
+  }, [finished, correctCount, finalRanks, mySocketId, players.length]);
 
   useEffect(() => {
     const pending = loadPendingAward();
@@ -1175,7 +1630,7 @@ export default function QuizModePage() {
         });
         if (monthlyErr) console.log("upsert_monthly_stats error:", monthlyErr);
 
-        const score = correctCount; // サバイバルは「正解数」がスコアでOK
+        const score = correctCount;
 
         const isFirstPlace = amIWinner;
 
@@ -1217,7 +1672,6 @@ export default function QuizModePage() {
       setRematchAvailable(false);
       setMatchEnded(false);
       setTimeUp(false);
-      setCountdown(null);
       setTimeLeft(totalTime);
 
       sendReady(handicap);
@@ -1239,7 +1693,6 @@ export default function QuizModePage() {
         setRematchAvailable(false);
         setMatchEnded(false);
         setTimeUp(false);
-        setCountdown(null);
         setTimeLeft(totalTime);
         setDisplayLives({});
         setAllPlayersDead(false);
@@ -1274,25 +1727,36 @@ export default function QuizModePage() {
     };
   }, [socket]);
 
-  const checkAnswer = () => {
-    if (userAnswer == null) return;
-
-    const correctAnswer = questions[currentIndex].quiz?.answer;
-
-    if (userAnswer === correctAnswer) {
-      submitAnswer(true)
-      setCorrectCount(prev => prev + 1);
-    } else {
-      submitAnswer(false)
-    }
-    setUserAnswer(null);
-  };
-
   // --- 不適切ワードリスト ---
   const bannedWords = [
     "ばか","馬鹿","バカ","くそ","糞","クソ","死ね","しね","アホ","あほ","ごみ","ゴミ",
     "fuck", "shit", "bastard", "idiot", "asshole",
   ]
+
+  const repName =
+    players.find((p) => p.socketId === mindRepId)?.playerName ?? "主役";
+
+  const repPickedText = useMemo(() => {
+    if (!revealedRepAnswer) return "";
+    const q = questions[mindQuestionIndex]?.quiz;
+    if (!q?.choices) return revealedRepAnswer;
+
+    const idx = revealedRepAnswer === "A" ? 0 : revealedRepAnswer === "B" ? 1 : 2;
+    return String(q.choices[idx] ?? revealedRepAnswer);
+  }, [revealedRepAnswer, questions, mindQuestionIndex]);
+
+  const orderRows = useMemo(() => {
+    if (!mindOrder || mindOrder.length === 0) return [];
+    return mindOrder.map((socketId, idx) => {
+      const p = players.find(pp => pp.socketId === socketId);
+      return {
+        rank: idx + 1,
+        socketId,
+        name: p?.playerName ?? "???",
+        value: mindSlotValues?.[socketId] ?? 0,
+      };
+    });
+  }, [mindOrder, mindSlotValues, players]);
 
   if (!joined) {
     return (
@@ -1431,13 +1895,6 @@ export default function QuizModePage() {
     );
   }
 
-  // --- 自分を常に左に表示するための並び替え ---
-  const orderedPlayers = [...players].sort((a, b) => {
-    if (a.socketId === mySocketId) return -1;
-    if (b.socketId === mySocketId) return 1;
-    return 0;
-  });
-
   // Xシェア機能
   const handleShareX = () => {
     const text = [
@@ -1455,39 +1912,298 @@ export default function QuizModePage() {
 
   return (
     <div className="container mx-auto p-8 text-center bg-gradient-to-b from-pink-400 via-rose-100 to-amber-400" key={battleKey}>
-      {countdown !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+      {mindPhase === "slot" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
           <motion.div
-            key={countdown}
-            initial={{ scale: 0.5, opacity: 0 }}
-            animate={{ scale: 1.2, opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-white text-6xl md:text-8xl font-extrabold"
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="
+              relative w-[340px] text-center
+              rounded-3xl p-5
+              border-4 border-black
+              shadow-[0_20px_60px_rgba(0,0,0,0.35)]
+              bg-gradient-to-b from-pink-200 via-white to-yellow-200
+              overflow-hidden
+            "
           >
-            {countdown === 0 ? "START!" : countdown}
+            {/* 背景キラキラ */}
+            <div className="absolute inset-0 opacity-30 pointer-events-none">
+              <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-pink-400 blur-2xl" />
+              <div className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-yellow-300 blur-2xl" />
+            </div>
+
+            <motion.p
+              animate={{ y: [0, -2, 0] }}
+              transition={{ duration: 1.2, repeat: Infinity }}
+              className="relative text-2xl font-extrabold drop-shadow"
+            >
+              🎰 順番決めスロット！
+            </motion.p>
+
+            <p className="relative text-sm text-gray-700 font-bold mt-1">
+              タップで止めてね！💥
+            </p>
+
+            {/* スロット窓 */}
+            <div className="relative mt-4 mx-auto w-[220px] h-[120px] rounded-2xl border-4 border-black bg-white shadow-inner flex items-center justify-center">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 w-2 h-16 rounded-full bg-black/10" />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 w-2 h-16 rounded-full bg-black/10" />
+
+              <motion.div
+                key={slotFinalValue ?? slotSpinningValue}
+                initial={{ scale: 0.9 }}
+                animate={{ scale: [1.15, 1] }}
+                transition={{ duration: 0.18 }}
+                className="text-7xl font-extrabold tracking-wider"
+              >
+                {slotFinalValue ?? slotSpinningValue}
+              </motion.div>
+            </div>
+
+            <button
+              disabled={slotStopped}
+              onClick={() => {
+                if (slotStoppedRef.current) return;
+
+                const timers = (socket as any).__mindSlotTimers;
+                if (timers?.t) clearInterval(timers.t);
+                if (timers?.countdown) clearInterval(timers.countdown);
+                if (timers?.auto) clearTimeout(timers.auto);
+
+                slotStoppedRef.current = true;
+                setSlotStopped(true);
+                setSlotSecondsLeft(0);
+
+                const final = slotValueRef.current;
+                setSlotFinalValue(final);
+                setSlotStoppedAt(Date.now());
+                socket?.emit("mind_slot_stop", { roomCode, value: final });
+              }}
+              className={`
+                relative mt-4 w-full py-3 rounded-2xl
+                text-white font-extrabold text-xl
+                border-4 border-black
+                transition-all
+                ${slotStopped
+                  ? "bg-gray-400"
+                  : "bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 hover:scale-[1.02] active:scale-[0.98]"
+                }
+              `}
+            >
+              {slotStopped ? "STOP！✅" : "タップで止める！🔥"}
+            </button>
+
+            <p className="relative text-sm text-gray-700 font-bold mt-3">
+              ⏳ 自動停止まで：{slotSecondsLeft}秒
+            </p>
+          </motion.div>
+        </div>
+      )}
+
+      {mindPhase === "orderReveal" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="
+              relative w-[360px] md:w-[420px]
+              rounded-3xl p-5
+              border-4 border-black
+              shadow-[0_20px_60px_rgba(0,0,0,0.35)]
+              bg-gradient-to-b from-yellow-200 via-white to-pink-200
+              overflow-hidden
+            "
+          >
+            {/* うっすらキラ背景 */}
+            <div className="absolute inset-0 opacity-30 pointer-events-none">
+              <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-yellow-300 blur-2xl" />
+              <div className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-pink-300 blur-2xl" />
+            </div>
+
+            <motion.p
+              animate={{ y: [0, -2, 0] }}
+              transition={{ duration: 1.2, repeat: Infinity }}
+              className="relative text-2xl md:text-3xl font-extrabold drop-shadow"
+            >
+              🎉 順番決定！
+            </motion.p>
+
+            <p className="relative text-sm md:text-base text-gray-700 font-bold mt-1">
+              1番から順に主役になるよ！
+            </p>
+
+            <div className="relative mt-4 space-y-2">
+              {orderRows.map((r) => (
+                <div
+                  key={r.socketId}
+                  className="
+                    flex items-center justify-between
+                    px-3 py-2
+                    bg-white
+                    rounded-xl
+                    border-2 border-black
+                    shadow
+                  "
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="
+                      w-10 h-10 rounded-full
+                      bg-blue-500 text-white
+                      flex items-center justify-center
+                      font-extrabold
+                    ">
+                      {r.rank}
+                    </div>
+
+                    <div className="font-extrabold text-lg md:text-xl max-w-[200px] truncate">
+                      {r.name}
+                    </div>
+                  </div>
+
+                  {/* スロット値 */}
+                  <div className="
+                    min-w-[60px]
+                    px-3 py-1
+                    rounded-full
+                    bg-yellow-300
+                    border-2 border-black
+                    text-center
+                    font-extrabold
+                    text-lg md:text-xl
+                  ">
+                    {r.value}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <p className="relative text-xs md:text-sm text-gray-600 font-bold mt-3">
+              まもなく1番目の主役へ…✨
+            </p>
           </motion.div>
         </div>
       )}
 
       {!finished ? (
         <>
+          {/* {mindTotalRounds > 0 && (
+            <div className="mb-2 flex justify-center">
+              <div
+                className="
+                  inline-flex items-center gap-2
+                  px-4 py-2
+                  rounded-full
+                  bg-white/90
+                  border-2 border-black
+                "
+              >
+                <span className="text-lg md:text-xl font-extrabold text-gray-900">
+                  {mindRoundIndex + 1}
+                  <span className="text-md md:text-xl font-bold text-gray-600"> / {mindTotalRounds}</span>
+                </span>
+                <span className="text-md md:text-xl font-extrabold text-gray-700">周目</span>
+              </div>
+            </div>
+          )} */}
+          {mindTotalRounds > 0 && (
+            <div className="mb-2 flex flex-col items-center gap-2">
+              {/* 1行目：説明 */}
+              <div>
+                <span className="text-md md:text-xl font-extrabold text-white drop-shadow">
+                  ✨主役の心理を当てたら得点ゲット！✨
+                </span>
+              </div>
+
+              {/* 2行目：周表示 */}
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/90 border-2 border-gray-400">
+                <span className="text-lg md:text-xl font-extrabold text-gray-900">
+                  {cycleNow}
+                  <span className="text-md md:text-xl font-bold text-gray-600"> / {totalCycles}</span>
+                </span>
+                <span className="text-md md:text-xl font-extrabold text-gray-700">周目</span>
+
+                <span className="text-sm md:text-base font-bold text-gray-600">
+                  （{turnInCycle}/{playerCountNow}人目）
+                </span>
+              </div>
+            </div>
+          )}
           <div className="flex flex-col items-center">
+            {/* ✅ いまの出題者 表示（mind用） */}
+            {mindRepId && mindPhase !== "idle" && mindPhase !== "slot" && mindPhase !== "orderReveal" && (
+              <div className="mb-4 flex justify-center">
+                <div
+                  className="
+                    inline-flex items-center gap-2
+                    px-4 py-2
+                    rounded-full
+                    bg-white/90
+                    border-3 border-blue-600
+                    shadow
+                    relative
+                    overflow-hidden
+                  "
+                >
+                  {/* うっすらキラ背景（形状は崩さない） */}
+                  <span className="absolute inset-0 opacity-25 pointer-events-none">
+                    <span className="absolute -top-6 -left-6 w-20 h-20 rounded-full bg-pink-400 blur-xl" />
+                    <span className="absolute -bottom-6 -right-6 w-20 h-20 rounded-full bg-yellow-300 blur-xl" />
+                  </span>
+
+                  {/* 中身 */}
+                  <span className="relative text-lg md:text-xl font-extrabold text-gray-900 flex items-center gap-2">
+                    <span
+                      className="
+                        w-8 h-8 md:w-9 md:h-9
+                        rounded-full
+                        border-2 border-yellow-500
+                        bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500
+                        text-white
+                        flex items-center justify-center
+                        shadow
+                      "
+                    >
+                      👑
+                    </span>
+                    いまの主役：
+                  </span>
+
+                  <span
+                    className="
+                      relative
+                      text-lg md:text-xl
+                      font-extrabold
+                      bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600
+                      bg-clip-text text-transparent
+                      drop-shadow-sm
+                    "
+                  >
+                    {repName}さん
+                  </span>
+                </div>
+              </div>
+            )}
             <div className="grid grid-cols-4 md:grid-cols-4 gap-1 md:gap-2 mb-1 justify-items-center">
               {orderedPlayers.map((p) => {
                 const isMe = p.socketId === mySocketId;
                 const change = scoreChanges[p.socketId];
-                const result = results.find(r => r.socketId === p.socketId); // ← 結果取得
-                    
-                let borderColorClass = "border-gray-300"; // デフォルト（問題中）
-                if (phase === "result" && showDamageResult) {
-                  if (result === undefined) {
-                    borderColorClass = "border-gray-300"; // 未回答
-                  } else if (result.isCorrect) {
-                    borderColorClass = "border-green-500";
-                  } else {
-                    borderColorClass = "border-red-500";
-                  }
+                const isRepNow =
+                  mindRepId != null &&
+                  p.socketId === mindRepId &&
+                  mindPhase !== "idle" &&
+                  mindPhase !== "slot" &&
+                  mindPhase !== "orderReveal";
+                
+                const mindRes = mindFrameResults[p.socketId];
+                const isRevealNow = mindPhase === "revealAnswer"; // mindだけ
+
+                let borderColorClass = "border-gray-300";
+
+                if (isRevealNow && showDamageResult) {
+                  if (!mindRes) borderColorClass = "border-gray-300";
+                  else if (mindRes.text === "主役") borderColorClass = "border-blue-500";
+                  else if (mindRes.isCorrect) borderColorClass = "border-green-500";
+                  else borderColorClass = "border-red-500";
                 }
                 
                 return (
@@ -1503,38 +2219,32 @@ export default function QuizModePage() {
                       bg-white border-4 ${borderColorClass}
                     `}
                   >
+                    {isRepNow && (
+                      <div className="w-full absolute -top-5 left-1/2 -translate-x-1/2 px-2 py-1 bg-blue-500 text-white text-xs font-extrabold rounded-full border-2 border-white shadow">
+                        主役
+                      </div>
+                    )}
                     <p className="font-bold text-gray-800 text-lg md:text-xl text-center">
                       {p.playerName.length > 5 ? p.playerName.slice(0, 5) + "..." : p.playerName}
                     </p>
 
+                    <p className="text-md md:text-lg font-bold text-green-600">
+                      {displayScores[p.socketId] ?? 0} 点
+                    </p>
+
                     {/* 結果表示 */}
                     <p
-                      className={`
-                        text-lg md:text-xl font-bold mt-1
-                        ${
-                          phase === "result"
-                            ? result?.isCorrect
-                              ? "text-green-600"
-                              : "text-red-600"
-                            : result
-                            ? "text-gray-800"
-                            : "text-green-500"
-                        }
-                      `}
+                      className={`text-lg md:text-xl font-bold mt-1 ${
+                        isRevealNow
+                          ? mindRes?.text === "主役"
+                            ? "text-blue-600"
+                            : mindRes?.isCorrect
+                            ? "text-green-600"
+                            : "text-red-600"
+                          : "text-green-500"
+                      }`}
                     >
-                      {
-                        phase === "result"
-                          ? showDamageResult
-                            ? result
-                              ? result.isCorrect
-                                ? "正解〇"
-                                : "誤答×"
-                              : "未回答"
-                            : "　"
-                          : result
-                          ? "？"
-                          : ""
-                      }
+                      {isRevealNow ? (showDamageResult ? (mindRes?.text ?? "　") : "　") : ""}
                     </p>
 
                     {/* 吹き出し表示 */}
@@ -1563,7 +2273,7 @@ export default function QuizModePage() {
             </div>
           </div>
 
-          {isGameOver && allPlayersDead && (
+          {showGameSet && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
               <motion.div
                 initial={{ scale: 0.5, opacity: 0 }}
@@ -1575,97 +2285,156 @@ export default function QuizModePage() {
               </motion.div>
             </div>
           )}
-  
-          {phase === "result" && !allPlayersDead &&(
-            <>
-              <div>
-                {showAnswerText && (
-                  <p className="mt-2 text-lg md:text-xl text-gray-700">
-                    正解は、、
-                  </p>
-                )}
 
-                {showAnswer && (
-                  <p className="mt-2 text-xl md:text-3xl text-gray-900 font-extrabold">
-                   「 {questions[currentIndex].quiz.displayAnswer}」
-                  </p>
-                )}
+          {mindPhase === "repIntro" && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+              <div className="bg-white rounded-2xl p-6 w-[360px] text-center border-4 border-black">
+                {/* <p className="text-2xl text-blue-500 font-extrabold">
+                  {mindRoundIndex + 1}回目！
+                </p> */}
+                {/* <p className="text-xl font-bold mt-2">
+                  {`${mindRoundIndex + 1}周目 / 全${mindTotalRounds}周`}
+                </p> */}
+                <p className="text-xl font-bold mt-2">
+                  {`${cycleNow}周目 / 全${totalCycles}周（${turnInCycle}/${playerCountNow}人目）`}
+                </p>
 
-                {showExplanation && (
-                  <p className="mt-2 mb-3 text-md md:text-xl text-gray-600">
-                    {questions[currentIndex].quiz.answerExplanation}
-                  </p>
-                )}
+                <p className="text-lg md:text-xl text-pink-500 mt-3 font-extrabold">
+                  {repName}さんの心理を当てよう！
+                </p>
               </div>
-            </>
+            </div>
           )}
 
-          {questions[currentIndex]?.quiz && (
-            <>
-              {(showCorrectMessage || incorrectMessage) ? (
-                <>
-                  {showCorrectMessage && <p className="text-4xl md:text-6xl font-extrabold mb-2 text-green-600 drop-shadow-lg animate-bounce animate-pulse">◎正解！🎉</p>}
-                  {incorrectMessage && <p className="text-3xl md:text-4xl font-extrabold mb-2 text-red-500 drop-shadow-lg animate-shake whitespace-pre-line">{incorrectMessage}</p>}
+          {mindPhase === "repQuestion" && mySocketId === mindRepId && (
+            <div className="mt-4">
+              <p className="text-2xl font-extrabold">{repName}さん、今の心理を選んでね！</p>
+              <p className="text-md text-gray-600 mt-1">
+                制限時間： {repSecondsLeft} 秒
+              </p>
 
-                  {questions[currentIndex].quiz.answerExplanation && (
-                    <div className="mt-5 md:mt-15 text-center">
-                      <p className="text-xl md:text-2xl font-bold text-blue-600">解説📖</p>
-                      <p className="mt-1 md:mt-2 text-lg md:text-xl text-gray-700">{questions[currentIndex].quiz.answerExplanation}</p>
-                    </div>
-                  )}
+              <QuizQuestion3
+                quiz={questions[mindQuestionIndex].quiz}
+                userAnswer={repUserAnswer}
+                setUserAnswer={setRepUserAnswer}
+              />
 
-                  {questions[currentIndex].quiz.trivia && (
-                    <div className="mt-5 md:mt-10 text-center">
-                      <p className="text-xl md:text-2xl font-bold text-yellow-600">知って得する豆知識💡</p>
-                      <p className="mt-1 md:mt-2 text-lg md:text-xl text-gray-700">{questions[currentIndex].quiz.trivia}</p>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <>
-                  {phase !== "result" && (
-                    <p
-                      className={`text-xl md:text-3xl text-center mb-2 font-bold ${
-                        questionTimeLeft <= 5 ? "text-red-500 animate-pulse" : "text-gray-700"
-                      }`}
-                      >
-                      回答タイマー：{questionTimeLeft}秒
-                    </p>
-                  )}
-                
-                  {phase !== "result" && (
-                    <QuizQuestion3
-                      quiz={questions[currentIndex].quiz}
-                      userAnswer={userAnswer}
-                      setUserAnswer={setUserAnswer}
-                    />
-                  )}
-                  {/* 回答フェーズ */}
-                  {phase === "question" && (
-                    <>
-                      {canAnswer ? (
-                        <button
-                          onClick={checkAnswer}
-                          className="px-6 py-3 bg-blue-500 text-white rounded-lg font-extrabold"
-                        >
-                          回答
-                        </button>
-                      ) : (
-                        <p className="mt-4 text-xl md:text-2xl font-bold text-gray-600 animate-pulse">
-                          他の人の回答を待っています…
-                        </p>
-                      )}
-                    </>
-                  )}
-                </>
+              <button
+                disabled={repUserAnswer == null}
+                onClick={() => {
+                  const q = questions[mindQuestionIndex]?.quiz;
+                  if (!q?.choices || repUserAnswer == null) return;
+
+                  const idx = q.choices.findIndex(c => String(c) === String(repUserAnswer));
+                  const safeIdx = idx >= 0 ? idx : (Number(repUserAnswer) ?? -1);
+                  if (safeIdx < 0 || safeIdx > 2) return;
+
+                  const choice = (["A","B","C"] as const)[safeIdx];
+
+                  // 代表の回答を送信（isCorrectは今まで通り）
+                  const selected = q.choices[safeIdx];
+                  const isCorrect = String(selected) === String(q.answer);
+
+                  socket?.emit("mind_rep_answer", { roomCode, choice, isCorrect });
+
+                  // UIリセット
+                  setRepChoice(choice);
+                }}
+                className="mt-3 px-6 py-3 bg-blue-500 text-white rounded-xl font-bold text-xl disabled:bg-gray-400"
+              >
+                決定！
+              </button>
+            </div>
+          )}
+
+          {mindPhase === "guess" && mySocketId !== mindRepId && (
+            <div className="mt-4">
+              <p className="text-2xl font-extrabold">{repName}さんの答えを予想してね！</p>
+              <p className="text-md text-gray-600 mt-1">
+                制限時間： {guessSecondsLeft} 秒
+              </p>
+
+              <QuizQuestion3
+                quiz={questions[mindQuestionIndex].quiz}
+                userAnswer={guessUserAnswer}
+                setUserAnswer={setGuessUserAnswer}
+              />
+
+              <button
+                disabled={guessUserAnswer == null}
+                onClick={() => {
+                  const q = questions[mindQuestionIndex]?.quiz;
+                  if (!q?.choices || guessUserAnswer == null) return;
+
+                  // guessUserAnswer が「選択肢の値」なら idx を探す
+                  const idx = q.choices.findIndex(c => String(c) === String(guessUserAnswer));
+                  // もし QuizQuestion3 が index(0/1/2)を返す仕様なら、ここを idx = guessUserAnswer に変えてOK
+                  const safeIdx = idx >= 0 ? idx : (Number(guessUserAnswer) ?? -1);
+
+                  if (safeIdx < 0 || safeIdx > 2) return;
+
+                  const choice = (["A", "B", "C"] as const)[safeIdx];
+                  setGuessChoice(choice);
+                  socket?.emit("mind_guess_answer", { roomCode, choice });
+
+                  // 送ったら待機フェーズへ
+                  setMindPhase("revealWait"); // ★後述のフェーズ
+                }}
+                className="mt-3 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xl disabled:bg-gray-400"
+              >
+                決定！
+              </button>
+            </div>
+          )}
+
+          {mindPhase === "repQuestion" && mySocketId !== mindRepId && (
+            <div className="mt-6 p-4 bg-white rounded-xl border-2 border-black max-w-md mx-auto">
+              <p className="text-2xl font-extrabold">
+                <span className="text-blue-600">{repName}さん</span>
+                が心理を選んでるよ…
+              </p>
+              <p className="text-lg text-gray-600 mt-2">ちょっと待ってね🙏</p>
+              <p className="text-md text-gray-600 mt-1">
+                制限時間： {repSecondsLeft} 秒
+              </p>
+            </div>
+          )}
+
+          {mindPhase === "guess" && mySocketId === mindRepId && (
+            <div className="mt-6 p-4 bg-white rounded-xl border-2 border-black max-w-md mx-auto">
+              <p className="text-2xl font-extrabold">みんなが回答してるよ…</p>
+              <p className="text-lg text-gray-600 mt-2">ちょっと待ってね🙏</p>
+              <p className="text-md text-gray-600 mt-1">
+                制限時間： {guessSecondsLeft} 秒
+              </p>
+            </div>
+          )}
+
+          {mindPhase === "revealWait" && (
+            <div className="mt-6 p-4 bg-white rounded-xl border-2 border-black max-w-md mx-auto">
+              <p className="text-2xl font-extrabold">みんなの回答を待ってるよ…</p>
+              <p className="text-lg text-gray-600 mt-2">ちょっと待ってね🙏</p>
+            </div>
+          )}
+  
+          {mindPhase === "revealAnswer" && (
+            <div className="mt-3">
+              <p className="mt-2 text-lg md:text-xl text-gray-700">
+                {repName}さんが選んだのは、、
+              </p>
+
+              {showRevealText && (
+                <p className="mt-2 text-xl md:text-3xl text-gray-900 font-extrabold">
+                  「 {repPickedText} 」
+                </p>
               )}
-            </>
+            </div>
           )}
 
           <div className="flex flex-col items-center mt-2 md:mt-3">
             {/* メッセージボタン */}
             <div className="text-center border border-black p-1 rounded-xl bg-white">
-              {["よろしく👋", "やったね✌", "たぶんこれ！👉", "ありがとう❤"].map((msg) => (
+              {["よろしく👋", "やったね✌", "どれだろう🤔", "ありがとう❤"].map((msg) => (
                 <button
                   key={msg}
                   onClick={() => sendMessage(msg)}
@@ -1686,8 +2455,6 @@ export default function QuizModePage() {
           rematchRequested={rematchRequested}
           handleNewMatch={handleNewMatch}
           handleRematch={handleRematch}
-          myRankState={myRankState}
-          eliminationGroups={lastPlayerElimination?.eliminationGroups ?? []}
           players={players}
           predictedWinner={predictedWinner}
           hasPredicted={hasPredicted}
@@ -1701,6 +2468,8 @@ export default function QuizModePage() {
           onGoLogin={() => router.push("/user/login")}
           isCodeMatch={mode === "code"}
           onShareX={handleShareX}
+          myRankNow={myFinalRank}
+          finalRanks={finalRanks}
         />
       )}
     </div>

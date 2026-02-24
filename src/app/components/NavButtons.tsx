@@ -286,7 +286,7 @@ export default function NavButtons() {
                         </button>
                       </Link>
 
-                      {/* <Link
+                      <Link
                         href="/quiz-mind"
                         onClick={() => handleNavClick("/quiz-mind")}
                       >
@@ -297,7 +297,7 @@ export default function NavButtons() {
                         >
                           心理当てバトル
                         </button>
-                      </Link> */}
+                      </Link>
                     </div>
                   </div>
 

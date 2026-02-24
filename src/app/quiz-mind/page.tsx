@@ -134,7 +134,7 @@ export default function QuizMasterPage() {
             >
               知り合いと遊ぶ
             </button>
-            <p className="text-sm text-gray-100 mt-1">※2人〜8人でプレイできます。</p>
+            <p className="text-sm text-white mt-1">※2人〜8人でプレイできます。</p>
           </div>
         </div>
 

@@ -506,7 +506,7 @@ export default async function HomePage({
             </p>
           </div>
           {/* 心理当てバトル */}
-          {/* <div className="text-center max-w-[260px]">
+          <div className="text-center max-w-[260px]">
             <Link href="/quiz-mind" className="w-full md:w-auto flex justify-center">
               <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-pink-600 via-rose-500 to-amber-200 text-white hover:scale-110 transition-all">
                 心理当てバトル🧠
@@ -518,7 +518,7 @@ export default async function HomePage({
             <p className="text-sm md:text-base text-gray-700 leading-tight">
               いちばん心を読めるのは誰だ！？
             </p>
-          </div> */}
+          </div>
         </div>
       </div>
 
