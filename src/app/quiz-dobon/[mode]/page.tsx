@@ -15,6 +15,57 @@ import { useResultModal } from "../../components/ResultModalProvider";
 import { getWeekStartJST } from "@/lib/week";
 import { getMonthStartJST } from "@/lib/month";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
+import RecommendedMultiplayerGames from "@/app/components/RecommendedMultiplayerGames";
+
+type RankRow = { socketId: string; name: string; score: number; rank: number };
+
+const buildRanksFromEliminationGroups = (
+  players: Player[],
+  eliminationGroups: string[][]
+): RankRow[] => {
+  const totalGroups = eliminationGroups.length;
+  const ranks: RankRow[] = [];
+
+  eliminationGroups.forEach((group, index) => {
+    const rank = totalGroups - index; // 勝者グループが1位
+    group.forEach((socketId) => {
+      const p = players.find(pp => pp.socketId === socketId);
+      ranks.push({
+        socketId,
+        name: p?.playerName ?? "???",
+        score: 0,
+        rank,
+      });
+    });
+  });
+
+  return ranks.sort((a, b) => a.rank - b.rank);
+};
+
+const BONUS_TABLE: Record<number, number[]> = {
+  2: [150],
+  3: [200, 100],
+  4: [250, 125, 60],
+  5: [350, 175, 85, 40],
+  6: [450, 225, 110, 55, 25],
+  7: [600, 300, 150, 75, 35, 15],
+  8: [750, 375, 180, 90, 45, 20, 10],
+};
+
+const calcPlacementBonus = (playerCount: number, ranksNow: RankRow[], mySocketId: string) => {
+  const table = BONUS_TABLE[playerCount] ?? [];
+  const me = ranksNow.find(r => r.socketId === mySocketId);
+  if (!me) return 0;
+
+  // 最下位はボーナス無し
+  if (me.rank >= playerCount) return 0;
+
+  // 同順位が1人だけのときのみ
+  const sameRankCount = ranksNow.filter(r => r.rank === me.rank).length;
+  if (sameRankCount !== 1) return 0;
+
+  return table[me.rank - 1] ?? 0;
+};
 
 type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
 
@@ -114,7 +165,7 @@ const QuizResult = ({
 
   return (
     <motion.div
-      className={`text-center mt-6 md:p-8 rounded-lg`}
+      className={`text-center mt-6 rounded-lg`}
     >
 
       {/* ============================
@@ -226,7 +277,8 @@ const QuizResult = ({
               <div className="mb-2 text-lg md:text-xl text-gray-700 font-bold">
                 <p className="text-blue-500">正解数ポイント：{basePoints}P（{correctCount}問 × 10P）</p>
                 {firstBonusPoints > 0 && (
-                  <p className="text-yellow-500">1位ボーナス✨：{firstBonusPoints}P</p>
+                  // <p className="text-yellow-500">1位ボーナス✨：{firstBonusPoints}P</p>
+                  <p className="text-yellow-500">順位ボーナス✨：{firstBonusPoints}P</p>
                 )}
 
                 {predictionBonusPoints > 0 && (
@@ -359,6 +411,15 @@ const QuizResult = ({
           </div>
         )
       )}
+      {showButton && (
+        <>
+          <RecommendedMultiplayerGames
+            title="次はみんなでどれ行く？🎮"
+            count={4}
+            excludeHref="/quiz-dobon"
+          />
+        </>
+      )}
     </motion.div>
   );
 };
@@ -471,7 +532,8 @@ export default function QuizModePage() {
       // ログ（＋）※失敗しても致命的ではない
       const reasonPoint =
         `サバイバルクイズ獲得: 正解${payload.correctCount}問=${payload.basePoints}P` +
-        (payload.firstBonusPoints ? ` / 1位ボーナス${payload.firstBonusPoints}P` : "") +
+        // (payload.firstBonusPoints ? ` / 1位ボーナス${payload.firstBonusPoints}P` : "") +
+        (payload.firstBonusPoints ? ` / 順位ボーナス${payload.firstBonusPoints}P` : "") +
         (payload.predictionBonusPoints ? ` / 予想的中${payload.predictionBonusPoints}P` : "");
 
       if (payload.points > 0) {
@@ -1063,34 +1125,95 @@ export default function QuizModePage() {
     };
   }, [gameSetScheduled]);
   
+  // useEffect(() => {
+  //   if (!finished) return;
+
+  //   // 勝者情報がまだ来てないなら待つ（1位ボーナス/予想的中に必要）
+  //   if (!lastPlayerElimination) return;
+
+  //   const base = correctCount * 10;
+
+  //   const groups = lastPlayerElimination.eliminationGroups ?? [];
+  //   const winnerGroup = groups.length ? groups[groups.length - 1] : [];
+  //   const isSoloWinner = winnerGroup.length === 1;
+  //   const amIWinner = winnerGroup.includes(mySocketId);
+
+  //   const firstBonus = (isSoloWinner && amIWinner) ? 300 : 0;
+
+  //   const predictionHit =
+  //     hasPredicted &&
+  //     predictedWinner &&
+  //     winnerGroup.includes(predictedWinner);
+
+  //   const predictionBonus = predictionHit ? 100 : 0;
+
+  //   const earned = base + firstBonus + predictionBonus;
+  //   const expEarned = correctCount * 20;
+
+  //   setBasePoints(base);
+  //   setFirstBonusPoints(firstBonus);
+  //   setPredictionBonusPoints(predictionBonus);
+  //   setEarnedPoints(earned);
+  //   setEarnedExp(expEarned);
+
+  //   if (earned <= 0 && expEarned <= 0) {
+  //     setAwardStatus("idle");
+  //     clearPendingAward();
+  //     return;
+  //   }
+
+  //   const payload: PendingAward = {
+  //     points: earned,
+  //     exp: expEarned,
+  //     correctCount,
+  //     basePoints: base,
+  //     firstBonusPoints: firstBonus,
+  //     predictionBonusPoints: predictionBonus,
+  //     predictedWinner,
+  //     hasPredicted,
+  //     winnerSocketIds: winnerGroup,
+  //     createdAt: Date.now(),
+  //   };
+
+  //   // ✅ まずpending保存（ここが重要）
+  //   savePendingAward(payload);
+
+  //   // ✅ その場で付与を試す（ログイン揺れでも ensureAuthedUserId が面倒みる）
+  //   awardPointsAndExp(payload);
+  // }, [finished,correctCount,lastPlayerElimination,mySocketId,hasPredicted,predictedWinner,]);
+
   useEffect(() => {
     if (!finished) return;
-
-    // 勝者情報がまだ来てないなら待つ（1位ボーナス/予想的中に必要）
     if (!lastPlayerElimination) return;
+
+    // 参加人数（players.length が確定している前提）
+    // const playerCount = players.length;
+    const playerCount = maxPlayers;
+
+    // eliminationGroups → RankRow[]
+    const ranks = buildRanksFromEliminationGroups(players, lastPlayerElimination.eliminationGroups ?? []);
+
+    // 自分の順位が取れなければ待つ
+    const myRank = ranks.find(r => r.socketId === mySocketId)?.rank ?? null;
+    if (!mySocketId || !myRank) return;
 
     const base = correctCount * 10;
 
-    const groups = lastPlayerElimination.eliminationGroups ?? [];
-    const winnerGroup = groups.length ? groups[groups.length - 1] : [];
-    const isSoloWinner = winnerGroup.length === 1;
-    const amIWinner = winnerGroup.includes(mySocketId);
+    // ✅ 最下位以外ボーナス（同順位ボーナス無し）
+    const placementBonus = calcPlacementBonus(playerCount, ranks, mySocketId);
 
-    const firstBonus = (isSoloWinner && amIWinner) ? 300 : 0;
-
+    // 予想ボーナスがあるなら残す（あなたのサバイバルには予想がある）
+    const winnerGroup = (lastPlayerElimination.eliminationGroups ?? []).slice(-1)[0] ?? [];
     const predictionHit =
-      hasPredicted &&
-      predictedWinner &&
-      winnerGroup.includes(predictedWinner);
-
+      hasPredicted && predictedWinner && winnerGroup.includes(predictedWinner);
     const predictionBonus = predictionHit ? 100 : 0;
 
-    const earned = base + firstBonus + predictionBonus;
+    const earned = base + placementBonus + predictionBonus;
     const expEarned = correctCount * 20;
 
     setBasePoints(base);
-    setFirstBonusPoints(firstBonus);
-    setPredictionBonusPoints(predictionBonus);
+    setFirstBonusPoints(placementBonus);       // ← UIのボーナス欄に出す
+    setPredictionBonusPoints(predictionBonus); // ← 予想あるなら
     setEarnedPoints(earned);
     setEarnedExp(expEarned);
 
@@ -1105,7 +1228,7 @@ export default function QuizModePage() {
       exp: expEarned,
       correctCount,
       basePoints: base,
-      firstBonusPoints: firstBonus,
+      firstBonusPoints: placementBonus,         // ← ここが「順位ボーナス」になる
       predictionBonusPoints: predictionBonus,
       predictedWinner,
       hasPredicted,
@@ -1113,12 +1236,9 @@ export default function QuizModePage() {
       createdAt: Date.now(),
     };
 
-    // ✅ まずpending保存（ここが重要）
     savePendingAward(payload);
-
-    // ✅ その場で付与を試す（ログイン揺れでも ensureAuthedUserId が面倒みる）
     awardPointsAndExp(payload);
-  }, [finished,correctCount,lastPlayerElimination,mySocketId,hasPredicted,predictedWinner,]);
+  }, [finished, correctCount, lastPlayerElimination, mySocketId, hasPredicted, predictedWinner, players]);
 
   useEffect(() => {
     const pending = loadPendingAward();
@@ -1719,7 +1839,7 @@ export default function QuizModePage() {
 
                           {!hasPredicted && (
                             <>
-                              <p className="text-lg md:text-xl font-bold text-green-500">
+                              <p className="text-lg md:text-xl font-bold text-blue-500">
                                 1位を予想しよう！
                               </p>
 
@@ -1759,7 +1879,7 @@ export default function QuizModePage() {
                           )}
 
                           {hasPredicted && (
-                            <p className="text-lg md:text-xl font-bold text-gray-600">
+                            <p className="text-lg md:text-xl font-bold text-blue-500">
                               予想を受け付けました！
                             </p>
                           )}

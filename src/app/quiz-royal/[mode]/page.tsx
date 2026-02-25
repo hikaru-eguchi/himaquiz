@@ -14,6 +14,7 @@ import { useResultModal } from "../../components/ResultModalProvider";
 import { getWeekStartJST } from "@/lib/week";
 import { getMonthStartJST } from "@/lib/month";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
+import RecommendedMultiplayerGames from "@/app/components/RecommendedMultiplayerGames";
 
 type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
 
@@ -118,7 +119,7 @@ const QuizResult = ({
   
   return (
     <motion.div
-      className={`text-center mt-6 md:p-8 rounded-lg`}
+      className={`text-center mt-6 rounded-lg`}
     >
 
       {/* ============================
@@ -356,6 +357,15 @@ const QuizResult = ({
             )}
           </div>
         )
+      )}
+      {showButton && (
+        <>
+          <RecommendedMultiplayerGames
+            title="次はみんなでどれ行く？🎮"
+            count={4}
+            excludeHref="/quiz-royal"
+          />
+        </>
       )}
     </motion.div>
   );

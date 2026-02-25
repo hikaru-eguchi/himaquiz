@@ -12,6 +12,7 @@ import { useResultModal } from "../../components/ResultModalProvider";
 import { getWeekStartJST } from "@/lib/week";
 import { getMonthStartJST } from "@/lib/month";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
+import RecommendedSoloGames from "@/app/components/RecommendedSoloGames";
 
 interface ArticleData {
   id: string;
@@ -173,23 +174,31 @@ const QuizResult = ({
       )}
 
       {showButton && (
-        <div className="flex flex-col md:flex-row justify-center items-center gap-4 mt-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <button
-              className="px-6 py-3 bg-black text-white border border-black rounded-lg font-bold text-xl hover:opacity-80 cursor-pointer"
-              onClick={onShareX}
-            >
-              Xで結果をシェア
-            </button>
+        <>
+          <div className="flex flex-col md:flex-row justify-center items-center gap-4 mt-6">
+            <div className="flex flex-col md:flex-row gap-4">
+              <button
+                className="px-6 py-3 bg-black text-white border border-black rounded-lg font-bold text-xl hover:opacity-80 cursor-pointer"
+                onClick={onShareX}
+              >
+                Xで結果をシェア
+              </button>
 
-            <button
-              className="px-6 py-3 bg-blue-500 text-white rounded-lg font-bold text-xl hover:bg-blue-600 cursor-pointer"
-              onClick={onRetry}
-            >
-              もう一回挑戦する
-            </button>
+              <button
+                className="px-6 py-3 bg-blue-500 text-white rounded-lg font-bold text-xl hover:bg-blue-600 cursor-pointer"
+                onClick={onRetry}
+              >
+                もう一回挑戦する
+              </button>
+            </div>
           </div>
-        </div>
+
+          <RecommendedSoloGames
+            title="次はどれで遊ぶ？🎮"
+            count={4}
+            excludeHref="/quiz-luck" // 今のページを出したくないなら
+          />
+        </>
       )}
     </div>
   );

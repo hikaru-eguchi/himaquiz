@@ -13,6 +13,7 @@ import { getMonthStartJST } from "@/lib/month";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
 import StreakRankingTop10 from "../../components/StreakRankingTop10";
 import { motion } from "framer-motion";
+import RecommendedSoloGames from "@/app/components/RecommendedSoloGames";
 
 interface ArticleData {
   id: string;
@@ -257,6 +258,12 @@ const QuizResult = ({
           ) : (
             <StreakRankingTop10 rows={streakTop10} />
           )}
+
+          <RecommendedSoloGames
+            title="次はどれで遊ぶ？🎮"
+            count={4}
+            excludeHref="/streak-challenge" // 今のページを出したくないなら
+          />
         </div>
       )}
     </div>

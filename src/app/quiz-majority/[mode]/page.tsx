@@ -11,6 +11,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useSupabaseUser } from "../../../hooks/useSupabaseUser";
 import { useResultModal } from "../../components/ResultModalProvider";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
+import RecommendedMultiplayerGames from "@/app/components/RecommendedMultiplayerGames";
 
 type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
 
@@ -119,7 +120,7 @@ const QuizResult = ({
 
   return (
     <motion.div
-      className={`text-center mt-6 p-8 rounded-lg`}
+      className={`text-center mt-6 rounded-lg`}
     >
 
       {/* ============================
@@ -273,6 +274,15 @@ const QuizResult = ({
             )}
           </div>
         )
+      )}
+      {showButton && (
+        <>
+          <RecommendedMultiplayerGames
+            title="次はみんなでどれ行く？🎮"
+            count={4}
+            excludeHref="/quiz-majority"
+          />
+        </>
       )}
     </motion.div>
   );

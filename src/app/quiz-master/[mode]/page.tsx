@@ -15,6 +15,7 @@ import { getMonthStartJST } from "@/lib/month";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
 import type { Rarity } from "@/types/gacha";
 import DungeonRankingTop10 from "../../components/DungeonRankingTop10";
+import RecommendedSoloGames from "@/app/components/RecommendedSoloGames";
 
 // =====================
 // ポイント仕様（ステージ到達に応じて付与）
@@ -674,6 +675,12 @@ const QuizResult = ({
   
             <DungeonRankingTop10 rows={rankingRows} />
           </div>
+
+          <RecommendedSoloGames
+            title="次はどれで遊ぶ？🎮"
+            count={4}
+            excludeHref="/quiz-master" // 今のページを出したくないなら
+          />
         </>
       )}
     </div>

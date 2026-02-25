@@ -15,6 +15,7 @@ import { getWeekStartJST } from "@/lib/week";
 import { getMonthStartJST } from "@/lib/month";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
 import { useCallback } from "react";
+import RecommendedMultiplayerGames from "@/app/components/RecommendedMultiplayerGames";
 
 type RankRow = { socketId: string; name: string; score: number; rank: number };
 
@@ -155,7 +156,7 @@ const QuizResult = ({
 
   return (
     <motion.div
-      className={`text-center mt-6 md:p-8 rounded-lg`}
+      className={`text-center mt-6 rounded-lg`}
     >
 
       {/* ============================
@@ -375,6 +376,15 @@ const QuizResult = ({
             )}
           </div>
         )
+      )}
+      {showButton && (
+        <>
+          <RecommendedMultiplayerGames
+            title="次はみんなでどれ行く？🎮"
+            count={4}
+            excludeHref="/quiz-mind"
+          />
+        </>
       )}
     </motion.div>
   );

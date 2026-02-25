@@ -15,6 +15,7 @@ import { getMonthStartJST } from "@/lib/month";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
 import type { Rarity } from "@/types/gacha";
 import confetti from "canvas-confetti";
+import RecommendedSoloGames from "@/app/components/RecommendedSoloGames";
 
 const fireConfetti = () => {
   // 低負荷設定：粒数少なめ・短時間・一回だけ
@@ -312,22 +313,30 @@ const QuizResult = ({
       )}
 
       {showButton && (
-        <div className="flex flex-col md:flex-row justify-center items-center gap-4 mt-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <button
-              className="px-6 py-3 bg-black text-white border border-black rounded-lg font-bold text-xl hover:opacity-80 cursor-pointer"
-              onClick={onShareX}
-            >
-              Xで結果をシェア
-            </button>
-            <button
-              className="px-6 py-3 bg-yellow-500 text-white rounded-lg font-bold text-xl hover:bg-yellow-600 cursor-pointer"
-              onClick={onRetry}
-            >
-              もういっかいやる
-            </button>
+        <>
+          <div className="flex flex-col md:flex-row justify-center items-center gap-4 mt-6">
+            <div className="flex flex-col md:flex-row gap-4">
+              <button
+                className="px-6 py-3 bg-black text-white border border-black rounded-lg font-bold text-xl hover:opacity-80 cursor-pointer"
+                onClick={onShareX}
+              >
+                Xで結果をシェア
+              </button>
+              <button
+                className="px-6 py-3 bg-yellow-500 text-white rounded-lg font-bold text-xl hover:bg-yellow-600 cursor-pointer"
+                onClick={onRetry}
+              >
+                もういっかいやる
+              </button>
+            </div>
           </div>
-        </div>
+
+          <RecommendedSoloGames
+            title="次はどれで遊ぶ？🎮"
+            count={4}
+            excludeHref="/quiz-kimagure" // 今のページを出したくないなら
+          />
+        </>
       )}
     </div>
   );
