@@ -214,7 +214,7 @@ const QuizResult = ({
                 Xで結果をシェア
               </button>
               <button
-                className="px-6 py-3 bg-green-500 text-white rounded-lg font-bold text-xl hover:bg-green-600 cursor-pointer animate-pulse"
+                className="px-6 py-3 bg-green-500 text-white rounded-lg font-bold text-xl hover:bg-green-600 cursor-pointer"
                 onClick={() => onRetry()}
                 >
                 もう一回挑戦する

@@ -329,7 +329,7 @@ const QuizResult = ({
                       transition-all duration-300
                     "
                   >
-                    もう一回挑戦する！
+                    もう一回挑戦する
                   </button>
                 )}
 

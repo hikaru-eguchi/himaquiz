@@ -296,7 +296,7 @@ const QuizResult = ({
                       transition-all duration-300
                     "
                   >
-                    もう一回対戦する！
+                    もう一回対戦する
                   </button>
                 )}
 
@@ -621,7 +621,7 @@ export default function QuizModePage() {
   const submitAnswer = questionPhase?.submitAnswer ?? (() => {});
   const [showStartButton, setShowStartButton] = useState(false);
 
-  const MAX_QUESTIONS = 10;
+  const MAX_QUESTIONS = 5;
   const QUESTION_LIMIT = 2; // 3秒固定（サーバ側も3にする）
   const QUESTION_MS = QUESTION_LIMIT * 1000;
 

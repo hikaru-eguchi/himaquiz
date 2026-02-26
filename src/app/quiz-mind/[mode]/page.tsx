@@ -64,6 +64,12 @@ const calcPlacementBonus = (playerCount: number, ranksNow: RankRow[], mySocketId
   return table[me.rank - 1] ?? 0;
 };
 
+const ellipsizeName = (name: string, maxLen = 4) => {
+  const chars = Array.from(name);
+  if (chars.length <= maxLen) return name;
+  return chars.slice(0, maxLen).join("") + "...";
+};
+
 type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
 
 interface ArticleData {
@@ -345,7 +351,7 @@ const QuizResult = ({
                       transition-all duration-300
                     "
                   >
-                    もう一回対戦する！
+                    もう一回対戦する
                   </button>
                 )}
 
@@ -1746,6 +1752,8 @@ export default function QuizModePage() {
   const repName =
     players.find((p) => p.socketId === mindRepId)?.playerName ?? "主役";
 
+  const repNameDisplay = useMemo(() => ellipsizeName(repName, 4), [repName]);
+
   const repPickedText = useMemo(() => {
     if (!revealedRepAnswer) return "";
     const q = questions[mindQuestionIndex]?.quiz;
@@ -2144,7 +2152,7 @@ export default function QuizModePage() {
               <div className="mb-4 flex justify-center">
                 <div
                   className="
-                    inline-flex items-center gap-2
+                    inline-flex items-center
                     px-4 py-2
                     rounded-full
                     bg-white/90
@@ -2166,11 +2174,9 @@ export default function QuizModePage() {
                       className="
                         w-8 h-8 md:w-9 md:h-9
                         rounded-full
-                        border-2 border-yellow-500
                         bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500
                         text-white
                         flex items-center justify-center
-                        shadow
                       "
                     >
                       👑
@@ -2188,7 +2194,7 @@ export default function QuizModePage() {
                       drop-shadow-sm
                     "
                   >
-                    {repName}さん
+                    {repNameDisplay}さん
                   </span>
                 </div>
               </div>
@@ -2310,7 +2316,7 @@ export default function QuizModePage() {
                 </p>
 
                 <p className="text-lg md:text-xl text-pink-500 mt-3 font-extrabold">
-                  {repName}さんの心理を当てよう！
+                  {repNameDisplay}さんの心理を当てよう！
                 </p>
               </div>
             </div>

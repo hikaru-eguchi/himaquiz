@@ -315,7 +315,7 @@ const QuizResult = ({
                       transition-all duration-300
                     "
                   >
-                    もう一回対戦する！
+                    もう一回対戦する
                   </button>
                 )}
 

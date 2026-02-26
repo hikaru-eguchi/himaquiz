@@ -1326,7 +1326,7 @@ export default function QuizModePage() {
                         "mt-3 px-6 py-3 rounded-full font-extrabold text-lg md:text-xl text-yellow-600",
                         "border-4 border-yellow-400",
                         "bg-gradient-to-b from-yellow-100 via-white to-yellow-200",
-                        "shadow-[0_10px_0_0_rgba(0,0,0,0.12)] hover:opacity-90 active:translate-y-[2px] active:shadow-[0_8px_0_0_rgba(0,0,0,0.12)]",
+                        "hover:opacity-90 active:translate-y-[2px]",
                         "transition",
                       ].join(" ")}
                       onClick={() => setOpenSearchConfirm(true)}
