@@ -23,6 +23,8 @@ export default function HeaderMenu() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [avatarPreviewOpen, setAvatarPreviewOpen] = useState(false);
 
+  const [infoOpen, setInfoOpen] = useState(false);
+
   const resetHeader = () => {
     setUser(null);
     setUsername(null);
@@ -170,7 +172,7 @@ export default function HeaderMenu() {
 
       {/* メニュー本体 */}
       {open && (
-        <div className="fixed top-0 right-0 w-68 h-full bg-white shadow-xl z-40 p-5 flex flex-col space-y-4 text-lg">
+        <div className="fixed top-0 right-0 w-68 h-full bg-white shadow-xl z-40 p-5 flex flex-col space-y-3 text-lg">
           <button className="self-end text-2xl" onClick={() => setOpen(false)}>
             ✕
           </button>
@@ -179,7 +181,7 @@ export default function HeaderMenu() {
           {user && (
             <div className="pb-3 border-b-3 border-black">
               <div className="rounded-[22px] overflow-hidden bg-white">
-                <div className="p-4 grid place-items-center gap-3">
+                <div className="p-4 grid place-items-center gap-2 md:gap-3">
                   {/* アバター（オーラ＋バッジ） */}
                   <button
                     type="button"
@@ -187,7 +189,7 @@ export default function HeaderMenu() {
                     className="relative"
                   >
                     <div className="absolute -inset-3 rounded-full blur-[6px] opacity-70 bg-gradient-to-br from-yellow-200 via-pink-200 to-sky-200" />
-                    <div className="relative w-28 h-28 md:w-30 md:h-30 rounded-full bg-white overflow-hidden border-3 border-black shadow-[0_5px_0_rgba(0,0,0,1)]">
+                    <div className="relative w-25 h-25 md:w-30 md:h-30 rounded-full bg-white overflow-hidden border-3 border-black shadow-[0_5px_0_rgba(0,0,0,1)]">
                       <img
                         src={avatarUrl}
                         alt="icon"
@@ -300,6 +302,15 @@ export default function HeaderMenu() {
               </button>
             </>
           )}
+
+          {/* ===== その他（共通） ===== */}
+          <button
+            type="button"
+            onClick={() => setInfoOpen(true)}
+            className="bg-gray-500 text-white py-2 px-4 rounded text-center hover:bg-gray-600 cursor-pointer"
+          >
+            その他 ⚙️
+          </button>
         </div>
       )}
 
@@ -400,6 +411,87 @@ export default function HeaderMenu() {
                 className="mt-4 md:mt-8 w-full rounded-4xl bg-white py-3 text-lg md:text-xl font-extrabold hover:scale-[1.01] transition"
               >
                 変更する
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+        {infoOpen && (
+          <motion.div
+            className="fixed inset-0 z-[65] flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setInfoOpen(false)}
+          >
+            {/* 背景 */}
+            <div className="absolute inset-0 bg-black/60" />
+
+            {/* 本体 */}
+            <motion.div
+              className="relative w-[92%] max-w-sm rounded-2xl bg-white p-5 shadow-2xl"
+              initial={{ scale: 0.95, y: 10, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.97, y: 10, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 380, damping: 28 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* タイトル（中央） */}
+              <div className="text-center">
+                <p className="text-xl md:text-2xl font-extrabold text-gray-800">その他</p>
+              </div>
+
+              {/* ×ボタン */}
+              <button
+                type="button"
+                onClick={() => setInfoOpen(false)}
+                className="absolute top-3 right-3 text-xl text-gray-500 hover:text-black"
+              >
+                ✕
+              </button>
+
+              {/* メニュー */}
+              <div className="mt-5 grid gap-2">
+                <Link
+                  href="/profile"
+                  onClick={() => {
+                    setInfoOpen(false);
+                    setOpen(false);
+                  }}
+                  className="rounded-xl bg-gray-100 py-3 text-center font-bold text-gray-800 hover:bg-gray-200 transition"
+                >
+                  サイト紹介
+                </Link>
+
+                <Link
+                  href="/privacy"
+                  onClick={() => {
+                    setInfoOpen(false);
+                    setOpen(false);
+                  }}
+                  className="rounded-xl bg-gray-100 py-3 text-center font-bold text-gray-800 hover:bg-gray-200 transition"
+                >
+                  プライバシー
+                </Link>
+
+                <Link
+                  href="/contact"
+                  onClick={() => {
+                    setInfoOpen(false);
+                    setOpen(false);
+                  }}
+                  className="rounded-xl bg-gray-100 py-3 text-center font-bold text-gray-800 hover:bg-gray-200 transition"
+                >
+                  お問い合わせ
+                </Link>
+              </div>
+
+              {/* 閉じる */}
+              <button
+                type="button"
+                onClick={() => setInfoOpen(false)}
+                className="mt-4 w-full rounded-xl bg-black text-white py-2 font-bold hover:opacity-90 transition"
+              >
+                閉じる
               </button>
             </motion.div>
           </motion.div>

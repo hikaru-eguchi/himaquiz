@@ -313,9 +313,9 @@ export default async function HomePage({
         </p>
         <div className="flex justify-center gap-3 md:gap-5 flex-wrap">
           {/* 連続正解チャレンジ */}
-          <div className="text-center max-w-[260px] md:mb-0">
+          <div className="text-center max-w-[280px] md:mb-0">
             <Link href="/streak-challenge" className="w-full md:w-auto flex justify-center">
-              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-red-500 to-orange-400 text-white hover:scale-110 transition-all">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-red-500 to-orange-400 text-white hover:scale-110 transition-all">
                 連続正解チャレンジ✅
               </button>
             </Link>
@@ -327,9 +327,9 @@ export default async function HomePage({
             </p>
           </div>
           {/* 制限時間クイズ */}
-          <div className="text-center max-w-[260px]">
+          <div className="text-center max-w-[280px]">
             <Link href="/time-quiz" className="w-full md:w-auto flex justify-center">
-              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-[#ec0101] via-[#FF6B6B] to-[#fb9797] text-white hover:scale-110 transition-all">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-[#ec0101] via-[#FF6B6B] to-[#fb9797] text-white hover:scale-110 transition-all">
                 制限時間クイズ⏱
               </button>
             </Link>
@@ -341,9 +341,9 @@ export default async function HomePage({
             </p>
           </div>
           {/* クイズダンジョン */}
-          <div className="text-center max-w-[260px]">
+          <div className="text-center max-w-[280px]">
             <Link href="/quiz-master" className="w-full md:w-auto flex justify-center">
-              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-purple-500 to-indigo-400 text-white hover:scale-110 transition-all">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-purple-500 to-indigo-400 text-white hover:scale-110 transition-all">
                 クイズダンジョン⚔
               </button>
             </Link>
@@ -355,9 +355,9 @@ export default async function HomePage({
             </p>
           </div>
           {/* きまぐれクイズ */}
-          <div className="text-center max-w-[260px]">
+          <div className="text-center max-w-[280px]">
             <Link href="/quiz-kimagure" className="w-full md:w-auto flex justify-center">
-              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-yellow-400 to-yellow-300  text-white hover:scale-110 transition-all">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-yellow-400 to-yellow-300  text-white hover:scale-110 transition-all">
                 きまぐれクイズ☁
               </button>
             </Link>
@@ -369,9 +369,9 @@ export default async function HomePage({
             </p>
           </div>
           {/* バッジハンター */}
-          {/* <div className="text-center max-w-[260px]">
+          {/* <div className="text-center max-w-[280px]">
             <Link href="/quiz-badge" className="w-full md:w-auto flex justify-center">
-              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-yellow-400 via-amber-600 to-slate-800 text-white hover:scale-110 transition-all">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-yellow-400 via-amber-600 to-slate-800 text-white hover:scale-110 transition-all">
                 バッジハンター⭐
               </button>
             </Link>
@@ -383,9 +383,9 @@ export default async function HomePage({
             </p>
           </div> */}
           {/* 運命のクイズ */}
-          <div className="text-center max-w-[260px]">
+          <div className="text-center max-w-[280px]">
             <Link href="/quiz-luck" className="w-full md:w-auto flex justify-center">
-              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-emerald-500 to-teal-400 text-white hover:scale-110 transition-all">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-emerald-500 to-teal-400 text-white hover:scale-110 transition-all">
                 運命のクイズ🎲
               </button>
             </Link>
@@ -408,9 +408,9 @@ export default async function HomePage({
         </p>
         <div className="flex justify-center gap-3 md:gap-5 flex-wrap">
           {/* 対戦クイズ */}
-          <div className="text-center max-w-[260px]">
+          <div className="text-center max-w-[280px]">
             <Link href="/quiz-battle" className="w-full md:w-auto flex justify-center">
-              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-pink-500 via-yellow-400 to-green-500 text-white hover:scale-110 transition-all">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-pink-500 via-yellow-400 to-green-500 text-white hover:scale-110 transition-all">
                 クイズバトル🔥
               </button>
             </Link>
@@ -422,9 +422,9 @@ export default async function HomePage({
             </p>
           </div>
           {/* クイズロワイヤル */}
-          <div className="text-center max-w-[260px]">
+          <div className="text-center max-w-[280px]">
             <Link href="/quiz-royal" className="w-full md:w-auto flex justify-center">
-              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-yellow-500 via-amber-300 to-blue-500 text-white hover:scale-110 transition-all">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-yellow-500 via-amber-300 to-blue-500 text-white hover:scale-110 transition-all">
                 クイズロワイヤル👑
               </button>
             </Link>
@@ -436,9 +436,9 @@ export default async function HomePage({
             </p>
           </div>
           {/* 協力ダンジョン */}
-          <div className="text-center max-w-[260px]">
+          <div className="text-center max-w-[280px]">
             <Link href="/quiz-adventure" className="w-full md:w-auto flex justify-center">
-              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-indigo-500 via-blue-500 to-sky-500 text-white hover:scale-110 transition-all">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-indigo-500 via-blue-500 to-sky-500 text-white hover:scale-110 transition-all">
                 協力ダンジョン⚔
               </button>
             </Link>
@@ -450,9 +450,9 @@ export default async function HomePage({
             </p>
           </div>
           {/* サバイバルクイズ */}
-          <div className="text-center max-w-[260px]">
+          <div className="text-center max-w-[280px]">
             <Link href="/quiz-dobon" className="w-full md:w-auto flex justify-center">
-              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-emerald-700 via-amber-800 to-stone-800 text-white hover:scale-110 transition-all">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-emerald-700 via-amber-800 to-stone-800 text-white hover:scale-110 transition-all">
                 サバイバルクイズ💀
               </button>
             </Link>
@@ -464,9 +464,9 @@ export default async function HomePage({
             </p>
           </div>
           {/* 多数決クイズ */}
-          <div className="text-center max-w-[260px]">
+          <div className="text-center max-w-[280px]">
             <Link href="/quiz-majority" className="w-full md:w-auto flex justify-center">
-              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-red-500 to-blue-500 text-white hover:scale-110 transition-all">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-red-500 to-blue-500 text-white hover:scale-110 transition-all">
                 多数決クイズ🗳️
               </button>
             </Link>
@@ -478,9 +478,9 @@ export default async function HomePage({
             </p>
           </div>
           {/* 瞬発力クイズ */}
-          <div className="text-center max-w-[260px]">
+          <div className="text-center max-w-[280px]">
             <Link href="/quiz-quick" className="w-full md:w-auto flex justify-center">
-              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-cyan-400 via-sky-300 to-sky-200 text-white hover:scale-110 transition-all">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-cyan-400 via-sky-300 to-sky-200 text-white hover:scale-110 transition-all">
                 瞬発力クイズ⚡
               </button>
             </Link>
@@ -492,9 +492,9 @@ export default async function HomePage({
             </p>
           </div>
           {/* サイコロクイズ */}
-          <div className="text-center max-w-[260px]">
+          <div className="text-center max-w-[280px]">
             <Link href="/quiz-dice" className="w-full md:w-auto flex justify-center">
-              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-green-700 via-emerald-500 to-amber-300 text-white hover:scale-110 transition-all">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-green-700 via-emerald-500 to-amber-300 text-white hover:scale-110 transition-all">
                 サイコロクイズ🎲
               </button>
             </Link>
@@ -506,9 +506,9 @@ export default async function HomePage({
             </p>
           </div>
           {/* 心理当てバトル */}
-          <div className="text-center max-w-[260px]">
+          <div className="text-center max-w-[280px]">
             <Link href="/quiz-mind" className="w-full md:w-auto flex justify-center">
-              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-pink-600 via-rose-500 to-amber-200 text-white hover:scale-110 transition-all">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-pink-600 via-rose-500 to-amber-200 text-white hover:scale-110 transition-all">
                 心理当てバトル🧠
               </button>
             </Link>
@@ -531,9 +531,9 @@ export default async function HomePage({
         </p>
         <div className="flex justify-center gap-3 md:gap-5 flex-wrap">
           {/* ひまQガチャ */}
-          <div className="text-center max-w-[260px]">
+          <div className="text-center max-w-[280px]">
             <Link href="/quiz-gacha" className="w-full md:w-auto flex justify-center">
-              <button className="w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-br from-red-400 via-sky-400 to-green-400 text-white hover:scale-110 transition-all">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-br from-red-400 via-sky-400 to-green-400 text-white hover:scale-110 transition-all">
                 ひまQガチャ🎰
               </button>
             </Link>

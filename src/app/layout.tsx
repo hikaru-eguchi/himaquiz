@@ -109,11 +109,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {/* ===== FOOTER ===== */}
           <footer className="mt-12 py-10 bg-pink-300 shadow-inner">
             <div className="container mx-auto px-6 text-center text-gray-700">
-              <div className="flex justify-center flex-wrap gap-8 mb-8 text-base font-medium">
+              {/* <div className="flex justify-center flex-wrap gap-8 mb-8 text-base font-medium">
                 <Link href="/profile" className="hover:scale-110 transition-transform">サイト紹介</Link>
                 <Link href="/privacy" className="hover:scale-110 transition-transform">プライバシー</Link>
                 <Link href="/contact" className="hover:scale-110 transition-transform">お問い合わせ</Link>
-              </div>
+              </div> */}
               <p className="text-xs text-gray-600">本サイトのクイズ内容は、正確性を保証するものではありません。</p>
               <p className="text-xs text-gray-600 mb-5">一部に誤りや解釈の違いが含まれる可能性がありますので、あらかじめご了承ください。</p>
               <p className="text-xs text-gray-600">&copy; 2025 ひまQ. All Rights Reserved.</p>
