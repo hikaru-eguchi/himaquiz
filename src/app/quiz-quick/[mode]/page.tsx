@@ -622,7 +622,8 @@ export default function QuizModePage() {
   const [showStartButton, setShowStartButton] = useState(false);
 
   const MAX_QUESTIONS = 5;
-  const QUESTION_LIMIT = 2; // 3秒固定（サーバ側も3にする）
+  // const QUESTION_LIMIT = 2; // 3秒固定（サーバ側も3にする）
+  const QUESTION_LIMIT = 1.6;
   const QUESTION_MS = QUESTION_LIMIT * 1000;
 
   // ✅ クライアント強制ゲージ
@@ -718,6 +719,12 @@ export default function QuizModePage() {
   const handleRetry = () => {
     setCorrectCount(0);
     setFinished(false);
+    setShowAnswer(false);
+    setShowAnswerText(false);
+    setShowExplanation(false);
+    setShowCorrectCount(false);
+    setShowDamageResult(false);
+    setShowGameSetOverlay(false);
     setWrongStreak(0);
     wrongStreakRef.current = 0;
     setScoreChanges({});
@@ -740,6 +747,7 @@ export default function QuizModePage() {
     scoredQuestionRef.current = "";
     gameSetOnceRef.current = false;
     resetGameSetAndResultTimers();
+    resultAnimKeyRef.current = "";
   };
 
   const handleNewMatch = () => {
@@ -776,6 +784,13 @@ export default function QuizModePage() {
     setCorrectByPlayer({});
     scoredQuestionRef.current = "";
     gameSetOnceRef.current = false;
+    setShowAnswer(false);
+    setShowAnswerText(false);
+    setShowExplanation(false);
+    setShowCorrectCount(false);
+    setShowDamageResult(false);
+    setShowGameSetOverlay(false);
+    resultAnimKeyRef.current = "";
 
     setReadyToStart(false);
 
@@ -1086,6 +1101,7 @@ export default function QuizModePage() {
   }, [allPlayersReady, bothReady]);
 
   useEffect(() => {
+    if (finished) return;
     if (phase !== "result") return;
     if (currentIndex !== MAX_QUESTIONS - 1) return;
     if (!showExplanation) return;
@@ -1107,7 +1123,7 @@ export default function QuizModePage() {
     }, 4000);
 
     // ★ここでcleanupしない（依存変化で殺されるのを防ぐ）
-  }, [phase, currentIndex, showExplanation, MAX_QUESTIONS]);
+  }, [finished, phase, currentIndex, showExplanation, MAX_QUESTIONS]);
 
   useEffect(() => {
     return () => {
