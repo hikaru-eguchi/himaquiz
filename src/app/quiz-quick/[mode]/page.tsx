@@ -606,7 +606,8 @@ export default function QuizModePage() {
 
   const questionPhase = useQuestionPhase(
     socket,
-    roomCode
+    roomCode,
+    battleKey
   );
 
   const groups = lastPlayerElimination?.eliminationGroups ?? [];
@@ -623,7 +624,7 @@ export default function QuizModePage() {
 
   const MAX_QUESTIONS = 5;
   // const QUESTION_LIMIT = 2; // 3秒固定（サーバ側も3にする）
-  const QUESTION_LIMIT = 1.6;
+  const QUESTION_LIMIT = 1.5;
   const QUESTION_MS = QUESTION_LIMIT * 1000;
 
   // ✅ クライアント強制ゲージ
@@ -1287,6 +1288,7 @@ export default function QuizModePage() {
     if (!socket) return;
 
     socket.on("both_rematch_ready", () => {
+      setBattleKey(prev => prev + 1);
       // 再戦開始
       handleRetry();      // 問題やスコアをリセット
       setRematchRequested(false);
@@ -1302,8 +1304,6 @@ export default function QuizModePage() {
     // 再戦開始通知
     socket.on("rematch_start", ({ startAt }) => {
         console.log("[rematch_start]再戦開始通知", startAt);
-
-        setBattleKey(prev => prev + 1);
 
         setPredictedWinner(null);
         setHasPredicted(false);

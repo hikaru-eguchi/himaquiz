@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Socket } from "socket.io-client";
 
 type AnswerResult = {
@@ -22,7 +22,8 @@ type UseQuestionPhaseReturn = {
 
 export function useQuestionPhase(
   socket: Socket | null,
-  roomCode: string
+  roomCode: string,
+  resetKey?: number
 ): UseQuestionPhaseReturn {
   const [phase, setPhase] = useState<"question" | "result">("question");
   const [deadline, setDeadline] = useState<number | null>(null);
@@ -34,11 +35,27 @@ export function useQuestionPhase(
   const [damage, setDamage] = useState(0);
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  const ignoreAnswerResultRef = useRef(false);
+
   const canAnswer =
     phase === "question" &&
     deadline !== null &&
     Date.now() < deadline &&
     !hasAnswered;
+
+  useEffect(() => {
+    ignoreAnswerResultRef.current = true; // ★次のquestion_startまで answer_result を捨てる
+
+    // ついでに内部状態もクリア（より安全）
+    setPhase("question");
+    setDeadline(null);
+    setQuestionTimeLeft(0);
+    setTimeLeft(0);
+    setHasAnswered(false);
+    setResults([]);
+    setDamage(0);
+    setCurrentIndex(0);
+  }, [resetKey]);
 
   /* =========================
      question_start（サーバー主導）
@@ -47,6 +64,7 @@ export function useQuestionPhase(
     if (!socket) return;
 
     const onQuestionStart = ({ deadline, index, }: { deadline: number; index: number; }) => {
+      ignoreAnswerResultRef.current = false;
       setPhase("question");
       setDeadline(deadline);
       const initial = Math.max(
@@ -95,6 +113,7 @@ export function useQuestionPhase(
         results: AnswerResult[];
         damage: number;
     }) => {
+        if (ignoreAnswerResultRef.current) return;
         setPhase("result");
         setResults(results);
         setDamage(damage);
