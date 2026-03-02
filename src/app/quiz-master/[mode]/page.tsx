@@ -1081,7 +1081,7 @@ export default function QuizModePage() {
         .from("user_public_profiles")
         .select("user_id, username, avatar_url, best_stage")
         .order("best_stage", { ascending: false })
-        .limit(10);
+        .limit(100);
 
       if (error) {
         console.error("fetch dungeon ranking error:", error);
@@ -2095,7 +2095,7 @@ export default function QuizModePage() {
             .from("user_public_profiles")
             .select("user_id, username, avatar_url, best_stage")
             .order("best_stage", { ascending: false })
-            .limit(10);
+            .limit(100);
 
           if (!error) setRankingRows((data ?? []) as any);
         };

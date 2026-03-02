@@ -9,7 +9,8 @@ export async function GET() {
     .select("user_id, username, avatar_url, best_streak")
     .order("best_streak", { ascending: false })
     .order("updated_at", { ascending: true }) // 同率時の安定化（あれば）
-    .limit(10);
+    // .limit(10);
+    .limit(100);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

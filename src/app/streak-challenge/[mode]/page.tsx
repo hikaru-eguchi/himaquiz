@@ -12,6 +12,7 @@ import { getWeekStartJST } from "@/lib/week";
 import { getMonthStartJST } from "@/lib/month";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
 import StreakRankingTop10 from "../../components/StreakRankingTop10";
+import { Top3CommentModal } from "../../components/Top3CommentModal";
 import { motion } from "framer-motion";
 import RecommendedSoloGames from "@/app/components/RecommendedSoloGames";
 
@@ -113,6 +114,8 @@ const QuizResult = ({
   onRetry,
   streakTop10,
   rankLoading,
+  topPercent,
+  percentLoading,
 }: {
   correctCount: number;
   earnedPoints: number;
@@ -126,6 +129,8 @@ const QuizResult = ({
   onRetry: () => void;
   streakTop10: { user_id: string; username: string | null; avatar_url: string | null; best_streak: number }[];
   rankLoading: boolean;
+  topPercent: number | null;
+  percentLoading: boolean;
 }) => {
   const [showScore, setShowScore] = useState(false);
   const [showText, setShowText] = useState(false);
@@ -138,6 +143,11 @@ const QuizResult = ({
       if (correctCount >= r.threshold) comment = r.comment;
     });
     return comment;
+  };
+
+  const formatTopPercent = (p: number) => {
+    // 上位1%未満だけ小数1桁、それ以外は整数
+    return p < 1 ? p.toFixed(1) : String(Math.round(p));
   };
 
   useEffect(() => {
@@ -155,6 +165,25 @@ const QuizResult = ({
     <div className="text-center mt-6">
       {showScore && (
         <p className="text-3xl md:text-5xl mb-4 md:mb-6">連続正解数： {correctCount}問</p>
+      )}
+
+      {showRank && (
+        <div className="mx-auto max-w-[520px] my-10">
+          {percentLoading ? (
+            <p className="text-lg md:text-xl font-extrabold text-gray-700">
+              上位％を計算中...
+            </p>
+          ) : topPercent !== null ? (
+            <p className="text-xl md:text-3xl font-extrabold text-gray-900">
+              あなたのスコアは{" "}
+              <span className="text-red-600">上位{formatTopPercent(topPercent)}%</span>！
+            </p>
+          ) : (
+            <p className="text-sm md:text-base font-bold text-gray-600">
+              ※上位％の取得に失敗しました
+            </p>
+          )}
+        </div>
       )}
 
       {showText && (
@@ -309,6 +338,35 @@ export default function QuizModePage() {
   const finishedRef = useRef(finished);
   const showCorrectRef = useRef(showCorrectMessage);
   const userIdRef = useRef<string | null>(null);
+
+  const [myTopComment, setMyTopComment] = useState<string>(""); // 自分のコメント
+  const [showTop3Modal, setShowTop3Modal] = useState(false);
+  const [top3Rank, setTop3Rank] = useState<number | null>(null);
+
+  // ✅ スキップ（最大3回）
+  const MAX_SKIP = 3;
+  const [skipLeft, setSkipLeft] = useState(MAX_SKIP);
+  const [openSkipModal, setOpenSkipModal] = useState(false);
+
+  const [topPercent, setTopPercent] = useState<number | null>(null);
+  const [percentLoading, setPercentLoading] = useState(false);
+
+  const ANON_KEY = "himaq_anon_id_v1";
+
+  const getAnonId = () => {
+    try {
+      const existing = localStorage.getItem(ANON_KEY);
+      if (existing) return existing;
+      const id =
+        typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.random()}`;
+      localStorage.setItem(ANON_KEY, id);
+      return id;
+    } catch {
+      return null;
+    }
+  };
 
   // ============================
   // ✅ 取りこぼし防止：pending key
@@ -471,6 +529,8 @@ export default function QuizModePage() {
     setShowCorrectMessage(false);
     setFlashMilestone(null);
     setIncorrectMessage(null);
+    setSkipLeft(MAX_SKIP);
+    setOpenSkipModal(false);
 
     // タイマーリセット（各問30秒）
     setTimeLeft(30);
@@ -638,6 +698,37 @@ export default function QuizModePage() {
     }
   };
 
+  const doSkip = () => {
+    if (skipLeft <= 0) return;
+
+    // 残り回数を減らす
+    setSkipLeft((v) => Math.max(0, v - 1));
+
+    // 表示状態リセット
+    setShowCorrectMessage(false);
+    setIncorrectMessage(null);
+    setUserAnswer(null);
+
+    // ✅ 「第◯問」はそのまま、問題だけ差し替える
+    setQuestions((prev) => {
+      if (prev.length <= 1) return prev;
+
+      // 現在の問題を避けてランダムに1つ選ぶ（なるべく被りを防ぐ）
+      const pool = prev.filter((_, i) => i !== currentIndex);
+      const pick = pool[Math.floor(Math.random() * pool.length)];
+
+      // currentIndex の位置だけ差し替え
+      const next = [...prev];
+      next[currentIndex] = pick;
+      return next;
+    });
+
+    // ✅ タイマーはリセットしたいなら戻す（不要なら消してOK）
+    setTimeLeft(30);
+
+    setOpenSkipModal(false);
+  };
+
   const finishQuiz = () => {
     setFinished(true);
   };
@@ -742,6 +833,83 @@ export default function QuizModePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [finished]);
 
+  useEffect(() => {
+    if (!finished) return;
+
+    (async () => {
+      setPercentLoading(true);
+      try {
+        const anonId = getAnonId();
+
+        // ログインしてればuserId送る（未ログインはnull）
+        const { data: u } = await supabase.auth.getUser();
+        const userId = u?.user?.id ?? null;
+
+        const res = await fetch("/api/streak/record", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            streak: correctCount,
+            anonId,
+            userId,
+            mode,
+            genre,
+            level,
+          }),
+        });
+
+        const json = await res.json();
+        if (!res.ok) throw new Error(json?.error ?? "failed");
+
+        setTopPercent(typeof json.topPercent === "number" ? json.topPercent : null);
+      } catch (e) {
+        console.error("record top percent error:", e);
+        setTopPercent(null);
+      } finally {
+        setPercentLoading(false);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [finished]);
+
+  useEffect(() => {
+    if (!finished) return;
+    if (!user?.id) return;
+    if (rankLoading) return;
+    if (streakTop10.length === 0) return;
+
+    // 自分がTOP3か？
+    const idx = streakTop10.slice(0, 3).findIndex((r) => r.user_id === user.id);
+    if (idx === -1) return;
+
+    const rank = idx + 1;
+    setTop3Rank(rank);
+
+    // 何度も出ないように（同じ記録で連打を防ぐ）
+    const key = `top3_modal_seen_v1:${user.id}:${correctCount}`;
+    if (localStorage.getItem(key) === "1") return;
+
+    (async () => {
+      // コメントを取りに行く（未設定なら null/空のはず）
+      const { data, error } = await supabase
+        .from("streak_top_comments")
+        .select("comment")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (error) return;
+
+      const comment = data?.comment ?? "";
+      setMyTopComment(comment);
+
+      // 未設定ならモーダル表示
+      if (!comment) {
+        setShowTop3Modal(true);
+        localStorage.setItem(key, "1");
+      }
+    })();
+  }, [finished, user?.id, streakTop10, rankLoading, correctCount, supabase]);
+
   // ★ 連続正解チャレンジ：成績(最高連続正解数)＆称号を保存 → 新記録/新称号ならモーダル
   useEffect(() => {
     if (!finished) return;
@@ -843,6 +1011,43 @@ export default function QuizModePage() {
           </motion.div>
         </div>
       )}
+      {/* ✅ スキップ確認モーダル */}
+      {openSkipModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="w-[92%] max-w-[520px] rounded-2xl bg-white border-4 border-black p-6 text-center shadow-xl">
+            <p className="text-2xl md:text-3xl font-extrabold text-gray-900">
+              この問題をスキップする？
+            </p>
+
+            <p className="mt-3 text-lg md:text-xl font-bold text-gray-700">
+              スキップできるのはあと <span className="text-red-600">{skipLeft}</span> 回です。
+            </p>
+
+            <div className="mt-6 flex items-center justify-center gap-3">
+              {/* 左：やめる */}
+              <button
+                className="px-6 py-3 rounded-lg font-extrabold text-lg bg-gray-200 hover:bg-gray-300 border-2 border-gray-400"
+                onClick={() => setOpenSkipModal(false)}
+              >
+                やめる
+              </button>
+
+              {/* 右：スキップ */}
+              <button
+                className={[
+                  "px-6 py-3 rounded-lg font-extrabold text-lg border-2 border-black",
+                  "bg-yellow-400 hover:bg-yellow-500",
+                  skipLeft <= 0 ? "opacity-40 cursor-not-allowed" : "",
+                ].join(" ")}
+                onClick={doSkip}
+                disabled={skipLeft <= 0}
+              >
+                スキップ
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {!finished ? (
         <>
           <h2 className="text-5xl md:text-6xl font-extrabold mb-6 text-yellow-500 drop-shadow-lg">
@@ -926,13 +1131,29 @@ export default function QuizModePage() {
                         userAnswer={userAnswer}
                         setUserAnswer={setUserAnswer}
                       />
-                      <button
-                        className="px-5 py-3 md:px-6 md:py-3 bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-4 hover:bg-blue-600 cursor-pointer font-extrabold"
-                        onClick={checkAnswer}
-                        disabled={userAnswer === null}
-                      >
-                        回答
-                      </button>
+                      <div className="mt-4 flex flex-col items-center gap-3">
+                        <button
+                          className="px-5 py-3 md:px-6 md:py-3 bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-4 hover:bg-blue-600 cursor-pointer font-extrabold"
+                          onClick={checkAnswer}
+                          disabled={userAnswer === null}
+                        >
+                          回答
+                        </button>
+
+                        {/* ✅ スキップボタン（回答の下） */}
+                        <button
+                          className={[
+                            "mt-3 px-5 py-2 md:px-6 md:py-2 rounded font-extrabold",
+                            "text-gray-800 bg-white border-2 border-gray-500",
+                            "hover:bg-gray-100 cursor-pointer",
+                            skipLeft <= 0 ? "opacity-40 cursor-not-allowed" : "",
+                          ].join(" ")}
+                          onClick={() => setOpenSkipModal(true)}
+                          disabled={skipLeft <= 0}
+                        >
+                          この問題をスキップする
+                        </button>
+                      </div>
                     </>
                   )}
                 </>
@@ -947,20 +1168,39 @@ export default function QuizModePage() {
           )}
         </>
       ) : (
-        <QuizResult
-          correctCount={correctCount}
-          earnedPoints={earnedPoints}
-          earnedExp={earnedExp}
-          isLoggedIn={!!user}
-          awardStatus={awardStatus}
-          getTitle={getTitle}
-          titles={titles}
-          onGoLogin={() => router.push("/user/login")}
-          onShareX={handleShareX}
-          onRetry={resetGame}
-          streakTop10={streakTop10}
-          rankLoading={rankLoading}
-        />
+        <>
+          <QuizResult
+            correctCount={correctCount}
+            earnedPoints={earnedPoints}
+            earnedExp={earnedExp}
+            isLoggedIn={!!user}
+            awardStatus={awardStatus}
+            getTitle={getTitle}
+            titles={titles}
+            onGoLogin={() => router.push("/user/login")}
+            onShareX={handleShareX}
+            onRetry={resetGame}
+            streakTop10={streakTop10}
+            rankLoading={rankLoading}
+            topPercent={topPercent}
+            percentLoading={percentLoading}
+          />
+
+          {user?.id && top3Rank && (
+            <Top3CommentModal
+              open={showTop3Modal}
+              rank={top3Rank}
+              initialValue={myTopComment}
+              userId={user.id}
+              onClose={() => setShowTop3Modal(false)}
+              onSaved={(c) => {
+                setMyTopComment(c);
+                // ついでにランキング表示も最新化したいなら
+                window.dispatchEvent(new Event("ranking:updated"));
+              }}
+            />
+          )}
+        </>
       )}
     </div>
   );

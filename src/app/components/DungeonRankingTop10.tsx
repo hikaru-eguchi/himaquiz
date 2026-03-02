@@ -8,7 +8,8 @@ type Row = {
 };
 
 export default function DungeonRankingTop10({ rows }: { rows: Row[] }) {
-  const list = rows.slice(0, 10);
+  // const list = rows.slice(0, 10);
+  const list = rows.slice(0, 20);
 
   const formatValue = (u: Row) => `${u.best_stage ?? 0}階`;
 
@@ -21,11 +22,11 @@ export default function DungeonRankingTop10({ rows }: { rows: Row[] }) {
               みんなのクイズダンジョン🏰
             </p>
             <p className="text-xl md:text-2xl font-black text-gray-900 mt-1">
-              最高到達ステージ TOP10🏆
+              最高到達ステージ TOP20🏆
             </p>
           </div>
 
-          <div className="mt-4 space-y-2">
+          <div className="mt-4 space-y-2 max-h-[600px] overflow-y-auto pr-1">
             {list.map((u, idx) => {
               const rank = idx + 1;
               const medal =
@@ -37,7 +38,7 @@ export default function DungeonRankingTop10({ rows }: { rows: Row[] }) {
                   className={`
                     w-full text-left flex items-center justify-between
                     bg-white border-2 rounded-xl px-3 py-2
-                    ${rank <= 3 ? "border-yellow-400 bg-yellow-50/50" : "border-gray-400"}
+                    ${rank <= 10 ? "border-yellow-400 bg-yellow-50/50" : "border-gray-300"}
                   `}
                 >
                   <div className="flex items-center gap-1 md:gap-4 min-w-0">
