@@ -1143,15 +1143,24 @@ export default function QuizModePage() {
                         {/* ✅ スキップボタン（回答の下） */}
                         <button
                           className={[
-                            "mt-3 px-5 py-2 md:px-6 md:py-2 rounded font-extrabold",
-                            "text-gray-800 bg-white border-2 border-gray-500",
-                            "hover:bg-gray-100 cursor-pointer",
-                            skipLeft <= 0 ? "opacity-40 cursor-not-allowed" : "",
+                            "mt-3 px-6 py-3 rounded-2xl font-extrabold text-lg md:text-xl",
+                            "border-4 border-black",
+                            "bg-gradient-to-r from-yellow-300 via-amber-200 to-yellow-100",
+                            "shadow-[0_10px_0_0_rgba(0,0,0,0.18)]",
+                            "hover:brightness-105 active:translate-y-[2px] active:shadow-[0_8px_0_0_rgba(0,0,0,0.18)]",
+                            "transition",
+                            "flex items-center justify-center gap-2",
+                            skipLeft <= 0 ? "opacity-40 cursor-not-allowed" : "cursor-pointer",
                           ].join(" ")}
                           onClick={() => setOpenSkipModal(true)}
                           disabled={skipLeft <= 0}
                         >
-                          この問題をスキップする
+                          <span className="flex flex-col items-center leading-tight md:flex-row md:items-baseline md:gap-2">
+                            <span className="text-lg md:text-xl">🎫この問題をスキップ</span>
+                            <span className="text-sm md:text-base font-black text-red-600">
+                            （残り {skipLeft}）
+                            </span>
+                          </span>
                         </button>
                       </div>
                     </>
