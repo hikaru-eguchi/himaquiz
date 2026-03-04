@@ -22,6 +22,7 @@ type PublicProfile = {
   avatar_url: string | null;
   level: number | null;
   character_count: number | null;
+  current_title: string | null;
 };
 
 export default function WeeklyRankingListClient({
@@ -56,14 +57,14 @@ export default function WeeklyRankingListClient({
 
     const { data, error } = await supabase
       .from("user_public_profiles")
-      .select("user_id, username, avatar_url, level, character_count")
+      .select("user_id, username, avatar_url, level, character_count, current_title")
       .eq("user_id", userId)
       .single();
 
     setLoading(false);
 
     if (error) {
-      setSelected({ user_id: userId, username: null, avatar_url: null, level: null, character_count: null, });
+      setSelected({ user_id: userId, username: null, avatar_url: null, level: null, character_count: null, current_title: null,});
       return;
     }
 
@@ -228,7 +229,7 @@ export default function WeeklyRankingListClient({
             <p className="text-sm md:text-base font-black text-gray-700">
               🌟 ユーザーレベル 🌟
             </p>
-            <p className="mt-1 text-3xl md:text-4xl font-extrabold">
+            <p className="mt-1 text-3xl md:text-4xl font-extrabold text-yellow-500">
               {loading ? "..." : `Lv.${selected?.level ?? "--"}`}
             </p>
           </div>
@@ -236,8 +237,16 @@ export default function WeeklyRankingListClient({
           {/* 所持キャラ数カード（ステッカー風） */}
           <div className="w-full rounded-3xl border-3 border-black bg-white p-4 shadow-[0_6px_0_rgba(0,0,0,1)]">
             <p className="text-sm md:text-base font-black text-gray-700">📚 所持キャラ数 📚</p>
-            <p className="mt-1 text-3xl md:text-4xl font-extrabold">
+            <p className="mt-1 text-3xl md:text-4xl font-extrabold text-emerald-500">
               {loading ? "..." : `${selected?.character_count ?? "--"}体`}
+            </p>
+          </div>
+
+          {/* マイ称号カード（ステッカー風） */}
+          <div className="w-full rounded-3xl border-3 border-black bg-white p-4 shadow-[0_6px_0_rgba(0,0,0,1)]">
+            <p className="text-sm md:text-base font-black text-gray-700">🏅 マイ称号 🏅</p>
+            <p className="mt-1 text-2xl md:text-3xl font-extrabold text-purple-500">
+              {loading ? "..." : (selected?.current_title ?? "（未設定）")}
             </p>
           </div>
 

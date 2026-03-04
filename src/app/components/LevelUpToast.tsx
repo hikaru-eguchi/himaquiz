@@ -8,6 +8,12 @@ export function LevelUpToast() {
   const [fromLv, setFromLv] = useState(0);
   const [toLv, setToLv] = useState(0);
 
+  const close = () => {
+    setOpen(false);
+    // ✅ Toastが閉じたことを通知
+    window.dispatchEvent(new Event("levelup:toastClosed"));
+  };
+
   useEffect(() => {
     const handler = (e: Event) => {
       const ce = e as CustomEvent;
@@ -34,11 +40,11 @@ export function LevelUpToast() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={() => setOpen(false)}
+          onClick={close}
         >
           {/* 光る背景 */}
           <motion.div
-            className="absolute w-[500px] h-[500px] rounded-full bg-gradient-to-r from-yellow-400 via-orange-400 to-pink-500 blur-3xl opacity-40"
+            className="absolute w-[500px] h-[500px] rounded-full bg-gradient-to-r from-orange-400 via-orange-500 to-red-500 blur-2xl opacity-40"
             initial={{ scale: 0.6, opacity: 0 }}
             animate={{ scale: 1.1, opacity: 0.6 }}
             exit={{ scale: 0.6, opacity: 0 }}
@@ -59,7 +65,7 @@ export function LevelUpToast() {
           >
             {/* タイトル */}
             <motion.p
-              className="text-4xl md:text-5xl font-black text-yellow-500 drop-shadow"
+              className="text-4xl md:text-5xl font-black text-orange-500 drop-shadow"
               animate={{ scale: [1, 1.2, 1] }}
               transition={{ repeat: Infinity, duration: 1.2 }}
             >
@@ -74,7 +80,7 @@ export function LevelUpToast() {
             >
               Lv.{fromLv} →{" "}
               <motion.span
-                className="text-yellow-500 inline-block"
+                className="text-orange-500 inline-block"
                 animate={{ scale: [1, 1.4, 1] }}
                 transition={{ delay: 0.3, duration: 0.6 }}
               >

@@ -332,6 +332,19 @@ export default function QuizModePage() {
     awardedOnceRef.current = true;
 
     try {
+      let oldLevel: number | null = null;
+      let newLevel: number | null = null;
+
+      // 事前に現在レベルを読んでおく（RPCがold/newを返すなら無駄になるけど安全）
+      try {
+        const { data: before } = await supabase
+          .from("profiles")
+          .select("level")
+          .eq("user_id", uid)
+          .maybeSingle();
+        oldLevel = typeof before?.level === "number" ? before.level : null;
+      } catch {}
+
       const { data, error } = await supabase.rpc("add_points_and_exp", {
         p_user_id: uid,
         p_points: p.points,
@@ -346,8 +359,66 @@ export default function QuizModePage() {
         return;
       }
 
+      const row = Array.isArray(data) ? data[0] : data;
+      const rpcOld = row?.old_level;
+      const rpcNew = row?.new_level;
+
+      if (typeof rpcOld === "number") oldLevel = rpcOld;
+      if (typeof rpcNew === "number") newLevel = rpcNew;
+
+      // 返ってこない場合は後段で “今のレベル” を読み直す
+      if (newLevel == null) {
+        try {
+          const { data: after } = await supabase
+            .from("profiles")
+            .select("level")
+            .eq("user_id", uid)
+            .maybeSingle();
+          newLevel = typeof after?.level === "number" ? after.level : null;
+        } catch {}
+      }
+
       // UI更新イベント
       window.dispatchEvent(new Event("points:updated"));
+
+      if (oldLevel != null && newLevel != null) {
+        window.dispatchEvent(new CustomEvent("profile:updated", { detail: { oldLevel, newLevel } }));
+      }
+
+      if (oldLevel != null && newLevel != null && newLevel > oldLevel) {
+        try {
+          const { data: r, error: rErr } = await supabase.rpc("claim_levelup_rewards", {
+            p_user_id: uid,
+            p_old_level: oldLevel,
+            p_new_level: newLevel,
+          });
+
+          if (rErr) {
+            console.error("claim_levelup_rewards error:", rErr);
+          } else {
+            const rr = Array.isArray(r) ? r[0] : r;
+            const awardedPoints = Number(rr?.awarded_points ?? 0);
+            const awardedTitle = (rr?.awarded_title ?? null) as string | null;
+
+            // 付与があった時だけ “レベルアップ/得点モーダル” を出すトリガー
+            if (awardedPoints > 0 || awardedTitle) {
+              window.dispatchEvent(new Event("points:updated"));
+              window.dispatchEvent(
+                new CustomEvent("levelup:rewarded", {
+                  detail: {
+                    fromLevel: oldLevel,
+                    toLevel: newLevel,
+                    awardedPoints,
+                    awardedTitle,
+                  },
+                })
+              );
+            }
+          }
+        } catch (e) {
+          console.error("levelup reward error:", e);
+        }
+      }
 
       // ログ（失敗しても致命的じゃない運用でOK）
       await supabase.from("user_point_logs").insert({

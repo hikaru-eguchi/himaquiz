@@ -9,10 +9,15 @@ import React, {
 } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
+type ModalPart = {
+  text: string;
+  tone?: "normal" | "accent" | "muted";
+};
+
 type ModalItem =
-  | { type: "record"; title: string; body: string }
-  | { type: "title"; title: string; body: string }
-  | { type: "both"; title: string; body: string };
+  | { type: "record"; title: string; parts: ModalPart[] }
+  | { type: "title"; title: string; parts: ModalPart[] }
+  | { type: "both"; title: string; parts: ModalPart[] };
 
 type Ctx = {
   pushModal: (item: ModalItem) => void;
@@ -97,41 +102,12 @@ export default function ResultModalProvider({ children }: { children: React.Reac
 
             {/* 光るオーラ（お祝い感） */}
             <motion.div
-              className={`absolute w-[520px] h-[520px] rounded-full bg-gradient-to-r ${theme.ring} blur-3xl opacity-50`}
+              className={`absolute w-[520px] h-[520px] rounded-full bg-gradient-to-r ${theme.ring} blur-2xl opacity-40`}
               initial={{ scale: 0.7, opacity: 0 }}
               animate={{ scale: 1.15, opacity: 0.55 }}
               exit={{ scale: 0.7, opacity: 0 }}
               transition={{ duration: 0.35 }}
             />
-
-            {/* キラキラ粒（簡易） */}
-            <motion.div
-              className="absolute inset-0 pointer-events-none"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              {Array.from({ length: 18 }).map((_, i) => (
-                <motion.div
-                  key={i}
-                  className="absolute w-2 h-2 rounded-full bg-white/80"
-                  style={{
-                    left: `${(i * 37) % 100}%`,
-                    top: `${(i * 53) % 100}%`,
-                  }}
-                  animate={{
-                    y: [0, -16, 0],
-                    opacity: [0.2, 0.9, 0.2],
-                    scale: [0.8, 1.3, 0.8],
-                  }}
-                  transition={{
-                    duration: 1.6 + (i % 5) * 0.2,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  }}
-                />
-              ))}
-            </motion.div>
 
             {/* メインカード（弾む） */}
             <motion.div
@@ -157,7 +133,6 @@ export default function ResultModalProvider({ children }: { children: React.Reac
                 animate={{ y: [0, -3, 0] }}
                 transition={{ repeat: Infinity, duration: 1.2 }}
               >
-                <span className="text-xl">{theme.emoji}</span>
                 <span className="font-extrabold">{theme.badge}</span>
               </motion.div>
 
@@ -171,9 +146,22 @@ export default function ResultModalProvider({ children }: { children: React.Reac
               </motion.p>
 
               {/* 本文 */}
-              <p className="mt-3 text-lg md:text-xl text-gray-700 whitespace-pre-line font-bold">
-                {current.body}
-              </p>
+              <div className="mt-3 text-lg md:text-xl whitespace-pre-line font-bold leading-relaxed">
+                {current.parts.map((p, i) => {
+                  const cls =
+                    p.tone === "accent"
+                      ? "text-sky-600 font-extrabold" // ← 青で強調（好きな色に変えてOK）
+                      : p.tone === "muted"
+                      ? "text-gray-500 font-bold text-sm md:text-base"
+                      : "text-gray-700 font-bold";
+
+                  return (
+                    <span key={i} className={cls}>
+                      {p.text}
+                    </span>
+                  );
+                })}
+              </div>
 
               {/* タップ案内 */}
               <p className="mt-5 text-sm text-gray-500">

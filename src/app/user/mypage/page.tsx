@@ -15,6 +15,7 @@ type Profile = {
   avatar_character_id: string | null;
   avatar_url: string | null;
   friend_code: string | null;
+  current_title: string | null;
 };
 
 export default function MyPage() {
@@ -46,7 +47,7 @@ export default function MyPage() {
 
         const { data, error } = await supabase
           .from("profiles")
-          .select("username, user_id, recovery_email, points, level, exp, avatar_character_id, avatar_url, friend_code")
+          .select("username, user_id, recovery_email, points, level, exp, avatar_character_id, avatar_url, friend_code, current_title")
           .eq("id", user.id)
           .single();
 
@@ -221,6 +222,13 @@ export default function MyPage() {
               {gainedThisLevel} / {needThisLevel} 
             </p>
           </div>
+
+          <p>
+            <span className="font-medium text-md md:text-xl">マイ称号：</span>
+            <span className="font-medium text-md md:text-xl text-purple-600">
+              {profile?.current_title ?? "（未設定）"}
+            </span>
+          </p>
 
           <p>
             <span className="font-medium text-md md:text-xl">現在の所持ポイント：</span>

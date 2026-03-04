@@ -844,6 +844,43 @@ export default function QuizModePage() {
         new CustomEvent("profile:updated", { detail: { oldLevel, newLevel } })
       );
 
+      // ✅ レベルアップ特典（Lv×100P + 称号）を“DBで一回だけ”付与
+      if (newLevel > oldLevel) {
+        try {
+          const { data: r, error: rErr } = await supabase.rpc("claim_levelup_rewards", {
+            p_user_id: authedUserId,
+            p_old_level: oldLevel,
+            p_new_level: newLevel,
+          });
+
+          if (rErr) {
+            console.error("claim_levelup_rewards error:", rErr);
+          } else {
+            const row = Array.isArray(r) ? r[0] : r;
+            const awardedPoints = Number(row?.awarded_points ?? 0);
+            const awardedTitle = (row?.awarded_title ?? null) as string | null;
+
+            // 付与があった時だけUI出す
+            if (awardedPoints > 0 || awardedTitle) {
+              window.dispatchEvent(new Event("points:updated"));
+              // 称号表示などがあるなら、profile:updated相当も再通知したい場合は別イベントでもOK
+              window.dispatchEvent(
+                new CustomEvent("levelup:rewarded", {
+                  detail: {
+                    fromLevel: oldLevel,
+                    toLevel: newLevel,
+                    awardedPoints,
+                    awardedTitle,
+                  },
+                })
+              );
+            }
+          }
+        } catch (e) {
+          console.error("levelup reward error:", e);
+        }
+      }
+
       // ログ（＋）※失敗しても致命的ではない
       const reasonPoint =
         `サイコロクイズ獲得: 正解${payload.correctCount}問=${payload.basePoints}P` +

@@ -309,7 +309,7 @@ export default function HeaderMenu() {
             onClick={() => setInfoOpen(true)}
             className="bg-gray-500 text-white py-2 px-4 rounded text-center hover:bg-gray-600 cursor-pointer"
           >
-            その他 ⚙️
+            その他
           </button>
         </div>
       )}

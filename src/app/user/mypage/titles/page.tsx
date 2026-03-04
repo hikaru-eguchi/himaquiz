@@ -12,6 +12,7 @@ type TitleRow = {
 };
 
 const GAME_LABEL: Record<string, { label: string; emoji: string }> = {
+  level: { label: "レベル称号", emoji: "🌟" },
   streak: { label: "連続正解チャレンジ", emoji: "🔥" },
   timed: { label: "制限時間クイズ", emoji: "⏱️" },
   dungeon: { label: "クイズダンジョン", emoji: "🏰" },
@@ -20,7 +21,7 @@ const GAME_LABEL: Record<string, { label: string; emoji: string }> = {
   survival: { label: "サバイバルクイズ", emoji: "🏆" },
 };
 
-const ORDER = ["streak", "timed", "dungeon", "battle", "coop_dungeon", "survival"];
+const ORDER = ["level", "streak", "timed", "dungeon", "battle", "coop_dungeon", "survival"];
 
 function formatDateJP(iso?: string) {
   if (!iso) return "-";
@@ -53,6 +54,7 @@ export default function TitlesPage() {
       const { data, error } = await supabase
         .from("user_titles")
         .select("game,title,unlocked_at")
+        .eq("user_id", user.id)
         .order("unlocked_at", { ascending: false });
 
       if (error) {

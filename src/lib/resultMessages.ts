@@ -1,39 +1,51 @@
 import { gameLabel, recordKindLabel, type GameKey } from "./gameResults";
 import type { SubmitGameResultResponse } from "./gameResults";
 
-export function buildResultModalPayload(game: GameKey, res: SubmitGameResultResponse) {
+export type ModalPart = {
+  text: string;
+  tone?: "normal" | "accent" | "muted";
+};
+
+export type ModalItem =
+  | { type: "record"; title: string; parts: ModalPart[] }
+  | { type: "title"; title: string; parts: ModalPart[] }
+  | { type: "both"; title: string; parts: ModalPart[] };
+
+export function buildResultModalPayload(game: GameKey, res: SubmitGameResultResponse): ModalItem | null {
   const g = gameLabel(game);
 
-  const recordLine =
+  const recordParts: ModalPart[] | null =
     res.is_new_record
-      ? `${g}で「${recordKindLabel(res.record_kind)}：${res.new_record_value}」を達成したよ！\n（最高記録はマイページから確認できます）`
+      ? [
+          { text: `${g}で「`, tone: "normal" },
+          { text: `${recordKindLabel(res.record_kind)}：${res.new_record_value}`, tone: "accent" }, // ←ここが青/強調
+          { text: `」を達成したよ！\n`, tone: "normal" },
+          { text: `（最高記録はマイページから確認できます）`, tone: "muted" },
+        ]
       : null;
 
-  const titleLine =
+  const titleParts: ModalPart[] | null =
     res.is_new_title && res.new_title
-      ? `新しい称号「${res.new_title}」を獲得したよ！\n（取得した称号はマイページから確認できます）`
+      ? [
+          { text: `新しい称号「`, tone: "normal" },
+          { text: `${res.new_title}`, tone: "accent" }, // ←ここが青/強調
+          { text: `」を獲得したよ！\n`, tone: "normal" },
+          { text: `（取得した称号はマイページから確認できます）`, tone: "muted" },
+        ]
       : null;
 
-  if (recordLine && titleLine) {
+  if (recordParts && titleParts) {
     return {
-      type: "both" as const,
+      type: "both",
       title: "おめでとう！🎉",
-      body: `${recordLine}\n\n${titleLine}`,
+      parts: [...recordParts, { text: "\n\n" }, ...titleParts],
     };
   }
-  if (recordLine) {
-    return {
-      type: "record" as const,
-      title: "新記録達成！🎉",
-      body: recordLine,
-    };
+  if (recordParts) {
+    return { type: "record", title: "新記録達成！🎉", parts: recordParts };
   }
-  if (titleLine) {
-    return {
-      type: "title" as const,
-      title: "新称号を獲得！🏆",
-      body: titleLine,
-    };
+  if (titleParts) {
+    return { type: "title", title: "新称号を獲得！🏆", parts: titleParts };
   }
   return null;
 }

@@ -13,6 +13,16 @@ const DEFAULT_ICONS = [
 
 type DefaultIconId = (typeof DEFAULT_ICONS)[number]["id"];
 
+const GAME_LABEL: Record<string, { label: string; emoji: string }> = {
+  level: { label: "レベル称号", emoji: "🌟" },
+  streak: { label: "連続正解チャレンジ", emoji: "🔥" },
+  timed: { label: "制限時間クイズ", emoji: "⏱️" },
+  dungeon: { label: "クイズダンジョン", emoji: "🏰" },
+  battle: { label: "クイズバトル", emoji: "⚔️" },
+  coop_dungeon: { label: "協力ダンジョン", emoji: "🤝" },
+  survival: { label: "サバイバルクイズ", emoji: "🏆" },
+};
+
 export default function ProfileEditPage() {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const { user, loading: userLoading } = useSupabaseUser();
@@ -28,6 +38,9 @@ export default function ProfileEditPage() {
   const [avatarType, setAvatarType] = useState<"initial" | "default" | "owned">("initial");
   const [avatarCharacterId, setAvatarCharacterId] = useState<string | null>(null);
   const [avatarDefaultId, setAvatarDefaultId] = useState<DefaultIconId | null>(null);
+  const [currentTitle, setCurrentTitle] = useState<string>(""); // "" は未設定扱い
+  type OwnedTitle = { game: string; title: string; unlocked_at: string };
+  const [ownedTitles, setOwnedTitles] = useState<OwnedTitle[]>([]);
 
   useEffect(() => {
     if (userLoading) return;
@@ -39,7 +52,7 @@ export default function ProfileEditPage() {
     const fetchProfile = async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("username, user_id, recovery_email, avatar_character_id, avatar_url")
+        .select("username, user_id, recovery_email, avatar_character_id, avatar_url, current_title")
         .eq("id", user.id)
         .single();
 
@@ -48,6 +61,7 @@ export default function ProfileEditPage() {
         setUserId(data.user_id ?? "");
         setOriginalUserId(data.user_id ?? "");
         setRecoveryEmail(data.recovery_email ?? "");
+        setCurrentTitle(data.current_title ?? "");
 
         const savedUrl = (data.avatar_url ?? "/images/初期アイコン.png").startsWith("/")
           ? (data.avatar_url ?? "/images/初期アイコン.png")
@@ -118,7 +132,24 @@ export default function ProfileEditPage() {
       setOwnedChars((chars ?? []) as OwnedChar[]);
     };
 
+    const fetchTitles = async () => {
+      const { data, error } = await supabase
+        .from("user_titles")
+        .select("game,title,unlocked_at")
+        .eq("user_id", user.id)
+        .order("unlocked_at", { ascending: false });
+
+      if (error) {
+        console.warn("fetchTitles error:", error);
+        setOwnedTitles([]);
+        return;
+      }
+
+      setOwnedTitles((data ?? []) as OwnedTitle[]);
+    };
+
     fetchOwned();
+    fetchTitles();
   }, [user, userLoading, supabase]);
 
   const handleSubmit = async (e: FormEvent) => {
@@ -212,6 +243,7 @@ export default function ProfileEditPage() {
           recovery_email: recoveryEmail || null,
           avatar_character_id: nextAvatarCharacterId,
           avatar_url: normalizedAvatarUrl,
+          current_title: currentTitle || null,
         })
         .eq("id", user.id);
 
@@ -252,6 +284,16 @@ export default function ProfileEditPage() {
     }
     return INITIAL;
   }, [avatarType, avatarDefaultId, avatarCharacterId, ownedChars]);
+
+  const uniqueTitleOptions = useMemo(() => {
+    // titleが空やnullっぽいものは除外
+    const titles = ownedTitles
+      .map(t => (t.title ?? "").trim())
+      .filter(Boolean);
+
+    // Setで重複除去（順序は維持される：unlocked_at descの並びを保てる）
+    return Array.from(new Set(titles));
+  }, [ownedTitles]);
   
   if (userLoading || loading) return <p>読み込み中...</p>;
 
@@ -309,6 +351,27 @@ export default function ProfileEditPage() {
           />
         </div>
 
+        <div>
+          <label className="block text-md md:text-xl font-medium">マイ称号</label>
+
+          <select
+            className="border rounded w-full p-2"
+            value={currentTitle}
+            onChange={(e) => setCurrentTitle(e.target.value)}
+          >
+            <option value="">（未設定）</option>
+            {uniqueTitleOptions.map((title) => (
+              <option key={title} value={title}>
+                {title}
+              </option>
+            ))}
+          </select>
+
+          <p className="text-sm md:text-md text-gray-500 mt-1">
+            獲得済みの称号から選べます。
+          </p>
+        </div>
+
         <div className="border rounded p-3">
           <p className="text-md md:text-xl font-medium mb-2">アイコン</p>
 
@@ -359,30 +422,44 @@ export default function ProfileEditPage() {
           {ownedChars.length === 0 ? (
             <p className="text-sm text-gray-600">まだ所持キャラがいません（ガチャでゲットできます）</p>
           ) : (
-            <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
-              {ownedChars.map(ch => {
-                const url = ch.image_url
-                  ? ch.image_url.startsWith("/") ? ch.image_url : `/${ch.image_url}`
-                  : "/images/初期アイコン.png";
+            <div
+              className="
+                max-h-95 md:max-h-95
+                overflow-y-auto
+                pr-1
+                rounded-lg
+                border border-gray-200
+                bg-gray-50/40
+                p-2
+              "
+            >
+              <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
+                {ownedChars.map((ch) => {
+                  const url = ch.image_url
+                    ? ch.image_url.startsWith("/") ? ch.image_url : `/${ch.image_url}`
+                    : "/images/初期アイコン.png";
 
-                const selected = avatarType === "owned" && avatarCharacterId === ch.id;
+                  const selected = avatarType === "owned" && avatarCharacterId === ch.id;
 
-                return (
-                  <button
-                    key={ch.id}
-                    type="button"
-                    onClick={() => {
-                      setAvatarType("owned");
-                      setAvatarCharacterId(ch.id);
-                      setAvatarDefaultId(null);
-                    }}
-                    className={`p-1 rounded border ${selected ? "border-blue-600 ring-4 ring-blue-400" : "border-gray-400"}`}
-                    title={ch.name}
-                  >
-                    <img src={url} alt={ch.name} className="w-full aspect-square object-contain" />
-                  </button>
-                );
-              })}
+                  return (
+                    <button
+                      key={ch.id}
+                      type="button"
+                      onClick={() => {
+                        setAvatarType("owned");
+                        setAvatarCharacterId(ch.id);
+                        setAvatarDefaultId(null);
+                      }}
+                      className={`p-1 rounded border ${
+                        selected ? "border-blue-600 ring-4 ring-blue-400" : "border-gray-400"
+                      }`}
+                      title={ch.name}
+                    >
+                      <img src={url} alt={ch.name} className="w-full aspect-square object-contain" />
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>

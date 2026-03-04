@@ -6,6 +6,7 @@ import NavButtons from "./components/NavButtons";
 import Script from "next/script";
 import HeaderMenu from "./components/HeaderMenu";
 import { LevelUpToast } from "./components/LevelUpToast";
+import { LevelUpRewardModal } from "./components/LevelUpRewardModal";
 import ResultModalProvider from "./components/ResultModalProvider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -52,6 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
       <body className={`${inter.variable} ${yomogi.variable} font-sans bg-[#abe4fb]`}>
         <LevelUpToast />
+        <LevelUpRewardModal />
         <HeaderMenu />
         <div className="flex flex-col min-h-screen">
           {/* ===== HEADER ===== */}
