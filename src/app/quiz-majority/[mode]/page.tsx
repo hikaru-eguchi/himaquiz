@@ -1107,16 +1107,16 @@ export default function QuizModePage() {
 
   }, [finished,mySocketId,clearedStage,correctCount,]);
 
-  useEffect(() => {
-    const pending = loadPendingAward();
-    if (!pending) return;
+  // useEffect(() => {
+  //   const pending = loadPendingAward();
+  //   if (!pending) return;
 
-    // 既に付与済みなら何もしない
-    if (awardStatus === "awarded") return;
+  //   // 既に付与済みなら何もしない
+  //   if (awardStatus === "awarded") return;
 
-    awardPointsAndExp(pending);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  //   awardPointsAndExp(pending);
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   useEffect(() => {
     const onFocus = async () => {
@@ -1134,8 +1134,8 @@ export default function QuizModePage() {
       await awardPointsAndExp(pending);
     };
 
-    window.addEventListener("focus", onFocus);
-    document.addEventListener("visibilitychange", onVis);
+    // window.addEventListener("focus", onFocus);
+    // document.addEventListener("visibilitychange", onVis);
     return () => {
       window.removeEventListener("focus", onFocus);
       document.removeEventListener("visibilitychange", onVis);

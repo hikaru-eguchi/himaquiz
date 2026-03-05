@@ -1604,15 +1604,15 @@ export default function QuizModePage() {
     awardPointsAndExp(payload);
   }, [finished, correctCount, finalRanks, mySocketId, players.length]);
 
-  useEffect(() => {
-    const pending = loadPendingAward();
-    if (!pending) return;
+  // useEffect(() => {
+  //   const pending = loadPendingAward();
+  //   if (!pending) return;
 
-    if (awardStatus === "awarded") return;
+  //   if (awardStatus === "awarded") return;
 
-    awardPointsAndExp(pending);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  //   awardPointsAndExp(pending);
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   useEffect(() => {
     const onFocus = async () => {
@@ -1630,8 +1630,8 @@ export default function QuizModePage() {
       await awardPointsAndExp(pending);
     };
 
-    window.addEventListener("focus", onFocus);
-    document.addEventListener("visibilitychange", onVis);
+    // window.addEventListener("focus", onFocus);
+    // document.addEventListener("visibilitychange", onVis);
     return () => {
       window.removeEventListener("focus", onFocus);
       document.removeEventListener("visibilitychange", onVis);

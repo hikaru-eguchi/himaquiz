@@ -976,16 +976,16 @@ export default function QuizModePage() {
   }, [finished, mode, me?.score, opponent?.score, correctCount]);
 
   // ✅ 起動時に pending があれば拾う
-  useEffect(() => {
-    const pending = loadPendingAward();
-    if (!pending) return;
+  // useEffect(() => {
+  //   const pending = loadPendingAward();
+  //   if (!pending) return;
 
-    // すでに付与済み表示なら何もしない
-    if (awardStatus === "awarded") return;
+  //   // すでに付与済み表示なら何もしない
+  //   if (awardStatus === "awarded") return;
 
-    awardPointsAndExp(pending);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  //   awardPointsAndExp(pending);
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   // ✅ タブ復帰 / フォーカス復帰でも拾う（ログイン直後の揺れ対策）
   useEffect(() => {
@@ -1004,8 +1004,8 @@ export default function QuizModePage() {
       await awardPointsAndExp(pending);
     };
 
-    window.addEventListener("focus", onFocus);
-    document.addEventListener("visibilitychange", onVis);
+    // window.addEventListener("focus", onFocus);
+    // document.addEventListener("visibilitychange", onVis);
     return () => {
       window.removeEventListener("focus", onFocus);
       document.removeEventListener("visibilitychange", onVis);

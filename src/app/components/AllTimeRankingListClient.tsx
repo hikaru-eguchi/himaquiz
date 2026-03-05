@@ -393,7 +393,7 @@ export default function AllTimeRankingListClient({
           className="fixed inset-0 z-[999] bg-black/60 backdrop-blur-[2px] grid place-items-center p-4"
         >
           {/* クリック伝播を止めたいならここで stopPropagation も可 */}
-          <div className="w-full max-w-sm rounded-[28px] overflow-hidden shadow-[0_8px_0_rgba(0,0,0,1)] border-3 border-black bg-white">
+          <div className="w-full max-w-sm rounded-[28px] overflow-hidden shadow-[0_6px_0_rgba(0,0,0,1)] border-3 border-black bg-white">
             {/* ヘッダー帯（ポップ） */}
             <div className="relative px-5 pt-5 pb-4 border-b-3 border-black bg-gradient-to-r from-yellow-200 via-pink-200 to-sky-200">
               {/* ドット柄っぽい演出 */}
@@ -406,7 +406,7 @@ export default function AllTimeRankingListClient({
             </div>
 
             <div className="p-5">
-              <div className="grid place-items-center gap-4">
+              <div className="grid place-items-center gap-3">
                 {/* アバター（オーラ＋バッジ） */}
                 <div className="relative">
                   {/* オーラ */}
@@ -423,7 +423,7 @@ export default function AllTimeRankingListClient({
 
                 {/* 名前（ポップ太字＋縁取りっぽい） */}
                 <div className="
-                  flex items-center gap-5
+                  flex items-center gap-2
                   px-4 py-2
                   rounded-full
                   border-3 border-black
@@ -446,34 +446,34 @@ export default function AllTimeRankingListClient({
                 </div>
 
                 {/* レベルカード（ステッカー風） */}
-                <div className="w-full rounded-3xl border-3 border-black bg-gradient-to-br from-white via-white to-yellow-50 p-4 shadow-[0_6px_0_rgba(0,0,0,1)]">
-                  <p className="text-sm md:text-base font-black text-gray-700">
+                <div className="w-full rounded-3xl border-3 border-black bg-gradient-to-br from-white via-white to-yellow-50 p-2 shadow-[0_3px_0_rgba(0,0,0,1)]">
+                  <p className="text-sm md:text-base font-black text-yellow-500">
                     🌟 ユーザーレベル 🌟
                   </p>
-                  <p className="mt-1 text-3xl md:text-4xl font-extrabold text-yellow-500">
+                  <p className="mt-1 text-3xl md:text-4xl font-extrabold">
                     {loading ? "..." : `Lv.${selected?.level ?? "--"}`}
                   </p>
                 </div>
 
                 {/* 所持キャラ数カード（ステッカー風） */}
-                <div className="w-full rounded-3xl border-3 border-black bg-white p-4 shadow-[0_6px_0_rgba(0,0,0,1)]">
-                  <p className="text-sm md:text-base font-black text-gray-700">📚 所持キャラ数 📚</p>
-                  <p className="mt-1 text-3xl md:text-4xl font-extrabold text-emerald-500">
+                <div className="w-full rounded-3xl border-3 border-black bg-white p-2 shadow-[0_3px_0_rgba(0,0,0,1)]">
+                  <p className="text-sm md:text-base font-black text-emerald-500">📚 所持キャラ数 📚</p>
+                  <p className="mt-1 text-3xl md:text-4xl font-extrabold">
                     {loading ? "..." : `${selected?.character_count ?? "--"}体`}
                   </p>
                 </div>
 
                 {/* マイ称号カード（ステッカー風） */}
-                <div className="w-full rounded-3xl border-3 border-black bg-white p-4 shadow-[0_6px_0_rgba(0,0,0,1)]">
-                  <p className="text-sm md:text-base font-black text-gray-700">🏅 マイ称号 🏅</p>
-                  <p className="mt-1 text-2xl md:text-3xl font-extrabold text-purple-500">
+                <div className="w-full rounded-3xl border-3 border-black bg-white p-2 shadow-[0_3px_0_rgba(0,0,0,1)]">
+                  <p className="text-sm md:text-base font-black text-purple-500">🏅 マイ称号 🏅</p>
+                  <p className="mt-1 text-2xl md:text-3xl font-extrabold">
                     {loading ? "..." : (selected?.current_title ?? "（未設定）")}
                   </p>
                 </div>
 
                 {/* 吹き出し案内 */}
                 <div className="relative">
-                  <div className="rounded-2xl bg-white border-2 border-black px-4 py-2 font-bold text-sm text-gray-700 shadow">
+                  <div className="rounded-2xl bg-white pt-1 font-bold text-sm text-gray-700">
                     画面をタップすると閉じます
                   </div>
                 </div>

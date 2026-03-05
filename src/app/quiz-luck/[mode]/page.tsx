@@ -690,14 +690,14 @@ export default function QuizModePage() {
     rewardAppliedRef.current[challengeIndex] = false;
   }, [challengeIndex]);
 
-  useEffect(() => {
-    (async () => {
-      const pending = loadPendingAward();
-      if (!pending) return;
-      await awardPointsAndExp(pending);
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // useEffect(() => {
+  //   (async () => {
+  //     const pending = loadPendingAward();
+  //     if (!pending) return;
+  //     await awardPointsAndExp(pending);
+  //   })();
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -896,8 +896,8 @@ export default function QuizModePage() {
       }
     };
 
-    document.addEventListener("visibilitychange", onVisibility);
-    window.addEventListener("focus", onFocus);
+    // document.addEventListener("visibilitychange", onVisibility);
+    // window.addEventListener("focus", onFocus);
     return () => {
       document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("focus", onFocus);
