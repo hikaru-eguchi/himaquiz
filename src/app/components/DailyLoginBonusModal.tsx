@@ -91,7 +91,6 @@ export function DailyLoginBonusModal() {
                   shadow-[0_6px_0_rgba(0,0,0,1)]
                 "
               >
-                <span className="text-lg md:text-xl">✨</span>
                 <span className="text-3xl md:text-4xl font-black text-green-600">
                   +{added}P
                 </span>

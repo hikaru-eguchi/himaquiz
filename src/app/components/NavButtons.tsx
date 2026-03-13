@@ -177,6 +177,32 @@ export default function NavButtons() {
                           運命のクイズ
                         </button>
                       </Link>
+
+                      <Link
+                        href="/quiz-fortune"
+                        onClick={() => handleNavClick("/quiz-fortune")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 text-white ring-2 ring-fuchsia-500 md:hover:scale-110 ${
+                            activeUrl === "/quiz-fortune" ? activeStyle : ""
+                          }`}
+                        >
+                          ひまQ占い
+                        </button>
+                      </Link>
+
+                      <Link
+                        href="/quiz-personality"
+                        onClick={() => handleNavClick("/quiz-personality")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-gradient-to-r from-blue-500 to-cyan-400 text-white ring-2 ring-blue-400 md:hover:scale-110 ${
+                            activeUrl === "/quiz-personality" ? activeStyle : ""
+                          }`}
+                        >
+                          ひまQ診断
+                        </button>
+                      </Link>
                     </div>
                   </div>
 
