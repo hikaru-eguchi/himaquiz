@@ -140,7 +140,6 @@ export default function QuizMasterPage() {
             className="text-gray-700 text-md md:text-lg text-center px-4 py-2"
           >
             「ひまQ占い」は、1問の選択で“今日のひまQ運勢”がわかるミニコーナーです。<br />
-            直感で答えを選ぶだけで、星（★★★★★）と一言アドバイスが表示されます。<br />
             今日の運試しに、サクッとどうぞ！🔮✨
           </p>
         </div>
