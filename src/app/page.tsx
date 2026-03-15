@@ -396,6 +396,20 @@ export default async function HomePage({
               運命のクイズでどこまで挑む！？
             </p>
           </div>
+          {/* クイズ迷路 */}
+          <div className="text-center max-w-[280px]">
+            <Link href="/quiz-maze" className="w-full md:w-auto flex justify-center">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-amber-700 to-orange-500 text-white hover:scale-110 transition-all">
+                クイズ迷路🧱
+              </button>
+            </Link>
+            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
+              クイズを解いて迷路を突破せよ！
+            </p>
+            <p className="text-sm md:text-base text-gray-700 leading-tight">
+              君はゴールまでたどり着ける？
+            </p>
+          </div>
           {/* ひまQ占い */}
           <div className="text-center max-w-[280px]">
             <Link href="/quiz-fortune" className="w-full md:w-auto flex justify-center">
