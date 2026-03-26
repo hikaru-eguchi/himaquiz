@@ -7,6 +7,9 @@ import MatchstickExpression from "../components/MatchstickExpression";
 function sanitizeExpression(value: string) {
   return value.replace(/\s+/g, "");
 }
+function extractNumbers(value: string) {
+  return value.replace(/[^0-9]/g, "");
+}
 
 export default function MatchstickPage() {
   const [expression, setExpression] = useState("6+4=4");
@@ -25,8 +28,10 @@ export default function MatchstickPage() {
     if (!targetRef.current) return;
 
     try {
-      const question = sanitizeExpression(expression || "6+4=4");
-      const answer = sanitizeExpression(answerExpression || "8-4=4");
+      // const question = sanitizeExpression(expression || "6+4=4");
+      // const answer = sanitizeExpression(answerExpression || "8-4=4");
+      const question = extractNumbers(expression || "6+4=4");
+      const answer = extractNumbers(answerExpression || "8-4=4");
 
       const dataUrl = await htmlToImage.toPng(targetRef.current, {
         backgroundColor: "#ffffff",
