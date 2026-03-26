@@ -50,8 +50,8 @@ export default async function MonthlyRankingCard({
       <div className="flex flex-col items-center text-center gap-2">
         <div>
           <p className="text-2xl md:text-4xl font-extrabold drop-shadow-xl">
-            {title}
             {icon}
+            {title}
           </p>
           <p className="text-xs md:text-sm text-gray-700">
             集計開始：{monthStart}（月初0:00〜）

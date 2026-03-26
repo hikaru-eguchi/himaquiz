@@ -60,8 +60,9 @@ export default function NavButtons() {
     (isOpen ? "max-h-[3000px] opacity-100 mt-2" : "max-h-0 opacity-0 mt-0");
 
   // ✅ 背景色（ちょい変え版）
-  const bgSolo = "bg-gradient-to-br from-rose-50 via-orange-50 to-amber-50"; // 1人用：暖色寄り
+  const bgSolo = "bg-gradient-to-br from-purple-50 via-violet-50 to-fuchsia-50"; // 1人用：紫寄り
   const bgMulti = "bg-gradient-to-br from-sky-50 via-indigo-50 to-fuchsia-50"; // みんな：寒色寄り
+  const bgBox = "bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50"; // クイズBOX：黄色より
   const bgGacha = "bg-gradient-to-br from-emerald-50 via-lime-50 to-yellow-50"; // ガチャ：キラッと系
 
   return (
@@ -93,7 +94,7 @@ export default function NavButtons() {
             <div className="flex flex-col md:flex-row gap-3 md:gap-4">
               {/* 1人で遊べる */}
               <fieldset className={`${groupBox} ${bgSolo} md:flex-1`}>
-                <legend className={groupLegend}>ひとりで遊べるクイズゲーム</legend>
+                <legend className={groupLegend}>🎮ひとりで遊べるクイズゲーム</legend>
                 <p className="text-xs md:text-sm text-black/70">
                   気軽に挑戦！ひとりクイズタイム！
                 </p>
@@ -227,7 +228,7 @@ export default function NavButtons() {
 
               {/* みんなで遊べる */}
               <fieldset className={`${groupBox} ${bgMulti} md:flex-1`}>
-                <legend className={groupLegend}>みんなで遊べるクイズゲーム</legend>
+                <legend className={groupLegend}>🌐みんなで遊べるクイズゲーム</legend>
                 <p className="text-xs md:text-sm text-black/70">
                   ネットの誰かと！友達や家族と！みんなでワイワイ遊ぼう🎉
                 </p>
@@ -369,32 +370,132 @@ export default function NavButtons() {
 
             <div className="flex flex-col md:flex-row gap-3 md:gap-4">
               <fieldset
-                className={`${groupBox} bg-gradient-to-br from-white via-slate-50 to-slate-100 md:flex-1`}
+                className={`${groupBox} ${bgBox} md:flex-1`}
               >
-                <legend className={groupLegend}>クイズ問題集</legend>
+                {/* <legend className={groupLegend}>クイズ問題集</legend> */}
+                <legend className={groupLegend}>🧩ひまQクイズBOX</legend>
                 <p className="text-xs md:text-sm text-black/70">
-                  面白いクイズ問題集が勢ぞろい。気になるテーマを解いてみよう！
+                  いろんなクイズで遊び放題！気になるクイズに今すぐ挑戦しよう！
                 </p>
-                <div className={rowWrap}>
-                  <Link
-                    href="/quizbooks"
-                    onClick={() => handleNavClick("/quizbooks")}
-                  >
-                    <button
-                      className={`${baseStyle} bg-white text-black ${
-                        activeUrl === "/quizbooks" ? activeStyle : ""
-                      }`}
-                    >
-                      漢字穴埋めクイズ
-                    </button>
-                  </Link>
+                <div className="mx-auto w-full max-w-[300px] md:max-w-none">
+                  <div className={gameScrollOuter}>
+                    <div className={gameRow}>
+                      <Link
+                        href="/quizbooks"
+                        onClick={() => handleNavClick("/quizbooks")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-gradient-to-r from-red-500 via-rose-400 to-orange-300 text-white ${
+                            activeUrl === "/quizbooks" ? activeStyle : ""
+                          }`}
+                        >
+                          漢字穴埋め
+                        </button>
+                      </Link>
+
+                      <Link
+                        href="/quizbooks_kanji"
+                        onClick={() => handleNavClick("/quizbooks_kanji")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-gradient-to-r from-pink-500 via-rose-400 to-amber-300 text-white ${
+                            activeUrl === "/quizbooks_kanji" ? activeStyle : ""
+                          }`}
+                        >
+                          漢字間違い探し
+                        </button>
+                      </Link>
+
+                      <Link
+                        href="/quizbooks_hiragana"
+                        onClick={() => handleNavClick("/quizbooks_hiragana")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-gradient-to-r from-pink-500 via-fuchsia-400 to-purple-400 text-white ${
+                            activeUrl === "/quizbooks_hiragana" ? activeStyle : ""
+                          }`}
+                        >
+                          ひらがな穴埋め
+                        </button>
+                      </Link>
+
+                      <Link
+                        href="/quizbooks_sort"
+                        onClick={() => handleNavClick("/quizbooks_sort")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-gradient-to-r from-green-500 via-emerald-400 to-lime-300 text-white ${
+                            activeUrl === "/quizbooks_sort" ? activeStyle : ""
+                          }`}
+                        >
+                          並び替えクイズ
+                        </button>
+                      </Link>
+
+                      <Link
+                        href="/quizbooks_lateral"
+                        onClick={() => handleNavClick("/quizbooks_lateral")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-gradient-to-r from-purple-600 via-indigo-500 to-blue-400 text-white ${
+                            activeUrl === "/quizbooks_lateral" ? activeStyle : ""
+                          }`}
+                        >
+                          水平思考クイズ
+                        </button>
+                      </Link>
+
+                      <Link
+                        href="/quizbooks_pattern"
+                        onClick={() => handleNavClick("/quizbooks_pattern")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-gradient-to-r from-indigo-600 via-blue-500 to-cyan-400 text-white ${
+                            activeUrl === "/quizbooks_pattern" ? activeStyle : ""
+                          }`}
+                        >
+                          パターンクイズ
+                        </button>
+                      </Link>
+
+                      <Link
+                        href="/quizbooks_matchstick"
+                        onClick={() => handleNavClick("/quizbooks_matchstick")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-gradient-to-r from-cyan-500 via-sky-400 to-blue-300 text-white ${
+                            activeUrl === "/quizbooks_matchstick" ? activeStyle : ""
+                          }`}
+                        >
+                          マッチ棒クイズ
+                        </button>
+                      </Link>
+
+                      <Link
+                        href="/quizbooks_theme"
+                        onClick={() => handleNavClick("/quizbooks_theme")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-gradient-to-r from-yellow-500 via-amber-400 to-orange-300 text-white ${
+                            activeUrl === "/quizbooks_theme" ? activeStyle : ""
+                          }`}
+                        >
+                          テーマクイズ
+                        </button>
+                      </Link>
+                    </div>
+                  </div>
+
+                  <p className="mt-1 text-xs text-black/60 text-center md:hidden">
+                    ← 横にスワイプできます →
+                  </p>
                 </div>
               </fieldset>
 
               <fieldset
                 className={`${groupBox} bg-gradient-to-br from-emerald-50 via-sky-50 to-yellow-50 md:flex-1`}
               >
-                <legend className={groupLegend}>4択クイズ</legend>
+                <legend className={groupLegend}>🎯4択クイズ</legend>
                 <p className="text-xs md:text-sm text-black/70">
                   サクッと遊べる4択クイズ。スキマ時間に脳トレ＆腕試し！
                 </p>

@@ -197,7 +197,7 @@ export default async function HomePage({
           animate-bounce
           animate-pulse
         ">
-          今日のチャレンジクイズ！🔥
+          🔥今日のチャレンジクイズ！
         </h2>
         <p className="text-lg md:text-xl mb-2 text-center leading-tight mb-4 underline">
           まずはこの問題！あなたは解けるかな？
@@ -208,25 +208,6 @@ export default async function HomePage({
       </div>
 
       <WeeklyRankingSection />
-
-      {/* <div className="max-w-[700px] mx-auto border-2 border rounded-xl m-5 p-5 mb-10 bg-gradient-to-b from-red-50 via-red-100 to-red-200">
-        <p className="text-2xl md:text-4xl font-extrabold mt-2 mb-4 text-center text-red-500">
-          📖クイズ問題集📖
-        </p>
-        <p className="text-lg md:text-xl mb-2 text-center leading-tight mb-4">
-          面白クイズや脳トレクイズの問題集！ひとりでもみんなとでも楽しめる！
-        </p>
-        <div className="flex justify-center gap-3 md:gap-5 flex-wrap">
-          クイズ集一覧
-          <div className="text-center max-w-[260px]">
-            <Link href="/quizbooks" className="w-full md:w-auto flex justify-center">
-              <button className="text-xl md:text-2xl px-3 py-1 md:px-5 md:py-2 bg-white border-2 border-black rounded-full font-bold hover:scale-105 transition-all">
-                漢字穴埋めクイズ
-              </button>
-            </Link>
-          </div>
-        </div>
-      </div> */}
 
       {/* <div className="
         max-w-[700px] 
@@ -313,10 +294,13 @@ export default async function HomePage({
         </p>
         <div className="flex justify-center gap-3 md:gap-5 flex-wrap">
           {/* 連続正解チャレンジ */}
-          <div className="text-center max-w-[280px] md:mb-0">
+          <div className="relative text-center max-w-[280px] md:mb-0">
+            <span className="absolute -top-3 -left-4 z-10 px-3 py-1 text-xs md:text-sm font-bold rounded-full border-2 border-white bg-red-500 text-white shadow-md rotate-[-8deg]">
+              🔥人気No.1
+            </span>
             <Link href="/streak-challenge" className="w-full md:w-auto flex justify-center">
               <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-red-500 to-orange-400 text-white hover:scale-110 transition-all">
-                連続正解チャレンジ✅
+                ✅連続正解チャレンジ
               </button>
             </Link>
             <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
@@ -330,7 +314,7 @@ export default async function HomePage({
           <div className="text-center max-w-[280px]">
             <Link href="/time-quiz" className="w-full md:w-auto flex justify-center">
               <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-[#ec0101] via-[#FF6B6B] to-[#fb9797] text-white hover:scale-110 transition-all">
-                制限時間クイズ⏱
+                ⏱制限時間クイズ
               </button>
             </Link>
             <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
@@ -344,7 +328,7 @@ export default async function HomePage({
           <div className="text-center max-w-[280px]">
             <Link href="/quiz-master" className="w-full md:w-auto flex justify-center">
               <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-purple-500 to-indigo-400 text-white hover:scale-110 transition-all">
-                クイズダンジョン⚔
+                ⚔クイズダンジョン
               </button>
             </Link>
             <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
@@ -358,7 +342,7 @@ export default async function HomePage({
           <div className="text-center max-w-[280px]">
             <Link href="/quiz-kimagure" className="w-full md:w-auto flex justify-center">
               <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-yellow-400 to-yellow-300  text-white hover:scale-110 transition-all">
-                きまぐれクイズ☁
+                ☁きまぐれクイズ
               </button>
             </Link>
             <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
@@ -386,7 +370,7 @@ export default async function HomePage({
           <div className="text-center max-w-[280px]">
             <Link href="/quiz-luck" className="w-full md:w-auto flex justify-center">
               <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-emerald-500 to-teal-400 text-white hover:scale-110 transition-all">
-                運命のクイズ🎲
+                🎲運命のクイズ
               </button>
             </Link>
             <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
@@ -400,7 +384,7 @@ export default async function HomePage({
           <div className="text-center max-w-[280px]">
             <Link href="/quiz-maze" className="w-full md:w-auto flex justify-center">
               <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-amber-700 to-orange-500 text-white hover:scale-110 transition-all">
-                クイズ迷路🧱
+                🧱クイズ迷路
               </button>
             </Link>
             <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
@@ -414,7 +398,7 @@ export default async function HomePage({
           <div className="text-center max-w-[280px]">
             <Link href="/quiz-fortune" className="w-full md:w-auto flex justify-center">
               <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-purple-600 via-fuchsia-500 to-pink-500 text-white hover:scale-110 transition-all">
-                ひまQ占い🔮
+                🔮ひまQ占い
               </button>
             </Link>
             <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
@@ -428,7 +412,7 @@ export default async function HomePage({
           <div className="text-center max-w-[280px]">
             <Link href="/quiz-personality" className="w-full md:w-auto flex justify-center">
               <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-blue-500 to-cyan-400 text-white hover:scale-110 transition-all">
-                ひまQ診断🔍
+                🔍ひまQ診断
               </button>
             </Link>
             <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
@@ -453,7 +437,7 @@ export default async function HomePage({
           <div className="text-center max-w-[280px]">
             <Link href="/quiz-battle" className="w-full md:w-auto flex justify-center">
               <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-pink-500 via-yellow-400 to-green-500 text-white hover:scale-110 transition-all">
-                クイズバトル🔥
+                🔥クイズバトル
               </button>
             </Link>
             <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
@@ -467,7 +451,7 @@ export default async function HomePage({
           <div className="text-center max-w-[280px]">
             <Link href="/quiz-royal" className="w-full md:w-auto flex justify-center">
               <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-yellow-500 via-amber-300 to-blue-500 text-white hover:scale-110 transition-all">
-                クイズロワイヤル👑
+                👑クイズロワイヤル
               </button>
             </Link>
             <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
@@ -481,7 +465,7 @@ export default async function HomePage({
           <div className="text-center max-w-[280px]">
             <Link href="/quiz-adventure" className="w-full md:w-auto flex justify-center">
               <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-indigo-500 via-blue-500 to-sky-500 text-white hover:scale-110 transition-all">
-                協力ダンジョン⚔
+                ⚔協力ダンジョン
               </button>
             </Link>
             <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
@@ -492,10 +476,13 @@ export default async function HomePage({
             </p>
           </div>
           {/* サバイバルクイズ */}
-          <div className="text-center max-w-[280px]">
+          <div className="relative text-center max-w-[280px]">
+            <span className="absolute -top-3 -left-4 z-10 px-3 py-1 text-xs md:text-sm font-bold rounded-full border-2 border-white bg-red-500 text-white shadow-md rotate-[-8deg]">
+              🔥人気No.1
+            </span>
             <Link href="/quiz-dobon" className="w-full md:w-auto flex justify-center">
               <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-emerald-700 via-amber-800 to-stone-800 text-white hover:scale-110 transition-all">
-                サバイバルクイズ💀
+                💀サバイバルクイズ
               </button>
             </Link>
             <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
@@ -509,7 +496,7 @@ export default async function HomePage({
           <div className="text-center max-w-[280px]">
             <Link href="/quiz-majority" className="w-full md:w-auto flex justify-center">
               <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-red-500 to-blue-500 text-white hover:scale-110 transition-all">
-                多数決クイズ🗳️
+                🗳️多数決クイズ
               </button>
             </Link>
             <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
@@ -523,7 +510,7 @@ export default async function HomePage({
           <div className="text-center max-w-[280px]">
             <Link href="/quiz-quick" className="w-full md:w-auto flex justify-center">
               <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-cyan-400 via-sky-300 to-sky-200 text-white hover:scale-110 transition-all">
-                瞬発力クイズ⚡
+                ⚡瞬発力クイズ
               </button>
             </Link>
             <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
@@ -537,7 +524,7 @@ export default async function HomePage({
           <div className="text-center max-w-[280px]">
             <Link href="/quiz-dice" className="w-full md:w-auto flex justify-center">
               <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-green-700 via-emerald-500 to-amber-300 text-white hover:scale-110 transition-all">
-                サイコロクイズ🎲
+                🎲サイコロクイズ
               </button>
             </Link>
             <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
@@ -551,7 +538,7 @@ export default async function HomePage({
           <div className="text-center max-w-[280px]">
             <Link href="/quiz-mind" className="w-full md:w-auto flex justify-center">
               <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-pink-600 via-rose-500 to-amber-200 text-white hover:scale-110 transition-all">
-                心理当てバトル🧠
+                🧠心理当てバトル
               </button>
             </Link>
             <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
@@ -559,6 +546,108 @@ export default async function HomePage({
             </p>
             <p className="text-sm md:text-base text-gray-700 leading-tight">
               いちばん心を読めるのは誰だ！？
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-[700px] mx-auto border-2 border-black rounded-xl m-5 p-5 bg-gradient-to-b from-orange-50 via-yellow-100 to-amber-200 shadow-lg">
+        <p className="text-2xl md:text-4xl font-extrabold mb-2 text-center leading-tight drop-shadow-xl text-orange-500">
+          🧩ひまQクイズBOX🧩
+        </p>
+        <p className="text-lg md:text-xl text-center leading-tight mb-4 text-gray-800">
+          いろんなクイズで遊べるコーナー！気になるものに挑戦しよう！
+        </p>
+
+        <div className="flex justify-center gap-3 md:gap-5 flex-wrap">
+          <div className="text-center max-w-[280px]">
+            <Link href="/quizbooks" className="w-full md:w-auto flex justify-center">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-red-500 via-rose-400 to-orange-300 text-white hover:scale-110 transition-all">
+                ⬜ 漢字穴埋め
+              </button>
+            </Link>
+            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
+              空欄に入る漢字はどれ？
+            </p>
+          </div>
+
+          <div className="text-center max-w-[280px]">
+            <Link href="/quizbooks_kanji" className="w-full md:w-auto flex justify-center">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-pink-500 via-rose-400 to-amber-300 text-white hover:scale-110 transition-all">
+                🔍 漢字間違い探し
+              </button>
+            </Link>
+            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
+              一つだけ違う漢字を見抜け！
+            </p>
+          </div>
+
+          <div className="text-center max-w-[280px]">
+            <Link href="/quizbooks_hiragana" className="w-full md:w-auto flex justify-center">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-pink-500 via-fuchsia-400 to-purple-400 text-white hover:scale-110 transition-all">
+                ✏️ ひらがな穴埋め
+              </button>
+            </Link>
+            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
+              空欄に入る共通のひらがなは？
+            </p>
+          </div>
+
+          <div className="text-center max-w-[280px]">
+            <Link href="/quizbooks_sort" className="w-full md:w-auto flex justify-center">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-green-500 via-emerald-400 to-lime-300 text-white hover:scale-110 transition-all">
+                🔀 並び替えクイズ
+              </button>
+            </Link>
+            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
+              バラバラの文字を並べ替えて言葉を完成！
+            </p>
+          </div>
+
+          <div className="relative text-center max-w-[280px]">
+            <span className="absolute -top-3 -left-4 z-10 px-3 py-1 text-xs md:text-sm font-bold rounded-full border-2 border-white bg-red-500 text-white shadow-md rotate-[-8deg]">
+              🔥人気No.1
+            </span>
+            <Link href="/quizbooks_lateral" className="w-full md:w-auto flex justify-center">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-purple-600 via-indigo-500 to-blue-400 text-white hover:scale-110 transition-all">
+                🧠 水平思考クイズ
+              </button>
+            </Link>
+            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
+              不思議な状況の真相を見抜け！
+            </p>
+          </div>
+
+          <div className="text-center max-w-[280px]">
+            <Link href="/quizbooks_pattern" className="w-full md:w-auto flex justify-center">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-indigo-600 via-blue-500 to-cyan-400 text-white hover:scale-110 transition-all">
+                🔷 パターンクイズ
+              </button>
+            </Link>
+            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
+              規則性をみつけて答えを導け！
+            </p>
+          </div>
+
+          <div className="text-center max-w-[280px]">
+            <Link href="/quizbooks_matchstick" className="w-full md:w-auto flex justify-center">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-cyan-500 via-sky-400 to-blue-300 text-white hover:scale-110 transition-all">
+                ➖ マッチ棒クイズ
+              </button>
+            </Link>
+            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
+              1本だけ動かして違う式にしよう。
+            </p>
+          </div>
+
+          <div className="text-center max-w-[280px]">
+            <Link href="/quizbooks_theme" className="w-full md:w-auto flex justify-center">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-yellow-500 via-amber-400 to-orange-300 text-white hover:scale-110 transition-all">
+                🎯 テーマクイズ
+              </button>
+            </Link>
+            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
+              好きなテーマを選んでクイズに挑戦！
             </p>
           </div>
         </div>

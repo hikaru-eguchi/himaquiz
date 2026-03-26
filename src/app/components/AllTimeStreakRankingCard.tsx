@@ -37,7 +37,7 @@ export default async function AllTimeStreakRankingCard({
       <div className="flex flex-col items-center text-center gap-2">
         <div>
           <p className="text-2xl md:text-4xl font-extrabold drop-shadow-xl">
-            {title}{icon}
+            {icon}{title}
           </p>
           <p className="text-xs md:text-sm text-gray-700">
             連続正解数の歴代ランキング！君も伝説に名を刻めるか！？

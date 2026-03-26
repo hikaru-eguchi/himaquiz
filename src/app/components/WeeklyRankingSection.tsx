@@ -25,7 +25,7 @@ export default async function WeeklyRankingSection() {
               border-3 border-white
               shadow-lg
             ">
-              ひまQランキング🏆
+              🏆ひまQランキング
             </p>
             <p className="text-md md:text-xl text-gray-700 mt-1 md:mt-2">
               ひまQのトッププレイヤーたちをチェックしよう！
@@ -51,7 +51,7 @@ export default async function WeeklyRankingSection() {
         {/* 中身（3カード） */}
         <div className="mt-2 md:mt-5">
           <AllTimeStreakRankingCard
-            title="歴代 連続正解数"
+            title="歴代連続正解数"
             icon="🔥"
             bgClass="from-yellow-200 via-amber-300 to-orange-300"
           />
