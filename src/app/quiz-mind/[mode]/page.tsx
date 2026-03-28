@@ -592,8 +592,8 @@ export default function QuizModePage() {
   };
 
   // 制限時間（秒）
-  const REP_LIMIT_SEC = 15;
-  const GUESS_LIMIT_SEC = 15;
+  const REP_LIMIT_SEC = 30;
+  const GUESS_LIMIT_SEC = 30;
 
   // カウントダウン表示用
   const [repSecondsLeft, setRepSecondsLeft] = useState<number>(0);
