@@ -38,7 +38,8 @@ export function getAllQuizBooksMeta(): QuizBookMeta[] {
         updated: data.updated ? String(data.updated) : undefined,
       };
     })
-    .sort((a, b) => (b.updated ?? "").localeCompare(a.updated ?? ""));
+    // .sort((a, b) => (b.updated ?? "").localeCompare(a.updated ?? ""));
+    .sort((a, b) => Number(a.slug) - Number(b.slug));
 }
 
 export function getQuizBookSourceBySlug(slug: string) {
