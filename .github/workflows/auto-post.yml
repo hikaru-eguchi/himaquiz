@@ -1,0 +1,36 @@
+name: Auto Generate Articles (2 times/day)
+permissions:
+  contents: write
+
+on:
+  schedule:
+    - cron: "0 3 * * *"   # 昼12時JST (UTC+9 → UTC 3)
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install openai
+
+      - name: Generate articles
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: python scripts/generate_articles.py
+
+      - name: Commit & Push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/articles
+          git commit -m "📝 Auto-generated articles $(date +'%Y-%m-%d %H:%M')" || exit 0
+          git push
