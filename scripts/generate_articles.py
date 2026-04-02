@@ -459,7 +459,7 @@ def generate_article(theme: str):
     frontmatter = build_frontmatter(title, description, theme, tags, updated)
     content = frontmatter + body.strip() + "\n"
 
-    file_name = safe_filename(title) + ".md"
+    file_name = safe_filename(title) + ".mdx"
     file_path = ARTICLE_DIR / file_name
 
     with open(file_path, "w", encoding="utf-8") as f:
