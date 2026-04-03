@@ -8,8 +8,156 @@ export const metadata = {
     "テーマクイズを一覧で楽しめる無料問題集です。アニメ、ゲーム、スポーツ、食べ物、雑学など、いろいろなジャンルのクイズを掲載。スキマ時間の暇つぶしや知識チェックにおすすめです。",
 };
 
+type QuizBookMeta = {
+  slug: string;
+  title: string;
+  description?: string;
+  theme?: string;
+  tags?: string[];
+  updated?: string;
+};
+
+const POPULAR_SLUGS = [
+  "onepiece-quiz-01",
+  "pokemon-quiz-01",
+  "baseball-sports-quiz",
+  "ramen-food-quiz",
+  "daily-life-trivia-zatsugaku-quiz",
+  "jojo-anime-quiz",
+];
+
+const RECOMMENDED_SLUGS = [
+  "frieren-anime-quiz",
+  "sauna-hobby-quiz",
+  "genshin-game-quiz",
+  "convenience-store-food-quiz",
+  "j-pop-music-quiz",
+  "space-science-quiz",
+];
+
+function sortByUpdatedDesc(items: QuizBookMeta[]) {
+  return [...items].sort((a, b) => {
+    const aTime = a.updated ? new Date(a.updated).getTime() : 0;
+    const bTime = b.updated ? new Date(b.updated).getTime() : 0;
+    return bTime - aTime;
+  });
+}
+
+function pickBySlugs(items: QuizBookMeta[], slugs: string[], limit = 6) {
+  const map = new Map(items.map((item) => [item.slug, item]));
+  return slugs.map((slug) => map.get(slug)).filter(Boolean).slice(0, limit) as QuizBookMeta[];
+}
+
+function excludeSlugs(items: QuizBookMeta[], slugs: string[]) {
+  const slugSet = new Set(slugs);
+  return items.filter((item) => !slugSet.has(item.slug));
+}
+
+function QuizCard({
+  item,
+  label,
+}: {
+  item: QuizBookMeta;
+  label: string;
+}) {
+  return (
+    <article
+      className="
+        rounded-2xl
+        border-2 border-black
+        bg-white
+        shadow-md
+        transition-all
+        hover:-translate-y-1 hover:shadow-xl
+      "
+    >
+      <Link
+        href={`/quizbooks_theme/${item.slug}`}
+        className="group block p-5 active:scale-95"
+      >
+        <p className="text-xs font-bold text-amber-600 mb-2">{label}</p>
+
+        <h3 className="text-xl md:text-2xl font-extrabold mb-2 group-hover:underline">
+          {item.title}
+        </h3>
+
+        {item.description && (
+          <p className="text-gray-700 text-sm md:text-base leading-relaxed">
+            {item.description}
+          </p>
+        )}
+
+        <p className="mt-4 text-sm font-bold text-black">
+          ▶ このテーマクイズに挑戦する
+        </p>
+      </Link>
+    </article>
+  );
+}
+
+function QuizSection({
+  id,
+  title,
+  description,
+  items,
+  labelPrefix,
+}: {
+  id: string;
+  title: string;
+  description: string;
+  items: QuizBookMeta[];
+  labelPrefix: string;
+}) {
+  if (items.length === 0) return null;
+
+  return (
+    <section className="mb-12" aria-labelledby={id}>
+      <div className="text-center mb-6">
+        <h2 id={id} className="text-2xl md:text-3xl font-extrabold mb-3">
+          {title}
+        </h2>
+        <p className="text-gray-700 text-sm md:text-base max-w-3xl mx-auto leading-relaxed">
+          {description}
+        </p>
+      </div>
+
+      <div className="grid gap-5 md:grid-cols-2">
+        {items.map((item, index) => (
+          <QuizCard
+            key={`${labelPrefix}-${item.slug}`}
+            item={item}
+            label={`${labelPrefix} ${index + 1}`}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export default function QuizBooksThemeIndexPage() {
-  const items = getAllQuizBooksMeta();
+  const allItems = getAllQuizBooksMeta() as QuizBookMeta[];
+
+  const popularItems = pickBySlugs(allItems, POPULAR_SLUGS, 6);
+  const newestItems = sortByUpdatedDesc(allItems)
+    .filter((item) => !POPULAR_SLUGS.includes(item.slug))
+    .slice(0, 6);
+  const recommendedItems = pickBySlugs(
+    allItems,
+    RECOMMENDED_SLUGS.filter(
+      (slug) =>
+        !POPULAR_SLUGS.includes(slug) &&
+        !newestItems.some((item) => item.slug === slug)
+    ),
+    6
+  );
+
+  const hiddenSlugs = [
+    ...popularItems.map((item) => item.slug),
+    ...newestItems.map((item) => item.slug),
+    ...recommendedItems.map((item) => item.slug),
+  ];
+
+  const remainingItems = excludeSlugs(allItems, hiddenSlugs);
 
   return (
     <main className="container mx-auto p-6 bg-gradient-to-br from-yellow-100 via-amber-100 to-orange-50">
@@ -35,54 +183,58 @@ export default function QuizBooksThemeIndexPage() {
         </p>
 
         <p className="text-gray-700 text-sm md:text-base mt-3 max-w-3xl mx-auto leading-relaxed">
-          アニメ、ゲーム、スポーツ、食べ物、雑学など、さまざまなテーマのクイズを掲載しています。
+          アニメ、ゲーム、スポーツ、食べ物、雑学、趣味・生活など、さまざまなテーマのクイズを掲載しています。
           スキマ時間に気軽に遊べる暇つぶしとしてはもちろん、好きなジャンルの知識チェックや話題作りにもおすすめです。
           気になるテーマからぜひ挑戦してみてください。
         </p>
       </section>
 
-      {/* ===== 一覧 ===== */}
-      <section aria-labelledby="quiz-list-heading">
-        <h2 className="sr-only" id="quiz-list-heading">
-          テーマクイズ一覧
-        </h2>
+      {/* ===== 人気 ===== */}
+      <QuizSection
+        id="popular-quiz-heading"
+        title="🔥 人気クイズ"
+        description="まずはよく読まれている人気のテーマクイズから挑戦したい人向けに、特に見られやすい問題をまとめました。迷ったらここから遊ぶのがおすすめです。"
+        items={popularItems}
+        labelPrefix="人気"
+      />
+
+      {/* ===== 新着 ===== */}
+      <QuizSection
+        id="newest-quiz-heading"
+        title="🆕 新着クイズ"
+        description="新しく追加されたテーマクイズをまとめています。最新の問題からチェックしたい人は、ここから気になるクイズに挑戦してみてください。"
+        items={newestItems}
+        labelPrefix="新着"
+      />
+
+      {/* ===== おすすめ ===== */}
+      <QuizSection
+        id="recommended-quiz-heading"
+        title="✨ おすすめクイズ"
+        description="運営おすすめのテーマクイズをまとめました。人気ジャンルだけでなく、少し気になるテーマや知識差が出やすい問題も楽しめます。"
+        items={recommendedItems}
+        labelPrefix="おすすめ"
+      />
+
+      {/* ===== すべての一覧 ===== */}
+      <section aria-labelledby="quiz-list-heading" className="mb-12">
+        <div className="text-center mb-6">
+          <h2 id="quiz-list-heading" className="text-2xl md:text-3xl font-extrabold mb-3">
+            📚 すべてのテーマクイズ一覧
+          </h2>
+          <p className="text-gray-700 text-sm md:text-base max-w-3xl mx-auto leading-relaxed">
+            すべてのテーマクイズを一覧で見たい人向けに、公開中の問題をまとめています。
+            人気・新着・おすすめ以外のクイズも含めて、気になるものから自由に遊んでみてください。
+          </p>
+        </div>
 
         <div className="grid gap-5 md:grid-cols-2">
-          {items.map((b, index) => (
-            <article
+          {remainingItems.map((b, index) => (
+            <QuizCard
               key={b.slug}
-              className="
-                rounded-2xl
-                border-2 border-black
-                bg-white
-                shadow-md
-                transition-all
-                hover:-translate-y-1 hover:shadow-xl
-              "
-            >
-              <Link
-                href={`/quizbooks_theme/${b.slug}`}
-                className="group block p-5 active:scale-95"
-              >
-                <p className="text-xs font-bold text-amber-600 mb-2">
-                  テーマ {index + 1}
-                </p>
-
-                <h2 className="text-xl md:text-2xl font-extrabold mb-2 group-hover:underline">
-                  {b.title}
-                </h2>
-
-                {b.description && (
-                  <p className="text-gray-700 text-sm md:text-base leading-relaxed">
-                    {b.description}
-                  </p>
-                )}
-
-                <p className="mt-4 text-sm font-bold text-black">
-                  ▶ このテーマクイズに挑戦する
-                </p>
-              </Link>
-            </article>
+              item={b}
+              label={`テーマ ${index + 1}`}
+            />
           ))}
         </div>
       </section>
@@ -133,6 +285,13 @@ export default function QuizBooksThemeIndexPage() {
           >
             💡 雑学クイズ
           </Link>
+
+          <Link
+            href="/quizbooks_theme/category/hobby"
+            className="px-4 py-2 rounded-full border-2 border-black bg-gradient-to-r from-teal-500 to-emerald-400 text-white font-bold shadow hover:-translate-y-0.5 transition-all"
+          >
+            🏕️ 趣味クイズ
+          </Link>
         </div>
       </section>
 
@@ -144,7 +303,7 @@ export default function QuizBooksThemeIndexPage() {
 
         <p className="text-gray-700 leading-relaxed mb-6 text-center">
           テーマクイズとは、特定のジャンルや話題にしぼって楽しめるクイズです。
-          アニメやゲーム、スポーツ、食べ物、雑学など、自分の好きなテーマで遊べるため、
+          アニメやゲーム、スポーツ、食べ物、雑学、趣味・生活など、自分の好きなテーマで遊べるため、
           知識チェックや暇つぶしにぴったりの人気クイズとして親しまれています。
           得意ジャンルに挑戦したい人にも、新しいテーマを気軽に楽しみたい人にもおすすめです。
         </p>
