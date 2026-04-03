@@ -113,7 +113,7 @@ const themeConfigs: Record<string, ThemeConfig> = {
     ],
     relatedThemes: [
       { slug: "zatsugaku", label: "💡 雑学クイズ" },
-      { slug: "showa", label: "📺 昭和クイズ" },
+      { slug: "hobby", label: "🏕️ 趣味クイズ" },
       { slug: "music", label: "🎵 音楽クイズ" },
     ],
   },
@@ -145,7 +145,7 @@ const themeConfigs: Record<string, ThemeConfig> = {
     relatedThemes: [
       { slug: "zatsugaku", label: "💡 雑学クイズ" },
       { slug: "science", label: "🔬 科学クイズ" },
-      { slug: "showa", label: "📺 昭和クイズ" },
+      { slug: "hobby", label: "🏕️ 趣味クイズ" },
     ],
   },
   zatsugaku: {
@@ -179,35 +179,35 @@ const themeConfigs: Record<string, ThemeConfig> = {
       { slug: "science", label: "🔬 科学クイズ" },
     ],
   },
-  showa: {
-    name: "昭和",
-    emoji: "📺",
-    pageTitle: "昭和クイズ一覧",
-    lead: "懐かしい話題で楽しめる、無料の昭和クイズ問題集ページです。",
+  hobby: {
+    name: "趣味",
+    emoji: "🏕️",
+    pageTitle: "趣味クイズ一覧",
+    lead: "日常や趣味を楽しめる、無料のクイズ問題集ページです。",
     description:
-      "昭和の流行、家電、文化、テレビ、食べ物、暮らしに関するクイズをまとめています。懐かしさを楽しみたい人はもちろん、昔の時代を知りたい人にもおすすめです。気になる問題からぜひ挑戦してみてください。",
+      "車、釣り、アウトドア、キャンプ、サウナ、旅行、ガジェット、日常生活の知識などに関するクイズをまとめています。スキマ時間の暇つぶしとしてはもちろん、趣味の知識チェックや話題作りにもおすすめです。気になる問題からぜひ挑戦してみてください。",
     seoTitle:
-      "昭和クイズ一覧｜懐かしい話題で遊べる無料問題集｜ひまQ",
+      "趣味クイズ一覧｜車・アウトドア・サウナ・生活知識で遊べる無料問題集｜ひまQ",
     seoDescription:
-      "昭和クイズを一覧で楽しめる無料問題集です。昭和の流行やテレビ、文化、暮らしに関する問題を掲載。懐かしい話題で楽しみたい人におすすめです。",
-    bgClass: "bg-gradient-to-br from-amber-100 via-orange-100 to-yellow-50",
+      "趣味・生活クイズを一覧で楽しめる無料問題集です。車、釣り、アウトドア、サウナ、ガジェットなど幅広いジャンルを掲載。暇つぶしや知識チェックにおすすめです。",
+    bgClass: "bg-gradient-to-br from-teal-100 via-emerald-100 to-green-50",
     headingClass:
-      "bg-gradient-to-r from-amber-600 via-orange-500 to-yellow-400",
-    borderClass: "border-amber-300",
-    accentTextClass: "text-amber-700",
-    seoBoxClass: "bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50",
+      "bg-gradient-to-r from-teal-500 via-emerald-400 to-green-400",
+    borderClass: "border-emerald-300",
+    accentTextClass: "text-emerald-700",
+    seoBoxClass: "bg-gradient-to-br from-teal-50 via-emerald-50 to-green-50",
     chipClass:
-      "bg-gradient-to-r from-amber-600 via-orange-500 to-yellow-400 text-white",
+      "bg-gradient-to-r from-teal-500 via-emerald-400 to-green-400 text-white",
     recommendedFor: [
-      "昭和の懐かしい話題が好きな人",
-      "昔の流行や文化を楽しく知りたい人",
-      "家族で一緒に遊べるクイズを探している人",
-      "スキマ時間に気軽に楽しみたい人",
+      "車・釣り・アウトドアなどの趣味が好きな人",
+      "日常生活の知識を楽しく増やしたい人",
+      "スキマ時間に気軽に暇つぶししたい人",
+      "実用的な雑学や話題を増やしたい人",
     ],
     relatedThemes: [
-      { slug: "music", label: "🎵 音楽クイズ" },
-      { slug: "food", label: "🍔 食べ物クイズ" },
       { slug: "zatsugaku", label: "💡 雑学クイズ" },
+      { slug: "sports", label: "⚽ スポーツクイズ" },
+      { slug: "food", label: "🍔 食べ物クイズ" },
     ],
   },
   music: {
@@ -236,7 +236,7 @@ const themeConfigs: Record<string, ThemeConfig> = {
       "友だちと盛り上がれる話題を探している人",
     ],
     relatedThemes: [
-      { slug: "showa", label: "📺 昭和クイズ" },
+      { slug: "hobby", label: "🏕️ 趣味クイズ" },
       { slug: "anime", label: "🎬 アニメクイズ" },
       { slug: "zatsugaku", label: "💡 雑学クイズ" },
     ],
