@@ -59,6 +59,10 @@ THEME_TOPIC_EXAMPLES = {
         "推しの子",
         "チェンソーマン",
         "ブルーロック",
+        "怪獣8号",
+        "薬屋のひとりごと",
+        "ぼっち・ざ・ろっく！",
+        "Re:ゼロから始める異世界生活",
     ],
     "game": [
         "ポケモン",
@@ -73,6 +77,12 @@ THEME_TOPIC_EXAMPLES = {
         "桃太郎電鉄",
         "ぷよぷよ",
         "パズルゲーム全般",
+        "ストリートファイター",
+        "原神",
+        "崩壊：スターレイル",
+        "マインクラフト",
+        "APEX Legends",
+        "フォートナイト",
     ],
     "sports": [
         "野球",
@@ -86,6 +96,11 @@ THEME_TOPIC_EXAMPLES = {
         "陸上競技",
         "フィギュアスケート",
         "スポーツルール雑学",
+        "プロ野球",
+        "Jリーグ",
+        "NBA",
+        "高校野球",
+        "駅伝",
     ],
     "food": [
         "ラーメン",
@@ -99,6 +114,11 @@ THEME_TOPIC_EXAMPLES = {
         "ファストフード",
         "給食メニュー",
         "日本の定番料理",
+        "コンビニグルメ",
+        "おにぎり",
+        "パン",
+        "コーヒー",
+        "スイーツ",
     ],
     "zatsugaku": [
         "ポケモン雑学",
@@ -110,6 +130,8 @@ THEME_TOPIC_EXAMPLES = {
         "乗り物雑学",
         "ことば雑学",
         "日常生活の雑学",
+        "日本文化雑学",
+        "学校で習う雑学",
     ],
     "music": [
         "J-POP",
@@ -120,6 +142,9 @@ THEME_TOPIC_EXAMPLES = {
         "バンド雑学",
         "ヒット曲",
         "カラオケ定番曲",
+        "ボーカロイド",
+        "アイドルソング",
+        "フェス音楽",
     ],
     "science": [
         "宇宙",
@@ -132,6 +157,9 @@ THEME_TOPIC_EXAMPLES = {
         "恐竜",
         "発明",
         "自然現象",
+        "昆虫",
+        "海の生き物",
+        "植物",
     ],
     "character": [
         "サンリオ",
@@ -143,6 +171,8 @@ THEME_TOPIC_EXAMPLES = {
         "アンパンマン",
         "ミッフィー",
         "クレヨンしんちゃん",
+        "ピクサーキャラクター",
+        "ゆるキャラ",
     ],
     "manga": [
         "ワンピース",
@@ -155,22 +185,45 @@ THEME_TOPIC_EXAMPLES = {
         "ドラゴンボール",
         "NARUTO",
         "ちはやふる",
+        "ジョジョの奇妙な冒険",
+        "葬送のフリーレン",
+        "ブルーロック",
+        "怪獣8号",
     ],
     "hobby": [
         "車",
         "スポーツカー",
         "ドライブ",
+        "カー用品",
+        "洗車",
+        "バイク",
+        "ツーリング",
         "釣り",
+        "海釣り",
+        "川釣り",
+        "ルアーフィッシング",
         "アウトドア",
         "キャンプ",
+        "ソロキャンプ",
+        "登山",
+        "ハイキング",
         "サウナ",
+        "温泉",
         "筋トレ",
+        "ランニング",
+        "ロードバイク",
         "ガジェット",
         "スマホ",
-        "日常生活の便利グッズ",
-        "節約術",
+        "イヤホン",
+        "カメラ",
         "旅行",
-        "温泉",
+        "国内旅行",
+        "節約術",
+        "一人暮らし",
+        "日常生活の便利グッズ",
+        "DIY",
+        "コーヒー",
+        "観葉植物",
     ],
 }
 
@@ -184,6 +237,7 @@ TAG_HINTS = {
     "science": ["科学", "クイズ", "知識", "雑学"],
     "character": ["キャラクター", "クイズ", "知識", "人気"],
     "manga": ["漫画", "クイズ", "知識", "上級"],
+    "hobby": ["趣味", "生活", "クイズ", "知識", "雑学"],
 }
 
 TOPIC_SLUG_HINTS = {
@@ -199,6 +253,15 @@ TOPIC_SLUG_HINTS = {
     "クレヨンしんちゃん": "crayon-shinchan",
     "ちびまる子ちゃん": "chibi-maruko-chan",
     "ポケモン": "pokemon",
+    "ジョジョの奇妙な冒険": "jojo",
+    "葬送のフリーレン": "frieren",
+    "推しの子": "oshi-no-ko",
+    "チェンソーマン": "chainsaw-man",
+    "ブルーロック": "blue-lock",
+    "怪獣8号": "kaiju-no-8",
+    "薬屋のひとりごと": "kusuriya-no-hitorigoto",
+    "ぼっち・ざ・ろっく！": "bocchi-the-rock",
+    "Re:ゼロから始める異世界生活": "rezero",
     "マリオ": "mario",
     "ゼルダの伝説": "zelda",
     "スプラトゥーン": "splatoon",
@@ -210,6 +273,12 @@ TOPIC_SLUG_HINTS = {
     "桃太郎電鉄": "momotaro-dentetsu",
     "ぷよぷよ": "puyo-puyo",
     "パズルゲーム全般": "puzzle-game",
+    "ストリートファイター": "street-fighter",
+    "原神": "genshin",
+    "崩壊：スターレイル": "honkai-star-rail",
+    "マインクラフト": "minecraft",
+    "APEX Legends": "apex-legends",
+    "フォートナイト": "fortnite",
     "野球": "baseball",
     "サッカー": "soccer",
     "バスケットボール": "basketball",
@@ -221,6 +290,11 @@ TOPIC_SLUG_HINTS = {
     "陸上競技": "track-and-field",
     "フィギュアスケート": "figure-skating",
     "スポーツルール雑学": "sports-rules",
+    "プロ野球": "pro-baseball",
+    "Jリーグ": "j-league",
+    "NBA": "nba",
+    "高校野球": "high-school-baseball",
+    "駅伝": "ekiden",
     "ラーメン": "ramen",
     "寿司": "sushi",
     "カレー": "curry",
@@ -232,6 +306,11 @@ TOPIC_SLUG_HINTS = {
     "ファストフード": "fast-food",
     "給食メニュー": "school-lunch",
     "日本の定番料理": "japanese-food",
+    "コンビニグルメ": "convenience-store-food",
+    "おにぎり": "onigiri",
+    "パン": "bread",
+    "コーヒー": "coffee",
+    "スイーツ": "sweets",
     "ポケモン雑学": "pokemon-trivia",
     "国語雑学": "japanese-language-trivia",
     "日本地理雑学": "japan-geography-trivia",
@@ -241,6 +320,8 @@ TOPIC_SLUG_HINTS = {
     "乗り物雑学": "vehicle-trivia",
     "ことば雑学": "word-trivia",
     "日常生活の雑学": "daily-life-trivia",
+    "日本文化雑学": "japanese-culture-trivia",
+    "学校で習う雑学": "school-trivia",
     "J-POP": "j-pop",
     "アニソン": "anime-song",
     "楽器": "musical-instruments",
@@ -249,6 +330,9 @@ TOPIC_SLUG_HINTS = {
     "バンド雑学": "band-trivia",
     "ヒット曲": "hit-songs",
     "カラオケ定番曲": "karaoke-songs",
+    "ボーカロイド": "vocaloid",
+    "アイドルソング": "idol-song",
+    "フェス音楽": "festival-music",
     "宇宙": "space",
     "人体": "human-body",
     "生き物": "animals",
@@ -259,6 +343,9 @@ TOPIC_SLUG_HINTS = {
     "恐竜": "dinosaurs",
     "発明": "inventions",
     "自然現象": "natural-phenomena",
+    "昆虫": "insects",
+    "海の生き物": "sea-creatures",
+    "植物": "plants",
     "サンリオ": "sanrio",
     "ディズニー": "disney",
     "すみっコぐらし": "sumikko-gurashi",
@@ -270,6 +357,38 @@ TOPIC_SLUG_HINTS = {
     "ハンターハンター": "hunter-hunter",
     "NARUTO": "naruto",
     "ちはやふる": "chihayafuru",
+    "車": "car",
+    "スポーツカー": "sports-car",
+    "ドライブ": "driving",
+    "カー用品": "car-accessories",
+    "洗車": "car-wash",
+    "バイク": "motorbike",
+    "ツーリング": "touring",
+    "釣り": "fishing",
+    "海釣り": "sea-fishing",
+    "川釣り": "river-fishing",
+    "ルアーフィッシング": "lure-fishing",
+    "アウトドア": "outdoor",
+    "キャンプ": "camping",
+    "ソロキャンプ": "solo-camping",
+    "登山": "mountain-climbing",
+    "ハイキング": "hiking",
+    "サウナ": "sauna",
+    "温泉": "hot-spring",
+    "筋トレ": "workout",
+    "ランニング": "running",
+    "ロードバイク": "road-bike",
+    "ガジェット": "gadgets",
+    "スマホ": "smartphone",
+    "イヤホン": "earphones",
+    "カメラ": "camera",
+    "旅行": "travel",
+    "国内旅行": "domestic-travel",
+    "節約術": "saving-money",
+    "一人暮らし": "living-alone",
+    "日常生活の便利グッズ": "daily-goods",
+    "DIY": "diy",
+    "観葉植物": "houseplants",
 }
 
 
@@ -350,9 +469,9 @@ def choose_themes() -> list[str]:
 
 def generate_topic_with_ai(theme: str) -> str:
     theme_label = THEME_LABELS.get(theme, theme)
-
     fallback_candidates = THEME_TOPIC_EXAMPLES.get(theme, [])
     fallback_topic = random.choice(fallback_candidates) if fallback_candidates else f"{theme_label}知識"
+    popular_examples = "、".join(fallback_candidates[:12]) if fallback_candidates else theme_label
 
     prompt = f"""
 あなたはクイズ企画者です。
@@ -361,31 +480,55 @@ def generate_topic_with_ai(theme: str) -> str:
 テーマ: {theme}
 テーマ表示名: {theme_label}
 
+人気候補の参考:
+{popular_examples}
+
 条件:
 - 実在する作品・分野・ジャンルにする
 - クイズにしやすい題材にする
 - 人気や検索需要が見込めるものを優先する
 - 日本語として自然にする
 - 曖昧すぎる題材は避ける
+- そのテーマの中で特化記事になりやすい題材にする
+- 広すぎる言葉より、やや特化した題材を優先する
+- ただしマニアックすぎて検索されなそうな題材は避ける
+- 既存の人気候補と完全一致でもよいし、近い具体化でもよい
 - 1つだけ出力する
 - 余計な説明は書かない
 - 題材名のみ出力する
 
 よい例:
-ワンピース
-ポケモン
-ゼルダの伝説
-世界の雑学
+ジョジョの奇妙な冒険
+葬送のフリーレン
+プロ野球
+コンビニグルメ
+ソロキャンプ
+ルアーフィッシング
 """
 
-    topic = call_model(prompt, model="gpt-4o-mini", temperature=0.9)
+    topic = call_model(prompt, model="gpt-4o-mini", temperature=0.95)
     topic = normalize_title(topic)
 
     return topic or fallback_topic
 
 
 def choose_topic_for_theme(theme: str) -> str:
-    return generate_topic_with_ai(theme)
+    fixed_candidates = THEME_TOPIC_EXAMPLES.get(theme, [])
+
+    # AIメイン + 人気作品を固定で残す
+    # 70%: AI生成 / 30%: 固定候補から選択
+    if fixed_candidates and random.random() < 0.30:
+        return random.choice(fixed_candidates)
+
+    ai_topic = generate_topic_with_ai(theme)
+
+    if ai_topic:
+        return ai_topic
+
+    if fixed_candidates:
+        return random.choice(fixed_candidates)
+
+    return f"{THEME_LABELS.get(theme, theme)}知識"
 
 
 def generate_click_title(theme: str, topic: str, question_count: int = 15) -> str:
@@ -414,7 +557,7 @@ def generate_click_title(theme: str, topic: str, question_count: int = 15) -> st
 例:
 ファンでも意外と間違えるワンピースクイズ15問
 ポケモン好きでも迷う知識クイズ15問
-意外と知らない昭和歌謡クイズ15問
+意外と知らないサウナクイズ15問
 """
 
     title = normalize_title(call_model(prompt, model="gpt-4o-mini", temperature=0.9))
@@ -469,8 +612,8 @@ JSONの形式:
             "tags": [theme_label, topic, "クイズ", "知識", "上級"],
             "intro_quote_lines": [
                 f"{topic}好きでも迷う{theme_label}クイズを15問出題します。",
-                "前半は一般常識寄り、後半はかなり深い知識まで試されます。",
-                "ライト層からコアファンまで、どこまで解けるか挑戦してみてください。",
+                "前半は一般常識寄り、中盤以降は知識差が出る問題構成です。",
+                "最後の超マニアック問題までどこまで解けるか挑戦してみてください。",
             ],
             "summary_cta": "次は別ジャンルのクイズにも挑戦してみましょう。",
             "seo_intro_keywords": [topic, f"{theme_label}クイズ"],
@@ -507,6 +650,7 @@ def generate_slug(theme: str, topic: str, title: str) -> str:
 one-piece-anime-quiz
 pokemon-zatsugaku-quiz
 baseball-sports-quiz
+sauna-hobby-quiz
 """
 
     slug = call_model(prompt, model="gpt-4o-mini", temperature=0.2)
@@ -636,8 +780,8 @@ def fix_quiz_by_fact_check(theme: str, topic: str, title: str, body: str, fact_r
 - 「## まとめ」も必ず残す
 - 問題数は15問のまま
 - 難易度構成を壊さない
-  - 1〜2問: 普通〜中級
-  - 3〜10問: 上級
+  - 1〜5問: 普通〜中級
+  - 6〜10問: 上級
   - 11〜15問: 超マニアック
 - frontmatterは追加しない
 - 不正確または曖昧な箇所を優先修正する
@@ -667,8 +811,8 @@ def review_quiz_body(theme: str, topic: str, title: str, body: str) -> str:
 - 日本語が不自然ではないか
 - 問題の難易度バランス
 - 15問の流れとして自然か
-- 1〜2問目が一般常識として機能しているか
-- 3〜10問目が上級レベルとして成立しているか
+- 1〜5問目が一般常識として機能しているか
+- 6〜10問目が上級レベルとして成立しているか
 - 11〜15問目が超マニアックとして成立しているか
 - 問題の重複感
 - 解説が薄すぎないか
@@ -713,8 +857,8 @@ def improve_quiz_body(theme: str, topic: str, title: str, body: str, review: str
 - 必要なら問題文や解説を自然に調整する
 - 冗長すぎる箇所は整理する
 - 難易度構成は壊さない
-  - 1〜2問: 普通〜中級
-  - 3〜10問: 上級
+  - 1〜5問: 普通〜中級
+  - 6〜10問: 上級
   - 11〜15問: 超マニアック
 
 出力:
@@ -750,8 +894,8 @@ def expand_for_seo(theme: str, topic: str, title: str, body: str) -> str:
 - frontmatterは追加しない
 - SEOっぽすぎる不自然な言い回しは避ける
 - 難易度構成は壊さない
-  - 1〜2問: 普通〜中級
-  - 3〜10問: 上級
+  - 1〜5問: 普通〜中級
+  - 6〜10問: 上級
   - 11〜15問: 超マニアック
 
 出力:
