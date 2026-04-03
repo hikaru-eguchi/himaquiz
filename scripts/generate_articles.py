@@ -12,10 +12,11 @@ BASE_DIR = pathlib.Path(__file__).resolve().parents[1]
 ARTICLE_DIR = BASE_DIR / "src" / "quizbooks_theme"
 
 # 必須テーマ
-REQUIRED_THEMES = ["anime", "game"]
+REQUIRED_THEMES = ["anime"]
 
 # ランダム候補テーマ
 OPTIONAL_THEMES = [
+    "game",
     "sports",
     "zatsugaku",
     "food",
@@ -329,9 +330,10 @@ def call_model(prompt: str, model: str = "gpt-4o", temperature: float = 0.7) -> 
                 "content": (
                     "あなたは日本語のクイズ記事編集者です。"
                     "SEOに強く、自然な日本語で、"
-                    "中級〜やや上級向けのクイズ記事を作るのが得意です。"
+                    "難易度設計のあるクイズ記事を作るのが得意です。"
                     "事実関係があやしい内容は避け、"
-                    "一般によく知られている情報を中心に構成してください。"
+                    "一般によく知られている情報からコアファン向け知識まで、"
+                    "段階的に構成してください。"
                     "出力形式の指示には厳密に従ってください。"
                 ),
             },
@@ -343,12 +345,82 @@ def call_model(prompt: str, model: str = "gpt-4o", temperature: float = 0.7) -> 
 
 
 def choose_themes() -> list[str]:
-    picked_optional = random.sample(OPTIONAL_THEMES, 3)
+    picked_optional = random.sample(OPTIONAL_THEMES, 4)
     return REQUIRED_THEMES + picked_optional
 
 
+def generate_topic_with_ai(theme: str) -> str:
+    theme_label = THEME_LABELS.get(theme, theme)
+
+    fallback_candidates = THEME_TOPIC_EXAMPLES.get(theme, [])
+    fallback_topic = random.choice(fallback_candidates) if fallback_candidates else f"{theme_label}知識"
+
+    prompt = f"""
+あなたはクイズ企画者です。
+以下のテーマに合う「クイズ題材」を1つだけ提案してください。
+
+テーマ: {theme}
+テーマ表示名: {theme_label}
+
+条件:
+- 実在する作品・分野・ジャンルにする
+- クイズにしやすい題材にする
+- 人気や検索需要が見込めるものを優先する
+- 日本語として自然にする
+- 曖昧すぎる題材は避ける
+- 1つだけ出力する
+- 余計な説明は書かない
+- 題材名のみ出力する
+
+よい例:
+ワンピース
+ポケモン
+ゼルダの伝説
+昭和歌謡
+世界の雑学
+"""
+
+    topic = call_model(prompt, model="gpt-4o-mini", temperature=0.9)
+    topic = normalize_title(topic)
+
+    return topic or fallback_topic
+
+
 def choose_topic_for_theme(theme: str) -> str:
-    return random.choice(THEME_TOPIC_EXAMPLES[theme])
+    return generate_topic_with_ai(theme)
+
+
+def generate_click_title(theme: str, topic: str, question_count: int = 15) -> str:
+    theme_label = THEME_LABELS[theme]
+
+    prompt = f"""
+あなたはSEOとクリック率に強い日本語Web編集者です。
+以下の題材に対して、クリックされやすい記事タイトルを1つだけ作ってください。
+
+テーマ: {theme}
+テーマ表示名: {theme_label}
+題材: {topic}
+
+条件:
+- 日本語として自然
+- クリック率を意識する
+- 強い引きがある
+- ただし過剰な煽りは禁止
+- 「クイズ」と「{question_count}問」を必ず含める
+- 25〜45文字くらい
+- 題材名が自然に入るなら入れる
+- 「9割が間違える」「意外と知らない」「ファンでも迷う」などの方向性は可
+- 下品・不自然・誇大表現は禁止
+- タイトルのみ1行で出力
+
+例:
+ファンでも意外と間違えるワンピースクイズ15問
+ポケモン好きでも迷う知識クイズ15問
+意外と知らない昭和歌謡クイズ15問
+"""
+
+    title = normalize_title(call_model(prompt, model="gpt-4o-mini", temperature=0.9))
+    return title or f"{topic}好きでも迷う{theme_label}クイズ{question_count}問"
 
 
 def generate_article_plan(theme: str, topic: str) -> dict:
@@ -363,10 +435,11 @@ def generate_article_plan(theme: str, topic: str) -> dict:
 題材: {topic}
 
 条件:
-- クイズは10問
-- 難易度は「普通〜やや難しめ」
-- 日本語として自然なタイトルにする
-- タイトルはクリックされやすいが煽りすぎない
+- クイズは15問
+- 難易度構成は以下
+  - 1〜2問: 普通〜中級の一般常識問題
+  - 3〜10問: 上級レベルの知識問題
+  - 11〜15問: 超マニアック問題
 - descriptionは自然なSEO説明文にする
 - tagsは5〜7個にする
 - tagsは日本語中心でよいが、作品名の英語表記が自然なら含めてよい
@@ -378,7 +451,6 @@ def generate_article_plan(theme: str, topic: str) -> dict:
 
 JSONの形式:
 {{
-  "title": "...",
   "description": "...",
   "tags": ["...", "..."],
   "intro_quote_lines": ["...", "...", "..."],
@@ -395,13 +467,12 @@ JSONの形式:
         return data
     except Exception:
         return {
-            "title": f"{topic}好きなら答えたい{theme_label}クイズ10問",
-            "description": f"{topic}に関する知識を問う{theme_label}クイズ10問です。普通〜やや難しめの問題で理解度をチェックできます。",
+            "description": f"{topic}に関する知識を問う{theme_label}クイズ15問です。前半は一般常識寄り、中盤は上級、後半は超マニアック問題まで幅広く楽しめます。",
             "tags": [theme_label, topic, "クイズ", "知識", "上級"],
             "intro_quote_lines": [
-                f"{topic}好きなら答えたい少し難しめのクイズを10問出題します。",
-                "名シーン・設定・ルール・知識などに関する問題に挑戦してみましょう。",
-                "細かい部分まで覚えているかがカギになります。",
+                f"{topic}好きでも迷う{theme_label}クイズを15問出題します。",
+                "前半は一般常識寄り、後半はかなり深い知識まで試されます。",
+                "ライト層からコアファンまで、どこまで解けるか挑戦してみてください。",
             ],
             "summary_cta": "次は別ジャンルのクイズにも挑戦してみましょう。",
             "seo_intro_keywords": [topic, f"{theme_label}クイズ"],
@@ -439,6 +510,7 @@ one-piece-anime-quiz
 pokemon-zatsugaku-quiz
 baseball-sports-quiz
 """
+
     slug = call_model(prompt, model="gpt-4o-mini", temperature=0.2)
     return slugify_ascii(slug)
 
@@ -455,7 +527,6 @@ def generate_quiz_body(theme: str, topic: str, plan: dict) -> str:
 テーマ: {theme}
 テーマ表示名: {theme_label}
 題材: {topic}
-記事タイトル: {plan["title"]}
 description: {plan["description"]}
 
 出力ルール:
@@ -465,7 +536,7 @@ description: {plan["description"]}
 - 導入文では、この記事でどんな知識が試せるかを自然に説明する
 - そのあとに次の形式の引用ブロックを入れる
 - そのあと区切り線 ---
-- そのあと「## 問題1」〜「## 問題10」
+- そのあと「## 問題1」〜「## 問題15」
 - 各問題の下に問題文を書く
 - その下に必ず <Answer> と </Answer> で答えを書く
 - Answerの中は「答え名 + 2〜4文の解説」にする
@@ -478,21 +549,26 @@ description: {plan["description"]}
 {plan["summary_cta"]}
 
 難易度ルール:
-- 全体として普通〜やや難しめ
-- 超マニアックすぎる問題は避ける
-- 初心者すぎる問題だけにもならないようにする
-- 10問中、3〜4問くらいは「やや難」でもよい
-- 問題文はわかりやすく簡潔にする
+- 問題数は必ず15問
+- 1〜2問目は普通〜中級の一般常識問題
+- 3〜10問目は上級レベルの知識問題
+- 11〜15問目は超マニアック問題
+- 最初から最後まで単調にならないように段階的に難しくする
+- 今回は簡単すぎる問題は禁止
+- ただし1〜2問目は入口として成立する難しさにする
+- 後半5問はコアファン向けにかなり深くしてよい
 
 品質ルール:
 - 事実関係が不安定な内容は避ける
 - あいまいな説や論争中の情報は出さない
-- 一般的によく知られている設定・ルール・作品知識を中心にする
+- 一般的によく知られている設定・ルール・作品知識から、コアファン向け知識まで段階的に出題する
 - ネタバレが強すぎるものは避ける
 - 同じタイプの問題が続きすぎないようにする
 - 問題はバリエーションを持たせる
 - 日本語は自然にする
 - あいまいな問いより、答えが比較的一意に決まりやすい問いを優先する
+- 明確に誤答しやすいひっかけだけに頼らない
+- 本当に知識差が出る問題構成にする
 
 SEOルール:
 - 導入では次の関連語を不自然にならない範囲で自然に触れてよい: {intro_keywords}
@@ -532,6 +608,7 @@ def fact_check_quiz_body(theme: str, topic: str, title: str, body: str) -> str:
 - より安全で一般的な表現への修正案を書く
 - 事実関係が揺れやすいものは、より安定した問題に差し替える提案をしてよい
 - 問題番号ごとに分ける
+- 問題15まで確認する
 - 出力はMarkdownで簡潔に
 """
     return call_model(prompt, model="gpt-4o", temperature=0.2)
@@ -554,10 +631,14 @@ def fix_quiz_by_fact_check(theme: str, topic: str, title: str, body: str, fact_r
 
 重要ルール:
 - Markdown形式を維持する
-- 「## 問題1」〜「## 問題10」を必ず残す
+- 「## 問題1」〜「## 問題15」を必ず残す
 - それぞれに <Answer>〜</Answer> を必ず残す
 - 「## まとめ」も必ず残す
-- 問題数は10問のまま
+- 問題数は15問のまま
+- 難易度構成を壊さない
+  - 1〜2問: 普通〜中級
+  - 3〜10問: 上級
+  - 11〜15問: 超マニアック
 - frontmatterは追加しない
 - 不正確または曖昧な箇所を優先修正する
 - より安全で一般的に正しい知識に寄せる
@@ -585,6 +666,10 @@ def review_quiz_body(theme: str, topic: str, title: str, body: str) -> str:
 レビュー観点:
 - 日本語が不自然ではないか
 - 問題の難易度バランス
+- 15問の流れとして自然か
+- 1〜2問目が一般常識として機能しているか
+- 3〜10問目が上級レベルとして成立しているか
+- 11〜15問目が超マニアックとして成立しているか
 - 問題の重複感
 - 解説が薄すぎないか
 - 導入とまとめが短すぎないか
@@ -617,16 +702,20 @@ def improve_quiz_body(theme: str, topic: str, title: str, body: str, review: str
 
 重要ルール:
 - Markdown形式を維持する
-- 「## 問題1」〜「## 問題10」を必ず残す
+- 「## 問題1」〜「## 問題15」を必ず残す
 - それぞれに <Answer>〜</Answer> を必ず残す
 - 「## まとめ」も必ず残す
-- 問題数は10問のまま
+- 問題数は15問のまま
 - frontmatterは追加しない
 - 内容は薄くしない
 - 不自然な日本語を直す
 - 導入とまとめが弱ければ自然に補強する
 - 必要なら問題文や解説を自然に調整する
 - 冗長すぎる箇所は整理する
+- 難易度構成は壊さない
+  - 1〜2問: 普通〜中級
+  - 3〜10問: 上級
+  - 11〜15問: 超マニアック
 
 出力:
 Markdown本文のみ
@@ -655,11 +744,15 @@ def expand_for_seo(theme: str, topic: str, title: str, body: str) -> str:
 
 重要ルール:
 - 問題数は変えない
-- 「## 問題1」〜「## 問題10」を残す
+- 「## 問題1」〜「## 問題15」を残す
 - <Answer>〜</Answer> を残す
 - 「## まとめ」を残す
 - frontmatterは追加しない
 - SEOっぽすぎる不自然な言い回しは避ける
+- 難易度構成は壊さない
+  - 1〜2問: 普通〜中級
+  - 3〜10問: 上級
+  - 11〜15問: 超マニアック
 
 出力:
 Markdown本文のみ
@@ -710,15 +803,15 @@ def generate_article(theme: str):
 
     plan = generate_article_plan(theme, topic)
 
-    title = normalize_title(plan.get("title", "")) or f"{topic}好きなら答えたい{THEME_LABELS[theme]}クイズ10問"
-    description = plan.get("description", "").strip() or f"{topic}に関する{THEME_LABELS[theme]}クイズ10問です。"
+    title = generate_click_title(theme, topic, question_count=15)
+    description = plan.get("description", "").strip() or f"{topic}に関する{THEME_LABELS[theme]}クイズ15問です。"
     tags = ensure_tags(theme, topic, plan.get("tags", []))
 
     if not isinstance(plan.get("intro_quote_lines"), list) or len(plan.get("intro_quote_lines", [])) < 3:
         plan["intro_quote_lines"] = [
-            f"{topic}好きなら答えたい少し難しめのクイズを10問出題します。",
-            "設定・知識・ルールなどに関する問題に挑戦してみましょう。",
-            "細かい部分まで覚えているかがカギになります。",
+            f"{topic}好きでも迷う少し難しめのクイズを15問出題します。",
+            "前半は一般常識寄り、中盤以降は知識差が出る問題構成です。",
+            "最後の超マニアック問題までどこまで解けるか挑戦してみましょう。",
         ]
 
     if not plan.get("summary_cta"):
