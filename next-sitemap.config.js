@@ -6,9 +6,4 @@ module.exports = {
   generateIndexSitemap: true,
   changefreq: 'daily',
   priority: 0.7,
-  robotsTxtOptions: {
-    additionalSitemaps: [
-      'https://www.hima-quiz.com/sitemap.xml',
-    ],
-  },
 };
