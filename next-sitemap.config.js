@@ -1,9 +1,14 @@
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
-  siteUrl: 'https://www.hima-quiz.com', // ←あなたのサイトURL
-  generateRobotsTxt: true,            // robots.txt も自動生成
-  sitemapSize: 7000,                  // 1つのsitemapに含めるURL上限
-  generateIndexSitemap: true,         // 複数sitemapに分割される場合はtrue推奨
-  changefreq: 'weekly',               // 更新頻度のデフォルト値
-  priority: 0.7,                      // ページ優先度のデフォルト値
+  siteUrl: 'https://www.hima-quiz.com',
+  generateRobotsTxt: true,
+  sitemapSize: 7000,
+  generateIndexSitemap: true,
+  changefreq: 'daily',
+  priority: 0.7,
+  robotsTxtOptions: {
+    additionalSitemaps: [
+      'https://www.hima-quiz.com/sitemap.xml',
+    ],
+  },
 };
