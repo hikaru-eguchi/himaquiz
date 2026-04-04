@@ -19,20 +19,16 @@ type QuizBookMeta = {
 
 const POPULAR_SLUGS = [
   "onepiece-quiz-01",
-  "pokemon-quiz-01",
-  "baseball-sports-quiz",
-  "ramen-food-quiz",
-  "daily-life-trivia-zatsugaku-quiz",
-  "jojo-anime-quiz",
+  "doraemon-anime-quiz",
+  "pokemon-character-quiz",
+  "kimetsu-no-yaiba-anime-quiz",
 ];
 
 const RECOMMENDED_SLUGS = [
-  "frieren-anime-quiz",
-  "sauna-hobby-quiz",
-  "genshin-game-quiz",
-  "convenience-store-food-quiz",
   "j-pop-music-quiz",
-  "space-science-quiz",
+  "japan-trivia-quiz-challenge",
+  "natural-phenomena-science-quiz",
+  "sushi-food-quiz",
 ];
 
 function sortByUpdatedDesc(items: QuizBookMeta[]) {
@@ -198,15 +194,6 @@ export default function QuizBooksThemeIndexPage() {
         labelPrefix="人気"
       />
 
-      {/* ===== 新着 ===== */}
-      <QuizSection
-        id="newest-quiz-heading"
-        title="🆕 新着クイズ"
-        description="新しく追加されたテーマクイズをまとめています。最新の問題からチェックしたい人は、ここから気になるクイズに挑戦してみてください。"
-        items={newestItems}
-        labelPrefix="新着"
-      />
-
       {/* ===== おすすめ ===== */}
       <QuizSection
         id="recommended-quiz-heading"
@@ -214,6 +201,15 @@ export default function QuizBooksThemeIndexPage() {
         description="運営おすすめのテーマクイズをまとめました。人気ジャンルだけでなく、少し気になるテーマや知識差が出やすい問題も楽しめます。"
         items={recommendedItems}
         labelPrefix="おすすめ"
+      />
+
+      {/* ===== 新着 ===== */}
+      <QuizSection
+        id="newest-quiz-heading"
+        title="🆕 新着クイズ"
+        description="新しく追加されたテーマクイズをまとめています。最新の問題からチェックしたい人は、ここから気になるクイズに挑戦してみてください。"
+        items={newestItems}
+        labelPrefix="新着"
       />
 
       {/* ===== すべての一覧 ===== */}
