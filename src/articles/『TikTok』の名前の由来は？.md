@@ -5,7 +5,7 @@ description: "サービス"
 quiz:
   title: "由来は？"
   genre: "雑学系"
-  level: "かんたん"
+  level: "ふつう"
   question: "TikTokの名前の由来は？"
   choices:
     - "音楽"

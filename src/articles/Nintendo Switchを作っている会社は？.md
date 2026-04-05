@@ -5,7 +5,7 @@ description: "企業"
 quiz:
   title: "この会社は？"
   genre: "雑学系"
-  level: "かんたん"
+  level: "ふつう"
   question: "Nintendo Switchを作っている会社はどれ？"
   choices:
     - "Sony"

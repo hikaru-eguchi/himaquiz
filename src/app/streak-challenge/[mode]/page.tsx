@@ -320,10 +320,10 @@ export default function QuizModePage() {
   const [incorrectMessage, setIncorrectMessage] = useState<string | null>(null);
 
     // ✅ 出題開始ゲート（カウントダウンが終わるまで問題＆タイマーを止める）
-  const [ready, setReady] = useState(false);
+  // const [ready, setReady] = useState(false);
 
   // ✅ 3,2,1,START! 表示用（null=非表示, 3..0=表示）
-  const [countdown, setCountdown] = useState<number | null>(3);
+  // const [countdown, setCountdown] = useState<number | null>(3);
 
   // ★ リザルト用：獲得ポイントと付与状態
   const [earnedPoints, setEarnedPoints] = useState(0);
@@ -555,6 +555,24 @@ export default function QuizModePage() {
 
   const shuffleArray = <T,>(arr: T[]) => [...arr].sort(() => Math.random() - 0.5);
 
+  const sortQuestionsForPlay = (list: { id: string; quiz: QuizData }[]) => {
+    const easyQuestions = shuffleArray(
+      list.filter((q) => q.quiz.level === "かんたん")
+    );
+
+    const otherQuestions = shuffleArray(
+      list.filter((q) => q.quiz.level !== "かんたん")
+    );
+
+    const first10Easy = easyQuestions.slice(0, 10);
+    const remaining = shuffleArray([
+      ...otherQuestions,
+      ...easyQuestions.slice(10),
+    ]);
+
+    return [...first10Easy, ...remaining];
+  };
+
   const resetGame = () => {
     // 進行リセット
     setCurrentIndex(0);
@@ -571,8 +589,8 @@ export default function QuizModePage() {
 
     // タイマーリセット（各問30秒）
     setTimeLeft(30);
-    setReady(false);
-    setCountdown(3);
+    // setReady(false);
+    // setCountdown(3);
 
     // リザルト関連リセット
     setEarnedPoints(0);
@@ -589,44 +607,44 @@ export default function QuizModePage() {
     clearPendingAward();
 
     // 問題順もシャッフルし直す（任意だけどおすすめ）
-    setQuestions((prev) => shuffleArray(prev));
+    setQuestions((prev) => sortQuestionsForPlay(prev));
   };
 
-  useEffect(() => {
-    // finished中はやらない
-    if (finished) return;
+  // useEffect(() => {
+  //   // finished中はやらない
+  //   if (finished) return;
 
-    // 問題がまだないなら待つ
-    if (questions.length === 0) return;
+  //   // 問題がまだないなら待つ
+  //   if (questions.length === 0) return;
 
-    // 既にreadyなら何もしない
-    if (ready) return;
+  //   // 既にreadyなら何もしない
+  //   if (ready) return;
 
-    // countdownを3から開始
-    setCountdown(3);
+  //   // countdownを3から開始
+  //   setCountdown(3);
 
-    const interval = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev === null) return null;
+  //   const interval = setInterval(() => {
+  //     setCountdown((prev) => {
+  //       if (prev === null) return null;
 
-        if (prev === 1) {
-          clearInterval(interval);
+  //       if (prev === 1) {
+  //         clearInterval(interval);
 
-          // START! を一瞬見せてから開始
-          setTimeout(() => {
-            setCountdown(null);
-            setReady(true); // ✅ ここで出題解禁
-          }, 800);
+  //         // START! を一瞬見せてから開始
+  //         setTimeout(() => {
+  //           setCountdown(null);
+  //           setReady(true); // ✅ ここで出題解禁
+  //         }, 800);
 
-          return 0; // 0 を START! 表示に使う
-        }
+  //         return 0; // 0 を START! 表示に使う
+  //       }
 
-        return prev - 1;
-      });
-    }, 1000);
+  //       return prev - 1;
+  //     });
+  //   }, 1000);
 
-    return () => clearInterval(interval);
-  }, [questions.length, finished, ready]);
+  //   return () => clearInterval(interval);
+  // }, [questions.length, finished, ready]);
 
   useEffect(() => {
     finishedRef.current = finished;
@@ -654,6 +672,25 @@ export default function QuizModePage() {
           all = all.filter((a) => a.quiz?.level === level);
         }
 
+        // const quizQuestions: { id: string; quiz: QuizData }[] = all
+        //   .filter((a) => a.quiz)
+        //   .map((a) => ({
+        //     id: a.id,
+        //     quiz: {
+        //       title: a.title,
+        //       question: a.quiz!.question,
+        //       answer: Number(a.quiz!.answer),
+        //       displayAnswer: a.quiz!.displayAnswer,
+        //       choices: a.quiz!.choices ? a.quiz!.choices.map(String) : [],
+        //       genre: a.quiz!.genre,
+        //       level: a.quiz!.level,
+        //       answerExplanation: a.quiz!.answerExplanation,
+        //       trivia: a.quiz!.trivia,
+        //     },
+        //   }));
+
+        // setQuestions(shuffleArray(quizQuestions));
+
         const quizQuestions: { id: string; quiz: QuizData }[] = all
           .filter((a) => a.quiz)
           .map((a) => ({
@@ -671,7 +708,7 @@ export default function QuizModePage() {
             },
           }));
 
-        setQuestions(shuffleArray(quizQuestions));
+        setQuestions(sortQuestionsForPlay(quizQuestions));
       } catch (error) {
         console.error("クイズ問題の取得に失敗しました:", error);
       }
@@ -681,7 +718,7 @@ export default function QuizModePage() {
   }, [mode, genre, level]);
 
   useEffect(() => {
-    if (!ready) return;
+    // if (!ready) return;
     if (finished) return;
     if (showCorrectMessage) return;
 
@@ -698,7 +735,7 @@ export default function QuizModePage() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [currentIndex, finished, showCorrectMessage, ready]);
+  }, [currentIndex, finished, showCorrectMessage]);
 
   const checkAnswer = () => {
     const correctAnswer = questions[currentIndex].quiz?.answer;
@@ -1035,19 +1072,6 @@ export default function QuizModePage() {
 
   return (
     <div className="container mx-auto p-8 text-center bg-gradient-to-b from-yellow-50 via-yellow-100 to-yellow-200">
-      {countdown !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
-          <motion.div
-            key={countdown}
-            initial={{ scale: 0.5, opacity: 0 }}
-            animate={{ scale: 1.2, opacity: 1 }}
-            transition={{ duration: 0.5 }}
-            className="text-white text-6xl md:text-8xl font-extrabold"
-          >
-            {countdown === 0 ? "START!" : countdown}
-          </motion.div>
-        </div>
-      )}
       {/* ✅ スキップ確認モーダル */}
       {openSkipModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
@@ -1157,51 +1181,43 @@ export default function QuizModePage() {
 
               {!showCorrectMessage && !incorrectMessage && (
                 <>
-                  {!ready ? (
-                    <p className="text-2xl md:text-3xl font-bold text-gray-700 mt-8">
-                      準備中…
-                    </p>
-                  ) : (
-                    <>
-                      <QuizQuestion
-                        quiz={questions[currentIndex].quiz}
-                        userAnswer={userAnswer}
-                        setUserAnswer={setUserAnswer}
-                      />
-                      <div className="mt-4 flex flex-col items-center gap-3">
-                        <button
-                          className="px-5 py-3 md:px-6 md:py-3 bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-4 hover:bg-blue-600 cursor-pointer font-extrabold"
-                          onClick={checkAnswer}
-                          disabled={userAnswer === null}
-                        >
-                          回答
-                        </button>
+                  <QuizQuestion
+                    quiz={questions[currentIndex].quiz}
+                    userAnswer={userAnswer}
+                    setUserAnswer={setUserAnswer}
+                  />
+                  <div className="mt-4 flex flex-col items-center gap-3">
+                    <button
+                      className="px-5 py-3 md:px-6 md:py-3 bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-4 hover:bg-blue-600 cursor-pointer font-extrabold"
+                      onClick={checkAnswer}
+                      disabled={userAnswer === null}
+                    >
+                      回答
+                    </button>
 
-                        {/* ✅ スキップボタン（回答の下） */}
-                        <button
-                          className={[
-                            "mt-3 px-6 py-3 rounded-2xl font-extrabold text-lg md:text-xl",
-                            "border-4 border-black",
-                            "bg-gradient-to-r from-yellow-300 via-amber-200 to-yellow-100",
-                            "shadow-[0_10px_0_0_rgba(0,0,0,0.18)]",
-                            "hover:brightness-105 active:translate-y-[2px] active:shadow-[0_8px_0_0_rgba(0,0,0,0.18)]",
-                            "transition",
-                            "flex items-center justify-center gap-2",
-                            skipLeft <= 0 ? "opacity-40 cursor-not-allowed" : "cursor-pointer",
-                          ].join(" ")}
-                          onClick={() => setOpenSkipModal(true)}
-                          disabled={skipLeft <= 0}
-                        >
-                          <span className="flex flex-col items-center leading-tight md:flex-row md:items-baseline md:gap-2">
-                            <span className="text-lg md:text-xl">この問題をスキップ</span>
-                            <span className="text-sm md:text-base font-black text-red-600">
-                            （残り {skipLeft}）
-                            </span>
-                          </span>
-                        </button>
-                      </div>
-                    </>
-                  )}
+                    {/* ✅ スキップボタン（回答の下） */}
+                    <button
+                      className={[
+                        "mt-3 px-6 py-3 rounded-2xl font-extrabold text-lg md:text-xl",
+                        "border-4 border-black",
+                        "bg-gradient-to-r from-yellow-300 via-amber-200 to-yellow-100",
+                        "shadow-[0_10px_0_0_rgba(0,0,0,0.18)]",
+                        "hover:brightness-105 active:translate-y-[2px] active:shadow-[0_8px_0_0_rgba(0,0,0,0.18)]",
+                        "transition",
+                        "flex items-center justify-center gap-2",
+                        skipLeft <= 0 ? "opacity-40 cursor-not-allowed" : "cursor-pointer",
+                      ].join(" ")}
+                      onClick={() => setOpenSkipModal(true)}
+                      disabled={skipLeft <= 0}
+                    >
+                      <span className="flex flex-col items-center leading-tight md:flex-row md:items-baseline md:gap-2">
+                        <span className="text-lg md:text-xl">この問題をスキップ</span>
+                        <span className="text-sm md:text-base font-black text-red-600">
+                        （残り {skipLeft}）
+                        </span>
+                      </span>
+                    </button>
+                  </div>
                 </>
               )}
             </>

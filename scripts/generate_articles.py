@@ -439,6 +439,31 @@ def ensure_unique_filepath(directory: pathlib.Path, slug: str, ext: str = ".mdx"
         i += 1
 
 
+def get_existing_topics() -> set[str]:
+    topics = set()
+
+    if not ARTICLE_DIR.exists():
+        return topics
+
+    for path in ARTICLE_DIR.glob("*.mdx"):
+        try:
+            text = path.read_text(encoding="utf-8")
+
+            # frontmatterの topic: "..." を拾う
+            match = re.search(r'^topic:\s*"(.+?)"', text, re.MULTILINE)
+            if match:
+                topics.add(match.group(1).strip())
+        except Exception:
+            continue
+
+    return topics
+
+EXISTING_TOPICS_CACHE = get_existing_topics()
+
+def is_topic_already_used(topic: str) -> bool:
+    return topic.strip() in EXISTING_TOPICS_CACHE
+
+
 def call_model(prompt: str, model: str = "gpt-4o", temperature: float = 0.7) -> str:
     res = client.chat.completions.create(
         model=model,
@@ -489,6 +514,8 @@ def generate_topic_with_ai(theme: str) -> str:
 - 人気や検索需要が見込めるものを優先する
 - 日本語として自然にする
 - 曖昧すぎる題材は避ける
+- すでに作成済みの題材は避ける
+- 同じ作品・題材の重複生成は避ける
 - そのテーマの中で特化記事になりやすい題材にする
 - 広すぎる言葉より、やや特化した題材を優先する
 - ただしマニアックすぎて検索されなそうな題材は避ける
@@ -515,16 +542,28 @@ def generate_topic_with_ai(theme: str) -> str:
 def choose_topic_for_theme(theme: str) -> str:
     fixed_candidates = THEME_TOPIC_EXAMPLES.get(theme, [])
 
-    # AIメイン + 人気作品を固定で残す
-    # 70%: AI生成 / 30%: 固定候補から選択
-    if fixed_candidates and random.random() < 0.30:
-        return random.choice(fixed_candidates)
+    # まず固定候補をシャッフルして、未使用のものを探す
+    shuffled_fixed = fixed_candidates[:]
+    random.shuffle(shuffled_fixed)
 
-    ai_topic = generate_topic_with_ai(theme)
+    # 30%は固定候補優先
+    if shuffled_fixed and random.random() < 0.30:
+        for topic in shuffled_fixed:
+            if not is_topic_already_used(topic):
+                return topic
 
-    if ai_topic:
-        return ai_topic
+    # 70%はAI生成を優先、ただし重複は避ける
+    for _ in range(5):
+        ai_topic = generate_topic_with_ai(theme)
+        if ai_topic and not is_topic_already_used(ai_topic):
+            return ai_topic
 
+    # 固定候補の中から未使用を探す
+    for topic in shuffled_fixed:
+        if not is_topic_already_used(topic):
+            return topic
+
+    # どうしても全部使い切っていたら最後の保険
     if fixed_candidates:
         return random.choice(fixed_candidates)
 
@@ -578,9 +617,10 @@ def generate_article_plan(theme: str, topic: str) -> dict:
 条件:
 - クイズは15問
 - 難易度構成は以下
-  - 1〜5問: 普通〜中級の一般常識問題
+  - 1〜2問: 超簡単問題
+  - 3〜5問: 普通レベル問題
   - 6〜10問: 上級レベルの知識問題
-  - 11〜15問: 超マニアック問題（コアファン向け）
+  - 11〜15問: マニア向け問題
 - descriptionは自然なSEO説明文にする
 - tagsは5〜7個にする
 - tagsは日本語中心でよいが、作品名の英語表記が自然なら含めてよい
@@ -692,25 +732,46 @@ description: {plan["description"]}
 
 難易度ルール:
 - 問題数は必ず15問
-- 1〜5問目は普通〜中級の一般常識問題（誰でも解ける〜少し考える）
-- 6〜10問目は上級レベルの知識問題（知識が必要）
-- 11〜15問目は超マニアック問題（かなり難しい）
-- 最初から最後まで単調にならないように段階的に難しくする
-- 今回は簡単すぎる問題は禁止
-- ただし1〜5問目は入口として成立する難しさにする
-- 後半5問はコアファン向けにかなり深くしてよい
+- 1〜2問目は超簡単問題にする
+- 3〜5問目は普通レベル問題にする
+- 6〜10問目は上級レベルの知識問題にする
+- 11〜15問目はマニア向け問題にする
+- 最初から最後まで段階的に難しくなる構成にする
+- 1問目と2問目は、その作品や題材を知っている人ならほぼ答えられる内容にする
+- 3〜5問目は、知っていれば解けるが少し考える内容にする
+- 6〜10問目は、しっかり知識がある人向けにする
+- 11〜15問目は、コアファンや詳しい人でないと難しい内容にする
 
 品質ルール:
-- 簡単すぎる問題は禁止
-- ただし最初5問は入口として成立させる
-- 後半5問はかなり攻めてOK
+- 1〜2問目は簡単でよい
+- ただし簡単すぎても、題材に関係ない問題にはしない
+- 3〜5問目は普通レベルとして成立させる
+- 6〜10問目は知識差が出る問題にする
+- 11〜15問目はかなり深い知識を問ってよい
+- 難易度の逆転は禁止（後半より前半のほうが難しい構成にしない）
 - 事実関係が不安定な内容は避ける
 - あいまいな説や論争中の情報は出さない
 - 一般的によく知られている設定・ルール・作品知識から、コアファン向け知識まで段階的に出題する
 - 同じタイプの問題が続きすぎないようにする
 - 問題はバリエーションを持たせる
 - 日本語は自然にする
-- あいまいな問いより、答えが比較的一意に決まりやすい問いを優先する
+- 各問題は必ず「答えが1つに明確に定まる形式」にする
+- 主観・説明問題は禁止（例：「〜について説明せよ」はNG）
+- 「最も〜」「〜とされる」など曖昧な表現は禁止
+- 答えが複数あり得る問題は禁止
+- すべての問題は一問一答形式にする
+- 問題は以下のいずれかの形式のみ許可する
+  1. 人物名を答える問題
+  2. 地名・組織名を答える問題
+  3. 技・能力・名称を答える問題
+  4. 数値・回数・順番を答える問題
+  - 問題文は必ず「1つの明確な固有名詞 or 数値」を答えさせる形式にする
+- 「どれ？」「何？」ではなく「〇〇は何という名前？」形式にする
+- 選択式は禁止
+- 同じ形式の問題が3問以上連続しないようにする
+- 人物・技・出来事・時系列などをバランスよく混ぜる
+- 抽象的な問いは禁止
+- 必ず固有名詞・数値・名称など、明確に特定できる答えにする
 - 明確に誤答しやすいひっかけだけに頼らない
 - 本当に知識差が出る問題構成にする
 
@@ -749,6 +810,8 @@ def fact_check_quiz_body(theme: str, topic: str, title: str, body: str) -> str:
 確認ルール:
 - 問題ごとに「正確」「やや不正確」「不正確」「曖昧」のどれかで判定
 - 不正確または曖昧なら、どこが問題か具体的に指摘
+- 答えが一意でない問題は「不正確」と判定する
+- 曖昧な問いは必ず修正対象にする
 - より安全で一般的な表現への修正案を書く
 - 事実関係が揺れやすいものは、より安定した問題に差し替える提案をしてよい
 - 問題番号ごとに分ける
@@ -780,9 +843,10 @@ def fix_quiz_by_fact_check(theme: str, topic: str, title: str, body: str, fact_r
 - 「## まとめ」も必ず残す
 - 問題数は15問のまま
 - 難易度構成を壊さない
-  - 1〜5問: 普通〜中級
+  - 1〜2問: 超簡単
+  - 3〜5問: 普通
   - 6〜10問: 上級
-  - 11〜15問: 超マニアック
+  - 11〜15問: マニア
 - frontmatterは追加しない
 - 不正確または曖昧な箇所を優先修正する
 - より安全で一般的に正しい知識に寄せる
@@ -857,9 +921,10 @@ def improve_quiz_body(theme: str, topic: str, title: str, body: str, review: str
 - 必要なら問題文や解説を自然に調整する
 - 冗長すぎる箇所は整理する
 - 難易度構成は壊さない
-  - 1〜5問: 普通〜中級
+  - 1〜2問: 超簡単
+  - 3〜5問: 普通
   - 6〜10問: 上級
-  - 11〜15問: 超マニアック
+  - 11〜15問: マニア
 
 出力:
 Markdown本文のみ
@@ -894,9 +959,10 @@ def expand_for_seo(theme: str, topic: str, title: str, body: str) -> str:
 - frontmatterは追加しない
 - SEOっぽすぎる不自然な言い回しは避ける
 - 難易度構成は壊さない
-  - 1〜5問: 普通〜中級
+  - 1〜2問: 超簡単
+  - 3〜5問: 普通
   - 6〜10問: 上級
-  - 11〜15問: 超マニアック
+  - 11〜15問: マニア
 
 出力:
 Markdown本文のみ
@@ -923,16 +989,19 @@ def build_frontmatter(
     tags: list[str],
     updated: str,
     slug: str,
+    topic: str,
 ) -> str:
     safe_title = clean_text(title)
     safe_description = clean_text(description)
     safe_slug = clean_text(slug)
+    safe_topic = clean_text(topic)
     tags_str = ", ".join([f'"{clean_text(t)}"' for t in tags])
 
     return f"""---
 title: "{safe_title}"
 description: "{safe_description}"
 theme: "{theme}"
+topic: "{safe_topic}"
 slug: "{safe_slug}"
 tags: [{tags_str}]
 updated: "{updated}"
@@ -984,7 +1053,7 @@ def generate_article(theme: str):
 
     slug = generate_slug(theme, topic, title)
     updated = datetime.now().strftime("%Y-%m-%d")
-    frontmatter = build_frontmatter(title, description, theme, tags, updated, slug)
+    frontmatter = build_frontmatter(title, description, theme, tags, updated, slug, topic)
     content = frontmatter + body.strip() + "\n"
 
     file_path = ensure_unique_filepath(ARTICLE_DIR, slug, ".mdx")
