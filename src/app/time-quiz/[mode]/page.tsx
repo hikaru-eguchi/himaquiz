@@ -37,7 +37,7 @@ interface ArticleData {
  * score の 5分の1 を獲得ポイントとして付与する
  */
 function calcEarnedPointsFromScore(score: number) {
-  return Math.floor(score / 10);
+  return Math.floor(score / 5);
 }
 
 // 正解数に応じて出すコメント

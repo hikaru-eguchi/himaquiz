@@ -11,7 +11,7 @@
 
 /* --- タイトル（太字・ポップ・黒い縁取り） --- */
 .prose h1 {
-  @apply text-5xl md:text-6xl font-extrabold text-center mt-6 mb-8;
+  @apply text-3xl md:text-5xl font-extrabold text-center mt-6 mb-8;
   font-family: 'Bangers', sans-serif;
   color: #fff100; /* 文字色は明るい黄色 */
   text-shadow: 

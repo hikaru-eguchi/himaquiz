@@ -13,7 +13,6 @@ import { getMonthStartJST } from "@/lib/month";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
 import StreakRankingTop10 from "../../components/StreakRankingTop10";
 import { Top3CommentModal } from "../../components/Top3CommentModal";
-import { motion } from "framer-motion";
 import RecommendedSoloGames from "@/app/components/RecommendedSoloGames";
 
 interface ArticleData {
@@ -33,18 +32,11 @@ interface ArticleData {
   };
 }
 
-/**
- * 3問ごとにUP（5点）
- * 1〜3問目: 5P
- * 4〜6問目: 10P
- * 7〜9問目: 15P
- * 10〜12問目: 20P ...
- */
 function calcQuizEarnedPoints(correctCount: number) {
   let total = 0;
   for (let i = 1; i <= correctCount; i++) {
     const tier = Math.floor((i - 1) / 3); // 0,1,2...
-    const per = 5 * (tier + 1); // 5,10,15...
+    const per = 30 * (tier + 1); // 5,10,15...
     total += per;
   }
   return total;
@@ -54,6 +46,41 @@ function calcQuizEarnedPoints(correctCount: number) {
 function calcEarnedExp(correctCount: number) {
   return correctCount * 20;
 }
+
+const titles = [
+  { threshold: 3, title: "優等生" },
+  { threshold: 5, title: "異端児" },
+  { threshold: 8, title: "賢者" },
+  { threshold: 10, title: "博識者" },
+  { threshold: 13, title: "クイズ研究家" },
+  { threshold: 15, title: "クイズ学者" },
+  { threshold: 18, title: "クイズ教授" },
+  { threshold: 20, title: "クイズ名人" },
+  { threshold: 23, title: "クイズ達人" },
+  { threshold: 25, title: "クイズ仙人" },
+  { threshold: 28, title: "クイズ星人" },
+  { threshold: 30, title: "知識マスター" },
+  { threshold: 33, title: "天才クイズプレイヤー" },
+  { threshold: 35, title: "脳内図書館 " },
+  { threshold: 38, title: "クイズマシーン " },
+  { threshold: 40, title: "問題バスター " },
+  { threshold: 43, title: "答えの支配者 " },
+  { threshold: 45, title: "クイズモンスター " },
+  { threshold: 48, title: "答えの錬金術師" },
+  { threshold: 50, title: "ひらめきの妖精" },
+  { threshold: 53, title: "クイズ帝王" },
+  { threshold: 55, title: "問題ハンター" },
+  { threshold: 58, title: "記憶の魔術師" },
+  { threshold: 60, title: "IQ200超えの賢者" },
+  { threshold: 65, title: "クイズ鬼人" },
+  { threshold: 70, title: "クイズ竜王" },
+  { threshold: 75, title: "クイズ魔人" },
+  { threshold: 80, title: "クイズ覇王" },
+  { threshold: 85, title: "クイズオリンポスの支配者" },
+  { threshold: 90, title: "レジェンドクイズマスター" },
+  { threshold: 95, title: "究極クイズマスター" },
+  { threshold: 100, title: "神（ゴッド）🌟" },
+];
 
 // 正解数に応じて出すコメント
 const rankComments = [
@@ -134,6 +161,7 @@ const QuizResult = ({
 }) => {
   const [showScore, setShowScore] = useState(false);
   const [showText, setShowText] = useState(false);
+  const [showText2, setShowText2] = useState(false);
   const [showRank, setShowRank] = useState(false);
   const [showButton, setShowButton] = useState(false);
 
@@ -145,6 +173,12 @@ const QuizResult = ({
     return comment;
   };
 
+  const maskResultTitle = (title: string) => {
+    const clean = title.trim();
+    if (clean.length <= 2) return `${clean}○○`;
+    return `${clean.slice(0, 2)}○○`;
+  };
+
   const formatTopPercent = (p: number) => {
     // 上位1%未満だけ小数1桁、それ以外は整数
     return p < 1 ? p.toFixed(1) : String(Math.round(p));
@@ -153,13 +187,32 @@ const QuizResult = ({
   useEffect(() => {
     const timers: NodeJS.Timeout[] = [];
     timers.push(setTimeout(() => setShowScore(true), 500));
-    timers.push(setTimeout(() => setShowText(true), 1000));
-    timers.push(setTimeout(() => setShowRank(true), 1500));
-    timers.push(setTimeout(() => setShowButton(true), 1500));
+    timers.push(setTimeout(() => setShowText2(true), 1000));
+    timers.push(setTimeout(() => setShowText(true), 1500));
+    timers.push(setTimeout(() => setShowRank(true), 2000));
+    timers.push(setTimeout(() => setShowButton(true), 2000));
     return () => timers.forEach(clearTimeout);
   }, []);
 
   const showLoginUI = !isLoggedIn && awardStatus === "need_login";
+
+  const getRetryMessage = () => {
+    if (topPercent === null) return "もう一回挑戦して記録更新を狙おう！";
+    if (topPercent <= 1) return "すごすぎる…！次は伝説級を狙おう！";
+    if (topPercent <= 5) return "あと少しで超上位帯！もう一回で更新を狙える！";
+    if (topPercent <= 20) return "かなり上位！次は1ケタ台を目指そう！";
+    return "次の1回で一気に上位を狙える！";
+  };
+
+  const getNextTitleResultInfo = () => {
+    const next = titles.find((t) => correctCount < t.threshold);
+    if (!next) return null;
+
+    return {
+      title: next.title.trim(),
+      remain: next.threshold - correctCount,
+    };
+  };
 
   return (
     <div className="text-center mt-6">
@@ -167,27 +220,57 @@ const QuizResult = ({
         <p className="text-3xl md:text-5xl mb-4 md:mb-6">連続正解数： {correctCount}問</p>
       )}
 
-      {showRank && (
-        <div className="mx-auto max-w-[520px] my-10">
-          {percentLoading ? (
-            <p className="text-lg md:text-xl font-extrabold text-gray-700">
-              上位％を計算中...
-            </p>
-          ) : topPercent !== null ? (
-            <p className="text-xl md:text-3xl font-extrabold text-gray-900">
-              あなたのスコアは{" "}
-              <span className="text-red-600">上位{formatTopPercent(topPercent)}%</span>！
-            </p>
-          ) : (
-            <p className="text-sm md:text-base font-bold text-gray-600">
-              ※上位％の取得に失敗しました
-            </p>
-          )}
-        </div>
+      {showText2 && (
+        <>
+          {/* <p className="mt-4 text-base md:text-lg font-bold text-gray-700">
+            {getRetryMessage()}
+          </p> */}
+          
+          <div className="mx-auto my-8 max-w-[620px]">
+            {percentLoading ? (
+              <div className="rounded-3xl border-4 border-gray-200 bg-white px-6 py-8 shadow-lg">
+                <p className="text-lg md:text-2xl font-extrabold text-gray-700 animate-pulse">
+                  📊 上位％を計算中...
+                </p>
+              </div>
+            ) : topPercent !== null ? (
+              <div className="relative overflow-hidden rounded-[28px] border-4 border-yellow-300 bg-gradient-to-br from-yellow-100 via-white to-orange-100 px-6 py-8 shadow-[0_16px_40px_rgba(0,0,0,0.12)]">
+                <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-yellow-300/40 blur-2xl" />
+                <div className="absolute -left-6 -bottom-6 h-24 w-24 rounded-full bg-pink-300/30 blur-2xl" />
+
+                <p className="mt-3 text-lg md:text-2xl font-bold text-gray-700">
+                  あなたの今回の記録は…
+                </p>
+
+                <p className="mt-3 text-4xl md:text-6xl font-extrabold leading-none text-red-500 drop-shadow-sm">
+                  上位{formatTopPercent(topPercent)}%
+                </p>
+
+                <p className="mt-4 text-base md:text-xl font-bold text-gray-800">
+                  かなりすごい記録です！
+                </p>
+
+                {/* <div className="mt-5 inline-flex items-center rounded-full bg-black px-4 py-2 text-sm md:text-base font-extrabold text-white">
+                  🔥 もう1回でさらに上を狙える
+                </div> */}
+
+                <div className="mt-5 inline-flex items-center rounded-full bg-black px-4 py-2 text-sm md:text-base font-extrabold text-white">
+                  🔥 {getRetryMessage()}
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-3xl border-4 border-gray-200 bg-white px-6 py-8 shadow-lg">
+                <p className="text-sm md:text-base font-bold text-gray-600">
+                  ※上位％の取得に失敗しました
+                </p>
+              </div>
+            )}
+          </div>
+        </>
       )}
 
       {showText && (
-        <p className="text-xl md:text-2xl text-gray-600 mb-2 mt-6">あなたの称号は…</p>
+        <p className="text-xl md:text-2xl text-gray-600 mb-2 mt-10">あなたの称号は…</p>
       )}
 
       {showRank && (
@@ -208,6 +291,75 @@ const QuizResult = ({
               {getRankComment()}
             </p>
           )}
+
+          {showRank && (() => {
+            const nextTitleInfo = getNextTitleResultInfo();
+            if (!nextTitleInfo) {
+              return (
+                <div className="mx-auto mb-8 max-w-[560px] rounded-2xl border-4 border-yellow-400 bg-gradient-to-r from-yellow-100 via-white to-yellow-100 px-5 py-4 shadow-lg">
+                  <p className="text-lg md:text-2xl font-extrabold text-yellow-700">
+                    👑 最高称号まで到達！
+                  </p>
+                  <p className="mt-2 text-sm md:text-lg font-bold text-gray-700">
+                    ここまで来たあなたは本物です
+                  </p>
+                </div>
+              );
+            }
+
+            return (
+              <div className="mx-auto my-10 max-w-[560px] rounded-3xl bg-gradient-to-br from-yellow-50 via-white to-orange-50 px-6 py-6 shadow-[0_10px_30px_rgba(255,180,0,0.15)] border border-yellow-200">
+
+                {/* タイトル */}
+                {/* <div className="text-center">
+                  <p className="inline-flex items-center gap-2 rounded-full bg-yellow-100 px-4 py-1 text-sm md:text-base font-black text-yellow-700 border border-yellow-300">
+                    🌟 次の称号チャレンジ
+                  </p>
+                </div> */}
+
+                {/* 称号名 */}
+                <p className="text-center text-lg md:text-2xl font-bold text-gray-700">
+                  次の称号
+                </p>
+                <p className="text-center text-2xl md:text-4xl font-extrabold text-yellow-600 tracking-wide">
+                  「{maskResultTitle(nextTitleInfo.title)}」
+                </p>
+
+                {/* 残り問題数 */}
+                <div className="mt-4 text-center">
+                  <p className="text-gray-600 text-sm md:text-base font-semibold">
+                    まであと
+                  </p>
+
+                  <p className="mt-1 text-4xl md:text-6xl font-extrabold tracking-tight">
+                    <span className="text-red-500 drop-shadow-[0_2px_6px_rgba(255,0,0,0.3)]">
+                      {nextTitleInfo.remain}
+                    </span>
+                    <span className="ml-2 text-gray-800 text-2xl md:text-3xl">
+                      問
+                    </span>
+                  </p>
+                </div>
+
+                {/* メッセージ */}
+                <p className="mt-5 text-center text-sm md:text-base font-bold text-gray-600">
+                  🔥 もう一回で称号アップできるかも…！
+                </p>
+
+                {/* プログレスバー */}
+                <div className="mt-5">
+                  <div className="h-3 w-full rounded-full bg-gray-200 overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-yellow-400 to-orange-500 transition-all duration-500"
+                      style={{
+                        width: `${Math.max(0, Math.min(100, (1 - nextTitleInfo.remain / (nextTitleInfo.remain + 5)) * 100))}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
         </>
       )}
 
@@ -255,7 +407,7 @@ const QuizResult = ({
       )}
 
       {showButton && (
-        <div className="flex flex-col md:flex-row justify-center items-center gap-4 mt-6">
+        <div className="flex flex-col md:flex-row justify-center items-center gap-4 my-10">
           <div className="flex flex-col md:flex-row gap-4">
             <button
               className="px-6 py-3 bg-black text-white border border-black rounded-lg font-bold text-xl hover:opacity-80 cursor-pointer"
@@ -318,12 +470,53 @@ export default function QuizModePage() {
   const [flashMilestone, setFlashMilestone] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState(30);
   const [incorrectMessage, setIncorrectMessage] = useState<string | null>(null);
+  const [justUnlockedTitle, setJustUnlockedTitle] = useState<string | null>(null);
 
     // ✅ 出題開始ゲート（カウントダウンが終わるまで問題＆タイマーを止める）
   // const [ready, setReady] = useState(false);
 
   // ✅ 3,2,1,START! 表示用（null=非表示, 3..0=表示）
   // const [countdown, setCountdown] = useState<number | null>(3);
+
+  const getCurrentTitle = () => {
+    let title = "クイズ初心者";
+    titles.forEach((t) => {
+      if (correctCount >= t.threshold) title = t.title;
+    });
+    return title;
+  };
+
+  const getNextTitleInfo = () => {
+    const next = titles.find((t) => correctCount < t.threshold);
+    if (!next) return null;
+
+    const remain = next.threshold - correctCount;
+    return {
+      title: next.title.trim(),
+      threshold: next.threshold,
+      remain,
+    };
+  };
+
+  const maskTitle = (title: string) => {
+    const clean = title.trim();
+    if (clean.length <= 2) return `${clean}○○`;
+    return `${clean.slice(0, 2)}○○`;
+  };
+
+  const getTitleProgressPercent = () => {
+    const currentThreshold =
+      [...titles].reverse().find((t) => correctCount >= t.threshold)?.threshold ?? 0;
+    const next = titles.find((t) => correctCount < t.threshold);
+
+    if (!next) return 100;
+
+    const range = next.threshold - currentThreshold;
+    const progress = correctCount - currentThreshold;
+
+    if (range <= 0) return 100;
+    return Math.max(0, Math.min(100, Math.round((progress / range) * 100)));
+  };
 
   // ★ リザルト用：獲得ポイントと付与状態
   const [earnedPoints, setEarnedPoints] = useState(0);
@@ -518,41 +711,6 @@ export default function QuizModePage() {
     }
   };
 
-  const titles = [
-    { threshold: 3, title: "優等生" },
-    { threshold: 5, title: "異端児" },
-    { threshold: 8, title: "賢者" },
-    { threshold: 10, title: "博識者" },
-    { threshold: 13, title: "クイズ研究家" },
-    { threshold: 15, title: "クイズ学者" },
-    { threshold: 18, title: "クイズ教授" },
-    { threshold: 20, title: "クイズ名人" },
-    { threshold: 23, title: "クイズ達人" },
-    { threshold: 25, title: "クイズ仙人" },
-    { threshold: 28, title: "クイズ星人" },
-    { threshold: 30, title: "知識マスター" },
-    { threshold: 33, title: "天才クイズプレイヤー" },
-    { threshold: 35, title: "脳内図書館 " },
-    { threshold: 38, title: "クイズマシーン " },
-    { threshold: 40, title: "問題バスター " },
-    { threshold: 43, title: "答えの支配者 " },
-    { threshold: 45, title: "クイズモンスター " },
-    { threshold: 48, title: "答えの錬金術師" },
-    { threshold: 50, title: "ひらめきの妖精" },
-    { threshold: 53, title: "クイズ帝王" },
-    { threshold: 55, title: "問題ハンター" },
-    { threshold: 58, title: "記憶の魔術師" },
-    { threshold: 60, title: "IQ200超えの賢者" },
-    { threshold: 65, title: "クイズ鬼人" },
-    { threshold: 70, title: "クイズ竜王" },
-    { threshold: 75, title: "クイズ魔人" },
-    { threshold: 80, title: "クイズ覇王" },
-    { threshold: 85, title: "クイズオリンポスの支配者" },
-    { threshold: 90, title: "レジェンドクイズマスター" },
-    { threshold: 95, title: "究極クイズマスター" },
-    { threshold: 100, title: "神（ゴッド）🌟" },
-  ];
-
   const shuffleArray = <T,>(arr: T[]) => [...arr].sort(() => Math.random() - 0.5);
 
   const sortQuestionsForPlay = (list: { id: string; quiz: QuizData }[]) => {
@@ -744,7 +902,11 @@ export default function QuizModePage() {
     if (userAnswer === correctAnswer) {
       setCorrectCount((c) => {
         const newCount = c + 1;
-
+        const unlocked = titles.find((t) => t.threshold === newCount);
+        if (unlocked) {
+          setJustUnlockedTitle(unlocked.title.trim());
+          setTimeout(() => setJustUnlockedTitle(null), 3000);
+        }
         if (newCount % 10 === 0) {
           setFlashMilestone(`${newCount}問突破！`);
           setTimeout(() => setFlashMilestone(null), 1000);
@@ -1114,6 +1276,93 @@ export default function QuizModePage() {
           <h2 className="text-5xl md:text-6xl font-extrabold mb-6 text-yellow-500 drop-shadow-lg">
             第 {currentIndex + 1} 問
           </h2>
+
+          {(() => {
+            const nextTitleInfo = getNextTitleInfo();
+            const progressPercent = getTitleProgressPercent();
+
+            if (justUnlockedTitle) {
+              return (
+                <div className="mx-auto mb-5 max-w-[560px] rounded-3xl border-4 border-yellow-300 bg-gradient-to-br from-yellow-100 via-white to-orange-100 px-5 py-5 shadow-[0_14px_36px_rgba(251,191,36,0.28)]">
+                  <div className="text-center">
+                    <p className="inline-flex items-center rounded-full border border-yellow-300 bg-yellow-50 px-3 py-1 text-sm md:text-base font-black text-yellow-700">
+                      👑 新称号達成！
+                    </p>
+                  </div>
+
+                  <p className="mt-4 text-center text-lg md:text-2xl font-bold text-gray-700">
+                    🎉おめでとう！
+                  </p>
+
+                  <p className="mt-2 text-center text-2xl md:text-4xl font-extrabold text-yellow-600 drop-shadow-sm animate-pulse">
+                    「{justUnlockedTitle}」GET！！
+                  </p>
+                </div>
+              );
+            }
+
+            if (!nextTitleInfo) {
+              return (
+                <div className="mx-auto mb-5 max-w-[560px] rounded-2xl border-4 border-yellow-400 bg-gradient-to-r from-yellow-100 via-white to-yellow-100 px-5 py-4 shadow-lg">
+                  <p className="text-lg md:text-xl font-extrabold text-yellow-700">
+                    👑 最高称号に到達中！
+                  </p>
+                  <p className="mt-1 text-base md:text-lg font-bold text-gray-700">
+                    今の称号：{getCurrentTitle()}
+                  </p>
+                </div>
+              );
+            }
+
+            return (
+              <div className="mx-auto mb-5 max-w-[560px] rounded-3xl border-4 border-blue-300 bg-white/95 px-5 py-5 shadow-[0_10px_30px_rgba(59,130,246,0.15)]">
+                <div className="text-center">
+                  <p className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-sm md:text-base font-black text-blue-600 border border-blue-200">
+                    🌟次の称号チャレンジ🌟
+                  </p>
+                </div>
+
+                <p className="mt-4 text-xl md:text-3xl font-extrabold text-gray-800 text-center leading-snug">
+                  「{maskTitle(nextTitleInfo.title)}」まであと
+                  <span className="mx-2 inline-block text-red-600 text-3xl md:text-5xl drop-shadow-sm">
+                    {nextTitleInfo.remain}
+                  </span>
+                  問
+                </p>
+
+                <div className="mt-4">
+                  <div className="mb-2 text-center text-sm md:text-lg font-bold text-gray-500">
+                    <span>今の称号：{getCurrentTitle()}</span>
+                    {/* <span>達成率 {progressPercent}%</span> */}
+                  </div>
+
+                  <div className="h-5 w-full overflow-hidden rounded-full bg-gray-200 shadow-inner">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 transition-all duration-500"
+                      style={{ width: `${progressPercent}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* <p className="mt-3 text-sm md:text-base font-bold text-gray-600 text-center">
+                  あと{nextTitleInfo.remain}問で称号アップ！🎉
+                </p> */}
+                <p
+                  className={[
+                    "mt-4 inline-flex items-center justify-center rounded-full px-4 py-2",
+                    "text-sm md:text-base font-extrabold shadow-md",
+                    nextTitleInfo.remain === 1
+                      ? "bg-gradient-to-r from-red-500 via-orange-400 to-yellow-400 text-white animate-pulse"
+                      : "bg-gradient-to-r from-blue-500 via-cyan-400 to-indigo-500 text-white",
+                  ].join(" ")}
+                >
+                  {nextTitleInfo.remain === 1
+                    ? "🔥 あと1問で次の称号GET！！"
+                    : `🎯 あと${nextTitleInfo.remain}問で称号UP！`}
+                </p>
+              </div>
+            );
+          })()}
 
           {!incorrectMessage && (
             <p className="text-2xl md:text-3xl font-bold mb-4 text-red-500">回答タイマー: {timeLeft} 秒</p>

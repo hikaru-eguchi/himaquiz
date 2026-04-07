@@ -261,7 +261,7 @@ export default function QuizModePage() {
   const [mulLocked, setMulLocked] = useState<number | null>(null); // タップで確定した倍率
 
   // ✅ 最初の報酬ルーレット（50/100/150）
-  const BASE_LIST = [50, 100, 150] as const;
+  const BASE_LIST = [300, 400, 500] as const;
   const [baseRolling, setBaseRolling] = useState(false);
   const [baseCandidate, setBaseCandidate] = useState<number>(BASE_LIST[0]);
   const [baseLocked, setBaseLocked] = useState<number | null>(null);

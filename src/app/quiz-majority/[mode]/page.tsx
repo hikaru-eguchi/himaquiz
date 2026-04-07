@@ -16,16 +16,16 @@ import RecommendedMultiplayerGames from "@/app/components/RecommendedMultiplayer
 type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
 
 const stagePointMap: Record<number, number> = {
-  1: 10,
-  2: 20,
-  3: 30,
-  4: 40,
-  5: 50,
-  6: 60,
-  7: 80,
-  8: 100,
-  9: 200,
-  10: 300,
+  1: 100,
+  2: 120,
+  3: 150,
+  4: 200,
+  5: 250,
+  6: 300,
+  7: 500,
+  8: 750,
+  9: 1500,
+  10: 3000,
 };
 
 const stageMessages: Record<number, string> = {

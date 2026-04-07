@@ -604,10 +604,7 @@ export default async function HomePage({
             </p>
           </div>
 
-          <div className="relative text-center max-w-[280px]">
-            <span className="absolute -top-3 -left-4 z-10 px-3 py-1 text-xs md:text-sm font-bold rounded-full border-2 border-white bg-red-500 text-white shadow-md rotate-[-8deg]">
-              🔥人気No.1
-            </span>
+          <div className="text-center max-w-[280px]">
             <Link href="/quizbooks_lateral" className="w-full md:w-auto flex justify-center">
               <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-purple-600 via-indigo-500 to-blue-400 text-white hover:scale-110 transition-all">
                 🧠 水平思考クイズ
@@ -629,7 +626,10 @@ export default async function HomePage({
             </p>
           </div>
 
-          <div className="text-center max-w-[280px]">
+          <div className="relative text-center max-w-[280px]">
+            <span className="absolute -top-3 -left-4 z-10 px-3 py-1 text-xs md:text-sm font-bold rounded-full border-2 border-white bg-red-500 text-white shadow-md rotate-[-8deg]">
+              🔥人気No.1
+            </span>
             <Link href="/quizbooks_matchstick" className="w-full md:w-auto flex justify-center">
               <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-cyan-500 via-sky-400 to-blue-300 text-white hover:scale-110 transition-all">
                 ➖ マッチ棒クイズ

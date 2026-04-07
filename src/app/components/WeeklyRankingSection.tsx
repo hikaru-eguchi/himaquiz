@@ -72,13 +72,13 @@ export default async function WeeklyRankingSection() {
             valueLabel={(r) => `${r.play_count}回`}
           /> */}
 
-          <MonthlyRankingCard
+          {/* <MonthlyRankingCard
             title="今月の正解数"
             icon="✅"
             bgClass="from-orange-50 via-orange-100 to-orange-200 border-gray-200"
             orderBy="correct_count"
             valueLabel={(r) => `${r.correct_count}問`}
-          />
+          /> */}
         </div>
       </div>
     </section>

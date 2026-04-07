@@ -21,13 +21,17 @@ const POPULAR_SLUGS = [
   "onepiece-quiz-01",
   "doraemon-anime-quiz",
   "pokemon-character-quiz",
+  "crayon-shinchan-anime-quiz-2",
   "kimetsu-no-yaiba-anime-quiz",
+  "jojo-anime-quiz",
 ];
 
 const RECOMMENDED_SLUGS = [
+  "japan-place-name-quiz",
   "j-pop-music-quiz",
   "japan-trivia-quiz-challenge",
   "natural-phenomena-science-quiz",
+  "karaoke-songs-music-quiz",
   "sushi-food-quiz",
 ];
 
