@@ -11,21 +11,18 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 BASE_DIR = pathlib.Path(__file__).resolve().parents[1]
 ARTICLE_DIR = BASE_DIR / "src" / "quizbooks_theme"
 
-# 必須テーマ
-REQUIRED_THEMES = ["anime"]
-
-# ランダム候補テーマ
-OPTIONAL_THEMES = [
-    "game",
-    "sports",
-    "zatsugaku",
-    "food",
-    "music",
-    "science",
-    "character",
-    "manga",
-    "hobby",
-]
+THEME_WEIGHTS = {
+    "anime": 5,
+    "game": 4,
+    "zatsugaku": 4,
+    "music": 4,
+    "sports": 3,
+    "food": 3,
+    "science": 2,
+    "character": 3,
+    "manga": 4,
+    "hobby": 2,
+}
 
 THEME_LABELS = {
     "anime": "アニメ",
@@ -136,15 +133,12 @@ THEME_TOPIC_EXAMPLES = {
     "music": [
         "J-POP",
         "アニソン",
-        "楽器",
-        "クラシック音楽",
-        "音楽記号",
-        "バンド雑学",
-        "ヒット曲",
-        "カラオケ定番曲",
+        "邦ロック",
+        "日本のバンド",
+        "カラオケ定番曲（日本）",
         "ボーカロイド",
-        "アイドルソング",
-        "フェス音楽",
+        "アイドルソング（日本）",
+        "日本のヒット曲",
     ],
     "science": [
         "宇宙",
@@ -487,9 +481,19 @@ def call_model(prompt: str, model: str = "gpt-4o", temperature: float = 0.7) -> 
     return remove_code_fence(res.choices[0].message.content or "")
 
 
-def choose_themes() -> list[str]:
-    picked_optional = random.sample(OPTIONAL_THEMES, 4)
-    return REQUIRED_THEMES + picked_optional
+def choose_themes():
+    pool = THEME_WEIGHTS.copy()
+    selected = []
+
+    for _ in range(min(5, len(pool))):
+        themes = list(pool.keys())
+        weights = list(pool.values())
+
+        picked = random.choices(themes, weights=weights, k=1)[0]
+        selected.append(picked)
+        del pool[picked]
+
+    return selected
 
 
 def generate_topic_with_ai(theme: str) -> str:
@@ -508,29 +512,26 @@ def generate_topic_with_ai(theme: str) -> str:
 人気候補の参考:
 {popular_examples}
 
-条件:
+🔥重要条件（必ず守る）:
+- 日本人向けコンテンツにする
+- 日本で知名度があるものを優先する
+- 日本のアニメ・ゲーム・芸能・文化を優先する
+- 音楽なら「J-POP・アニソン・日本のバンド」に限定する
+- 海外アーティスト・海外作品は基本的に避ける
+- 日本人の10〜30代が知っているものにする
+- 日本で検索需要が高い題材を選ぶ
+- 最近話題の作品を優先する
+- 若い世代（10〜30代）が知っているものにする
+- SNSで話題になりやすい題材にする
+
+通常条件:
 - 実在する作品・分野・ジャンルにする
 - クイズにしやすい題材にする
 - 人気や検索需要が見込めるものを優先する
 - 日本語として自然にする
 - 曖昧すぎる題材は避ける
-- すでに作成済みの題材は避ける
-- 同じ作品・題材の重複生成は避ける
-- そのテーマの中で特化記事になりやすい題材にする
-- 広すぎる言葉より、やや特化した題材を優先する
-- ただしマニアックすぎて検索されなそうな題材は避ける
-- 既存の人気候補と完全一致でもよいし、近い具体化でもよい
 - 1つだけ出力する
-- 余計な説明は書かない
 - 題材名のみ出力する
-
-よい例:
-ジョジョの奇妙な冒険
-葬送のフリーレン
-プロ野球
-コンビニグルメ
-ソロキャンプ
-ルアーフィッシング
 """
 
     topic = call_model(prompt, model="gpt-4o-mini", temperature=0.95)
@@ -773,6 +774,11 @@ description: {plan["description"]}
 - 後半より前半のほうが難しい構成にしない
 - 事実関係が不安定な内容は避ける
 - あいまいな説や論争中の情報は出さない
+- 出題内容は日本人に馴染みのある内容にする
+- 日本で広く知られている情報を優先する
+- 日本の文化・作品・人物を優先する
+- 海外前提の知識は避ける
+- 日本の10〜30代が理解しやすい内容にする
 - 一般的によく知られている設定・ルール・作品知識から、コアファン向け知識まで段階的に出題する
 - 同じタイプの問題が続きすぎないようにする
 - 問題はバリエーションを持たせる
