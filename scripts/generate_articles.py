@@ -448,8 +448,6 @@ def get_existing_topics() -> set[str]:
     for path in ARTICLE_DIR.glob("*.mdx"):
         try:
             text = path.read_text(encoding="utf-8")
-
-            # frontmatterの topic: "..." を拾う
             match = re.search(r'^topic:\s*"(.+?)"', text, re.MULTILINE)
             if match:
                 topics.add(match.group(1).strip())
@@ -458,7 +456,9 @@ def get_existing_topics() -> set[str]:
 
     return topics
 
+
 EXISTING_TOPICS_CACHE = get_existing_topics()
+
 
 def is_topic_already_used(topic: str) -> bool:
     return topic.strip() in EXISTING_TOPICS_CACHE
@@ -542,28 +542,23 @@ def generate_topic_with_ai(theme: str) -> str:
 def choose_topic_for_theme(theme: str) -> str:
     fixed_candidates = THEME_TOPIC_EXAMPLES.get(theme, [])
 
-    # まず固定候補をシャッフルして、未使用のものを探す
     shuffled_fixed = fixed_candidates[:]
     random.shuffle(shuffled_fixed)
 
-    # 30%は固定候補優先
     if shuffled_fixed and random.random() < 0.30:
         for topic in shuffled_fixed:
             if not is_topic_already_used(topic):
                 return topic
 
-    # 70%はAI生成を優先、ただし重複は避ける
     for _ in range(5):
         ai_topic = generate_topic_with_ai(theme)
         if ai_topic and not is_topic_already_used(ai_topic):
             return ai_topic
 
-    # 固定候補の中から未使用を探す
     for topic in shuffled_fixed:
         if not is_topic_already_used(topic):
             return topic
 
-    # どうしても全部使い切っていたら最後の保険
     if fixed_candidates:
         return random.choice(fixed_candidates)
 
@@ -617,10 +612,12 @@ def generate_article_plan(theme: str, topic: str) -> dict:
 条件:
 - クイズは15問
 - 難易度構成は以下
-  - 1〜2問: 超簡単問題
-  - 3〜5問: 普通レベル問題
-  - 6〜10問: 上級レベルの知識問題
-  - 11〜15問: マニア向け問題
+  - 1〜3問: 超簡単問題
+  - 4〜7問: 簡単〜普通問題
+  - 8〜10問: 普通問題
+  - 11〜13問: 難しい問題
+  - 14〜15問: マニア向け問題
+- ただし読者への体感としては「1〜10問目は簡単〜普通でわりとやさしめ」「11〜15問目は難しい〜マニアック」にする
 - descriptionは自然なSEO説明文にする
 - tagsは5〜7個にする
 - tagsは日本語中心でよいが、作品名の英語表記が自然なら含めてよい
@@ -648,12 +645,12 @@ JSONの形式:
         return data
     except Exception:
         return {
-            "description": f"{topic}に関する知識を問う{theme_label}クイズ15問です。前半は一般常識寄り、中盤は上級、後半は超マニアック問題まで幅広く楽しめます。",
+            "description": f"{topic}に関する知識を問う{theme_label}クイズ15問です。1〜10問目はやさしめ、11〜15問目は難しい〜マニア向けまで段階的に楽しめます。",
             "tags": [theme_label, topic, "クイズ", "知識", "上級"],
             "intro_quote_lines": [
-                f"{topic}好きでも迷う{theme_label}クイズを15問出題します。",
-                "前半は一般常識寄り、中盤以降は知識差が出る問題構成です。",
-                "最後の超マニアック問題までどこまで解けるか挑戦してみてください。",
+                f"{topic}好きでも楽しめる{theme_label}クイズを15問出題します。",
+                "1〜10問目は簡単〜普通で解きやすく、後半はしっかり差がつく構成です。",
+                "最後の難問・マニア問題までどこまで解けるか挑戦してみてください。",
             ],
             "summary_cta": "次は別ジャンルのクイズにも挑戦してみましょう。",
             "seo_intro_keywords": [topic, f"{theme_label}クイズ"],
@@ -697,6 +694,27 @@ sauna-hobby-quiz
     return slugify_ascii(slug)
 
 
+def validate_quiz_structure(body: str) -> tuple[bool, list[str]]:
+    issues = []
+
+    question_headers = re.findall(r"^## 問題(\d+)", body, flags=re.MULTILINE)
+    if len(question_headers) != 15:
+        issues.append(f"問題見出しが15個ではありません: {len(question_headers)}個")
+
+    expected = [str(i) for i in range(1, 16)]
+    if question_headers != expected:
+        issues.append(f"問題番号が連番になっていません: {question_headers}")
+
+    answer_blocks = re.findall(r"<Answer>.*?</Answer>", body, flags=re.DOTALL)
+    if len(answer_blocks) != 15:
+        issues.append(f"Answerブロックが15個ではありません: {len(answer_blocks)}個")
+
+    if "## まとめ" not in body:
+        issues.append("『## まとめ』がありません")
+
+    return (len(issues) == 0, issues)
+
+
 def generate_quiz_body(theme: str, topic: str, plan: dict) -> str:
     theme_label = THEME_LABELS[theme]
     intro_keywords = ", ".join(plan.get("seo_intro_keywords", []))
@@ -732,23 +750,27 @@ description: {plan["description"]}
 
 難易度ルール:
 - 問題数は必ず15問
-- 1〜2問目は超簡単問題にする
-- 3〜5問目は普通レベル問題にする
-- 6〜10問目は上級レベルの知識問題にする
-- 11〜15問目はマニア向け問題にする
+- 1〜10問目は「簡単〜普通」でわりとやさしめにする
+- 11〜15問目は「難しい〜マニアック」にする
+- より具体的には以下の粒度で作る
+  - 1〜3問目: 超簡単問題
+  - 4〜7問目: 簡単〜普通問題
+  - 8〜10問目: 普通問題
+  - 11〜13問目: 難しい問題
+  - 14〜15問目: マニア向け問題
 - 最初から最後まで段階的に難しくなる構成にする
-- 1問目と2問目は、その作品や題材を知っている人ならほぼ答えられる内容にする
-- 3〜5問目は、知っていれば解けるが少し考える内容にする
-- 6〜10問目は、しっかり知識がある人向けにする
-- 11〜15問目は、コアファンや詳しい人でないと難しい内容にする
+- 1〜3問目は、その作品や題材を知っている人ならかなり答えやすい内容にする
+- 4〜7問目は、知っていれば十分解ける基本〜普通レベルにする
+- 8〜10問目は、少し詳しい人なら解ける普通レベルにする
+- 11〜13問目は、しっかり知識がある人向けにする
+- 14〜15問目は、コアファンや詳しい人でないと難しい内容にする
 
 品質ルール:
-- 1〜2問目は簡単でよい
+- 1〜10問目は全体としてやさしめにする
 - ただし簡単すぎても、題材に関係ない問題にはしない
-- 3〜5問目は普通レベルとして成立させる
-- 6〜10問目は知識差が出る問題にする
-- 11〜15問目はかなり深い知識を問ってよい
-- 難易度の逆転は禁止（後半より前半のほうが難しい構成にしない）
+- 11〜15問目は知識差がしっかり出る問題にする
+- 難易度の逆転は禁止
+- 後半より前半のほうが難しい構成にしない
 - 事実関係が不安定な内容は避ける
 - あいまいな説や論争中の情報は出さない
 - 一般的によく知られている設定・ルール・作品知識から、コアファン向け知識まで段階的に出題する
@@ -756,7 +778,7 @@ description: {plan["description"]}
 - 問題はバリエーションを持たせる
 - 日本語は自然にする
 - 各問題は必ず「答えが1つに明確に定まる形式」にする
-- 主観・説明問題は禁止（例：「〜について説明せよ」はNG）
+- 主観・説明問題は禁止
 - 「最も〜」「〜とされる」など曖昧な表現は禁止
 - 答えが複数あり得る問題は禁止
 - すべての問題は一問一答形式にする
@@ -765,7 +787,7 @@ description: {plan["description"]}
   2. 地名・組織名を答える問題
   3. 技・能力・名称を答える問題
   4. 数値・回数・順番を答える問題
-  - 問題文は必ず「1つの明確な固有名詞 or 数値」を答えさせる形式にする
+- 問題文は必ず「1つの明確な固有名詞 or 数値」を答えさせる形式にする
 - 「どれ？」「何？」ではなく「〇〇は何という名前？」形式にする
 - 選択式は禁止
 - 同じ形式の問題が3問以上連続しないようにする
@@ -795,10 +817,10 @@ SEOルール:
     return call_model(prompt, model="gpt-4o", temperature=0.7)
 
 
-def fact_check_quiz_body(theme: str, topic: str, title: str, body: str) -> str:
+def fact_check_quiz_body_json(theme: str, topic: str, title: str, body: str) -> list[dict]:
     prompt = f"""
-あなたはクイズ記事のファクトチェッカーです。
-以下のクイズ本文について、各問題と答えの正当性を確認してください。
+あなたはクイズ記事の厳格なファクトチェッカーです。
+以下のクイズ本文を確認し、問題1〜15をそれぞれJSON配列で判定してください。
 
 テーマ: {theme}
 題材: {topic}
@@ -807,24 +829,89 @@ def fact_check_quiz_body(theme: str, topic: str, title: str, body: str) -> str:
 本文:
 {body}
 
-確認ルール:
-- 問題ごとに「正確」「やや不正確」「不正確」「曖昧」のどれかで判定
-- 不正確または曖昧なら、どこが問題か具体的に指摘
-- 答えが一意でない問題は「不正確」と判定する
-- 曖昧な問いは必ず修正対象にする
-- より安全で一般的な表現への修正案を書く
-- 事実関係が揺れやすいものは、より安定した問題に差し替える提案をしてよい
-- 問題番号ごとに分ける
-- 問題15まで確認する
-- 出力はMarkdownで簡潔に
+判定基準:
+- status は "ok" / "warning" / "ng" のいずれか
+- ok: 問題文・答え・解説が妥当
+- warning: 大きな誤りではないが曖昧さや微妙さがある
+- ng: 明確に誤り、または答えが一意でない、または危険
+- issue には具体的な問題点を書く
+- fix にはより安全な修正案を書く
+- question_no は 1〜15 の整数
+- 15問ぶんすべて返す
+- 難易度評価も確認し、1〜10問目が難しすぎる場合は warning または ng を付ける
+- 11〜15問目が簡単すぎる場合も warning を付ける
+- JSON配列のみ出力する
+
+出力例:
+[
+  {{
+    "question_no": 1,
+    "status": "ok",
+    "issue": "",
+    "fix": ""
+  }},
+  {{
+    "question_no": 2,
+    "status": "ng",
+    "issue": "答えが複数あり得る",
+    "fix": "〇〇を明示して一意にする"
+  }}
+]
 """
-    return call_model(prompt, model="gpt-4o", temperature=0.2)
+    text = call_model(prompt, model="gpt-4o", temperature=0.0)
+
+    try:
+        data = json.loads(text)
+        if isinstance(data, list) and len(data) == 15:
+            return data
+    except Exception:
+        pass
+
+    return [
+        {
+            "question_no": i,
+            "status": "ng",
+            "issue": "ファクトチェックJSONの解析に失敗",
+            "fix": "再チェックが必要",
+        }
+        for i in range(1, 16)
+    ]
 
 
-def fix_quiz_by_fact_check(theme: str, topic: str, title: str, body: str, fact_review: str) -> str:
+def has_blocking_issues(fact_results: list[dict]) -> bool:
+    for item in fact_results:
+        if item.get("status") == "ng":
+            return True
+    return False
+
+
+def summarize_fact_results(fact_results: list[dict]) -> dict:
+    ok_count = 0
+    warning_count = 0
+    ng_count = 0
+
+    for item in fact_results:
+        status = item.get("status")
+        if status == "ok":
+            ok_count += 1
+        elif status == "warning":
+            warning_count += 1
+        elif status == "ng":
+            ng_count += 1
+
+    return {
+        "ok": ok_count,
+        "warning": warning_count,
+        "ng": ng_count,
+    }
+
+
+def fix_quiz_by_fact_check_json(theme: str, topic: str, title: str, body: str, fact_results: list[dict]) -> str:
+    fact_review_json = json.dumps(fact_results, ensure_ascii=False, indent=2)
+
     prompt = f"""
 あなたはクイズ記事編集者です。
-以下のファクトチェック結果を反映して、クイズ本文を修正してください。
+以下のファクトチェックJSONを反映して、本文を修正してください。
 
 テーマ: {theme}
 題材: {topic}
@@ -833,30 +920,28 @@ def fix_quiz_by_fact_check(theme: str, topic: str, title: str, body: str, fact_r
 元の本文:
 {body}
 
-ファクトチェック結果:
-{fact_review}
+ファクトチェックJSON:
+{fact_review_json}
 
 重要ルール:
 - Markdown形式を維持する
 - 「## 問題1」〜「## 問題15」を必ず残す
-- それぞれに <Answer>〜</Answer> を必ず残す
-- 「## まとめ」も必ず残す
+- 各問題に <Answer>〜</Answer> を必ず残す
+- 「## まとめ」も残す
 - 問題数は15問のまま
-- 難易度構成を壊さない
-  - 1〜2問: 超簡単
-  - 3〜5問: 普通
-  - 6〜10問: 上級
-  - 11〜15問: マニア
-- frontmatterは追加しない
-- 不正確または曖昧な箇所を優先修正する
-- より安全で一般的に正しい知識に寄せる
-- 問い自体が悪い場合は、同テーマ内で自然な別問題に差し替えてよい
+- 1〜10問目は簡単〜普通で、わりとやさしめを維持する
+- 11〜15問目は難しい〜マニアックを維持する
+- status が ng の問題は必ず修正する
+- status が warning の問題もできるだけ改善する
+- 問題自体が危険なら、同テーマ内のより安全で一意な問題に差し替える
+- 問題文は必ず一問一答で、答えが1つに定まる形にする
 - 本文全体を不必要に短くしない
+- frontmatterは追加しない
 
 出力:
 Markdown本文のみ
 """
-    return call_model(prompt, model="gpt-4o", temperature=0.2)
+    return call_model(prompt, model="gpt-4o", temperature=0.1)
 
 
 def review_quiz_body(theme: str, topic: str, title: str, body: str) -> str:
@@ -875,9 +960,8 @@ def review_quiz_body(theme: str, topic: str, title: str, body: str) -> str:
 - 日本語が不自然ではないか
 - 問題の難易度バランス
 - 15問の流れとして自然か
-- 1〜5問目が一般常識として機能しているか
-- 6〜10問目が上級レベルとして成立しているか
-- 11〜15問目が超マニアックとして成立しているか
+- 1〜10問目が簡単〜普通として機能しているか
+- 11〜15問目が難しい〜マニアックとして成立しているか
 - 問題の重複感
 - 解説が薄すぎないか
 - 導入とまとめが短すぎないか
@@ -921,15 +1005,13 @@ def improve_quiz_body(theme: str, topic: str, title: str, body: str, review: str
 - 必要なら問題文や解説を自然に調整する
 - 冗長すぎる箇所は整理する
 - 難易度構成は壊さない
-  - 1〜2問: 超簡単
-  - 3〜5問: 普通
-  - 6〜10問: 上級
-  - 11〜15問: マニア
+- 1〜10問目は簡単〜普通でわりとやさしめを維持する
+- 11〜15問目は難しい〜マニアックを維持する
 
 出力:
 Markdown本文のみ
 """
-    return call_model(prompt, model="gpt-4o", temperature=0.45)
+    return call_model(prompt, model="gpt-4o", temperature=0.35)
 
 
 def expand_for_seo(theme: str, topic: str, title: str, body: str) -> str:
@@ -945,29 +1027,25 @@ def expand_for_seo(theme: str, topic: str, title: str, body: str) -> str:
 {body}
 
 目的:
-- 情報量を増やす
-- 解説を少し丁寧にする
-- 導入とまとめを少し厚くする
+- 導入を少し厚くする
+- まとめを少し厚くする
 - 読みやすさを保つ
 - 冗長にはしない
 
 重要ルール:
+- 問題文と<Answer>〜</Answer>の中身は一切変更しない
+- 変更してよいのは導入文と「## まとめ」だけ
 - 問題数は変えない
 - 「## 問題1」〜「## 問題15」を残す
 - <Answer>〜</Answer> を残す
 - 「## まとめ」を残す
 - frontmatterは追加しない
 - SEOっぽすぎる不自然な言い回しは避ける
-- 難易度構成は壊さない
-  - 1〜2問: 超簡単
-  - 3〜5問: 普通
-  - 6〜10問: 上級
-  - 11〜15問: マニア
 
 出力:
 Markdown本文のみ
 """
-    return call_model(prompt, model="gpt-4o", temperature=0.35)
+    return call_model(prompt, model="gpt-4o", temperature=0.2)
 
 
 def ensure_tags(theme: str, topic: str, tags: list[str]) -> list[str]:
@@ -1022,9 +1100,9 @@ def generate_article(theme: str):
 
     if not isinstance(plan.get("intro_quote_lines"), list) or len(plan.get("intro_quote_lines", [])) < 3:
         plan["intro_quote_lines"] = [
-            f"{topic}好きでも迷う少し難しめのクイズを15問出題します。",
-            "前半は一般常識寄り、中盤以降は知識差が出る問題構成です。",
-            "最後の超マニアック問題までどこまで解けるか挑戦してみましょう。",
+            f"{topic}好きでも楽しめるクイズを15問出題します。",
+            "1〜10問目は簡単〜普通で解きやすく、後半はしっかり差がつく構成です。",
+            "最後の難問・マニア問題までどこまで解けるか挑戦してみましょう。",
         ]
 
     if not plan.get("summary_cta"):
@@ -1036,20 +1114,71 @@ def generate_article(theme: str):
     if not isinstance(plan.get("seo_summary_keywords"), list):
         plan["seo_summary_keywords"] = ["知識チェック", "暇つぶし"]
 
-    body = generate_quiz_body(theme, topic, plan)
+    # 構造が壊れていたら最大2回まで本文生成をやり直す
+    body = ""
+    structure_ok = False
+    structure_issues = []
 
-    fact_review = fact_check_quiz_body(theme, topic, title, body)
-    print("🧪 ファクトチェック:")
-    print(fact_review)
+    for structure_attempt in range(2):
+        body = generate_quiz_body(theme, topic, plan)
+        structure_ok, structure_issues = validate_quiz_structure(body)
+        if structure_ok:
+            break
+        print(f"⚠️ 構造エラー {structure_attempt + 1}回目:", structure_issues)
 
-    body = fix_quiz_by_fact_check(theme, topic, title, body, fact_review)
+    if not structure_ok:
+        print("⚠️ 構造エラーが残っていますが、後続修正へ進みます")
+        print(structure_issues)
+
+    # ファクトチェック -> 修正を最大3回繰り返す
+    latest_fact_results = []
+
+    for attempt in range(3):
+        latest_fact_results = fact_check_quiz_body_json(theme, topic, title, body)
+        summary = summarize_fact_results(latest_fact_results)
+
+        print(f"🧪 ファクトチェック {attempt + 1}回目:")
+        print(json.dumps(latest_fact_results, ensure_ascii=False, indent=2))
+        print(f"集計: ok={summary['ok']} / warning={summary['warning']} / ng={summary['ng']}")
+
+        if not has_blocking_issues(latest_fact_results):
+            break
+
+        body = fix_quiz_by_fact_check_json(theme, topic, title, body, latest_fact_results)
 
     review = review_quiz_body(theme, topic, title, body)
     print("🔍 レビュー結果:")
     print(review)
 
     body = improve_quiz_body(theme, topic, title, body, review)
+
+    # 改善後にもう一度ファクトチェック
+    final_fact_results = fact_check_quiz_body_json(theme, topic, title, body)
+    final_summary = summarize_fact_results(final_fact_results)
+
+    print("🧪 最終ファクトチェック:")
+    print(json.dumps(final_fact_results, ensure_ascii=False, indent=2))
+    print(f"集計: ok={final_summary['ok']} / warning={final_summary['warning']} / ng={final_summary['ng']}")
+
+    if has_blocking_issues(final_fact_results):
+        print("⚠️ 最終チェックでNGが残ったため、追加修正を実施します")
+        body = fix_quiz_by_fact_check_json(theme, topic, title, body, final_fact_results)
+
+        # 追加修正後にもう一度だけ最終確認
+        final_fact_results = fact_check_quiz_body_json(theme, topic, title, body)
+        final_summary = summarize_fact_results(final_fact_results)
+
+        print("🧪 追加修正後ファクトチェック:")
+        print(json.dumps(final_fact_results, ensure_ascii=False, indent=2))
+        print(f"集計: ok={final_summary['ok']} / warning={final_summary['warning']} / ng={final_summary['ng']}")
+
     body = expand_for_seo(theme, topic, title, body)
+
+    # SEO補強後に構造だけ再確認
+    structure_ok_after_seo, structure_issues_after_seo = validate_quiz_structure(body)
+    if not structure_ok_after_seo:
+        print("⚠️ SEO補強後に構造エラー:")
+        print(structure_issues_after_seo)
 
     slug = generate_slug(theme, topic, title)
     updated = datetime.now().strftime("%Y-%m-%d")
