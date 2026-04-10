@@ -1316,11 +1316,24 @@ export default function QuizModePage() {
 
             return (
               <div className="mx-auto mb-5 max-w-[560px] rounded-3xl border-4 border-blue-300 bg-white/95 px-5 py-5 shadow-[0_10px_30px_rgba(59,130,246,0.15)]">
-                <div className="text-center">
+                {/* <div className="text-center">
                   <p className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-sm md:text-base font-black text-blue-600 border border-blue-200">
                     🌟次の称号チャレンジ🌟
                   </p>
-                </div>
+                </div> */}
+                <p
+                  className={[
+                    "mt-4 inline-flex items-center justify-center rounded-full px-4 py-2",
+                    "text-sm md:text-base font-extrabold shadow-md",
+                    nextTitleInfo.remain === 1
+                      ? "bg-gradient-to-r from-red-500 via-orange-400 to-yellow-400 text-white animate-pulse"
+                      : "bg-gradient-to-r from-blue-500 via-cyan-400 to-indigo-500 text-white",
+                  ].join(" ")}
+                >
+                  {nextTitleInfo.remain === 1
+                    ? "🔥 あと1問で次の称号GET！！"
+                    : `🎯 あと${nextTitleInfo.remain}問で称号UP！`}
+                </p>
 
                 <p className="mt-4 text-xl md:text-3xl font-extrabold text-gray-800 text-center leading-snug">
                   「{maskTitle(nextTitleInfo.title)}」まであと
@@ -1347,19 +1360,6 @@ export default function QuizModePage() {
                 {/* <p className="mt-3 text-sm md:text-base font-bold text-gray-600 text-center">
                   あと{nextTitleInfo.remain}問で称号アップ！🎉
                 </p> */}
-                <p
-                  className={[
-                    "mt-4 inline-flex items-center justify-center rounded-full px-4 py-2",
-                    "text-sm md:text-base font-extrabold shadow-md",
-                    nextTitleInfo.remain === 1
-                      ? "bg-gradient-to-r from-red-500 via-orange-400 to-yellow-400 text-white animate-pulse"
-                      : "bg-gradient-to-r from-blue-500 via-cyan-400 to-indigo-500 text-white",
-                  ].join(" ")}
-                >
-                  {nextTitleInfo.remain === 1
-                    ? "🔥 あと1問で次の称号GET！！"
-                    : `🎯 あと${nextTitleInfo.remain}問で称号UP！`}
-                </p>
               </div>
             );
           })()}

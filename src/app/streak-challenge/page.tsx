@@ -3,13 +3,24 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Anton } from "next/font/google";
+import StreakRankingTop10 from "@/app/components/StreakRankingTop10";
 
 const anton = Anton({ subsets: ["latin"], weight: "400" });
+
+type StreakRankRow = {
+  user_id: string;
+  username: string | null;
+  avatar_url: string | null;
+  best_streak: number;
+};
 
 export default function QuizMasterPage() {
   const [showGenreButtons, setShowGenreButtons] = useState(false);
   const [showLevelButtons, setShowLevelButtons] = useState(false);
   const [showDescription, setShowDescription] = useState(false);
+
+  const [streakTop10, setStreakTop10] = useState<StreakRankRow[]>([]);
+  const [rankLoading, setRankLoading] = useState(true);
 
   const handleGenreClick = () => {
     setShowGenreButtons(true);
@@ -50,6 +61,25 @@ export default function QuizMasterPage() {
       }, index * 300);
     });
   }, [characters]); // ← charactersが決まってから実行
+
+
+  useEffect(() => {
+    const fetchStreakRanking = async () => {
+      setRankLoading(true);
+      try {
+        const res = await fetch("/api/rankings/streak", { cache: "no-store" });
+        const data = (await res.json()) as StreakRankRow[];
+        setStreakTop10(Array.isArray(data) ? data : []);
+      } catch (e) {
+        console.error("ランキング取得失敗:", e);
+        setStreakTop10([]);
+      } finally {
+        setRankLoading(false);
+      }
+    };
+
+    fetchStreakRanking();
+  }, []);
 
   // アコーディオン用 ref
   const descriptionRef = useRef<HTMLParagraphElement>(null);
@@ -215,6 +245,33 @@ export default function QuizMasterPage() {
             連続正解数が増えるほど、あなたの称号もランクアップ！<br />
             最高ランクの称号を目指して挑戦してみましょう。<br />
           </p>
+        </div>
+        
+        {/* <div className="mx-auto mt-8 max-w-[880px] rounded-[28px] border-4 border-yellow-300 bg-white/90 shadow-[0_14px_35px_rgba(0,0,0,0.12)]"> */}
+        <div>
+          {/* <div className="mb-4 text-center">
+            <p className="inline-flex items-center rounded-full bg-gradient-to-r from-yellow-400 to-orange-400 px-4 py-2 text-sm md:text-base font-extrabold text-white shadow">
+              🏆 連続正解ランキング TOP20
+            </p>
+            <p className="mt-3 text-sm md:text-base font-bold text-gray-600">
+              全国の猛者たちをチェックして挑戦しよう！
+            </p>
+          </div> */}
+          <p className="mt-15 text-xl md:text-2xl font-bold text-gray-600">
+            全国ランキングをチェック！👇
+          </p>
+
+          {rankLoading ? (
+            <p className="py-6 text-center text-base md:text-lg font-bold text-gray-600">
+              ランキング読み込み中...
+            </p>
+          ) : streakTop10.length > 0 ? (
+            <StreakRankingTop10 rows={streakTop10} />
+          ) : (
+            <p className="py-6 text-center text-base md:text-lg font-bold text-gray-600">
+              まだランキングがありません
+            </p>
+          )}
         </div>
       </>
     </div>
