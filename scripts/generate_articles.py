@@ -485,7 +485,7 @@ def choose_themes():
     pool = THEME_WEIGHTS.copy()
     selected = []
 
-    for _ in range(min(5, len(pool))):
+    for _ in range(min(3, len(pool))):
         themes = list(pool.keys())
         weights = list(pool.values())
 
