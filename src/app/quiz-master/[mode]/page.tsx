@@ -1091,7 +1091,7 @@ export default function QuizModePage() {
     setCharacter(null)
 
     // 問題順シャッフル（任意）
-    setQuestions((prev) => shuffleArray(prev));
+    setQuestions((prev) => sortQuestionsForDungeon(prev, course));
   };
 
   useEffect(() => {
@@ -1183,7 +1183,7 @@ export default function QuizModePage() {
             }
           }));
 
-        setQuestions(shuffleArray(quizQuestions));
+        setQuestions(sortQuestionsForDungeon(quizQuestions, course));
       } catch (e: any) {
         if (e?.name === "AbortError") return; // ✅ 中断は無視
         console.error("クイズ問題の取得に失敗しました:", e);
@@ -1226,6 +1226,45 @@ export default function QuizModePage() {
   }, [currentIndex, character]);
 
   const shuffleArray = <T,>(arr: T[]) => [...arr].sort(() => Math.random() - 0.5);
+
+  const sortQuestionsForDungeon = (
+    list: { id: string; quiz: QuizData }[],
+    course?: string
+  ) => {
+    // シークレットは今まで通り全ランダム
+    if (course === "secret") {
+      return shuffleArray(list);
+    }
+
+    const easyQuestions = shuffleArray(
+      list.filter((q) => q.quiz.level === "かんたん")
+    );
+
+    const normalQuestions = shuffleArray(
+      list.filter((q) => q.quiz.level === "ふつう")
+    );
+
+    const hardQuestions = shuffleArray(
+      list.filter(
+        (q) => q.quiz.level !== "かんたん" && q.quiz.level !== "ふつう"
+      )
+    );
+
+    // 1〜3体目：スケルトンまで → かんたんだけ
+    const first3Easy = easyQuestions.slice(0, 5);
+
+    // 4〜8体目：ミミック〜バーサーカー → ふつうだけ
+    const next5Normal = normalQuestions.slice(0, 15);
+
+    // 9体目以降：ドラゴン〜 → 全難易度ランダム
+    const remaining = shuffleArray([
+      ...easyQuestions.slice(3),
+      ...normalQuestions.slice(5),
+      ...hardQuestions,
+    ]);
+
+    return [...first3Easy, ...next5Normal, ...remaining];
+  };
 
   const startedRef = useRef(false);
 

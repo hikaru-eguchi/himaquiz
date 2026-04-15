@@ -526,8 +526,6 @@ export default function QuizModePage() {
     showCorrectRef.current = false;
 
     clearPendingAward();
-
-    setQuestions((prev) => shuffleArray(prev));
   };
 
   const startFirstChallenge = () => {
@@ -552,7 +550,7 @@ export default function QuizModePage() {
     setBaseLocked(null);
 
     // シャッフル（任意だけどおすすめ）
-    setQuestions((prev) => shuffleArray(prev));
+    setQuestions((prev) => sortQuestionsForMode(prev));
   };
 
   const lockMul = () => {
@@ -730,7 +728,7 @@ export default function QuizModePage() {
             },
           }));
 
-        setQuestions(shuffleArray(quizQuestions));
+        setQuestions(sortQuestionsForMode(quizQuestions));
       } catch (error) {
         console.error("クイズ問題の取得に失敗しました:", error);
       }
@@ -740,6 +738,39 @@ export default function QuizModePage() {
   }, [mode, genre, level]);
 
   const shuffleArray = <T,>(arr: T[]) => [...arr].sort(() => Math.random() - 0.5);
+
+  const sortQuestionsForMode = (
+    list: { id: string; quiz: QuizData }[]
+  ) => {
+    const easyQuestions = shuffleArray(
+      list.filter((q) => q.quiz.level === "かんたん")
+    );
+
+    const normalQuestions = shuffleArray(
+      list.filter((q) => q.quiz.level === "ふつう")
+    );
+
+    const hardQuestions = shuffleArray(
+      list.filter(
+        (q) => q.quiz.level !== "かんたん" && q.quiz.level !== "ふつう"
+      )
+    );
+
+    // 最初の3問：かんたん
+    const first3Easy = easyQuestions.slice(0, 3);
+
+    // 次の4問：ふつう
+    const next5Normal = normalQuestions.slice(0, 4);
+
+    // 残り：全難易度ランダム
+    const remaining = shuffleArray([
+      ...easyQuestions.slice(3),
+      ...normalQuestions.slice(5),
+      ...hardQuestions,
+    ]);
+
+    return [...first3Easy, ...next5Normal, ...remaining];
+  };
 
   useEffect(() => {
     if (phase !== "playing") return;
