@@ -5,7 +5,7 @@ description: "スマホ雑学"
 quiz:
   title: "スマホ設定クイズ"
   genre: "雑学系"
-  level: "かんたん"
+  level: "ふつう"
   question: "飛行機に乗るときONにする設定は？"
   choices:
     - "Bluetooth"

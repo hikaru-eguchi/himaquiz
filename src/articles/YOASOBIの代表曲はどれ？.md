@@ -5,7 +5,7 @@ description: "音楽"
 quiz:
   title: "YOASOBIのヒット曲は？"
   genre: "雑学系"
-  level: "かんたん"
+  level: "難しい"
   question: "YOASOBIの代表曲として知られるのはどれでしょう？"
   choices:
     - "夜に駆ける"

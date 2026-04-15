@@ -5,7 +5,7 @@ description: "ゲーム用語雑学"
 quiz:
   title: "FPSの意味"
   genre: "雑学系"
-  level: "ふつう"
+  level: "難しい"
   question: "ゲームジャンルのFPSは何の略？"
   choices:
     - "First Person Shooter"

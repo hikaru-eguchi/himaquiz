@@ -5,7 +5,7 @@ description: "略語の由来に関する雑学"
 quiz:
   title: "NGの略"
   genre: "雑学系"
-  level: "ふつう"
+  level: "難しい"
   question: "テレビ業界などで使う「NG」は元々何の略？"
   choices:
     - "Not Great"

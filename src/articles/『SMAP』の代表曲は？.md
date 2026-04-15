@@ -5,7 +5,7 @@ description: "音楽"
 quiz:
   title: "SMAPの名曲は？"
   genre: "雑学系"
-  level: "かんたん"
+  level: "ふつう"
   question: "SMAPの代表曲として有名なのはどれ？"
   choices:
     - "Lemon"

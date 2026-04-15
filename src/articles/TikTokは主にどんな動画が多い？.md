@@ -5,7 +5,7 @@ description: "カルチャー"
 quiz:
   title: "TikTokの特徴は？"
   genre: "雑学系"
-  level: "かんたん"
+  level: "ふつう"
   question: "TikTokに多い動画の特徴はどれでしょう？"
   choices:
     - "長編映画"

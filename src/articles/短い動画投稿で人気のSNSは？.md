@@ -5,7 +5,7 @@ description: "SNS雑学"
 quiz:
   title: "SNSクイズ"
   genre: "雑学系"
-  level: "かんたん"
+  level: "難しい"
   question: "短い動画投稿で人気のSNSは？"
   choices:
     - "電卓"

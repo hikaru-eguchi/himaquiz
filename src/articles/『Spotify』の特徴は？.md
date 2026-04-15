@@ -5,7 +5,7 @@ description: "サービス"
 quiz:
   title: "このサービスは？"
   genre: "雑学系"
-  level: "かんたん"
+  level: "ふつう"
   question: "Spotifyはどんなサービス？"
   choices:
     - "音楽配信"

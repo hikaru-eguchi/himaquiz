@@ -5,7 +5,7 @@ description: "音楽"
 quiz:
   title: "ヒゲダンのヒット曲は？"
   genre: "雑学系"
-  level: "かんたん"
+  level: "ふつう"
   question: "Official髭男dismの代表曲はどれでしょう？"
   choices:
     - "Pretender"

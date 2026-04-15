@@ -5,7 +5,7 @@ description: "スポーツ用語"
 quiz:
   title: "サッカー用語"
   genre: "雑学系"
-  level: "かんたん"
+  level: "ふつう"
   question: "サッカーの『PK』とは？"
   choices:
     - "特別な作戦"

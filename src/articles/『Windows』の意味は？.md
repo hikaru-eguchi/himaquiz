@@ -5,7 +5,7 @@ description: "IT"
 quiz:
   title: "意味は？"
   genre: "雑学系"
-  level: "かんたん"
+  level: "難しい"
   question: "Windowsの名前の意味は？"
   choices:
     - "窓"

@@ -5,7 +5,7 @@ description: "カルチャー"
 quiz:
   title: "生配信者の呼び方は？"
   genre: "雑学系"
-  level: "かんたん"
+  level: "難しい"
   question: "YouTubeなどで生配信をする人は何と呼ばれるでしょう？"
   choices:
     - "ライター"

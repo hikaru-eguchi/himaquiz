@@ -5,7 +5,7 @@ description: "サービス"
 quiz:
   title: "これは何？"
   genre: "雑学系"
-  level: "かんたん"
+  level: "ふつう"
   question: "YouTubeはどんなサービス？"
   choices:
     - "動画共有"

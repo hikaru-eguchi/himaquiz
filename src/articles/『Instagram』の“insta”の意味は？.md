@@ -5,7 +5,7 @@ description: "サービス"
 quiz:
   title: "意味は？"
   genre: "雑学系"
-  level: "かんたん"
+  level: "難しい"
   question: "『Instagram』のinstaの意味はどれ？"
   choices:
     - "写真"

@@ -5,7 +5,7 @@ description: "アニメ雑学クイズ"
 quiz:
   title: "ハンターハンタークイズ"
   genre: "雑学系"
-  level: "ふつう"
+  level: "難しい"
   question: "『HUNTER×HUNTER』の主人公の名前は？"
   choices:
     - "ゴン＝フリークス"

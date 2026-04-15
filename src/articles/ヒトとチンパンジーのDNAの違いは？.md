@@ -5,7 +5,7 @@ description: "雑学トリビアクイズ"
 quiz:
   title: "生物の進化クイズ"
   genre: "雑学系"
-  level: "ふつう"
+  level: "難しい"
   question: "チンパンジーとヒトのDNAの違いはどのくらい？"
   choices:
     - "約1％"

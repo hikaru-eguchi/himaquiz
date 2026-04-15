@@ -5,7 +5,7 @@ description: "カルチャー"
 quiz:
   title: "動画投稿者の呼び方は？"
   genre: "雑学系"
-  level: "かんたん"
+  level: "ふつう"
   question: "YouTubeで動画を投稿する人は何と呼ばれる？"
   choices:
     - "YouTuber"

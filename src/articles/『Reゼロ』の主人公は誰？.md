@@ -5,7 +5,7 @@ description: "アニメ雑学クイズ"
 quiz:
   title: "リゼロクイズ"
   genre: "雑学系"
-  level: "ふつう"
+  level: "難しい"
   question: "『Re:ゼロから始める異世界生活』の主人公は誰？"
   choices:
     - "ラインハルト"

@@ -5,7 +5,7 @@ description: "略語の由来に関する雑学"
 quiz:
   title: "DIYの略"
   genre: "雑学系"
-  level: "ふつう"
+  level: "難しい"
   question: "「DIY」は何の略でしょう？"
   choices:
     - "Do It Yourself"

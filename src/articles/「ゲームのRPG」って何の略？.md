@@ -5,7 +5,7 @@ description: "ゲーム用語雑学"
 quiz:
   title: "RPGの意味"
   genre: "雑学系"
-  level: "ふつう"
+  level: "難しい"
   question: "RPGは何の略？"
   choices:
     - "Role Playing Game"

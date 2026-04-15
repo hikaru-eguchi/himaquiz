@@ -5,7 +5,7 @@ description: "インターネット雑学"
 quiz:
   title: "WWWの正式名称"
   genre: "雑学系"
-  level: "ふつう"
+  level: "難しい"
   question: "インターネットで使われる「WWW」とは何の略？"
   choices:
     - "World Web Window"

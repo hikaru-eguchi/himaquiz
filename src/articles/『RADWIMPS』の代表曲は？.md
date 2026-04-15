@@ -5,7 +5,7 @@ description: "音楽"
 quiz:
   title: "RADの代表曲は？"
   genre: "雑学系"
-  level: "かんたん"
+  level: "ふつう"
   question: "RADWIMPSの代表曲として有名なのはどれ？"
   choices:
     - "前前前世"

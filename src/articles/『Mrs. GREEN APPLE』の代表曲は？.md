@@ -5,7 +5,7 @@ description: "音楽"
 quiz:
   title: "ミセスの代表曲は？"
   genre: "雑学系"
-  level: "かんたん"
+  level: "ふつう"
   question: "Mrs. GREEN APPLEの代表曲として有名なのはどれ？"
   choices:
     - "ケセラセラ"

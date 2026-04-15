@@ -5,7 +5,7 @@ description: "アルファベットの法則"
 quiz:
   title: "進む数が増える"
   genre: "知識系"
-  level: "ふつう"
+  level: "難しい"
   question: "空欄に入るアルファベットは？「A, B, D, G, □」"
   choices:
     - "I"

@@ -5,7 +5,7 @@ description: "SNS雑学"
 quiz:
   title: "写真投稿SNS"
   genre: "雑学系"
-  level: "かんたん"
+  level: "ふつう"
   question: "写真を投稿して共有するSNSとして有名なのは？"
   choices:
     - "電卓"

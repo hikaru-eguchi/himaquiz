@@ -5,7 +5,7 @@ description: "最新ワード雑学"
 quiz:
   title: "AIワードクイズ"
   genre: "雑学系"
-  level: "かんたん"
+  level: "難しい"
   question: "AIを使って画像や文章などを“作り出す”ことは？"
   choices:
     - "AI生成"

@@ -5,7 +5,7 @@ description: "生活知識クイズ"
 quiz:
   title: "Suicaの会社"
   genre: "雑学系"
-  level: "ふつう"
+  level: "難しい"
   question: "電子マネー「Suica」を発行している会社は？"
   choices:
     - "JR東日本"

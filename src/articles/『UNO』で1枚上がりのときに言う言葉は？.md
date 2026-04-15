@@ -5,7 +5,7 @@ description: "ゲーム雑学"
 quiz:
   title: "盛り上がる定番"
   genre: "雑学系"
-  level: "かんたん"
+  level: "難しい"
   question: "UNOで手札が残り1枚になったら言う言葉は？"
   choices:
     - "ゴー！"

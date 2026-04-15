@@ -5,7 +5,7 @@ description: "アルファベット数列クイズ"
 quiz:
   title: "3つ進む"
   genre: "知識系"
-  level: "ふつう"
+  level: "難しい"
   question: "空欄に入るアルファベットはどれ？「B, E, H, □, N」"
   choices:
     - "J"

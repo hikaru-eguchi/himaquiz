@@ -5,7 +5,7 @@ description: "略語の由来に関する雑学"
 quiz:
   title: "SNSの略"
   genre: "雑学系"
-  level: "ふつう"
+  level: "難しい"
   question: "「SNS」は何の略でしょう？"
   choices:
     - "Social Network Service"

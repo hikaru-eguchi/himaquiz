@@ -5,7 +5,7 @@ description: "科学雑学クイズ"
 quiz:
   title: "科学クイズ"
   genre: "雑学系"
-  level: "ふつう"
+  level: "難しい"
   question: "DNAの二重らせん構造を発見した科学者コンビは誰？"
   choices:
     - "ニュートンとフック"

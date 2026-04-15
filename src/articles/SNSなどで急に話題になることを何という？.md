@@ -5,7 +5,7 @@ description: "ネット雑学"
 quiz:
   title: "ネット用語"
   genre: "雑学系"
-  level: "かんたん"
+  level: "ふつう"
   question: "SNSなどで急に話題になることを何という？"
   choices:
     - "フォロー"

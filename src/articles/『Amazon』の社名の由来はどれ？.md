@@ -5,7 +5,7 @@ description: "企業"
 quiz:
   title: "由来は？"
   genre: "雑学系"
-  level: "ふつう"
+  level: "難しい"
   question: "Amazonの社名の由来は？"
   choices:
     - "創業者の名前"

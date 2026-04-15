@@ -5,7 +5,7 @@ description: "音楽"
 quiz:
   title: "Adoの代表曲は？"
   genre: "雑学系"
-  level: "かんたん"
+  level: "難しい"
   question: "Adoが有名になったきっかけの曲はどれでしょう？"
   choices:
     - "うっせぇわ"

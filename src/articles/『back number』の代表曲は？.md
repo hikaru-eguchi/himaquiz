@@ -5,7 +5,7 @@ description: "音楽"
 quiz:
   title: "back numberの名曲は？"
   genre: "雑学系"
-  level: "かんたん"
+  level: "ふつう"
   question: "back numberの代表曲として有名なのはどれ？"
   choices:
     - "Lemon"

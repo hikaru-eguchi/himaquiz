@@ -5,7 +5,7 @@ description: "企業"
 quiz:
   title: "このブランドは？"
   genre: "雑学系"
-  level: "かんたん"
+  level: "難しい"
   question: "ZARAはどんなブランド？"
   choices:
     - "スポーツ"

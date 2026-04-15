@@ -5,7 +5,7 @@ description: "サービス"
 quiz:
   title: "最初の動画は？"
   genre: "雑学系"
-  level: "かんたん"
+  level: "難しい"
   question: "YouTube最初の動画はどんな内容？"
   choices:
     - "ゲーム実況"

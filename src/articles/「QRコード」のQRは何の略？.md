@@ -5,7 +5,7 @@ description: "IT雑学"
 quiz:
   title: "QRの意味"
   genre: "雑学系"
-  level: "ふつう"
+  level: "難しい"
   question: "QRコードの「QR」は何の略？"
   choices:
     - "Quick Response"

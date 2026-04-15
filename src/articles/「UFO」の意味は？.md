@@ -5,7 +5,7 @@ description: "略語雑学"
 quiz:
   title: "UFOの意味"
   genre: "雑学系"
-  level: "ふつう"
+  level: "難しい"
   question: "「UFO」は何の略？"
   choices:
     - "United Fire Organization"

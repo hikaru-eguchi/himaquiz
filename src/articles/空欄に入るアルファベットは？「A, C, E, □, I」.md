@@ -5,7 +5,7 @@ description: "アルファベット並び替えクイズ"
 quiz:
   title: "アルファベットの法則"
   genre: "知識系"
-  level: "ふつう"
+  level: "難しい"
   question: "空欄に入るアルファベットはどれ？「A, C, E, □, I」"
   choices:
     - "G"
