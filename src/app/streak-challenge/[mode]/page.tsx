@@ -565,6 +565,7 @@ export default function QuizModePage() {
   // ✅ 取りこぼし防止：pending key
   // ============================
   const PENDING_KEY = "streak_award_pending_v1";
+  const PENDING_RANKING_KEY = "streak_ranking_pending_v1";
 
   // ✅ 付与直前に “いまログインできてるか” を確認して userId を返す
   const ensureAuthedUserId = async (): Promise<string | null> => {
@@ -597,6 +598,57 @@ export default function QuizModePage() {
   const clearPendingAward = () => {
     try {
       localStorage.removeItem(PENDING_KEY);
+    } catch {}
+  };
+
+  const savePendingRankingBestOnly = (payload: {
+    streak: number;
+    title: string;
+    topPercent: number | null;
+  }) => {
+    try {
+      const raw = localStorage.getItem(PENDING_RANKING_KEY);
+
+      if (raw) {
+        const current = JSON.parse(raw) as {
+          streak?: number;
+          title?: string;
+          topPercent?: number | null;
+          at?: number;
+        };
+
+        // 今入っている pending の方が強い or 同等なら上書きしない
+        if ((current?.streak ?? 0) >= payload.streak) return;
+      }
+
+      localStorage.setItem(
+        PENDING_RANKING_KEY,
+        JSON.stringify({
+          ...payload,
+          at: Date.now(),
+        })
+      );
+    } catch {}
+  };
+
+  const loadPendingRanking = (): null | {
+    streak: number;
+    title: string;
+    topPercent: number | null;
+    at: number;
+  } => {
+    try {
+      const raw = localStorage.getItem(PENDING_RANKING_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  };
+
+  const clearPendingRanking = () => {
+    try {
+      localStorage.removeItem(PENDING_RANKING_KEY);
     } catch {}
   };
 
@@ -708,6 +760,68 @@ export default function QuizModePage() {
       savePendingAward(p);
       awardedOnceRef.current = false;
       setAwardStatus("error");
+    }
+  };
+
+  const registerPendingRanking = async () => {
+    const pending = loadPendingRanking();
+    if (!pending) return;
+
+    const uid = await ensureAuthedUserId();
+    if (!uid) return;
+
+    try {
+      const weekStart = getWeekStartJST();
+      const monthStart = getMonthStartJST();
+
+      const { error: weeklyErr } = await supabase.rpc("upsert_weekly_stats", {
+        p_user_id: uid,
+        p_week_start: weekStart,
+        p_score_add: 0,
+        p_correct_add: pending.streak,
+        p_play_add: 1,
+        p_best_streak: pending.streak,
+      });
+      if (weeklyErr) {
+        console.error("pending weekly stats error:", weeklyErr);
+      }
+
+      const { error: monthlyErr } = await supabase.rpc("upsert_monthly_stats", {
+        p_user_id: uid,
+        p_month_start: monthStart,
+        p_score_add: 0,
+        p_correct_add: pending.streak,
+        p_play_add: 1,
+        p_best_streak: pending.streak,
+      });
+      if (monthlyErr) {
+        console.error("pending monthly stats error:", monthlyErr);
+      }
+
+      const res = await submitGameResult(supabase, {
+        game: "streak",
+        streak: pending.streak,
+        score: 0,
+        stage: 0,
+        title: pending.title,
+        writeLog: true,
+      });
+
+      const modal = buildResultModalPayload("streak", res);
+      if (modal) pushModal(modal);
+
+      const { error: bsErr } = await supabase.rpc("update_best_streak", {
+        p_user_id: uid,
+        p_best_streak: pending.streak,
+      });
+      if (bsErr) {
+        console.error("pending update_best_streak error:", bsErr);
+      }
+
+      clearPendingRanking();
+      window.dispatchEvent(new Event("ranking:updated"));
+    } catch (e) {
+      console.error("registerPendingRanking error:", e);
     }
   };
 
@@ -830,6 +944,13 @@ export default function QuizModePage() {
   }, [user]);
 
   useEffect(() => {
+    if (!user?.id) return;
+
+    registerPendingRanking();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
+  useEffect(() => {
     const fetchArticles = async () => {
       try {
         const res = await fetch("/api/articles");
@@ -918,7 +1039,6 @@ export default function QuizModePage() {
         const unlocked = titles.find((t) => t.threshold === newCount);
         if (unlocked) {
           setJustUnlockedTitle(unlocked.title.trim());
-          setTimeout(() => setJustUnlockedTitle(null), 3000);
         }
         if (newCount % 10 === 0) {
           setFlashMilestone(`${newCount}問突破！`);
@@ -938,6 +1058,7 @@ export default function QuizModePage() {
 
   const nextQuestion = () => {
     setShowCorrectMessage(false);
+    setJustUnlockedTitle(null);
 
     if (currentIndex + 1 >= questions.length) {
       setFinished(true);
@@ -1110,7 +1231,20 @@ export default function QuizModePage() {
         const json = await res.json();
         if (!res.ok) throw new Error(json?.error ?? "failed");
 
-        setTopPercent(typeof json.topPercent === "number" ? json.topPercent : null);
+        // setTopPercent(typeof json.topPercent === "number" ? json.topPercent : null);
+        const nextTopPercent =
+          typeof json.topPercent === "number" ? json.topPercent : null;
+
+        setTopPercent(nextTopPercent);
+
+        // 未ログインなら記録を1件だけ保持（より高い記録だけ上書き）
+        if (!userId) {
+          savePendingRankingBestOnly({
+            streak: correctCount,
+            title: getTitle(),
+            topPercent: nextTopPercent,
+          });
+        }
       } catch (e) {
         console.error("record top percent error:", e);
         setTopPercent(null);

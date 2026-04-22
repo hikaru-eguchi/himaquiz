@@ -188,6 +188,15 @@ export default function LoginPage() {
             パスワードを忘れた方はこちら
           </Link>
         </div>
+
+        <div className="flex justify-center mt-3">
+          <Link
+            href="/user/signup"
+            className="text-sm md:text-base text-blue-600 hover:underline font-semibold"
+          >
+            新規ユーザー登録（無料）はこちら
+          </Link>
+        </div>
       </form>
     </div>
   );

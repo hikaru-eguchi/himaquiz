@@ -5,6 +5,7 @@ import matter from 'gray-matter';
 import QuizMDXWrapper from "@/app/components/QuizMDXWrapper";
 import { DailyLoginBonusModal } from "../app/components/DailyLoginBonusModal";
 import WeeklyRankingSection from "@/app/components/WeeklyRankingSection";
+import RegisterPendingRanking from "@/app/components/RegisterPendingRanking";
 
 export const metadata = {
   title: "無料で遊べる暇つぶしクイズ｜ひまQ",
@@ -143,6 +144,7 @@ export default async function HomePage({
 
   return (
     <div className="container mx-auto py-2 sm:py-8">
+      <RegisterPendingRanking />
       <DailyLoginBonusModal />
 
       <div className="text-center">

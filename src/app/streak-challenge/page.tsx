@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Anton } from "next/font/google";
 import StreakRankingTop10 from "@/app/components/StreakRankingTop10";
+import { useSupabaseUser } from "../../hooks/useSupabaseUser";
+import { useRegisterPendingStreakRanking } from "@/hooks/useRegisterPendingStreakRanking";
 
 const anton = Anton({ subsets: ["latin"], weight: "400" });
 
@@ -15,12 +17,15 @@ type StreakRankRow = {
 };
 
 export default function QuizMasterPage() {
+  useRegisterPendingStreakRanking();
   const [showGenreButtons, setShowGenreButtons] = useState(false);
   const [showLevelButtons, setShowLevelButtons] = useState(false);
   const [showDescription, setShowDescription] = useState(false);
 
   const [streakTop10, setStreakTop10] = useState<StreakRankRow[]>([]);
   const [rankLoading, setRankLoading] = useState(true);
+
+  const { user, loading: userLoading } = useSupabaseUser();
 
   const handleGenreClick = () => {
     setShowGenreButtons(true);
@@ -248,7 +253,7 @@ export default function QuizMasterPage() {
         </div>
         
         {/* <div className="mx-auto mt-8 max-w-[880px] rounded-[28px] border-4 border-yellow-300 bg-white/90 shadow-[0_14px_35px_rgba(0,0,0,0.12)]"> */}
-        <div>
+        <div className="flex justify-center">
           {/* <div className="mb-4 text-center">
             <p className="inline-flex items-center rounded-full bg-gradient-to-r from-yellow-400 to-orange-400 px-4 py-2 text-sm md:text-base font-extrabold text-white shadow">
               🏆 連続正解ランキング TOP20
@@ -257,21 +262,70 @@ export default function QuizMasterPage() {
               全国の猛者たちをチェックして挑戦しよう！
             </p>
           </div> */}
-          <p className="mt-15 text-xl md:text-2xl font-bold text-gray-600">
+          {/* <p className="mt-15 text-xl md:text-2xl font-bold text-gray-600">
             全国ランキングをチェック！👇
           </p>
 
-          {rankLoading ? (
-            <p className="py-6 text-center text-base md:text-lg font-bold text-gray-600">
-              ランキング読み込み中...
-            </p>
-          ) : streakTop10.length > 0 ? (
-            <StreakRankingTop10 rows={streakTop10} />
-          ) : (
-            <p className="py-6 text-center text-base md:text-lg font-bold text-gray-600">
-              まだランキングがありません
-            </p>
-          )}
+          <p className="mt-2 text-sm md:text-base text-red-600 font-semibold">
+            🔒 ランキングに載るにはログインが必要です
+          </p> */}
+          <div className="mt-3 w-full max-w-[900px] rounded-[28px] border border-[#e5ddd3] bg-[#f8f8f8] px-4 py-5 md:px-8 md:py-7 shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
+            <div className="flex flex-col items-center text-center">
+              <h2 className="text-xl md:text-3xl font-extrabold text-gray-800 tracking-tight">
+                <span className="mr-2 text-yellow-500">👑</span>
+                全国ランキングをチェック！
+                <span className="ml-2 text-yellow-500">✨</span>
+              </h2>
+
+              <div className="mt-5 w-full max-w-[800px] rounded-[22px] border-2 border-[#efb8b8] bg-[#fff8f8] px-5 py-5 md:px-8 md:py-6">
+                <div className="flex items-center gap-4 md:gap-6">
+                  <div className="shrink-0 text-3xl md:text-5xl">🔒</div>
+
+                  <div className="text-left">
+                    <p className="text-lg md:text-2xl font-extrabold text-red-600 leading-tight">
+                      ランキングに載るにはログインが必要です
+                    </p>
+                    <p className="mt-2 text-sm md:text-lg font-bold text-gray-800 leading-relaxed">
+                      あなたの記録をランキングに残して、全国のユーザーと競い合おう！
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {!userLoading && !user && (
+                <div className="mt-5 w-full max-w-[800px] rounded-[22px] border border-[#d9d9d9] bg-[#fdfdfd] px-5 py-5 md:px-8 md:py-6 shadow-sm">
+                  <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div className="text-left">
+                      <p className="text-xl md:text-2xl font-extrabold text-red-600 leading-tight">
+                        ログインしていません
+                      </p>
+                      <p className="mt-2 text-sm md:text-base font-bold text-gray-800">
+                        ログインするとランキングに参加できます！
+                      </p>
+                    </div>
+
+                    <Link href="/user/login" className="md:shrink-0">
+                      <button className="w-full md:w-auto min-w-[200px] px-6 py-2 md:px-8 md:py-3 bg-orange-400 hover:bg-orange-500 text-white rounded-[18px] font-extrabold text-lg md:text-2xl border-2 border-[#b85c00] shadow-[0_3px_0_#b85c00] transition-transform hover:scale-[1.02] cursor-pointer">
+                        ログインする
+                      </button>
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
+            {rankLoading ? (
+              <p className="py-6 text-center text-base md:text-lg font-bold text-gray-600">
+                ランキング読み込み中...
+              </p>
+            ) : streakTop10.length > 0 ? (
+              <StreakRankingTop10 rows={streakTop10} />
+            ) : (
+              <p className="py-6 text-center text-base md:text-lg font-bold text-gray-600">
+                まだランキングがありません
+              </p>
+            )}
+          </div>
+
         </div>
       </>
     </div>
