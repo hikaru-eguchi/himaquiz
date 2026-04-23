@@ -90,7 +90,7 @@ export default function QuizMasterPage() {
   const descriptionRef = useRef<HTMLParagraphElement>(null);
 
   return (
-    <div className="container mx-auto px-4 py-8 text-center bg-gradient-to-b from-yellow-100 via-yellow-200 to-yellow-300">
+    <div className="container mx-auto md:px-4 px-2 py-8 text-center bg-gradient-to-b from-yellow-100 via-yellow-200 to-yellow-300">
       <h1
         className="text-5xl md:text-7xl font-extrabold mb-6 text-center"
         style={{
@@ -269,7 +269,7 @@ export default function QuizMasterPage() {
           <p className="mt-2 text-sm md:text-base text-red-600 font-semibold">
             🔒 ランキングに載るにはログインが必要です
           </p> */}
-          <div className="mt-3 w-full max-w-[900px] rounded-[28px] border border-[#e5ddd3] bg-[#f8f8f8] px-4 py-5 md:px-8 md:py-7 shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
+          <div className="mt-3 w-full max-w-[900px] rounded-[28px] border border-[#e5ddd3] bg-[#f8f8f8] px-2 py-5 md:px-8 md:py-7 shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
             <div className="flex flex-col items-center text-center">
               <h2 className="text-xl md:text-3xl font-extrabold text-gray-800 tracking-tight">
                 <span className="mr-2 text-yellow-500">👑</span>

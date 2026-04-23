@@ -68,7 +68,7 @@ export default function StreakRankingTop10({ rows }: { rows: Row[] }) {
                   className={`w-full rounded-2xl border px-3 py-3 md:px-4 md:py-3 transition-transform duration-200 hover:scale-[1.01] ${getRowStyle(rank)}`}
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <div className="flex min-w-0 items-center gap-3 md:gap-4">
+                    <div className="flex min-w-0 items-center gap-2 md:gap-4">
                       <div
                         className={`flex h-10 w-10 md:h-12 md:w-12 shrink-0 items-center justify-center rounded-full border-2 font-extrabold text-sm md:text-base ${
                           rank <= 3

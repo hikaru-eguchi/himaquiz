@@ -2273,7 +2273,7 @@ export default function QuizModePage() {
       {showEnemyAttackEffect && (
         <EnemyAttackEffect enemy={getEnemyForStage(currentStage + 1, course, boss)} />
       )}
-      <div className="container mx-auto p-8 text-center bg-gradient-to-b from-purple-50 via-purple-100 to-purple-200">
+      <div className="container mx-auto p-2 md:p-8 text-center bg-gradient-to-b from-purple-50 via-purple-100 to-purple-200">
         {!finished ? (
           <>
             <h2 className="text-5xl md:text-6xl font-extrabold mb-6 text-purple-500 drop-shadow-lg">

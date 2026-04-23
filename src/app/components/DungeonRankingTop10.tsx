@@ -71,7 +71,7 @@ export default function DungeonRankingTop10({ rows }: { rows: Row[] }) {
                   className={`w-full rounded-2xl border px-3 py-3 md:px-4 md:py-3 flex items-center justify-between transition-transform hover:scale-[1.01] ${getRowStyle(rank)}`}
                 >
                   {/* 左側 */}
-                  <div className="flex items-center gap-3 md:gap-4 min-w-0">
+                  <div className="flex items-center gap-2 md:gap-4 min-w-0">
                     
                     {/* 順位 */}
                     <div className={`flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full font-extrabold border-2 ${

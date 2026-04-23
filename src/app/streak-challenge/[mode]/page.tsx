@@ -1380,7 +1380,7 @@ export default function QuizModePage() {
   };
 
   return (
-    <div className="container mx-auto p-8 text-center bg-gradient-to-b from-yellow-50 via-yellow-100 to-yellow-200">
+    <div className="container mx-auto p-2 md:p-8 text-center bg-gradient-to-b from-yellow-50 via-yellow-100 to-yellow-200">
       {/* ✅ スキップ確認モーダル */}
       {openSkipModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
