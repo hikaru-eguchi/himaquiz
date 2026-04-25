@@ -21,9 +21,9 @@ const POPULAR_SLUGS = [
   "onepiece-quiz-01",
   "doraemon-anime-quiz",
   "pokemon-character-quiz",
-  "crayon-shinchan-anime-quiz-2",
   "kimetsu-no-yaiba-anime-quiz",
   "jojo-anime-quiz",
+  "recent-jpop-hit-songs-quiz",
 ];
 
 const RECOMMENDED_SLUGS = [
@@ -215,6 +215,61 @@ export default function QuizBooksThemeIndexPage() {
         items={newestItems}
         labelPrefix="新着"
       />
+
+      <section className="mt-10 max-w-5xl mx-auto mb-15">
+        <h2 className="text-2xl md:text-3xl font-extrabold text-center mb-4">
+          人気のテーマから探す
+        </h2>
+
+        <p className="text-center text-gray-700 text-sm md:text-base mb-5 max-w-3xl mx-auto leading-relaxed">
+          人気の高いテーマからクイズを探したい人向けに、よく遊ばれるジャンルをまとめました。
+          好きなジャンルを選んで、気になる問題に挑戦してみてください。
+        </p>
+
+        <div className="flex flex-wrap justify-center gap-3">
+          <Link
+            href="/quizbooks_theme/category/anime"
+            className="px-4 py-2 rounded-full border-2 border-black bg-gradient-to-r from-pink-500 to-rose-400 text-white font-bold shadow hover:-translate-y-0.5 transition-all"
+          >
+            🎬 アニメクイズ
+          </Link>
+
+          <Link
+            href="/quizbooks_theme/category/game"
+            className="px-4 py-2 rounded-full border-2 border-black bg-gradient-to-r from-indigo-500 to-purple-400 text-white font-bold shadow hover:-translate-y-0.5 transition-all"
+          >
+            🎮 ゲームクイズ
+          </Link>
+
+          <Link
+            href="/quizbooks_theme/category/sports"
+            className="px-4 py-2 rounded-full border-2 border-black bg-gradient-to-r from-green-500 to-emerald-400 text-white font-bold shadow hover:-translate-y-0.5 transition-all"
+          >
+            ⚽ スポーツクイズ
+          </Link>
+
+          <Link
+            href="/quizbooks_theme/category/food"
+            className="px-4 py-2 rounded-full border-2 border-black bg-gradient-to-r from-orange-500 to-amber-400 text-white font-bold shadow hover:-translate-y-0.5 transition-all"
+          >
+            🍔 食べ物クイズ
+          </Link>
+
+          <Link
+            href="/quizbooks_theme/category/zatsugaku"
+            className="px-4 py-2 rounded-full border-2 border-black bg-gradient-to-r from-yellow-500 to-lime-400 text-white font-bold shadow hover:-translate-y-0.5 transition-all"
+          >
+            💡 雑学クイズ
+          </Link>
+
+          <Link
+            href="/quizbooks_theme/category/hobby"
+            className="px-4 py-2 rounded-full border-2 border-black bg-gradient-to-r from-teal-500 to-emerald-400 text-white font-bold shadow hover:-translate-y-0.5 transition-all"
+          >
+            🏕️ 趣味クイズ
+          </Link>
+        </div>
+      </section>
 
       {/* ===== すべての一覧 ===== */}
       <section aria-labelledby="quiz-list-heading" className="mb-12">

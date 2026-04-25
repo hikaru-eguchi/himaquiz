@@ -61,33 +61,35 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className="flex items-center justify-center md:gap-4">
               <img src="/images/まる2.png" alt="みんなで遊べる暇つぶしクイズ" className="w-18 md:w-30 h-auto" />
               <div>
-                <h1
-                  className="text-xl md:text-2xl font-extrabold text-white transition-transform cursor-default"
-                  style={{
-                    fontFamily: "Bangers, sans-serif",
-                    textShadow: `
-                      -2px -2px 0 #000,
-                      0   -2px 0 #000,
-                      2px -2px 0 #000,
-                      -2px  0   0 #000,
-                      2px  0   0 #000,
-                      -2px  2px 0 #000,
-                      0    2px 0 #000,
-                      2px  2px 0 #000,
-                      -1px -3px 0 #000,
-                      1px -3px 0 #000,
-                      -3px -1px 0 #000,
-                      3px -1px 0 #000,
-                      -3px  1px 0 #000,
-                      3px  1px 0 #000,
-                      -1px  3px 0 #000,
-                      1px  3px 0 #000
-                    `,
-                  }}
-                >
-                  空き時間に遊ぶなら
-                  <span className="block text-5xl md:text-7xl mt-2">ひまQ</span>
-                </h1>
+                <Link href="/" className="inline-block hover:scale-105 transition-transform">
+                  <h1
+                    className="text-xl md:text-2xl font-extrabold text-white transition-transform cursor-default"
+                    style={{
+                      fontFamily: "Bangers, sans-serif",
+                      textShadow: `
+                        -2px -2px 0 #000,
+                        0   -2px 0 #000,
+                        2px -2px 0 #000,
+                        -2px  0   0 #000,
+                        2px  0   0 #000,
+                        -2px  2px 0 #000,
+                        0    2px 0 #000,
+                        2px  2px 0 #000,
+                        -1px -3px 0 #000,
+                        1px -3px 0 #000,
+                        -3px -1px 0 #000,
+                        3px -1px 0 #000,
+                        -3px  1px 0 #000,
+                        3px  1px 0 #000,
+                        -1px  3px 0 #000,
+                        1px  3px 0 #000
+                      `,
+                    }}
+                  >
+                    空き時間に遊ぶなら
+                    <span className="block text-5xl md:text-7xl mt-2">ひまQ</span>
+                  </h1>
+                </Link>
                 <p className="text-black/90 mt-3 md:mt-4 mb-1 md:mb-0 md:text-xl tracking-wide font-bold">
                   みんなで盛り上がる暇つぶしクイズ！
                 </p>

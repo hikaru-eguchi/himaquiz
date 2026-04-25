@@ -3,12 +3,20 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Anton } from "next/font/google";
+import DungeonRankingTop10 from "@/app/components/DungeonRankingTop10";
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useSupabaseUser } from "../../hooks/useSupabaseUser"; 
 
 const anton = Anton({ subsets: ["latin"], weight: "400" });
+
+type DungeonRankRow = {
+  user_id: string;
+  username: string | null;
+  avatar_url: string | null;
+  best_stage: number;
+};
 
 export default function QuizMasterPage() {
   const router = useRouter();
@@ -17,6 +25,9 @@ export default function QuizMasterPage() {
 
   const [showGenreButtons, setShowGenreButtons] = useState(false);
   const [showDescription, setShowDescription] = useState(false);
+
+  const [dungeonTop10, setDungeonTop10] = useState<DungeonRankRow[]>([]);
+  const [rankLoading, setRankLoading] = useState(true);
 
   const handleGenreClick = () => {
     setShowGenreButtons(true);
@@ -201,6 +212,24 @@ export default function QuizMasterPage() {
     });
   }, [characters]); // ← charactersが決まってから実行
 
+  useEffect(() => {
+    const fetchDungeonRanking = async () => {
+      setRankLoading(true);
+      try {
+        const res = await fetch("/api/rankings/dungeon", { cache: "no-store" });
+        const data = (await res.json()) as DungeonRankRow[];
+        setDungeonTop10(Array.isArray(data) ? data : []);
+      } catch (e) {
+        console.error("ランキング取得失敗:", e);
+        setDungeonTop10([]);
+      } finally {
+        setRankLoading(false);
+      }
+    };
+
+    fetchDungeonRanking();
+  }, []);
+
   // アコーディオン用 ref
   const descriptionRef = useRef<HTMLParagraphElement>(null);
 
@@ -315,10 +344,32 @@ export default function QuizMasterPage() {
           このゲームの説明を見る
         </button>
 
+        {/* アコーディオン説明文 */}
+        <div
+          className={`overflow-hidden transition-all duration-500 ease-in-out mt-2 rounded-xl bg-white`}
+          style={{
+            maxHeight: showDescription
+              ? descriptionRef.current?.scrollHeight
+              : 0,
+          }}
+        >
+          <p
+            ref={descriptionRef}
+            className="text-gray-700 text-md md:text-lg text-center px-4 py-2"
+          >
+            「クイズダンジョン」は、クイズを解きながらダンジョンを進んでいく冒険クイズゲームです。<br />
+            クイズに正解すれば敵に攻撃できますが、間違えるとあなたのHP（ライフ）が減ってしまいます。<br />
+            HPが0になるとゲームオーバー。<br />
+            敵を倒すごとにステージが進み、あなたのランク（称号）もどんどん昇格していきます。<br />
+            運が良ければ、めったに入手できないレアアイテムを発見できることも…！？<br />
+            最終称号 「クイズマスター」を手に入れて、ダンジョン制覇を目指しましょう！
+          </p>
+        </div>
+
         {/* ✅ シークレットステージ */}
-        <div className="mt-12 max-w-4xl mx-auto">
+        <div className="mt-6 max-w-4xl mx-auto">
           <div
-  className="relative overflow-hidden border-2 border-black rounded-2xl p-4 shadow
+             className="relative overflow-hidden border-2 border-black rounded-2xl p-4 shadow
              bg-gradient-to-br from-[#f6f1ff] via-[#efe7ff] to-[#fff4d6]"
 >
             <div className="relative">
@@ -413,26 +464,63 @@ export default function QuizMasterPage() {
           </div>
         </div>
 
-        {/* アコーディオン説明文 */}
-        <div
-          className={`overflow-hidden transition-all duration-500 ease-in-out mt-2 rounded-xl bg-white`}
-          style={{
-            maxHeight: showDescription
-              ? descriptionRef.current?.scrollHeight
-              : 0,
-          }}
-        >
-          <p
-            ref={descriptionRef}
-            className="text-gray-700 text-md md:text-lg text-center px-4 py-2"
-          >
-            「クイズダンジョン」は、クイズを解きながらダンジョンを進んでいく冒険クイズゲームです。<br />
-            クイズに正解すれば敵に攻撃できますが、間違えるとあなたのHP（ライフ）が減ってしまいます。<br />
-            HPが0になるとゲームオーバー。<br />
-            敵を倒すごとにステージが進み、あなたのランク（称号）もどんどん昇格していきます。<br />
-            運が良ければ、めったに入手できないレアアイテムを発見できることも…！？<br />
-            最終称号 「クイズマスター」を手に入れて、ダンジョン制覇を目指しましょう！
-          </p>
+        <div className="flex justify-center">
+          <div className="mt-3 w-full max-w-[900px] rounded-[28px] border border-[#e5ddd3] bg-[#f8f8f8] px-2 py-5 md:px-8 md:py-7 shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
+            <div className="flex flex-col items-center text-center">
+              <h2 className="text-xl md:text-3xl font-extrabold text-gray-800 tracking-tight">
+                <span className="mr-2 text-yellow-500">👑</span>
+                全国ランキングをチェック！
+                <span className="ml-2 text-yellow-500">✨</span>
+              </h2>
+
+              <div className="mt-5 w-full max-w-[800px] rounded-[22px] border-2 border-[#efb8b8] bg-[#fff8f8] px-5 py-5 md:px-8 md:py-6">
+                <div className="flex items-center gap-4 md:gap-6">
+                  <div className="shrink-0 text-3xl md:text-5xl">🔒</div>
+
+                  <div className="text-left">
+                    <p className="text-lg md:text-2xl font-extrabold text-red-600 leading-tight">
+                      ランキングに載るにはログインが必要です
+                    </p>
+                    <p className="mt-2 text-sm md:text-lg font-bold text-gray-800 leading-relaxed">
+                      あなたの記録をランキングに残して、全国のユーザーと競い合おう！
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {!userLoading && !user && (
+                <div className="mt-5 w-full max-w-[800px] rounded-[22px] border border-[#d9d9d9] bg-[#fdfdfd] px-5 py-5 md:px-8 md:py-6 shadow-sm">
+                  <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div className="text-left">
+                      <p className="text-xl md:text-2xl font-extrabold text-red-600 leading-tight">
+                        ログインしていません
+                      </p>
+                      <p className="mt-2 text-sm md:text-base font-bold text-gray-800">
+                        ログインするとランキングに参加できます！
+                      </p>
+                    </div>
+
+                    <Link href="/user/login" className="md:shrink-0">
+                      <button className="w-full md:w-auto min-w-[200px] px-6 py-2 md:px-8 md:py-3 bg-orange-400 hover:bg-orange-500 text-white rounded-[18px] font-extrabold text-lg md:text-2xl border-2 border-[#b85c00] shadow-[0_3px_0_#b85c00] transition-transform hover:scale-[1.02] cursor-pointer">
+                        ログインする
+                      </button>
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
+            {rankLoading ? (
+              <p className="py-6 text-center text-base md:text-lg font-bold text-gray-600">
+                ランキング読み込み中...
+              </p>
+            ) : dungeonTop10.length > 0 ? (
+              <DungeonRankingTop10 rows={dungeonTop10} />
+            ) : (
+              <p className="py-6 text-center text-base md:text-lg font-bold text-gray-600">
+                まだランキングがありません
+              </p>
+            )}
+          </div>
         </div>
       </>
     </div>

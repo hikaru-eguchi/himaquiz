@@ -122,7 +122,7 @@ export default function AllTimeRankingListClient({
   const formatValue = (u: Row) => {
     if (labelType === "score") return `${u.score}pt`;
     if (labelType === "play_count") return `${u.play_count}回`;
-    if (labelType === "best_streak") return `${u.best_streak ?? 0}問連続✅`;
+    if (labelType === "best_streak") return `${u.best_streak ?? 0}問連続🔥`;
     return `${u.correct_count}問`;
   };
 

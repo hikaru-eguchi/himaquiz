@@ -209,8 +209,6 @@ export default async function HomePage({
         )}
       </div>
 
-      <WeeklyRankingSection />
-
       {/* <div className="
         max-w-[700px] 
         mx-auto 
@@ -654,6 +652,8 @@ export default async function HomePage({
           </div>
         </div>
       </div>
+
+      <WeeklyRankingSection />
 
       <div className="max-w-[700px] mx-auto border-2 border rounded-xl m-5 p-5 bg-gradient-to-br from-pink-300 via-yellow-200 to-blue-300 shadow-xl shadow-yellow-200/40">
         <p className="text-2xl md:text-4xl font-extrabold mb-2 text-center leading-tight drop-shadow-xl">
