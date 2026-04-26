@@ -55,7 +55,7 @@ export default function StreakRankingTop10({ rows }: { rows: Row[] }) {
             </p>
           </div>
 
-          <div className="mt-5 space-y-3 max-h-[600px] overflow-y-auto pr-1">
+          <div className="mt-5 space-y-3 max-h-[380px] md:max-h-[420px] overflow-y-auto pr-1">
             {list.map((u, idx) => {
               const rank = idx + 1;
               const avatar = u.avatar_url ?? "/images/初期アイコン.png";
