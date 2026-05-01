@@ -19,7 +19,7 @@ const PRIZES: Prize[] = [
     kind: "trivia",
     icon: "💡",
     label: "雑学",
-    title: "今日のひま雑学",
+    title: "今日の雑学",
     badge: "へぇ〜が出たら勝ち",
     bg: "from-yellow-200 via-white to-orange-200",
     texts: [
@@ -114,7 +114,7 @@ const PRIZES: Prize[] = [
     kind: "aruaru",
     icon: "😂",
     label: "あるある",
-    title: "クイズあるある",
+    title: "今日のあるある",
     badge: "わかる人にはわかる",
     bg: "from-sky-200 via-white to-cyan-200",
     texts: [
