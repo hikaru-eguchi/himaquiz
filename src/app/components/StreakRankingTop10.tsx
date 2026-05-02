@@ -1,5 +1,9 @@
 "use client";
 
+import { useMemo, useState } from "react";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import UserProfileModal, { PublicProfile } from "@/app/components/UserProfileModal";
+
 type Row = {
   user_id: string;
   username: string | null;
@@ -40,90 +44,138 @@ export default function StreakRankingTop10({ rows }: { rows: Row[] }) {
     return "text-red-500";
   };
 
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+
+  const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState<PublicProfile | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const openUserProfile = async (userId: string) => {
+    setSelected(null);
+    setLoading(true);
+    setOpen(true);
+
+    const { data, error } = await supabase
+      .from("user_public_profiles")
+      .select("user_id, username, avatar_url, level, character_count, current_title")
+      .eq("user_id", userId)
+      .single();
+
+    setLoading(false);
+
+    if (error) {
+      setSelected({
+        user_id: userId,
+        username: null,
+        avatar_url: null,
+        level: null,
+        character_count: null,
+        current_title: null,
+      });
+      return;
+    }
+
+    setSelected(data as PublicProfile);
+  };
+
   return (
-    <div className="mt-6">
-      <div className="mx-auto w-full max-w-[760px]">
-        <div className="rounded-[28px] border border-[#e6dccf] bg-[#f8f8f8] p-4 md:p-6 shadow-[0_12px_30px_rgba(0,0,0,0.08)]">
-          <div className="text-center">
-            <p className="text-sm md:text-base font-black text-red-500 drop-shadow-sm">
-              みんなの連続正解チャレンジ🔥
-            </p>
-            <p className="mt-1 text-lg md:text-2xl font-black text-gray-900">
-              連続正解ランキング TOP20🏆
-            </p>
-            <p className="mt-2 text-xs md:text-sm text-gray-500 font-semibold">
-              上位を目指して自己ベスト更新！
-            </p>
-          </div>
+    <>
+      <div className="mt-6">
+        <div className="mx-auto w-full max-w-[760px]">
+          <div className="rounded-[28px] border border-[#e6dccf] bg-[#f8f8f8] p-4 md:p-6 shadow-[0_12px_30px_rgba(0,0,0,0.08)]">
+            <div className="text-center">
+              <p className="text-sm md:text-base font-black text-red-500 drop-shadow-sm">
+                みんなの連続正解チャレンジ🔥
+              </p>
+              <p className="mt-1 text-lg md:text-2xl font-black text-gray-900">
+                連続正解ランキング TOP20🏆
+              </p>
+              <p className="mt-2 text-xs md:text-sm text-gray-500 font-semibold">
+                上位を目指して自己ベスト更新！
+              </p>
+            </div>
 
-          <div className="mt-5 space-y-3 max-h-[600px] overflow-y-auto pr-1">
-            {list.map((u, idx) => {
-              const rank = idx + 1;
-              const avatar = u.avatar_url ?? "/images/初期アイコン.png";
-              const username = u.username ?? "名無し";
+            <div className="mt-5 space-y-3 max-h-[600px] overflow-y-auto pr-1">
+              {list.map((u, idx) => {
+                const rank = idx + 1;
+                const avatar = u.avatar_url ?? "/images/初期アイコン.png";
+                const username = u.username ?? "名無し";
 
-              return (
-                <div
-                  key={u.user_id}
-                  className={`w-full rounded-2xl border px-3 py-3 md:px-4 md:py-3 transition-transform duration-200 hover:scale-[1.01] ${getRowStyle(rank)}`}
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex min-w-0 items-center gap-2 md:gap-4">
-                      <div
-                        className={`flex h-10 w-10 md:h-12 md:w-12 shrink-0 items-center justify-center rounded-full border-2 font-extrabold text-sm md:text-base ${
-                          rank <= 3
-                            ? "border-black bg-white shadow-[0_3px_0_rgba(0,0,0,1)]"
-                            : "border-gray-300 bg-gray-50 text-gray-700"
-                        }`}
-                      >
-                        {getRankLabel(rank)}
+                return (
+                  <button
+                    type="button"
+                    key={u.user_id}
+                    onClick={() => openUserProfile(u.user_id)}
+                    className={`w-full rounded-2xl border px-3 py-3 md:px-4 md:py-3 text-left transition-transform duration-200 hover:scale-[1.01] ${getRowStyle(rank)}`}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex min-w-0 items-center gap-2 md:gap-4">
+                        <div
+                          className={`flex h-10 w-10 md:h-12 md:w-12 shrink-0 items-center justify-center rounded-full border-2 font-extrabold text-sm md:text-base ${
+                            rank <= 3
+                              ? "border-black bg-white shadow-[0_3px_0_rgba(0,0,0,1)]"
+                              : "border-gray-300 bg-gray-50 text-gray-700"
+                          }`}
+                        >
+                          {getRankLabel(rank)}
+                        </div>
+
+                        <div className="relative h-10 w-10 md:h-12 md:w-12 shrink-0 overflow-hidden rounded-full border-2 border-black bg-white shadow-[0_3px_0_rgba(0,0,0,1)]">
+                          <img
+                            src={avatar}
+                            alt={username}
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+
+                        <div className="min-w-0 text-left">
+                          <p className="truncate text-sm md:text-base font-extrabold text-gray-900">
+                            {username}
+                          </p>
+                          {/* <p className="text-[11px] md:text-xs font-semibold text-gray-500">
+                            {rank <= 3
+                              ? "TOP3ランカー"
+                              : rank <= 10
+                              ? "TOP10入り"
+                              : "チャレンジャー"}
+                          </p> */}
+                        </div>
                       </div>
 
-                      <div className="relative h-10 w-10 md:h-12 md:w-12 shrink-0 overflow-hidden rounded-full border-2 border-black bg-white shadow-[0_3px_0_rgba(0,0,0,1)]">
-                        <img
-                          src={avatar}
-                          alt={username}
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-
-                      <div className="min-w-0 text-left">
-                        <p className="truncate text-sm md:text-base font-extrabold text-gray-900">
-                          {username}
+                      <div className="shrink-0 text-right">
+                        <p
+                          className={`text-xl md:text-2xl font-black leading-none ${getScoreStyle(rank)}`}
+                        >
+                          {u.best_streak ?? 0}
+                          <span className="ml-1 mt-1 text-sm md:text-md font-bold text-gray-600">
+                            問
+                          </span>
                         </p>
-                        {/* <p className="text-[11px] md:text-xs font-semibold text-gray-500">
-                          {rank <= 3
-                            ? "TOP3ランカー"
-                            : rank <= 10
-                            ? "TOP10入り"
-                            : "チャレンジャー"}
-                        </p> */}
                       </div>
                     </div>
+                  </button>
+                );
+              })}
+            </div>
 
-                    <div className="shrink-0 text-right">
-                      <p
-                        className={`text-xl md:text-2xl font-black leading-none ${getScoreStyle(rank)}`}
-                      >
-                        {u.best_streak ?? 0}
-                        <span className="ml-1 mt-1 text-sm md:text-md font-bold text-gray-600">
-                          問
-                        </span>
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+            {rows.length === 0 && (
+              <p className="mt-4 text-center text-gray-600 font-bold">
+                ランキングを読み込み中…
+              </p>
+            )}
           </div>
-
-          {rows.length === 0 && (
-            <p className="mt-4 text-center text-gray-600 font-bold">
-              ランキングを読み込み中…
-            </p>
-          )}
         </div>
       </div>
-    </div>
+      <UserProfileModal
+        open={open}
+        loading={loading}
+        selected={selected}
+        onClose={() => {
+          setOpen(false);
+          setSelected(null);
+          setLoading(false);
+        }}
+      />
+    </>
   );
 }
