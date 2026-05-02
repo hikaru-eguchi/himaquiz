@@ -8,6 +8,7 @@ export type QuizBookMeta = {
   slug: string;
   title: string;
   description?: string;
+  difficulty?: number;
   theme?: string;
   tags?: string[];
   updated?: string;
@@ -33,6 +34,7 @@ export function getAllQuizBooksMeta(): QuizBookMeta[] {
         slug,
         title: String(data.title ?? slug),
         description: data.description ? String(data.description) : undefined,
+        difficulty: Number(data.difficulty ?? 3),
         theme: data.theme ? String(data.theme) : undefined,
         tags: Array.isArray(data.tags) ? data.tags.map(String) : undefined,
         updated: data.updated ? String(data.updated) : undefined,
@@ -53,6 +55,7 @@ export function getQuizBookSourceBySlug(slug: string) {
       slug,
       title: String(data.title ?? slug),
       description: data.description ? String(data.description) : undefined,
+      difficulty: Number(data.difficulty ?? 3),
       theme: data.theme ? String(data.theme) : undefined,
       tags: Array.isArray(data.tags) ? data.tags.map(String) : undefined,
       updated: data.updated ? String(data.updated) : undefined,

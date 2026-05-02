@@ -68,9 +68,19 @@ export default function QuizBooksMatchstickIndexPage() {
                   問題 {index + 1}
                 </p>
 
-                <h2 className="text-xl md:text-2xl font-extrabold mb-2 group-hover:underline">
-                  {b.title}
-                </h2>
+                <div className="mb-2 flex flex-wrap items-center gap-2">
+                  <h2 className="text-xl md:text-2xl font-extrabold group-hover:underline">
+                    {b.title}
+                  </h2>
+
+                  <span className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-extrabold text-amber-700">
+                    むずかしさ
+                    <span className="tracking-tight">
+                      {"★".repeat(b.difficulty ?? 3)}
+                      {"☆".repeat(5 - (b.difficulty ?? 3))}
+                    </span>
+                  </span>
+                </div>
 
                 {b.description && (
                   <p className="text-gray-700 text-sm md:text-base leading-relaxed">
