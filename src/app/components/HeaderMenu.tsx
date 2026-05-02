@@ -172,16 +172,16 @@ export default function HeaderMenu() {
 
       {/* メニュー本体 */}
       {open && (
-        <div className="fixed top-0 right-0 w-68 h-full bg-white shadow-xl z-40 p-5 flex flex-col space-y-3 text-lg">
+        <div className="fixed top-0 right-0 w-68 h-full bg-white shadow-xl z-40 p-5 flex flex-col space-y-2 md:space-y-3 text-lg">
           <button className="self-end text-2xl" onClick={() => setOpen(false)}>
             ✕
           </button>
 
           {/* ログイン済み：ユーザー名＆ポイント */}
           {user && (
-            <div className="pb-3 border-b-3 border-black">
+            <div className="pb-1 md:pb-3 border-b-3 border-black">
               <div className="rounded-[22px] overflow-hidden bg-white">
-                <div className="p-4 grid place-items-center gap-2 md:gap-3">
+                <div className="p-3 md:p-4 grid place-items-center gap-2 md:gap-3">
                   {/* アバター（オーラ＋バッジ） */}
                   <button
                     type="button"
@@ -266,12 +266,29 @@ export default function HeaderMenu() {
               >
                 トップページへ
               </Link>
+              
+              <Link
+                href="/user/mypage"
+                className="bg-blue-500 text-white py-2 px-4 rounded text-center hover:bg-blue-600"
+                onClick={() => setOpen(false)}
+              >
+                マイプロフィール
+              </Link>
+              
               <Link
                 href="/quiz-gacha"
                 className="bg-gradient-to-r from-red-500 via-sky-500 to-green-500 text-white py-2 px-4 rounded text-center hover:opacity-90"
                 onClick={() => setOpen(false)}
               >
-                ひまQガチャ
+                ひまキャラガチャ
+              </Link>
+
+              <Link
+                href="/title-gacha"
+                className="bg-gradient-to-r from-purple-500 via-pink-400 to-yellow-300 text-white py-2 px-4 rounded text-center hover:opacity-90"
+                onClick={() => setOpen(false)}
+              >
+                称号ガチャ
               </Link>
 
               <Link
@@ -284,14 +301,6 @@ export default function HeaderMenu() {
                 onClick={() => setOpen(false)}
               >
                 マイキャラ図鑑📖
-              </Link>
-
-              <Link
-                href="/user/mypage"
-                className="bg-blue-500 text-white py-2 px-4 rounded text-center hover:bg-blue-600"
-                onClick={() => setOpen(false)}
-              >
-                マイプロフィール
               </Link>
 
               <button

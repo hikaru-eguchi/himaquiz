@@ -30,7 +30,7 @@ export default function ProfileEditPage() {
 
   const [username, setUsername] = useState("");
   const [userId, setUserId] = useState("");
-  const [originalUserId, setOriginalUserId] = useState(""); // 変更前のID保持
+  const [originalUserId, setOriginalUserId] = useState("");
   const [recoveryEmail, setRecoveryEmail] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -38,9 +38,19 @@ export default function ProfileEditPage() {
   const [avatarType, setAvatarType] = useState<"initial" | "default" | "owned">("initial");
   const [avatarCharacterId, setAvatarCharacterId] = useState<string | null>(null);
   const [avatarDefaultId, setAvatarDefaultId] = useState<DefaultIconId | null>(null);
-  const [currentTitle, setCurrentTitle] = useState<string>(""); // "" は未設定扱い
+  const [currentTitle, setCurrentTitle] = useState<string>("");
+
   type OwnedTitle = { game: string; title: string; unlocked_at: string };
   const [ownedTitles, setOwnedTitles] = useState<OwnedTitle[]>([]);
+
+  type OwnedChar = {
+    id: string;
+    name: string;
+    image_url: string | null;
+    rarity: string | null;
+  };
+
+  const [ownedChars, setOwnedChars] = useState<OwnedChar[]>([]);
 
   useEffect(() => {
     if (userLoading) return;
@@ -72,7 +82,7 @@ export default function ProfileEditPage() {
           setAvatarCharacterId(data.avatar_character_id);
           setAvatarDefaultId(null);
         } else {
-          const hit = DEFAULT_ICONS.find(i => i.url === savedUrl);
+          const hit = DEFAULT_ICONS.find((i) => i.url === savedUrl);
           if (hit) {
             setAvatarType("default");
             setAvatarDefaultId(hit.id);
@@ -84,20 +94,12 @@ export default function ProfileEditPage() {
           }
         }
       }
+
       setLoading(false);
     };
 
     fetchProfile();
   }, [user, userLoading, supabase, router]);
-
-  type OwnedChar = {
-    id: string;
-    name: string;
-    image_url: string | null;
-    rarity: string | null;
-  };
-
-  const [ownedChars, setOwnedChars] = useState<OwnedChar[]>([]);
 
   useEffect(() => {
     if (userLoading) return;
@@ -164,21 +166,19 @@ export default function ProfileEditPage() {
         setSaving(false);
         return;
       }
-      
+
       if (!userId.trim()) {
         setError("ユーザーIDを入力してください。");
         setSaving(false);
         return;
       }
-      
-      // ユーザーIDに「@」は禁止（擬似メールで使うため）
+
       if (userId.includes("@")) {
         setError("ユーザーIDに「@」は使えません。");
         setSaving(false);
         return;
       }
 
-      // 1. ユーザーID重複チェック（自分以外で同じ user_id がないか）
       const { data: existing, error: selectError } = await supabase
         .from("profiles")
         .select("id")
@@ -199,7 +199,6 @@ export default function ProfileEditPage() {
         return;
       }
 
-      // 2. userId が変わっていた場合は auth 側の擬似メールも更新
       if (userId !== originalUserId) {
         const newAuthEmail = `${userId}@hima-quiz.com`;
 
@@ -215,19 +214,18 @@ export default function ProfileEditPage() {
         }
       }
 
-      // 3. profiles の更新
       const INITIAL = "/images/初期アイコン.png";
 
       let selectedAvatarUrl = INITIAL;
       let nextAvatarCharacterId: string | null = null;
 
       if (avatarType === "default" && avatarDefaultId) {
-        selectedAvatarUrl = DEFAULT_ICONS.find(i => i.id === avatarDefaultId)?.url ?? INITIAL;
+        selectedAvatarUrl = DEFAULT_ICONS.find((i) => i.id === avatarDefaultId)?.url ?? INITIAL;
         nextAvatarCharacterId = null;
       }
 
       if (avatarType === "owned" && avatarCharacterId) {
-        const raw = ownedChars.find(c => c.id === avatarCharacterId)?.image_url ?? INITIAL;
+        const raw = ownedChars.find((c) => c.id === avatarCharacterId)?.image_url ?? INITIAL;
         selectedAvatarUrl = raw.startsWith("/") ? raw : `/${raw}`;
         nextAvatarCharacterId = avatarCharacterId;
       }
@@ -249,7 +247,6 @@ export default function ProfileEditPage() {
 
       if (updateError) {
         console.error("updateError:", updateError);
-        // ここが重要：message / code / details を直接見る
         console.error("message:", (updateError as any).message);
         console.error("code:", (updateError as any).code);
         console.error("details:", (updateError as any).details);
@@ -271,209 +268,331 @@ export default function ProfileEditPage() {
       setSaving(false);
     }
   };
-  
+
   const selectedUrl = useMemo(() => {
     const INITIAL = "/images/初期アイコン.png";
-    
+
     if (avatarType === "default" && avatarDefaultId) {
-      return DEFAULT_ICONS.find(i => i.id === avatarDefaultId)?.url ?? INITIAL;
+      return DEFAULT_ICONS.find((i) => i.id === avatarDefaultId)?.url ?? INITIAL;
     }
+
     if (avatarType === "owned" && avatarCharacterId) {
-      const raw = ownedChars.find(c => c.id === avatarCharacterId)?.image_url ?? INITIAL;
+      const raw = ownedChars.find((c) => c.id === avatarCharacterId)?.image_url ?? INITIAL;
       return raw.startsWith("/") ? raw : `/${raw}`;
     }
+
     return INITIAL;
   }, [avatarType, avatarDefaultId, avatarCharacterId, ownedChars]);
 
   const uniqueTitleOptions = useMemo(() => {
-    // titleが空やnullっぽいものは除外
     const titles = ownedTitles
-      .map(t => (t.title ?? "").trim())
+      .map((t) => (t.title ?? "").trim())
       .filter(Boolean);
 
-    // Setで重複除去（順序は維持される：unlocked_at descの並びを保てる）
     return Array.from(new Set(titles));
   }, [ownedTitles]);
-  
-  if (userLoading || loading) return <p>読み込み中...</p>;
+
+  if (userLoading || loading) {
+    return (
+      <main className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-yellow-50 px-4 py-5">
+        <div className="mx-auto max-w-md space-y-4">
+          <div className="h-12 animate-pulse rounded-2xl bg-gray-200" />
+          <div className="h-40 animate-pulse rounded-[2rem] bg-gray-200" />
+          <div className="h-72 animate-pulse rounded-[2rem] bg-gray-200" />
+          <div className="h-72 animate-pulse rounded-[2rem] bg-gray-200" />
+        </div>
+      </main>
+    );
+  }
 
   return (
-    <div className="max-w-md mx-auto p-4 space-y-4">
-      <div className="mb-6 md:mb-8">
+    <main className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-yellow-50 px-4 py-5">
+      <div className="mx-auto max-w-md space-y-4">
         <div className="flex justify-start">
           <button
             onClick={() => router.push("/user/mypage")}
-            className="text-sm md:text-base text-blue-600 underline cursor-pointer"
+            className="rounded-full bg-white px-4 py-2 text-sm font-black text-blue-600 shadow-sm ring-1 ring-blue-100 transition hover:bg-blue-50 active:scale-95"
           >
             ← マイページへ戻る
           </button>
         </div>
 
-        <h1 className="text-2xl md:text-4xl font-extrabold text-center mt-4">
-          プロフィール編集
-        </h1>
-      </div>
+        <section className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-sky-500 via-blue-500 to-purple-500 p-5 text-white shadow-lg">
+          <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/20 blur-2xl" />
+          <div className="absolute -bottom-12 -left-10 h-36 w-36 rounded-full bg-yellow-200/30 blur-2xl" />
 
-      <form onSubmit={handleSubmit} className="space-y-3">
-        <div>
-          <label className="block text-md md:text-xl font-medium">ユーザー名（表示名）</label>
-          <input
-            className="border rounded w-full p-2 mb-1 md:mb-2"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-        </div>
+          <div className="relative">
+            <p className="text-xs font-black text-white/80">PROFILE EDIT</p>
+            <h1 className="mt-1 text-2xl font-black">プロフィール編集</h1>
+            <p className="mt-2 text-sm font-bold text-white/85">
+              表示名・ログインID・アイコン・マイ称号を変更できます。
+            </p>
+{/* 
+            <div className="mt-5 flex items-center gap-4 rounded-3xl bg-white/15 p-4 backdrop-blur">
+              <img
+                src={selectedUrl}
+                className="h-24 w-24 shrink-0 rounded-full bg-white object-contain p-1 shadow-xl"
+                alt="selected icon"
+              />
 
-        <div>
-          <label className="block text-md md:text-xl font-medium">
-            ユーザーID（ログインに使うID）
-          </label>
-          <input
-            className="border rounded w-full p-2"
-            value={userId}
-            onChange={(e) => setUserId(e.target.value)}
-          />
-          <p className="text-sm md:text-md text-gray-500 mt-1">
-            「@」は使用できません。
-          </p>
-        </div>
-
-        <div>
-          <label className="block text-md md:text-xl font-medium">
-            復旧用メールアドレス（任意）
-          </label>
-          <input
-            className="border rounded w-full p-2"
-            type="email"
-            value={recoveryEmail}
-            onChange={(e) => setRecoveryEmail(e.target.value)}
-            placeholder="パスワードを忘れたときのためのメールアドレス"
-          />
-        </div>
-
-        <div>
-          <label className="block text-md md:text-xl font-medium">マイ称号</label>
-
-          <select
-            className="border rounded w-full p-2"
-            value={currentTitle}
-            onChange={(e) => setCurrentTitle(e.target.value)}
-          >
-            <option value="">（未設定）</option>
-            {uniqueTitleOptions.map((title) => (
-              <option key={title} value={title}>
-                {title}
-              </option>
-            ))}
-          </select>
-
-          <p className="text-sm md:text-md text-gray-500 mt-1">
-            獲得済みの称号から選べます。
-          </p>
-        </div>
-
-        <div className="border rounded p-3">
-          <p className="text-md md:text-xl font-medium mb-2">アイコン</p>
-
-          {/* 現在の選択 */}
-          <div className="flex items-center gap-3 mb-3">
-            <img
-              src={selectedUrl}
-              className="w-30 md:w-40 h-30 md:h-40 border-2 border-white shadow-lg rounded-full bg-white object-contain"
-              alt="selected icon"
-            />
-            <button
-              type="button"
-              onClick={() => {
-                setAvatarType("initial");
-                setAvatarDefaultId(null);
-                setAvatarCharacterId(null);
-              }}
-              className="px-3 py-2 rounded bg-gray-200 hover:bg-gray-300"
-            >
-              初期アイコンにする
-            </button>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-black text-white/75">現在の選択</p>
+                <p className="truncate text-lg font-black">
+                  {username || "ユーザー名未設定"}
+                </p>
+                <p className="mt-1 truncate text-sm font-bold text-white/80">
+                  {currentTitle || "マイ称号未設定"}
+                </p>
+              </div>
+            </div> */}
           </div>
+        </section>
 
-          <p className="text-sm md:text-base text-gray-600 mb-2">＜ 最初から選べるアイコン ＞</p>
-          <div className="grid grid-cols-3 md:grid-cols-4 gap-2 mb-4">
-            {DEFAULT_ICONS.map((ic) => {
-              const selected = avatarType === "default" && avatarDefaultId === ic.id;
-              return (
-                <button
-                  key={ic.id}
-                  type="button"
-                  onClick={() => {
-                    setAvatarType("default");
-                    setAvatarDefaultId(ic.id);
-                    setAvatarCharacterId(null); // ownedの選択を外す
-                  }}
-                  className={`p-1 rounded border ${selected ? "border-blue-600 ring-4 ring-blue-400" : "border-gray-400"}`}
-                  title={ic.name}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <section className="rounded-[2rem] border border-blue-100 bg-white p-4 shadow-sm">
+            <div className="mb-4">
+              <p className="text-xs font-black text-blue-500">ACCOUNT</p>
+              <h2 className="text-lg font-black text-gray-900">
+                基本プロフィール
+              </h2>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="mb-1 block text-sm font-black text-gray-700">
+                  ユーザー名（表示名）
+                </label>
+                <input
+                  className="w-full rounded-2xl border-2 border-gray-100 bg-gray-50 px-4 py-3 font-bold text-gray-900 outline-none transition focus:border-blue-300 focus:bg-white focus:ring-4 focus:ring-blue-100"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-black text-gray-700">
+                  ユーザーID（ログインに使うID）
+                </label>
+                <input
+                  className="w-full rounded-2xl border-2 border-gray-100 bg-gray-50 px-4 py-3 font-bold text-gray-900 outline-none transition focus:border-blue-300 focus:bg-white focus:ring-4 focus:ring-blue-100"
+                  value={userId}
+                  onChange={(e) => setUserId(e.target.value)}
+                />
+                <p className="mt-1 text-xs font-bold text-gray-500">
+                  「@」は使用できません。
+                </p>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-black text-gray-700">
+                  復旧用メールアドレス（任意）
+                </label>
+                <input
+                  className="w-full rounded-2xl border-2 border-gray-100 bg-gray-50 px-4 py-3 font-bold text-gray-900 outline-none transition focus:border-blue-300 focus:bg-white focus:ring-4 focus:ring-blue-100"
+                  type="email"
+                  value={recoveryEmail}
+                  onChange={(e) => setRecoveryEmail(e.target.value)}
+                  placeholder="パスワードを忘れたときのためのメールアドレス"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-black text-gray-700">
+                  マイ称号
+                </label>
+
+                <select
+                  className="w-full rounded-2xl border-2 border-gray-100 bg-gray-50 px-4 py-3 font-bold text-gray-900 outline-none transition focus:border-purple-300 focus:bg-white focus:ring-4 focus:ring-purple-100"
+                  value={currentTitle}
+                  onChange={(e) => setCurrentTitle(e.target.value)}
                 >
-                  <img src={ic.url} alt={ic.name} className="w-full aspect-square object-contain" />
-                </button>
-              );
-            })}
-          </div>
+                  <option value="">（未設定）</option>
+                  {uniqueTitleOptions.map((title) => (
+                    <option key={title} value={title}>
+                      {title}
+                    </option>
+                  ))}
+                </select>
 
-          {/* 所持キャラから選択 */}
-          <p className="text-sm md:text-base text-gray-600 mb-2">＜ 所持キャラアイコン ＞</p>
-          {ownedChars.length === 0 ? (
-            <p className="text-sm text-gray-600">まだ所持キャラがいません（ガチャでゲットできます）</p>
-          ) : (
-            <div
-              className="
-                max-h-95 md:max-h-95
-                overflow-y-auto
-                pr-1
-                rounded-lg
-                border border-gray-200
-                bg-gray-50/40
-                p-2
-              "
-            >
-              <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
-                {ownedChars.map((ch) => {
-                  const url = ch.image_url
-                    ? ch.image_url.startsWith("/") ? ch.image_url : `/${ch.image_url}`
-                    : "/images/初期アイコン.png";
+                <p className="mt-1 text-xs font-bold text-gray-500">
+                  獲得済みの称号から選べます。
+                </p>
+              </div>
+            </div>
+          </section>
 
-                  const selected = avatarType === "owned" && avatarCharacterId === ch.id;
+          <section className="rounded-[2rem] border border-purple-100 bg-white p-4 shadow-sm">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-black text-purple-500">AVATAR</p>
+                <h2 className="text-lg font-black text-gray-900">アイコン</h2>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setAvatarType("initial");
+                  setAvatarDefaultId(null);
+                  setAvatarCharacterId(null);
+                }}
+                className="rounded-2xl bg-gray-100 px-4 py-2 text-sm font-black text-gray-700 transition hover:bg-gray-200 active:scale-95"
+              >
+                初期アイコンにする
+              </button>
+            </div>
+
+            <div className="mb-5 flex items-center gap-4 rounded-3xl bg-gradient-to-br from-purple-50 to-sky-50 p-4">
+              <img
+                src={selectedUrl}
+                className="h-28 w-28 shrink-0 rounded-full border-4 border-white bg-white object-contain p-1 shadow-lg md:h-36 md:w-36"
+                alt="selected icon"
+              />
+
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-black text-gray-500">現在の選択</p>
+                <p className="mt-1 text-lg font-black text-gray-900">
+                  {avatarType === "initial"
+                    ? "初期アイコン"
+                    : avatarType === "default"
+                      ? "デフォルトアイコン"
+                      : "所持キャラアイコン"}
+                </p>
+                <p className="mt-1 text-xs font-bold text-gray-500">
+                  保存するとこのアイコンがプロフィールに反映されます。
+                </p>
+              </div>
+            </div>
+
+            <div className="mb-5">
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-sm font-black text-gray-700">
+                  最初から選べるアイコン
+                </p>
+                <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-500">
+                  {DEFAULT_ICONS.length}種類
+                </span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3 md:grid-cols-4">
+                {DEFAULT_ICONS.map((ic) => {
+                  const selected = avatarType === "default" && avatarDefaultId === ic.id;
 
                   return (
                     <button
-                      key={ch.id}
+                      key={ic.id}
                       type="button"
                       onClick={() => {
-                        setAvatarType("owned");
-                        setAvatarCharacterId(ch.id);
-                        setAvatarDefaultId(null);
+                        setAvatarType("default");
+                        setAvatarDefaultId(ic.id);
+                        setAvatarCharacterId(null);
                       }}
-                      className={`p-1 rounded border ${
-                        selected ? "border-blue-600 ring-4 ring-blue-400" : "border-gray-400"
+                      className={`group rounded-3xl border-2 bg-white p-2 shadow-sm transition active:scale-95 ${
+                        selected
+                          ? "border-blue-500 ring-4 ring-blue-100"
+                          : "border-gray-100 hover:border-blue-200 hover:bg-blue-50"
                       }`}
-                      title={ch.name}
+                      title={ic.name}
                     >
-                      <img src={url} alt={ch.name} className="w-full aspect-square object-contain" />
+                      <div className="rounded-2xl bg-gray-50 p-2">
+                        <img
+                          src={ic.url}
+                          alt={ic.name}
+                          className="aspect-square w-full object-contain transition group-hover:scale-105"
+                        />
+                      </div>
+                      <p className="mt-2 truncate text-xs font-black text-gray-700">
+                        {ic.name}
+                      </p>
                     </button>
                   );
                 })}
               </div>
             </div>
+
+            <div>
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-sm font-black text-gray-700">
+                  所持キャラアイコン
+                </p>
+                <span className="rounded-full bg-purple-50 px-3 py-1 text-xs font-black text-purple-500">
+                  {ownedChars.length}体
+                </span>
+              </div>
+
+              {ownedChars.length === 0 ? (
+                <div className="rounded-3xl border-2 border-dashed border-gray-200 bg-gray-50 p-5 text-center">
+                  <div className="mx-auto mb-2 flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-2xl shadow-sm">
+                    🎁
+                  </div>
+                  <p className="font-black text-gray-700">
+                    まだ所持キャラがいません
+                  </p>
+                  <p className="mt-1 text-xs font-bold text-gray-500">
+                    ガチャでゲットできます
+                  </p>
+                </div>
+              ) : (
+                <div className="max-h-95 overflow-y-auto rounded-3xl border border-gray-100 bg-gray-50/70 p-3 pr-2 md:max-h-95">
+                  <div className="grid grid-cols-3 gap-3 md:grid-cols-4">
+                    {ownedChars.map((ch) => {
+                      const url = ch.image_url
+                        ? ch.image_url.startsWith("/")
+                          ? ch.image_url
+                          : `/${ch.image_url}`
+                        : "/images/初期アイコン.png";
+
+                      const selected = avatarType === "owned" && avatarCharacterId === ch.id;
+
+                      return (
+                        <button
+                          key={ch.id}
+                          type="button"
+                          onClick={() => {
+                            setAvatarType("owned");
+                            setAvatarCharacterId(ch.id);
+                            setAvatarDefaultId(null);
+                          }}
+                          className={`group rounded-3xl border-2 bg-white p-2 shadow-sm transition active:scale-95 ${
+                            selected
+                              ? "border-blue-500 ring-4 ring-blue-100"
+                              : "border-gray-100 hover:border-purple-200 hover:bg-purple-50"
+                          }`}
+                          title={ch.name}
+                        >
+                          <div className="rounded-2xl bg-white p-1">
+                            <img
+                              src={url}
+                              alt={ch.name}
+                              className="aspect-square w-full object-contain transition group-hover:scale-105"
+                            />
+                          </div>
+                          <p className="mt-2 truncate text-xs font-black text-gray-700">
+                            {ch.name}
+                          </p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+
+          {error && (
+            <div className="rounded-2xl border-2 border-red-200 bg-red-50 p-4 text-sm font-black text-red-600">
+              {error}
+            </div>
           )}
-        </div>
 
-        {error && <p className="text-red-500 text-md md:text-xl">{error}</p>}
-
-        <button
-          type="submit"
-          disabled={saving}
-          className="w-full bg-blue-600 text-white py-2 rounded disabled:opacity-60 mt-2 md:mt-4 cursor-pointer"
-        >
-          {saving ? "保存中..." : "保存"}
-        </button>
-      </form>
-    </div>
+          <button
+            type="submit"
+            disabled={saving}
+            className="w-full rounded-3xl bg-gradient-to-r from-blue-600 via-sky-500 to-purple-500 py-4 text-lg font-black text-white shadow-lg transition hover:scale-[1.01] hover:brightness-105 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {saving ? "保存中..." : "保存する"}
+          </button>
+        </form>
+      </div>
+    </main>
   );
 }

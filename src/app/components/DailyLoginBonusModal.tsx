@@ -99,7 +99,7 @@ export function DailyLoginBonusModal() {
           </div>
 
           <p className="mt-4 text-lg md:text-xl text-gray-700 font-bold text-center">
-            ポイントで <span className="font-black">ひまQガチャ</span> を回してみよう！
+            ポイントで <span className="font-black">ガチャ</span> を回してみよう！
           </p>
 
           <p className="mt-6 text-md md:text-lg text-gray-500 text-center">

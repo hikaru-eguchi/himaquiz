@@ -39,15 +39,16 @@ export default function MyPage() {
       setLoading(true);
 
       try {
-        // friend_codeが無いユーザーもいる可能性があるので先に保証
-        const { data: ensuredCode, error: ensureErr } = await supabase.rpc("ensure_friend_code");
+        const { error: ensureErr } = await supabase.rpc("ensure_friend_code");
         if (ensureErr) {
           console.warn("ensure_friend_code error:", ensureErr);
         }
 
         const { data, error } = await supabase
           .from("profiles")
-          .select("username, user_id, recovery_email, points, level, exp, avatar_character_id, avatar_url, friend_code, current_title")
+          .select(
+            "username, user_id, recovery_email, points, level, exp, avatar_character_id, avatar_url, friend_code, current_title"
+          )
           .eq("id", user.id)
           .single();
 
@@ -57,12 +58,14 @@ export default function MyPage() {
           const p = data as Profile;
           setProfile(p);
 
-          // ✅ アイコンURLを作る
           const initial = "/images/初期アイコン.png";
-          const saved = p.avatar_url ? (p.avatar_url.startsWith("/") ? p.avatar_url : `/${p.avatar_url}`) : initial;
+          const saved = p.avatar_url
+            ? p.avatar_url.startsWith("/")
+              ? p.avatar_url
+              : `/${p.avatar_url}`
+            : initial;
 
           if (!p.avatar_character_id) {
-            // default も initial もここに入る（avatar_url が入ってればそれが表示される）
             setAvatarUrl(saved);
           } else {
             const { data: ch, error: chErr } = await supabase
@@ -72,9 +75,11 @@ export default function MyPage() {
               .single();
 
             if (chErr || !ch?.image_url) {
-              setAvatarUrl(saved); // ← fallbackを初期じゃなく saved にすると強い
+              setAvatarUrl(saved);
             } else {
-              const url = ch.image_url.startsWith("/") ? ch.image_url : `/${ch.image_url}`;
+              const url = ch.image_url.startsWith("/")
+                ? ch.image_url
+                : `/${ch.image_url}`;
               setAvatarUrl(url);
             }
           }
@@ -89,62 +94,171 @@ export default function MyPage() {
     fetchProfile();
   }, [user, userLoading, supabase, router]);
 
-  if (userLoading) return <p>読み込み中...</p>;
+  if (userLoading) {
+    return (
+      <main className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-yellow-50 p-4">
+        <div className="mx-auto max-w-md space-y-4">
+          <div className="h-44 animate-pulse rounded-[2rem] bg-gray-200" />
+          <div className="h-28 animate-pulse rounded-3xl bg-gray-200" />
+          <div className="h-72 animate-pulse rounded-3xl bg-gray-200" />
+        </div>
+      </main>
+    );
+  }
+
   if (!user) return null;
-  if (loading) return <p>プロフィール読み込み中...</p>;
+
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-yellow-50 p-4">
+        <div className="mx-auto max-w-md space-y-4">
+          <div className="h-44 animate-pulse rounded-[2rem] bg-gray-200" />
+          <div className="h-28 animate-pulse rounded-3xl bg-gray-200" />
+          <div className="h-72 animate-pulse rounded-3xl bg-gray-200" />
+        </div>
+      </main>
+    );
+  }
 
   const totalPoints = profile?.points ?? 0;
-
   const level = profile?.level ?? 1;
   const exp = profile?.exp ?? 0;
 
-  // 次レベルに到達するための「累積」必要EXP
-  const nextLevelTotalExp = (level * (level + 1) / 2) * 100;
-
-  // 現レベル開始時点の累積EXP
-  const currentLevelStartExp = ((level - 1) * level / 2) * 100;
-
-  // 現レベル内での必要量（例：Lv3なら 300）
+  const nextLevelTotalExp = ((level * (level + 1)) / 2) * 100;
+  const currentLevelStartExp = (((level - 1) * level) / 2) * 100;
   const needThisLevel = nextLevelTotalExp - currentLevelStartExp;
-
-  // 現レベル内での獲得量
   const gainedThisLevel = Math.max(0, exp - currentLevelStartExp);
-
-  // 次のレベルまで残り
   const expToNext = Math.max(0, nextLevelTotalExp - exp);
+  const expPercent = Math.min(
+    100,
+    Math.floor((gainedThisLevel / needThisLevel) * 100)
+  );
 
-  // ゲージ(0〜100)
-  const expPercent = Math.min(100, Math.floor((gainedThisLevel / needThisLevel) * 100));
+  const iconLabel = profile?.avatar_character_id
+    ? "所持キャラ"
+    : profile?.avatar_url && profile.avatar_url !== "/images/初期アイコン.png"
+      ? "デフォルト"
+      : "初期アイコン";
 
   return (
     <>
-      <div className="max-w-md mx-auto p-4 space-y-4">
-        <h1 className="text-2xl md:text-4xl font-bold text-center">マイページ</h1>
+      <main className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-yellow-50 px-4 py-5">
+        <div className="mx-auto max-w-md space-y-4">
+          <section className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-sky-500 via-blue-500 to-purple-500 p-5 text-white shadow-lg">
+            <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/20 blur-2xl" />
+            <div className="absolute -bottom-12 -left-10 h-36 w-36 rounded-full bg-yellow-200/30 blur-2xl" />
 
-        <div className="border rounded p-3 space-y-2">
-          <p>
-            <span className="font-medium text-md md:text-xl">ユーザー名：</span>
-            <span className="text-md md:text-xl">{profile?.username ?? "(未設定)"}</span>
-          </p>
+            <div className="relative">
+              <div className="mb-4 flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-black text-white/80">MY PAGE</p>
+                  <h1 className="text-2xl font-black">マイページ</h1>
+                </div>
 
-          <p>
-            <span className="font-medium text-md md:text-xl">ユーザーID：</span>
-            <span className="text-md md:text-xl">{profile?.user_id ?? "(未設定)"}</span>
-          </p>
+                <div className="rounded-full bg-white/20 px-3 py-1 text-xs font-black backdrop-blur">
+                  Lv.{level}
+                </div>
+              </div>
 
-          <div className="pt-2">
-            <div className="flex items-center gap-2 flex-wrap">
-              {/* ラベル */}
-              <p className="font-medium text-md md:text-xl whitespace-nowrap">
-                フレンドID：
+              <div className="flex items-center gap-4">
+                <button
+                  type="button"
+                  onClick={() => setIsPreviewOpen(true)}
+                  className="shrink-0 rounded-full bg-white p-1 shadow-xl transition active:scale-95"
+                >
+                  <img
+                    src={avatarUrl}
+                    alt="icon"
+                    className="h-24 w-24 rounded-full bg-white object-contain"
+                  />
+                </button>
+
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-bold text-white/80">ユーザー名</p>
+                  <p className="truncate text-xl font-black">
+                    {profile?.username ?? "(未設定)"}
+                  </p>
+
+                  <p className="mt-2 text-xs font-bold text-white/80">
+                    ユーザーID
+                  </p>
+                  <p className="break-all text-sm font-bold text-white">
+                    {profile?.user_id ?? "(未設定)"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-4 rounded-3xl bg-white/15 p-4 backdrop-blur">
+                <p className="text-xs font-black text-white/75">マイ称号</p>
+                <p className="mt-1 text-base font-black">
+                  {profile?.current_title ?? "（未設定）"}
+                </p>
+              </div>
+
+              <div className="mt-4 rounded-3xl bg-white/15 p-4 backdrop-blur">
+                <div className="mb-2 flex items-end justify-between">
+                  <div>
+                    <p className="text-xs font-black text-white/75">
+                      現在のユーザーレベル
+                    </p>
+                    <p className="text-lg font-black text-yellow-100">
+                      Lv.{profile?.level ?? 1}
+                    </p>
+                  </div>
+
+                  <div className="text-right">
+                    <p className="text-xs font-black text-white/75">
+                      次のレベルまで
+                    </p>
+                    <p className="text-lg font-black">{expToNext} EXP</p>
+                  </div>
+                </div>
+
+                <div className="h-4 overflow-hidden rounded-full bg-white/30">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-lime-200 to-white"
+                    style={{ width: `${expPercent}%` }}
+                  />
+                </div>
+
+                <div className="mt-2 flex justify-between text-xs font-bold text-white/80">
+                  <span>
+                    {gainedThisLevel} / {needThisLevel}
+                  </span>
+                  <span>{expPercent}%</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="grid grid-cols-2 gap-3">
+            <div className="rounded-3xl border border-blue-100 bg-white p-4 shadow-sm">
+              <p className="text-xs font-black text-gray-500">
+                現在の所持ポイント
               </p>
+              <p className="mt-1 text-2xl font-black text-blue-500">
+                {totalPoints}
+                <span className="ml-1 text-sm text-gray-500">pt</span>
+              </p>
+            </div>
 
-              {/* コード */}
-              <span className="text-md md:text-xl font-bold tracking-widest">
-                {profile?.friend_code ?? "----"}
-              </span>
+            <div className="rounded-3xl border border-amber-100 bg-white p-4 shadow-sm">
+              <p className="text-xs font-black text-gray-500">アイコン</p>
+              <p className="mt-1 truncate text-lg font-black text-amber-500">
+                {iconLabel}
+              </p>
+            </div>
+          </section>
 
-              {/* コピーボタン */}
+          <section className="rounded-[2rem] border border-sky-100 bg-white p-4 shadow-sm">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-black text-gray-500">FRIEND ID</p>
+                <h2 className="text-lg font-black text-gray-900">
+                  フレンドID
+                </h2>
+              </div>
+
               <button
                 type="button"
                 onClick={async () => {
@@ -157,134 +271,143 @@ export default function MyPage() {
                     alert("コピーに失敗しました…");
                   }
                 }}
-                className="
-                  px-3 py-1 rounded-lg font-extrabold
-                  bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-500
-                  text-white shadow
-                  hover:brightness-110 active:scale-95
-                  transition
-                "
+                className="rounded-2xl bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-500 px-4 py-2 text-sm font-black text-white shadow transition hover:brightness-110 active:scale-95"
               >
                 コピー
               </button>
             </div>
 
-            <p className="text-xs md:text-sm text-gray-500 mt-1">
-              友達追加画面でこのIDを入力してもらうとフレンド申請できます👥
-            </p>
-          </div>
-          <p>
-            <span className="font-medium text-md md:text-xl">
-              復旧用メールアドレス：
-            </span>
-            <span className="text-md md:text-xl">{profile?.recovery_email ?? "(未設定)"}</span>
-          </p>
-
-          <p>
-            <span className="font-medium text-md md:text-xl">
-              アイコン：
-            </span>
-            <span className="text-md md:text-xl">
-              {profile?.avatar_character_id
-                ? "所持キャラ"
-                : (profile?.avatar_url && profile.avatar_url !== "/images/初期アイコン.png" ? "デフォルト" : "初期アイコン")}
-            </span>
-          </p>
-          <div className="flex items-center justify-center gap-3">
-            <img
-              src={avatarUrl}
-              alt="icon"
-              onClick={() => setIsPreviewOpen(true)}
-              className="w-30 h-30 md:w-40 md:h-40 border-2 border-white shadow-lg rounded-full bg-white object-contain"
-            />
-          </div>
-
-          <p>
-            <span className="font-medium text-md md:text-xl">現在のユーザーレベル：</span>
-            <span className="font-medium text-md md:text-xl text-amber-500">Lv.{profile?.level ?? 1}</span>
-          </p>
-
-          <div className="space-y-2">
-            <p className="text-sm md:text-base text-gray-700 font-bold">
-              次のレベルまで <span className="text-green-700">{expToNext}</span> EXP
-            </p>
-
-            {/* ゲージ */}
-            <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden border">
-              <div
-                className="h-4 bg-green-500"
-                style={{ width: `${expPercent}%` }}
-              />
+            <div className="rounded-2xl bg-sky-50 px-4 py-3 text-center">
+              <p className="text-2xl font-black tracking-widest text-sky-700">
+                {profile?.friend_code ?? "----"}
+              </p>
             </div>
 
-            {/* 数字 */}
-            <p className="text-sm md:text-md text-gray-600">
-              {gainedThisLevel} / {needThisLevel} 
+            <p className="mt-2 text-xs font-bold text-gray-500">
+              友達追加画面でこのIDを入力してもらうとフレンド申請できます👥
             </p>
-          </div>
+          </section>
 
-          <p>
-            <span className="font-medium text-md md:text-xl">マイ称号：</span>
-            <span className="font-medium text-md md:text-xl text-purple-600">
-              {profile?.current_title ?? "（未設定）"}
-            </span>
-          </p>
+          <section className="rounded-[2rem] bg-white p-4 shadow-sm">
+            {/* <h2 className="mb-3 text-lg font-black text-gray-900">
+              プロフィール情報
+            </h2> */}
 
-          <p>
-            <span className="font-medium text-md md:text-xl">現在の所持ポイント：</span>
-            <span className="text-blue-500 font-bold text-md md:text-xl">{totalPoints} pt</span>
-          </p>
+            <div className="space-y-3">
+              {/* <div className="rounded-2xl bg-gray-50 p-3">
+                <p className="text-xs font-black text-gray-500">ユーザー名</p>
+                <p className="text-base font-bold text-gray-900">
+                  {profile?.username ?? "(未設定)"}
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-gray-50 p-3">
+                <p className="text-xs font-black text-gray-500">ユーザーID</p>
+                <p className="break-all text-base font-bold text-gray-900">
+                  {profile?.user_id ?? "(未設定)"}
+                </p>
+              </div> */}
+
+              <div className="rounded-2xl bg-gray-50 p-3">
+                <p className="text-xs font-black text-gray-500">
+                  復旧用メールアドレス
+                </p>
+                <p className="break-all text-base font-bold text-gray-900">
+                  {profile?.recovery_email ?? "(未設定)"}
+                </p>
+              </div>
+
+              {/* <div className="rounded-2xl bg-gray-50 p-3">
+                <p className="text-xs font-black text-gray-500">アイコン</p>
+                <p className="text-base font-bold text-gray-900">
+                  {iconLabel}
+                </p>
+              </div> */}
+
+              {/* <div className="rounded-2xl bg-gray-50 p-3">
+                <p className="text-xs font-black text-gray-500">
+                  現在のユーザーレベル
+                </p>
+                <p className="text-base font-black text-amber-500">
+                  Lv.{profile?.level ?? 1}
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-gray-50 p-3">
+                <p className="text-xs font-black text-gray-500">マイ称号</p>
+                <p className="text-base font-black text-purple-600">
+                  {profile?.current_title ?? "（未設定）"}
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-gray-50 p-3">
+                <p className="text-xs font-black text-gray-500">
+                  現在の所持ポイント
+                </p>
+                <p className="text-base font-black text-blue-500">
+                  {totalPoints} pt
+                </p>
+              </div> */}
+            </div>
+          </section>
+
+          <section className="grid gap-3">
+            <button
+              onClick={() => router.push("/user/mypage/edit")}
+              className="flex w-full items-center justify-between rounded-3xl bg-gradient-to-r from-yellow-400 to-orange-400 px-5 py-4 font-black text-white shadow-md transition hover:scale-[1.01] active:scale-[0.99]"
+            >
+              <span>プロフィールを編集</span>
+              <span>✏️</span>
+            </button>
+
+            <button
+              onClick={() => router.push("/user/mypage/titles")}
+              className="flex w-full items-center justify-between rounded-3xl bg-gradient-to-r from-purple-500 to-pink-500 px-5 py-4 font-black text-white shadow-md transition hover:scale-[1.01] active:scale-[0.99]"
+            >
+              <span>称号コレクション</span>
+              <span>🏅</span>
+            </button>
+
+            <button
+              onClick={() => router.push("/user/mypage/records")}
+              className="flex w-full items-center justify-between rounded-3xl bg-gradient-to-r from-green-500 to-emerald-500 px-5 py-4 font-black text-white shadow-md transition hover:scale-[1.01] active:scale-[0.99]"
+            >
+              <span>プレイ記録</span>
+              <span>🎮</span>
+            </button>
+
+            <button
+              onClick={() => router.push("/user/friends")}
+              className="flex w-full items-center justify-between rounded-3xl bg-gradient-to-r from-sky-400 to-blue-500 px-5 py-4 font-black text-white shadow-md transition hover:scale-[1.01] active:scale-[0.99]"
+            >
+              <span>フレンド</span>
+              <span>👥</span>
+            </button>
+
+            <button
+              onClick={() => router.push("/user/mypage/points-history")}
+              className="flex w-full items-center justify-between rounded-3xl bg-gradient-to-r from-blue-500 to-indigo-500 px-5 py-4 font-black text-white shadow-md transition hover:scale-[1.01] active:scale-[0.99]"
+            >
+              <span>ポイント履歴</span>
+              <span>💰</span>
+            </button>
+
+            <button
+              onClick={() => router.push("/user/change-password")}
+              className="flex w-full items-center justify-between rounded-3xl bg-gradient-to-r from-red-500 to-rose-500 px-5 py-4 font-black text-white shadow-md transition hover:scale-[1.01] active:scale-[0.99]"
+            >
+              <span>パスワードを変更</span>
+              <span>🔑</span>
+            </button>
+          </section>
         </div>
-
-        <button
-          onClick={() => router.push("/user/mypage/edit")}
-          className="w-full bg-yellow-500 text-white py-2 rounded cursor-pointer font-bold"
-        >
-          プロフィールを編集✏️
-        </button>
-
-        <button
-          onClick={() => router.push("/user/friends")}
-          className="w-full bg-sky-400 text-white py-2 rounded cursor-pointer font-bold"
-        >
-          フレンド👥
-        </button>
-
-        <button
-          onClick={() => router.push("/user/mypage/points-history")}
-          className="w-full bg-blue-500 text-white py-2 rounded cursor-pointer font-bold"
-        >
-          ポイント履歴💰
-        </button>
-
-        <button
-          onClick={() => router.push("/user/mypage/records")}
-          className="w-full bg-green-500 text-white py-2 rounded cursor-pointer font-bold"
-        >
-          プレイ記録🎮
-        </button>
-
-        <button
-          onClick={() => router.push("/user/mypage/titles")}
-          className="w-full bg-purple-500 text-white py-2 rounded cursor-pointer font-bold"
-        >
-          称号コレクション🏅
-        </button>
-
-        <button
-          onClick={() => router.push("/user/change-password")}
-          className="w-full bg-red-500 text-white py-2 rounded cursor-pointer font-bold"
-        >
-          パスワードを変更🔑
-        </button>
-      </div>
+      </main>
 
       {isPreviewOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
-          onClick={() => setIsPreviewOpen(false)} // 外側クリックで閉じる
+          onClick={() => setIsPreviewOpen(false)}
         >
-          {/* 中身（ここをクリックしても閉じない） */}
           <div
             className="w-[80vw] max-w-[420px]"
             onClick={(e) => e.stopPropagation()}
@@ -292,7 +415,7 @@ export default function MyPage() {
             <img
               src={avatarUrl}
               alt="icon preview"
-              className="w-full aspect-square rounded-full bg-white shadow-2xl object-contain"
+              className="aspect-square w-full rounded-full bg-white object-contain shadow-2xl"
             />
 
             <button
@@ -302,7 +425,7 @@ export default function MyPage() {
                 router.push("/user/mypage/edit");
                 router.refresh();
               }}
-              className="mt-4 md:mt-8 w-full rounded-4xl bg-white py-3 text-lg md:text-xl font-extrabold hover:scale-[1.01] transition"
+              className="mt-4 w-full rounded-full bg-white py-3 text-lg font-black text-gray-900 shadow-xl transition hover:scale-[1.01] md:mt-8 md:text-xl"
             >
               変更する
             </button>

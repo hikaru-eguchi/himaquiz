@@ -270,9 +270,15 @@ const QuizGacha = ({
         {/* メインボタン：1つ */}
         <button
           className={`
-            mt-3 px-6 py-3 rounded-lg font-extrabold text-xl md:text-2xl
-            transition-all duration-300 ease-in-out
-            ${canRollNow ? "bg-blue-600 text-white hover:bg-blue-700" : "bg-blue-600 text-white opacity-50 cursor-not-allowed pointer-events-none"}
+            mt-3 rounded-full border-4 border-white px-8 py-4
+            font-black text-xl md:text-3xl
+            shadow-2xl transition-all duration-300
+
+            ${
+              canRollNow
+                ? "bg-gradient-to-r from-blue-400 via-cyan-400 to-indigo-500 text-white hover:scale-105"
+                : "bg-gray-500 text-white opacity-50 cursor-not-allowed pointer-events-none"
+            }
           `}
           onClick={onRoll}
           disabled={!canRollNow}
@@ -280,8 +286,8 @@ const QuizGacha = ({
           {rolling
             ? "抽選中..."
             : rollCount === 10
-            ? `10連を回す（${cost}P）`
-            : `回す（${cost}P）`}
+            ? `10連でキャラを引く（${cost}P）`
+            : `キャラを引く（${cost}P）`}
         </button>
 
         {points < cost && (
@@ -296,9 +302,9 @@ const QuizGacha = ({
           </p>
         )}
 
-        <p className="text-green-500 text-md md:text-lg font-bold">
+        {/* <p className="text-green-500 text-md md:text-lg font-bold">
           あと {remain} 回で★6以上確定！
-        </p>
+        </p> */}
       </div>
 
       {/* 入手キャラ履歴 */}
@@ -1220,28 +1226,30 @@ export default function QuizMasterPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-red-400 via-blue-200 to-green-200">
       <div className="container mx-auto px-4 py-6 text-center">
-        <>
+        <div className="mx-auto max-w-5xl rounded-3xl border-4 border-white/80 bg-black/35 p-4 md:p-8 shadow-2xl backdrop-blur">
           {/* タイトル */}
           <h1
             className="
-              text-5xl md:text-7xl font-extrabold tracking-widest mb-4
+              text-5xl md:text-7xl font-extrabold tracking-widest mb-4 md:mb-8 md:mt-4
               text-white
               drop-shadow-[0_0_10px_rgba(0,0,0,0.9)]
             "
           >
             <span className="block md:hidden leading-tight">
-              ひまQ<br />ガチャ
+              ひまキャラ<br />ガチャ
             </span>
-            <span className="hidden md:block">ひまQガチャ</span>
+            <span className="hidden md:block">ひまキャラガチャ</span>
           </h1>
+
           <p
             className="
-              text-2xl md:text-3xl font-extrabold mb-3
+              text-xl md:text-2xl font-extrabold mb-3
               text-white
             "
           >
-            ポイントでガチャ！レアキャラGETなるか！？✨
+            ポイントでガチャ！レアキャラをゲットしよう！✨
           </p>
+
           <p className="text-md md:text-xl text-white mb-2">
             ★当たったキャラは右上メニューの「マイキャラ図鑑」で確認できます
           </p>
@@ -1256,7 +1264,7 @@ export default function QuizMasterPage() {
 
           {/* 説明文 */}
           <div
-            className={`overflow-hidden transition-all duration-500 ease-in-out mt-2 rounded-xl bg-white`}
+            className={`overflow-hidden transition-all duration-500 ease-in-out mt-3 rounded-2xl bg-white/95 shadow`}
             style={{
               maxHeight: showDescription
                 ? descriptionRef.current?.scrollHeight
@@ -1265,9 +1273,9 @@ export default function QuizMasterPage() {
           >
             <p
               ref={descriptionRef}
-              className="text-gray-700 text-md md:text-lg text-center px-4 py-2"
+              className="text-gray-700 text-md md:text-lg text-center px-4 py-4"
             >
-              「ひまQガチャ」は、集めたポイントで回せるキャラクターガチャ！
+              「ひまキャラガチャ」は、集めたポイントで回せるキャラクターガチャ！
               <br />
               クイズでポイントをためて、いろんなキャラを仲間にしよう✨
               <br />
@@ -1275,7 +1283,7 @@ export default function QuizMasterPage() {
               <br />
               登場キャラは 全88種類！ひまQの各ゲームキャラが大集合🎮
               <br />
-              当たったキャラは、右上メニューの「マイキャラ図鑑」でいつでも確認OK！
+              当たったキャラは、右上メニューの「マイキャラ図鑑」でいつでも確認できます。
               <br />
               超レアを引き当てて、全キャラコンプリートを目指そう！🔥
               <br />
@@ -1305,7 +1313,7 @@ export default function QuizMasterPage() {
               <br />
             </p>
           </div>
-        </>
+        </div>
       </div>
 
       {/* 下にガチャ画面 */}
