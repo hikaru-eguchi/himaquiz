@@ -59,15 +59,15 @@ const GAME_LABEL: Record<
     text: "text-violet-700",
     description: "階層を進んだ者だけが持つ称号。",
   },
-  battle: {
-    label: "クイズバトル",
-    emoji: "⚔️",
-    color: "from-rose-400 via-pink-500 to-fuchsia-500",
-    soft: "from-rose-50 to-pink-50",
-    border: "border-rose-200",
-    text: "text-rose-700",
-    description: "勝負の中で手に入る称号。",
-  },
+  // battle: {
+  //   label: "クイズバトル",
+  //   emoji: "⚔️",
+  //   color: "from-rose-400 via-pink-500 to-fuchsia-500",
+  //   soft: "from-rose-50 to-pink-50",
+  //   border: "border-rose-200",
+  //   text: "text-rose-700",
+  //   description: "勝負の中で手に入る称号。",
+  // },
   coop_dungeon: {
     label: "協力ダンジョン",
     emoji: "🤝",
@@ -77,15 +77,15 @@ const GAME_LABEL: Record<
     text: "text-emerald-700",
     description: "協力プレイで集まる称号。",
   },
-  survival: {
-    label: "サバイバルクイズ",
-    emoji: "🏆",
-    color: "from-lime-400 via-green-400 to-emerald-500",
-    soft: "from-lime-50 to-green-50",
-    border: "border-lime-200",
-    text: "text-green-700",
-    description: "最後まで生き残った証。",
-  },
+  // survival: {
+  //   label: "サバイバルクイズ",
+  //   emoji: "🏆",
+  //   color: "from-lime-400 via-green-400 to-emerald-500",
+  //   soft: "from-lime-50 to-green-50",
+  //   border: "border-lime-200",
+  //   text: "text-green-700",
+  //   description: "最後まで生き残った証。",
+  // },
   title_gacha: {
     label: "称号ガチャ",
     emoji: "👑",
@@ -102,11 +102,20 @@ const ORDER = [
   "streak",
   "timed",
   "dungeon",
-  "battle",
+  // "battle",
   "coop_dungeon",
-  "survival",
+  // "survival",
   "title_gacha",
 ];
+
+const CATEGORY_TOTAL: Record<string, number> = {
+  level: 30,
+  streak: 32,
+  timed: 32,
+  dungeon: 22,
+  coop_dungeon: 15,
+  title_gacha: 50,
+};
 
 function formatDateJP(iso?: string) {
   if (!iso) return "-";
@@ -391,7 +400,7 @@ export default function TitlesPage() {
                         <div
                           className={`rounded-full bg-gradient-to-r ${meta.soft} px-3 py-1 text-sm font-black ${meta.text}`}
                         >
-                          {list.length}個
+                          {list.length}/{CATEGORY_TOTAL[gameKey] ?? "?"}個
                         </div>
                       </div>
 
@@ -419,9 +428,9 @@ export default function TitlesPage() {
                                 <div className="text-base font-black text-gray-900">
                                   {t.title}
                                 </div>
-                                <div className="mt-2 text-[11px] font-bold text-gray-500">
+                                {/* <div className="mt-2 text-[11px] font-bold text-gray-500">
                                   {formatDateJP(t.unlocked_at)}
-                                </div>
+                                </div> */}
                               </div>
                             </button>
                           ))}
