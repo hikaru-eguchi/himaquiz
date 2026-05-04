@@ -29,7 +29,6 @@ export default function UserProfileModal({
       className="fixed inset-0 z-[999] bg-black/60 backdrop-blur-[2px] grid place-items-center p-4"
     >
       <div
-        onClick={(e) => e.stopPropagation()}
         className="w-full max-w-sm rounded-[28px] overflow-hidden shadow-[0_6px_0_rgba(0,0,0,1)] border-3 border-black bg-white"
       >
         <div className="relative px-5 pt-5 pb-4 border-b-3 border-black bg-gradient-to-r from-yellow-200 via-pink-200 to-sky-200">
@@ -92,7 +91,7 @@ export default function UserProfileModal({
             </div>
 
             <p className="pt-1 font-bold text-sm text-gray-700">
-              外側をタップすると閉じます
+              画面をタップすると閉じます
             </p>
           </div>
         </div>

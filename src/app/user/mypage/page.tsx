@@ -26,6 +26,7 @@ export default function MyPage() {
   const router = useRouter();
   const [avatarUrl, setAvatarUrl] = useState<string>("/images/初期アイコン.png");
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isTitleChangeOpen, setIsTitleChangeOpen] = useState(false);
 
   useEffect(() => {
     if (userLoading) return;
@@ -188,12 +189,16 @@ export default function MyPage() {
                 </div>
               </div>
 
-              <div className="mt-4 rounded-3xl bg-white/15 p-4 backdrop-blur">
+              <button
+                type="button"
+                onClick={() => setIsTitleChangeOpen(true)}
+                className="mt-4 w-full rounded-3xl bg-white/15 p-4 text-left backdrop-blur transition active:scale-95 hover:bg-white/20"
+              >
                 <p className="text-xs font-black text-white/75">マイ称号</p>
                 <p className="mt-1 text-base font-black">
                   {profile?.current_title ?? "（未設定）"}
                 </p>
-              </div>
+              </button>
 
               <div className="mt-4 rounded-3xl bg-white/15 p-4 backdrop-blur">
                 <div className="mb-2 flex items-end justify-between">
@@ -429,6 +434,47 @@ export default function MyPage() {
             >
               変更する
             </button>
+          </div>
+        </div>
+      )}
+
+      {isTitleChangeOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+          onClick={() => setIsTitleChangeOpen(false)}
+        >
+          <div
+            className="w-full max-w-sm rounded-[28px] border-3 border-black bg-white p-5 text-center shadow-[0_8px_0_rgba(0,0,0,1)]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-xl font-black text-gray-900">
+              マイ称号を変更する？
+            </p>
+
+            <p className="mt-2 text-sm font-bold text-gray-600">
+              プロフィール編集画面へ移動します
+            </p>
+
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setIsTitleChangeOpen(false)}
+                className="rounded-2xl border-2 border-black bg-gray-100 px-4 py-3 font-black text-gray-800 shadow-[0_4px_0_rgba(0,0,0,1)] active:translate-y-[2px] active:shadow-[0_2px_0_rgba(0,0,0,1)]"
+              >
+                いいえ
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsTitleChangeOpen(false);
+                  router.push("/user/mypage/edit");
+                }}
+                className="rounded-2xl border-2 border-black bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-3 font-black text-white shadow-[0_4px_0_rgba(0,0,0,1)] active:translate-y-[2px] active:shadow-[0_2px_0_rgba(0,0,0,1)]"
+              >
+                はい
+              </button>
+            </div>
           </div>
         </div>
       )}
