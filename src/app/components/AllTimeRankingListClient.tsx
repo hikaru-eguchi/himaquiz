@@ -390,94 +390,93 @@ export default function AllTimeRankingListClient({
             setSelected(null);
             setLoading(false);
           }}
-          className="fixed inset-0 z-[999] bg-black/60 backdrop-blur-[2px] grid place-items-center p-4"
+          className="fixed inset-0 z-[999] grid place-items-center bg-slate-950/60 p-4"
         >
-          {/* クリック伝播を止めたいならここで stopPropagation も可 */}
-          <div className="w-full max-w-sm rounded-[28px] overflow-hidden shadow-[0_6px_0_rgba(0,0,0,1)] border-3 border-black bg-white">
-            {/* ヘッダー帯（ポップ） */}
-            <div className="relative px-5 pt-5 pb-4 border-b-3 border-black bg-gradient-to-r from-yellow-200 via-pink-200 to-sky-200">
-              {/* ドット柄っぽい演出 */}
-              <div className="absolute inset-0 opacity-25">
-                <div className="w-full h-full bg-[radial-gradient(circle_at_10px_10px,rgba(0,0,0,0.35)_1.2px,transparent_1.3px)] [background-size:20px_20px]" />
-              </div>
-              <p className="font-extrabold text-lg tracking-tight">
-                ユーザープロフィール👤
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute left-1/2 top-1/2 h-[360px] w-[360px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-300/20 blur-lg" />
+          </div>
+
+          <div
+            className="
+              relative w-full max-w-sm overflow-hidden
+              rounded-[32px]
+              border border-white/70
+              bg-white/90
+              text-left
+              shadow-[0_24px_70px_rgba(14,165,233,0.28)]
+            "
+          >
+            {/* ヘッダー */}
+            <div className="relative bg-gradient-to-br from-sky-100 via-cyan-50 to-white px-5 pb-16 pt-5 text-center">
+              <p className="relative inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white/75 px-4 py-1.5 text-xs font-black text-sky-700 shadow-sm">
+                👤 USER PROFILE
               </p>
             </div>
 
-            <div className="p-5">
-              <div className="grid place-items-center gap-3">
-                {/* アバター（オーラ＋バッジ） */}
-                <div className="relative">
-                  {/* オーラ */}
-                  <div className="absolute -inset-4 rounded-full blur-[6px] opacity-70 bg-gradient-to-br from-yellow-200 via-pink-200 to-sky-200" />
-                  {/* 本体 */}
-                  <div className="relative w-36 h-36 md:w-44 md:h-44 rounded-full bg-white overflow-hidden border-3 border-black shadow-[0_6px_0_rgba(0,0,0,1)]">
-                    <img
-                      src={selected?.avatar_url ?? "/images/初期アイコン.png"}
-                      alt={selected?.username ?? "user"}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+            {/* アイコン */}
+            <div className="relative -mt-14 grid place-items-center">
+              <div className="relative">
+                <div className="absolute -inset-3 rounded-full bg-cyan-300/35 blur-md" />
+
+                <div className="relative h-32 w-32 overflow-hidden rounded-full border-4 border-white bg-white shadow-xl">
+                  <img
+                    src={selected?.avatar_url ?? "/images/初期アイコン.png"}
+                    alt={selected?.username ?? "user"}
+                    className="h-full w-full object-cover"
+                  />
                 </div>
+              </div>
+            </div>
 
-                {/* 名前（ポップ太字＋縁取りっぽい） */}
-                <div className="
-                  flex items-center gap-2
-                  px-4 py-2
-                  rounded-full
-                  border-3 border-black
-                  bg-gradient-to-br from-yellow-100 via-amber-100 to-yellow-50
-                ">
-                  <span className="
-                    text-xs md:text-sm font-black
-                    bg-gradient-to-r from-sky-300 to-blue-400
-                    text-white
-                    px-3 py-1
-                    rounded-full
-                    shadow-[0_1px_0_rgba(0,0,0,1)]
-                  ">
-                    👤 NAME
-                  </span>
+            <div className="px-5 pb-6 pt-3">
+              {/* 名前 */}
+              <div className="text-center">
+                <p className="text-xs font-black tracking-[0.22em] text-sky-400">
+                  NAME
+                </p>
 
-                  <p className="font-extrabold text-2xl md:text-3xl leading-none text-black">
-                    {loading ? "読み込み中..." : selected?.username ?? "名無し"}　
+                <p className="mt-1 text-2xl md:text-3xl font-black text-slate-900 leading-tight">
+                  {loading ? "読み込み中..." : selected?.username ?? "名無し"}
+                </p>
+              </div>
+
+              {/* ステータス */}
+              <div className="mt-5 grid grid-cols-2 gap-3">
+                <div className="rounded-3xl border border-sky-100 bg-gradient-to-br from-white to-sky-50 p-4 text-center shadow-sm">
+                  <p className="text-xs font-black text-sky-500">
+                    🌟 レベル
                   </p>
-                </div>
 
-                {/* レベルカード（ステッカー風） */}
-                <div className="w-full rounded-3xl border-3 border-black bg-gradient-to-br from-white via-white to-yellow-50 p-2 shadow-[0_3px_0_rgba(0,0,0,1)]">
-                  <p className="text-sm md:text-base font-black text-yellow-500">
-                    🌟 ユーザーレベル 🌟
-                  </p>
-                  <p className="mt-1 text-3xl md:text-4xl font-extrabold">
+                  <p className="mt-1 text-2xl font-black text-slate-900">
                     {loading ? "..." : `Lv.${selected?.level ?? "--"}`}
                   </p>
                 </div>
 
-                {/* 所持キャラ数カード（ステッカー風） */}
-                <div className="w-full rounded-3xl border-3 border-black bg-white p-2 shadow-[0_3px_0_rgba(0,0,0,1)]">
-                  <p className="text-sm md:text-base font-black text-emerald-500">📚 所持キャラ数 📚</p>
-                  <p className="mt-1 text-3xl md:text-4xl font-extrabold">
+                <div className="rounded-3xl border border-emerald-100 bg-gradient-to-br from-white to-emerald-50 p-4 text-center shadow-sm">
+                  <p className="text-xs font-black text-emerald-500">
+                    📚 所持キャラ
+                  </p>
+
+                  <p className="mt-1 text-2xl font-black text-slate-900">
                     {loading ? "..." : `${selected?.character_count ?? "--"}体`}
                   </p>
                 </div>
-
-                {/* マイ称号カード（ステッカー風） */}
-                <div className="w-full rounded-3xl border-3 border-black bg-white p-2 shadow-[0_3px_0_rgba(0,0,0,1)]">
-                  <p className="text-sm md:text-base font-black text-purple-500">🏅 マイ称号 🏅</p>
-                  <p className="mt-1 text-2xl md:text-3xl font-extrabold">
-                    {loading ? "..." : (selected?.current_title ?? "（未設定）")}
-                  </p>
-                </div>
-
-                {/* 吹き出し案内 */}
-                <div className="relative">
-                  <div className="rounded-2xl bg-white pt-1 font-bold text-sm text-gray-700">
-                    画面をタップすると閉じます
-                  </div>
-                </div>
               </div>
+
+              {/* 称号 */}
+              <div className="mt-3 rounded-3xl border border-purple-100 bg-gradient-to-br from-white to-purple-50 px-4 py-4 text-center shadow-sm">
+                <p className="text-xs font-black text-purple-500">
+                  🏅 マイ称号
+                </p>
+
+                <p className="mt-2 text-xl md:text-2xl font-black text-slate-900 leading-tight">
+                  {loading ? "..." : selected?.current_title ?? "（未設定）"}
+                </p>
+              </div>
+
+              <p className="mt-5 text-center text-xs font-bold text-slate-400">
+                画面をタップすると閉じます
+              </p>
             </div>
           </div>
         </button>

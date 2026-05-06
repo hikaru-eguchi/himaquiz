@@ -270,9 +270,18 @@ export default function HimaQRoulette() {
 
         <div className="relative rounded-[1.8rem] border-4 border-black bg-white/80 p-2 md:p-4 md:p-6">
           <div className="text-center">
-            <p className="mb-3 inline-flex items-center gap-2 rounded-full border-3 border-black bg-black px-4 py-1.5 text-xs font-black text-white md:text-sm">
-              <span>🎁</span>
-              <span>{today} のひまつぶしガチャ</span>
+            <p className="
+              mb-3 inline-flex items-center gap-2
+              rounded-full
+              border border-yellow-300
+              bg-gradient-to-r from-yellow-100 via-amber-50 to-white
+              px-4 py-1.5
+              text-xs md:text-sm
+              font-black text-amber-700
+              shadow-sm
+            ">
+              {/* <span className="text-base">🎡</span> */}
+              <span>{today} のミニひまつぶし</span>
             </p>
 
             <h2 className="text-3xl font-black tracking-tight text-gray-950 md:text-5xl">

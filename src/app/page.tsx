@@ -305,12 +305,14 @@ export default async function HomePage({
                 ✅連続正解チャレンジ
               </button>
             </Link>
-            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
-              何問連続で正解できるか挑戦！
-            </p>
-            <p className="text-sm md:text-base text-gray-700 leading-tight">
-              集中力と実力を試せるゲームです。
-            </p>
+            <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                何問連続で正解できるか挑戦！
+              </p>
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                集中力と実力を試せるゲームです。
+              </p>
+            </div>
           </div>
           {/* 制限時間クイズ */}
           <div className="text-center max-w-[280px]">
@@ -319,12 +321,14 @@ export default async function HomePage({
                 ⏱制限時間クイズ
               </button>
             </Link>
-            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
-              時間内に何問正解できるかな？
-            </p>
-            <p className="text-sm md:text-base text-gray-700 leading-tight">
-              友達や家族と対決してみよう！
-            </p>
+            <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                時間内に何問正解できるかな？
+              </p>
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                友達や家族と対決してみよう！
+              </p>
+            </div>
           </div>
           {/* クイズダンジョン */}
           <div className="text-center max-w-[280px]">
@@ -333,12 +337,14 @@ export default async function HomePage({
                 ⚔クイズダンジョン
               </button>
             </Link>
-            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
-              ダンジョン形式で進む本格派クイズ！
-            </p>
-            <p className="text-sm md:text-base text-gray-700 leading-tight">
-              君は深層まで進めるか！？
-            </p>
+            <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                ダンジョン形式で進む本格派クイズ！
+              </p>
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                君は深層まで進めるか！？
+              </p>
+            </div>
           </div>
           {/* きまぐれクイズ */}
           <div className="text-center max-w-[280px]">
@@ -347,12 +353,14 @@ export default async function HomePage({
                 ☁きまぐれクイズ
               </button>
             </Link>
-            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
-              きまぐれにモンスターが出現！
-            </p>
-            <p className="text-sm md:text-base text-gray-700 leading-tight">
-              何種類みつけられる？
-            </p>
+            <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                きまぐれにモンスターが出現！
+              </p>
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                何種類みつけられる？
+              </p>
+            </div>
           </div>
           {/* バッジハンター */}
           {/* <div className="text-center max-w-[280px]">
@@ -375,12 +383,14 @@ export default async function HomePage({
                 🎲運命のクイズ
               </button>
             </Link>
-            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
-              チャレンジ成功で報酬アップ！
-            </p>
-            <p className="text-sm md:text-base text-gray-700 leading-tight">
-              運命のクイズでどこまで挑む！？
-            </p>
+            <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                チャレンジ成功で報酬アップ！
+              </p>
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                運命のクイズでどこまで挑む！？
+              </p>
+            </div>
           </div>
           {/* クイズ迷路 */}
           <div className="text-center max-w-[280px]">
@@ -389,12 +399,14 @@ export default async function HomePage({
                 🧱クイズ迷路
               </button>
             </Link>
-            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
-              クイズを解いて迷路を突破せよ！
-            </p>
-            <p className="text-sm md:text-base text-gray-700 leading-tight">
-              君はゴールまでたどり着ける？
-            </p>
+            <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                クイズを解いて迷路を突破せよ！
+              </p>
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                君はゴールまでたどり着ける？
+              </p>
+            </div>
           </div>
           {/* ひまQ占い */}
           <div className="text-center max-w-[280px]">
@@ -403,12 +415,14 @@ export default async function HomePage({
                 🔮ひまQ占い
               </button>
             </Link>
-            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
-              直感で答えるひまQ占い！
-            </p>
-            <p className="text-sm md:text-base text-gray-700 leading-tight">
-              今日の運勢は★いくつ？
-            </p>
+            <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                直感で答えるひまQ占い！
+              </p>
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                今日の運勢は★いくつ？
+              </p>
+            </div>
           </div>
           {/* ひまQ診断 */}
           <div className="text-center max-w-[280px]">
@@ -417,12 +431,14 @@ export default async function HomePage({
                 🔍ひまQ診断
               </button>
             </Link>
-            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
-              直感で答えるタイプ診断！
-            </p>
-            <p className="text-sm md:text-base text-gray-700 leading-tight">
-              あなたはどのタイプ？
-            </p>
+            <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                直感で答えるタイプ診断！
+              </p>
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                あなたはどのタイプ？
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -442,12 +458,14 @@ export default async function HomePage({
                 🔥クイズバトル
               </button>
             </Link>
-            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
-              2分間でどれだけ正解できるか勝負だ！
-            </p>
-            <p className="text-sm md:text-base text-gray-700 leading-tight">
-              相手よりハイスコアを狙おう！
-            </p>
+            <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                2分間でどれだけ正解できるか勝負だ！
+              </p>
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                相手よりハイスコアを狙おう！
+              </p>
+            </div>
           </div>
           {/* クイズロワイヤル */}
           <div className="text-center max-w-[280px]">
@@ -456,12 +474,14 @@ export default async function HomePage({
                 👑クイズロワイヤル
               </button>
             </Link>
-            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
-              みんなで2分間のクイズバトル！
-            </p>
-            <p className="text-sm md:text-base text-gray-700 leading-tight">
-              正解を積み上げて王冠をつかみ取れ！
-            </p>
+            <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                みんなで2分間のクイズバトル！
+              </p>
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                正解を積み上げて王冠をつかみ取れ！
+              </p>
+            </div>
           </div>
           {/* 協力ダンジョン */}
           <div className="text-center max-w-[280px]">
@@ -470,12 +490,14 @@ export default async function HomePage({
                 ⚔協力ダンジョン
               </button>
             </Link>
-            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
-              仲間と力を合わせてクイズに挑め！
-            </p>
-            <p className="text-sm md:text-base text-gray-700 leading-tight">
-              クイズに正解して、強敵を打ち倒そう！
-            </p>
+            <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                仲間と力を合わせてクイズに挑め！
+              </p>
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                クイズに正解して、強敵を打ち倒そう！
+              </p>
+            </div>
           </div>
           {/* サバイバルクイズ */}
           <div className="relative text-center max-w-[280px]">
@@ -487,12 +509,14 @@ export default async function HomePage({
                 💀サバイバルクイズ
               </button>
             </Link>
-            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
-              ３問間違えたら即脱落！
-            </p>
-            <p className="text-sm md:text-base text-gray-700 leading-tight">
-              君は最後まで生き残れるか！？
-            </p>
+            <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                ３問間違えたら即脱落！
+              </p>
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                君は最後まで生き残れるか！？
+              </p>
+            </div>
           </div>
           {/* 多数決クイズ */}
           <div className="text-center max-w-[280px]">
@@ -501,12 +525,14 @@ export default async function HomePage({
                 🗳️多数決クイズ
               </button>
             </Link>
-            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
-              多数決で運命が決まる！
-            </p>
-            <p className="text-sm md:text-base text-gray-700 leading-tight">
-              最後のステージまでたどり着けるか！？
-            </p>
+            <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                多数決で運命が決まる！
+              </p>
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                最後のステージまでたどり着けるか！？
+              </p>
+            </div>
           </div>
           {/* 瞬発力クイズ */}
           <div className="text-center max-w-[280px]">
@@ -515,12 +541,14 @@ export default async function HomePage({
                 ⚡瞬発力クイズ
               </button>
             </Link>
-            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
-              迷ってるヒマはない！
-            </p>
-            <p className="text-sm md:text-base text-gray-700 leading-tight">
-              君は2秒で正解できるか！？
-            </p>
+            <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                迷ってるヒマはない！
+              </p>
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                君は2秒で正解できるか！？
+              </p>
+            </div>
           </div>
           {/* サイコロクイズ */}
           <div className="text-center max-w-[280px]">
@@ -529,12 +557,14 @@ export default async function HomePage({
                 🎲サイコロクイズ
               </button>
             </Link>
-            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
-              サイコロ次第でポイント爆増！？
-            </p>
-            <p className="text-sm md:text-base text-gray-700 leading-tight">
-              運も実力も試されるドキドキクイズ！
-            </p>
+            <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                サイコロ次第でポイント爆増！？
+              </p>
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                運も実力も試されるドキドキクイズ！
+              </p>
+            </div>
           </div>
           {/* 心理当てバトル */}
           <div className="text-center max-w-[280px]">
@@ -543,12 +573,14 @@ export default async function HomePage({
                 🧠心理当てバトル
               </button>
             </Link>
-            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
-              相手の心理を見抜け！
-            </p>
-            <p className="text-sm md:text-base text-gray-700 leading-tight">
-              いちばん心を読めるのは誰だ！？
-            </p>
+            <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                相手の心理を見抜け！
+              </p>
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                いちばん心を読めるのは誰だ！？
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -568,9 +600,11 @@ export default async function HomePage({
                 ⬜ 漢字穴埋め
               </button>
             </Link>
-            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
-              空欄に入る漢字はどれ？
-            </p>
+            <div className="mt-1 rounded-2xl bg-white/85 px-2 py-2 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                空欄に入る漢字はどれ？
+              </p>
+            </div>
           </div>
 
           <div className="text-center max-w-[280px]">
@@ -579,9 +613,11 @@ export default async function HomePage({
                 🔍 漢字間違い探し
               </button>
             </Link>
-            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
-              一つだけ違う漢字を見抜け！
-            </p>
+            <div className="mt-1 rounded-2xl bg-white/85 px-2 py-2 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                一つだけ違う漢字を見抜け！
+              </p>
+            </div>
           </div>
 
           <div className="text-center max-w-[280px]">
@@ -590,9 +626,11 @@ export default async function HomePage({
                 ✏️ ひらがな穴埋め
               </button>
             </Link>
-            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
-              空欄に入る共通のひらがなは？
-            </p>
+            <div className="mt-1 rounded-2xl bg-white/85 px-2 py-2 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                空欄に入る共通のひらがなは？
+              </p>
+            </div>
           </div>
 
           <div className="text-center max-w-[280px]">
@@ -601,9 +639,11 @@ export default async function HomePage({
                 🔀 並び替えクイズ
               </button>
             </Link>
-            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
-              バラバラの文字を並べ替えて言葉を完成！
-            </p>
+            <div className="mt-1 rounded-2xl bg-white/85 px-2 py-2 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                バラバラの文字を並べ替えて言葉を完成！
+              </p>
+            </div>
           </div>
 
           <div className="text-center max-w-[280px]">
@@ -612,9 +652,11 @@ export default async function HomePage({
                 🧠 水平思考クイズ
               </button>
             </Link>
-            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
-              不思議な状況の真相を見抜け！
-            </p>
+            <div className="mt-1 rounded-2xl bg-white/85 px-2 py-2 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                不思議な状況の真相を見抜け！
+              </p>
+            </div>
           </div>
 
           <div className="text-center max-w-[280px]">
@@ -623,9 +665,11 @@ export default async function HomePage({
                 🔷 パターンクイズ
               </button>
             </Link>
-            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
-              規則性をみつけて答えを導け！
-            </p>
+            <div className="mt-1 rounded-2xl bg-white/85 px-2 py-2 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                規則性をみつけて答えを導け！
+              </p>
+            </div>
           </div>
 
           <div className="relative text-center max-w-[280px]">
@@ -637,9 +681,11 @@ export default async function HomePage({
                 ➖ マッチ棒クイズ
               </button>
             </Link>
-            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
-              1本だけ動かして違う式にしよう。
-            </p>
+            <div className="mt-1 rounded-2xl bg-white/85 px-2 py-2 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                1本だけ動かして違う式にしよう。
+              </p>
+            </div>
           </div>
 
           <div className="text-center max-w-[280px]">
@@ -648,9 +694,11 @@ export default async function HomePage({
                 🎯 テーマクイズ
               </button>
             </Link>
-            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
-              好きなテーマを選んでクイズに挑戦！
-            </p>
+            <div className="mt-1 rounded-2xl bg-white/85 px-2 py-2 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                好きなテーマを選んでクイズに挑戦！
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -661,28 +709,50 @@ export default async function HomePage({
 
       <HimaQRoulette />
 
-      <div className="max-w-[700px] mx-auto border-2 border rounded-xl m-5 p-5 bg-gradient-to-br from-pink-300 via-yellow-200 to-blue-300 shadow-xl shadow-yellow-200/40">
-        <p className="text-2xl md:text-4xl font-extrabold mb-2 text-center leading-tight drop-shadow-xl">
-          🌟ガチャコーナー🌟
-        </p>
-        <p className="text-lg md:text-xl mb-2 text-center leading-tight mb-4">
-          クイズなどで集めたポイントでガチャを回そう！
-        </p>
+      <div className="max-w-[700px] mx-auto border-2 border rounded-xl m-5 p-5 bg-gradient-to-br from-pink-300 via-yellow-200 to-blue-300">
+        <div className="text-center mb-6 flex flex-col items-center">
+          {/* タイトル */}
+          <p
+            className="
+              inline-block
+              text-2xl md:text-4xl font-black
+              px-6 py-2.5
+              rounded-2xl
+              bg-white/85
+              text-amber-900
+              border border-white/80
+              shadow-[0_8px_0_rgba(180,83,9,0.25)]
+              leading-tight
+            "
+          >
+            🎰 ガチャコーナー 🎰
+          </p>
+
+          {/* サブ */}
+          <p className="mt-4 inline-block rounded-full bg-white/65 px-4 py-2 text-sm md:text-base font-bold text-gray-700 shadow-sm">
+            クイズで集めたポイントでガチャを回そう！
+          </p>
+        </div>
+
         <div className="flex justify-center gap-3 md:gap-5 flex-wrap">
           {/* ひまキャラガチャ */}
           <div className="text-center max-w-[280px]">
             <Link href="/quiz-gacha" className="w-full md:w-auto flex justify-center">
               <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-br from-red-400 via-sky-400 to-green-400 text-white hover:scale-110 transition-all">
-                ひまキャラガチャ🎰
+                ひまキャラガチャ🐲
               </button>
             </Link>
-            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
-              ポイントでガチャにチャレンジ！
-            </p>
-            <p className="text-sm md:text-base text-gray-700 leading-tight">
-              超レアキャラを引き当てよう！
-            </p>
+
+            <div className="mt-2 rounded-2xl bg-white/65 px-4 py-3 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base font-bold text-gray-700 leading-tight">
+                ポイントでガチャにチャレンジ！
+              </p>
+              <p className="mt-1 text-sm md:text-base font-black text-emerald-700 leading-tight">
+                超レアキャラを引き当てよう！
+              </p>
+            </div>
           </div>
+
           {/* 称号ガチャ */}
           <div className="text-center max-w-[280px]">
             <Link href="/title-gacha" className="w-full md:w-auto flex justify-center">
@@ -690,12 +760,15 @@ export default async function HomePage({
                 称号ガチャ👑
               </button>
             </Link>
-            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">
-              ポイントで自分だけの称号をゲット！
-            </p>
-            <p className="text-sm md:text-base text-gray-700 leading-tight">
-              プロフィールに並べて自慢しよう！
-            </p>
+
+            <div className="mt-2 rounded-2xl bg-white/65 px-4 py-3 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base font-bold text-gray-700 leading-tight">
+                ポイントで自分だけの称号をゲット！
+              </p>
+              <p className="mt-1 text-sm md:text-base font-black text-purple-700 leading-tight">
+                プロフィールに並べて自慢しよう！
+              </p>
+            </div>
           </div>
         </div>
       </div>

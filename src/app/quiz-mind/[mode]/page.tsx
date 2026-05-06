@@ -639,6 +639,7 @@ export default function QuizModePage() {
 
   const [revealedRepAnswer, setRevealedRepAnswer] = useState<"A"|"B"|"C"|null>(null);
   const [showRevealText, setShowRevealText] = useState(false);
+  const [showGuessStartModal, setShowGuessStartModal] = useState(false);
 
 
   const pendingOrderDecidedRef = useRef<MindOrderDecidedPayload | null>(null);
@@ -1352,6 +1353,12 @@ export default function QuizModePage() {
       setMindPhase("guess");
       setMindRepId(repId);
       setGuessChoice(null);
+
+      setShowGuessStartModal(true);
+
+      setTimeout(() => {
+        setShowGuessStartModal(false);
+      }, 2500);
     };
 
     const choiceToIndex = (c: "A" | "B" | "C") => (c === "A" ? 0 : c === "B" ? 1 : 2);
@@ -1966,565 +1973,661 @@ export default function QuizModePage() {
   };
 
   return (
-    <div className="container mx-auto p-8 text-center bg-gradient-to-b from-pink-400 via-rose-100 to-amber-400" key={battleKey}>
-      {mindPhase === "slot" && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="
-              relative w-[340px] text-center
-              rounded-3xl p-5
-              border-4 border-black
-              shadow-[0_20px_60px_rgba(0,0,0,0.35)]
-              bg-gradient-to-b from-pink-200 via-white to-yellow-200
-              overflow-hidden
-            "
-          >
-            {/* 背景キラキラ */}
-            <div className="absolute inset-0 opacity-30 pointer-events-none">
-              <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-pink-400 blur-2xl" />
-              <div className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-yellow-300 blur-2xl" />
-            </div>
-
-            <motion.p
-              animate={{ y: [0, -2, 0] }}
-              transition={{ duration: 1.2, repeat: Infinity }}
-              className="relative text-2xl font-extrabold drop-shadow"
-            >
-              🎰 順番決めスロット！
-            </motion.p>
-
-            <p className="relative text-sm text-gray-700 font-bold mt-1">
-              タップで止めてね！💥
-            </p>
-
-            {/* スロット窓 */}
-            <div className="relative mt-4 mx-auto w-[220px] h-[120px] rounded-2xl border-4 border-black bg-white shadow-inner flex items-center justify-center">
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 w-2 h-16 rounded-full bg-black/10" />
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 w-2 h-16 rounded-full bg-black/10" />
-
-              <motion.div
-                key={slotFinalValue ?? slotSpinningValue}
-                initial={{ scale: 0.9 }}
-                animate={{ scale: [1.15, 1] }}
-                transition={{ duration: 0.18 }}
-                className="text-7xl font-extrabold tracking-wider"
-              >
-                {slotFinalValue ?? slotSpinningValue}
-              </motion.div>
-            </div>
-
-            <button
-              disabled={slotStopped}
-              onClick={() => {
-                if (slotStoppedRef.current) return;
-
-                const timers = (socket as any).__mindSlotTimers;
-                if (timers?.t) clearInterval(timers.t);
-                if (timers?.countdown) clearInterval(timers.countdown);
-                if (timers?.auto) clearTimeout(timers.auto);
-
-                slotStoppedRef.current = true;
-                setSlotStopped(true);
-                setSlotSecondsLeft(0);
-
-                const final = slotValueRef.current;
-                setSlotFinalValue(final);
-                setSlotStoppedAt(Date.now());
-                socket?.emit("mind_slot_stop", { roomCode, value: final });
-              }}
-              className={`
-                relative mt-4 w-full py-3 rounded-2xl
-                text-white font-extrabold text-xl
+    <>
+      <div className="container mx-auto p-8 text-center bg-gradient-to-b from-pink-400 via-rose-100 to-amber-400" key={battleKey}>
+        {mindPhase === "slot" && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="
+                relative w-[340px] text-center
+                rounded-3xl p-5
                 border-4 border-black
-                transition-all
-                ${slotStopped
-                  ? "bg-gray-400"
-                  : "bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 hover:scale-[1.02] active:scale-[0.98]"
-                }
-              `}
+                shadow-[0_20px_60px_rgba(0,0,0,0.35)]
+                bg-gradient-to-b from-pink-200 via-white to-yellow-200
+                overflow-hidden
+              "
             >
-              {slotStopped ? "STOP！✅" : "タップで止める！🔥"}
-            </button>
+              {/* 背景キラキラ */}
+              <div className="absolute inset-0 opacity-30 pointer-events-none">
+                <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-pink-400 blur-2xl" />
+                <div className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-yellow-300 blur-2xl" />
+              </div>
 
-            <p className="relative text-sm text-gray-700 font-bold mt-3">
-              ⏳ 自動停止まで：{slotSecondsLeft}秒
-            </p>
-          </motion.div>
-        </div>
-      )}
-
-      {mindPhase === "orderReveal" && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="
-              relative w-[360px] md:w-[420px]
-              rounded-3xl p-5
-              border-4 border-black
-              shadow-[0_20px_60px_rgba(0,0,0,0.35)]
-              bg-gradient-to-b from-yellow-200 via-white to-pink-200
-              overflow-hidden
-            "
-          >
-            {/* うっすらキラ背景 */}
-            <div className="absolute inset-0 opacity-30 pointer-events-none">
-              <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-yellow-300 blur-2xl" />
-              <div className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-pink-300 blur-2xl" />
-            </div>
-
-            <motion.p
-              animate={{ y: [0, -2, 0] }}
-              transition={{ duration: 1.2, repeat: Infinity }}
-              className="relative text-2xl md:text-3xl font-extrabold drop-shadow"
-            >
-              🎉 順番決定！
-            </motion.p>
-
-            <p className="relative text-sm md:text-base text-gray-700 font-bold mt-1">
-              1番から順に主役になるよ！
-            </p>
-
-            <div className="relative mt-4 space-y-2">
-              {orderRows.map((r) => (
-                <div
-                  key={r.socketId}
-                  className="
-                    flex items-center justify-between
-                    px-3 py-2
-                    bg-white
-                    rounded-xl
-                    border-2 border-black
-                    shadow
-                  "
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="
-                      w-10 h-10 rounded-full
-                      bg-blue-500 text-white
-                      flex items-center justify-center
-                      font-extrabold
-                    ">
-                      {r.rank}
-                    </div>
-
-                    <div className="font-extrabold text-lg md:text-xl max-w-[200px] truncate">
-                      {r.name}
-                    </div>
-                  </div>
-
-                  {/* スロット値 */}
-                  <div className="
-                    min-w-[60px]
-                    px-3 py-1
-                    rounded-full
-                    bg-yellow-300
-                    border-2 border-black
-                    text-center
-                    font-extrabold
-                    text-lg md:text-xl
-                  ">
-                    {r.value}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <p className="relative text-xs md:text-sm text-gray-600 font-bold mt-3">
-              まもなく1番目の主役へ…✨
-            </p>
-          </motion.div>
-        </div>
-      )}
-
-      {!finished ? (
-        <>
-          {/* {mindTotalRounds > 0 && (
-            <div className="mb-2 flex justify-center">
-              <div
-                className="
-                  inline-flex items-center gap-2
-                  px-4 py-2
-                  rounded-full
-                  bg-white/90
-                  border-2 border-black
-                "
+              <motion.p
+                animate={{ y: [0, -2, 0] }}
+                transition={{ duration: 1.2, repeat: Infinity }}
+                className="relative text-2xl font-extrabold drop-shadow"
               >
-                <span className="text-lg md:text-xl font-extrabold text-gray-900">
-                  {mindRoundIndex + 1}
-                  <span className="text-md md:text-xl font-bold text-gray-600"> / {mindTotalRounds}</span>
-                </span>
-                <span className="text-md md:text-xl font-extrabold text-gray-700">周目</span>
-              </div>
-            </div>
-          )} */}
-          {mindTotalRounds > 0 && (
-            <div className="mb-2 flex flex-col items-center gap-2">
-              {/* 1行目：説明 */}
-              <div>
-                <span className="text-md md:text-xl font-extrabold text-white drop-shadow">
-                  ✨主役の心理を当てたら得点ゲット！✨
-                </span>
+                🎰 順番決めスロット！
+              </motion.p>
+
+              <p className="relative text-sm text-gray-700 font-bold mt-1">
+                タップで止めてね！💥
+              </p>
+
+              {/* スロット窓 */}
+              <div className="relative mt-4 mx-auto w-[220px] h-[120px] rounded-2xl border-4 border-black bg-white shadow-inner flex items-center justify-center">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 w-2 h-16 rounded-full bg-black/10" />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 w-2 h-16 rounded-full bg-black/10" />
+
+                <motion.div
+                  key={slotFinalValue ?? slotSpinningValue}
+                  initial={{ scale: 0.9 }}
+                  animate={{ scale: [1.15, 1] }}
+                  transition={{ duration: 0.18 }}
+                  className="text-7xl font-extrabold tracking-wider"
+                >
+                  {slotFinalValue ?? slotSpinningValue}
+                </motion.div>
               </div>
 
-              {/* 2行目：周表示 */}
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/90 border-2 border-gray-400">
-                <span className="text-lg md:text-xl font-extrabold text-gray-900">
-                  {cycleNow}
-                  <span className="text-md md:text-xl font-bold text-gray-600"> / {totalCycles}</span>
-                </span>
-                <span className="text-md md:text-xl font-extrabold text-gray-700">周目</span>
+              <button
+                disabled={slotStopped}
+                onClick={() => {
+                  if (slotStoppedRef.current) return;
 
-                <span className="text-sm md:text-base font-bold text-gray-600">
-                  （{turnInCycle}/{playerCountNow}人目）
-                </span>
+                  const timers = (socket as any).__mindSlotTimers;
+                  if (timers?.t) clearInterval(timers.t);
+                  if (timers?.countdown) clearInterval(timers.countdown);
+                  if (timers?.auto) clearTimeout(timers.auto);
+
+                  slotStoppedRef.current = true;
+                  setSlotStopped(true);
+                  setSlotSecondsLeft(0);
+
+                  const final = slotValueRef.current;
+                  setSlotFinalValue(final);
+                  setSlotStoppedAt(Date.now());
+                  socket?.emit("mind_slot_stop", { roomCode, value: final });
+                }}
+                className={`
+                  relative mt-4 w-full py-3 rounded-2xl
+                  text-white font-extrabold text-xl
+                  border-4 border-black
+                  transition-all
+                  ${slotStopped
+                    ? "bg-gray-400"
+                    : "bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 hover:scale-[1.02] active:scale-[0.98]"
+                  }
+                `}
+              >
+                {slotStopped ? "STOP！✅" : "タップで止める！🔥"}
+              </button>
+
+              <p className="relative text-sm text-gray-700 font-bold mt-3">
+                ⏳ 自動停止まで：{slotSecondsLeft}秒
+              </p>
+            </motion.div>
+          </div>
+        )}
+
+        {mindPhase === "orderReveal" && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="
+                relative w-[360px] md:w-[420px]
+                rounded-3xl p-5
+                border-4 border-black
+                shadow-[0_20px_60px_rgba(0,0,0,0.35)]
+                bg-gradient-to-b from-yellow-200 via-white to-pink-200
+                overflow-hidden
+              "
+            >
+              {/* うっすらキラ背景 */}
+              <div className="absolute inset-0 opacity-30 pointer-events-none">
+                <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-yellow-300 blur-2xl" />
+                <div className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-pink-300 blur-2xl" />
               </div>
-            </div>
-          )}
-          <div className="flex flex-col items-center">
-            {/* ✅ いまの出題者 表示（mind用） */}
-            {mindRepId && mindPhase !== "idle" && mindPhase !== "slot" && mindPhase !== "orderReveal" && (
-              <div className="mb-4 flex justify-center">
+
+              <motion.p
+                animate={{ y: [0, -2, 0] }}
+                transition={{ duration: 1.2, repeat: Infinity }}
+                className="relative text-2xl md:text-3xl font-extrabold drop-shadow"
+              >
+                🎉 順番決定！
+              </motion.p>
+
+              <p className="relative text-sm md:text-base text-gray-700 font-bold mt-1">
+                1番から順に主役になるよ！
+              </p>
+
+              <div className="relative mt-4 space-y-2">
+                {orderRows.map((r) => (
+                  <div
+                    key={r.socketId}
+                    className="
+                      flex items-center justify-between
+                      px-3 py-2
+                      bg-white
+                      rounded-xl
+                      border-2 border-black
+                      shadow
+                    "
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="
+                        w-10 h-10 rounded-full
+                        bg-blue-500 text-white
+                        flex items-center justify-center
+                        font-extrabold
+                      ">
+                        {r.rank}
+                      </div>
+
+                      <div className="font-extrabold text-lg md:text-xl max-w-[200px] truncate">
+                        {r.name}
+                      </div>
+                    </div>
+
+                    {/* スロット値 */}
+                    <div className="
+                      min-w-[60px]
+                      px-3 py-1
+                      rounded-full
+                      bg-yellow-300
+                      border-2 border-black
+                      text-center
+                      font-extrabold
+                      text-lg md:text-xl
+                    ">
+                      {r.value}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <p className="relative text-xs md:text-sm text-gray-600 font-bold mt-3">
+                まもなく1番目の主役へ…✨
+              </p>
+            </motion.div>
+          </div>
+        )}
+
+        {!finished ? (
+          <>
+            {/* {mindTotalRounds > 0 && (
+              <div className="mb-2 flex justify-center">
                 <div
                   className="
-                    inline-flex items-center
+                    inline-flex items-center gap-2
                     px-4 py-2
                     rounded-full
                     bg-white/90
-                    border-3 border-blue-600
-                    shadow
-                    relative
-                    overflow-hidden
+                    border-2 border-black
                   "
                 >
-                  {/* うっすらキラ背景（形状は崩さない） */}
-                  <span className="absolute inset-0 opacity-25 pointer-events-none">
-                    <span className="absolute -top-6 -left-6 w-20 h-20 rounded-full bg-pink-400 blur-xl" />
-                    <span className="absolute -bottom-6 -right-6 w-20 h-20 rounded-full bg-yellow-300 blur-xl" />
+                  <span className="text-lg md:text-xl font-extrabold text-gray-900">
+                    {mindRoundIndex + 1}
+                    <span className="text-md md:text-xl font-bold text-gray-600"> / {mindTotalRounds}</span>
                   </span>
-
-                  {/* 中身 */}
-                  <span className="relative text-lg md:text-xl font-extrabold text-gray-900 flex items-center gap-2">
-                    <span
-                      className="
-                        w-8 h-8 md:w-9 md:h-9
-                        rounded-full
-                        bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500
-                        text-white
-                        flex items-center justify-center
-                      "
-                    >
-                      👑
-                    </span>
-                    いまの主役：
+                  <span className="text-md md:text-xl font-extrabold text-gray-700">周目</span>
+                </div>
+              </div>
+            )} */}
+            {mindTotalRounds > 0 && (
+              <div className="mb-2 flex flex-col items-center gap-2">
+                {/* 1行目：説明 */}
+                <div>
+                  <span className="text-md md:text-xl font-extrabold text-white drop-shadow">
+                    ✨主役の心理を当てたら得点ゲット！✨
                   </span>
+                </div>
 
-                  <span
-                    className="
-                      relative
-                      text-lg md:text-xl
-                      font-extrabold
-                      bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600
-                      bg-clip-text text-transparent
-                      drop-shadow-sm
-                    "
-                  >
-                    {repNameDisplay}さん
+                {/* 2行目：周表示 */}
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/90 border-2 border-gray-400">
+                  <span className="text-lg md:text-xl font-extrabold text-gray-900">
+                    {cycleNow}
+                    <span className="text-md md:text-xl font-bold text-gray-600"> / {totalCycles}</span>
+                  </span>
+                  <span className="text-md md:text-xl font-extrabold text-gray-700">周目</span>
+
+                  <span className="text-sm md:text-base font-bold text-gray-600">
+                    （{turnInCycle}/{playerCountNow}人目）
                   </span>
                 </div>
               </div>
             )}
-            <div className="grid grid-cols-4 md:grid-cols-4 gap-1 md:gap-2 mb-1 justify-items-center">
-              {orderedPlayers.map((p) => {
-                const isMe = p.socketId === mySocketId;
-                const change = scoreChanges[p.socketId];
-                const isRepNow =
-                  mindRepId != null &&
-                  p.socketId === mindRepId &&
-                  mindPhase !== "idle" &&
-                  mindPhase !== "slot" &&
-                  mindPhase !== "orderReveal";
-                
-                const mindRes = mindFrameResults[p.socketId];
-                const isRevealNow = mindPhase === "revealAnswer"; // mindだけ
-
-                let borderColorClass = "border-gray-300";
-
-                if (isRevealNow && showDamageResult) {
-                  if (!mindRes) borderColorClass = "border-gray-300";
-                  else if (mindRes.text === "主役") borderColorClass = "border-blue-500";
-                  else if (mindRes.isCorrect) borderColorClass = "border-green-500";
-                  else borderColorClass = "border-red-500";
-                }
-                
-                return (
+            <div className="flex flex-col items-center">
+              {/* ✅ いまの出題者 表示（mind用） */}
+              {mindRepId && mindPhase !== "idle" && mindPhase !== "slot" && mindPhase !== "orderReveal" && (
+                <div className="mb-4 flex justify-center">
                   <div
-                    key={p.socketId}
-                    className={`
+                    className="
+                      inline-flex items-center
+                      px-4 py-2
+                      rounded-full
+                      bg-white/90
+                      border-3 border-blue-600
+                      shadow
                       relative
-                      w-17 md:w-22
-                      aspect-square
-                      rounded-lg
-                      shadow-md
-                      flex flex-col items-center justify-center
-                      bg-white border-4 ${borderColorClass}
-                    `}
+                      overflow-hidden
+                    "
                   >
-                    {isRepNow && (
-                      <div className="w-full absolute -top-5 left-1/2 -translate-x-1/2 px-2 py-1 bg-blue-500 text-white text-xs font-extrabold rounded-full border-2 border-white shadow">
-                        主役
-                      </div>
-                    )}
-                    <p className="font-bold text-gray-800 text-lg md:text-xl text-center">
-                      {p.playerName.length > 5 ? p.playerName.slice(0, 5) + "..." : p.playerName}
-                    </p>
+                    {/* うっすらキラ背景（形状は崩さない） */}
+                    <span className="absolute inset-0 opacity-25 pointer-events-none">
+                      <span className="absolute -top-6 -left-6 w-20 h-20 rounded-full bg-pink-400 blur-xl" />
+                      <span className="absolute -bottom-6 -right-6 w-20 h-20 rounded-full bg-yellow-300 blur-xl" />
+                    </span>
 
-                    <p className="text-md md:text-lg font-bold text-green-600">
-                      {displayScores[p.socketId] ?? 0} 点
-                    </p>
+                    {/* 中身 */}
+                    <span className="relative text-lg md:text-xl font-extrabold text-gray-900 flex items-center gap-2">
+                      <span
+                        className="
+                          w-8 h-8 md:w-9 md:h-9
+                          rounded-full
+                          bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500
+                          text-white
+                          flex items-center justify-center
+                        "
+                      >
+                        👑
+                      </span>
+                      いまの主役：
+                    </span>
 
-                    {/* 結果表示 */}
-                    <p
-                      className={`text-lg md:text-xl font-bold mt-1 ${
-                        isRevealNow
-                          ? mindRes?.text === "主役"
-                            ? "text-blue-600"
-                            : mindRes?.isCorrect
-                            ? "text-green-600"
-                            : "text-red-600"
-                          : "text-green-500"
-                      }`}
+                    <span
+                      className="
+                        relative
+                        text-lg md:text-xl
+                        font-extrabold
+                        bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600
+                        bg-clip-text text-transparent
+                        drop-shadow-sm
+                      "
                     >
-                      {isRevealNow ? (showDamageResult ? (mindRes?.text ?? "　") : "　") : ""}
-                    </p>
-
-                    {/* 吹き出し表示 */}
-                    <div className="absolute -bottom-1 w-20 md:w-28">
-                      {visibleMessages
-                        .filter(m => m.fromId === p.socketId)
-                        .map((m, i) => (
-                          <motion.div
-                            key={i}
-                            style={{ zIndex: i + 10 }}
-                            initial={{ opacity: 0, y: 20, scale: 0.8 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: -20, scale: 0.8 }}
-                            transition={{ duration: 0.3, ease: "easeOut" }}
-                            className={`absolute right-2 md:right-4 top-0 w-16 md:w-20 px-2 py-1 rounded shadow text-sm md:text-md font-bold border-2 ${
-                              isMe ? "bg-blue-400 text-white border-blue-200" : "bg-red-400 text-white border-red-200"
-                            }`}
-                          >
-                            {m.message}
-                          </motion.div>
-                        ))}
-                    </div>
+                      {repNameDisplay}さん
+                    </span>
                   </div>
-                );
-              })}
-            </div>
-          </div>
+                </div>
+              )}
+              <div className="grid grid-cols-4 md:grid-cols-4 gap-1 md:gap-2 mb-1 justify-items-center">
+                {orderedPlayers.map((p) => {
+                  const isMe = p.socketId === mySocketId;
+                  const change = scoreChanges[p.socketId];
+                  const isRepNow =
+                    mindRepId != null &&
+                    p.socketId === mindRepId &&
+                    mindPhase !== "idle" &&
+                    mindPhase !== "slot" &&
+                    mindPhase !== "orderReveal";
+                  
+                  const mindRes = mindFrameResults[p.socketId];
+                  const isRevealNow = mindPhase === "revealAnswer"; // mindだけ
 
-          {showGameSet && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
-              <motion.div
-                initial={{ scale: 0.5, opacity: 0 }}
-                animate={{ scale: 1.3, opacity: 1 }}
-                transition={{ duration: 0.6 }}
-                className="text-white text-6xl md:text-8xl font-extrabold"
-              >
-                GAME SET!
-              </motion.div>
-            </div>
-          )}
+                  let borderColorClass = "border-gray-300";
 
-          {mindPhase === "repIntro" && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-              <div className="bg-white rounded-2xl p-6 w-[360px] text-center border-4 border-black">
-                {/* <p className="text-2xl text-blue-500 font-extrabold">
-                  {mindRoundIndex + 1}回目！
-                </p> */}
-                {/* <p className="text-xl font-bold mt-2">
-                  {`${mindRoundIndex + 1}周目 / 全${mindTotalRounds}周`}
-                </p> */}
-                <p className="text-xl font-bold mt-2">
-                  {`${cycleNow}周目 / 全${totalCycles}周（${turnInCycle}/${playerCountNow}人目）`}
-                </p>
+                  if (isRevealNow && showDamageResult) {
+                    if (!mindRes) borderColorClass = "border-gray-300";
+                    else if (mindRes.text === "主役") borderColorClass = "border-blue-500";
+                    else if (mindRes.isCorrect) borderColorClass = "border-green-500";
+                    else borderColorClass = "border-red-500";
+                  }
+                  
+                  return (
+                    <div
+                      key={p.socketId}
+                      className={`
+                        relative
+                        w-17 md:w-22
+                        aspect-square
+                        rounded-lg
+                        shadow-md
+                        flex flex-col items-center justify-center
+                        bg-white border-4 ${borderColorClass}
+                      `}
+                    >
+                      {isRepNow && (
+                        <div className="w-full absolute -top-5 left-1/2 -translate-x-1/2 px-2 py-1 bg-blue-500 text-white text-xs font-extrabold rounded-full border-2 border-white shadow">
+                          主役
+                        </div>
+                      )}
+                      <p className="font-bold text-gray-800 text-lg md:text-xl text-center">
+                        {p.playerName.length > 5 ? p.playerName.slice(0, 5) + "..." : p.playerName}
+                      </p>
 
-                <p className="text-lg md:text-xl text-pink-500 mt-3 font-extrabold">
-                  {repNameDisplay}さんの心理を当てよう！
-                </p>
+                      <p className="text-md md:text-lg font-bold text-green-600">
+                        {displayScores[p.socketId] ?? 0} 点
+                      </p>
+
+                      {/* 結果表示 */}
+                      <p
+                        className={`text-lg md:text-xl font-bold mt-1 ${
+                          isRevealNow
+                            ? mindRes?.text === "主役"
+                              ? "text-blue-600"
+                              : mindRes?.isCorrect
+                              ? "text-green-600"
+                              : "text-red-600"
+                            : "text-green-500"
+                        }`}
+                      >
+                        {isRevealNow ? (showDamageResult ? (mindRes?.text ?? "　") : "　") : ""}
+                      </p>
+
+                      {/* 吹き出し表示 */}
+                      <div className="absolute -bottom-1 w-20 md:w-28">
+                        {visibleMessages
+                          .filter(m => m.fromId === p.socketId)
+                          .map((m, i) => (
+                            <motion.div
+                              key={i}
+                              style={{ zIndex: i + 10 }}
+                              initial={{ opacity: 0, y: 20, scale: 0.8 }}
+                              animate={{ opacity: 1, y: 0, scale: 1 }}
+                              exit={{ opacity: 0, y: -20, scale: 0.8 }}
+                              transition={{ duration: 0.3, ease: "easeOut" }}
+                              className={`absolute right-2 md:right-4 top-0 w-16 md:w-20 px-2 py-1 rounded shadow text-sm md:text-md font-bold border-2 ${
+                                isMe ? "bg-blue-400 text-white border-blue-200" : "bg-red-400 text-white border-red-200"
+                              }`}
+                            >
+                              {m.message}
+                            </motion.div>
+                          ))}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
-          )}
 
-          {mindPhase === "repQuestion" && mySocketId === mindRepId && (
-            <div className="mt-4">
-              <p className="text-2xl font-extrabold">{repName}さん、今の心理を選んでね！</p>
-              <p className="text-md text-gray-600 mt-1">
-                制限時間： {repSecondsLeft} 秒
-              </p>
-
-              <QuizQuestion3
-                quiz={questions[mindQuestionIndex].quiz}
-                userAnswer={repUserAnswer}
-                setUserAnswer={setRepUserAnswer}
-              />
-
-              <button
-                disabled={repUserAnswer == null}
-                onClick={() => {
-                  const q = questions[mindQuestionIndex]?.quiz;
-                  if (!q?.choices || repUserAnswer == null) return;
-
-                  const idx = q.choices.findIndex(c => String(c) === String(repUserAnswer));
-                  const safeIdx = idx >= 0 ? idx : (Number(repUserAnswer) ?? -1);
-                  if (safeIdx < 0 || safeIdx > 2) return;
-
-                  const choice = (["A","B","C"] as const)[safeIdx];
-
-                  // 代表の回答を送信（isCorrectは今まで通り）
-                  const selected = q.choices[safeIdx];
-                  const isCorrect = String(selected) === String(q.answer);
-
-                  socket?.emit("mind_rep_answer", { roomCode, choice, isCorrect });
-
-                  // UIリセット
-                  setRepChoice(choice);
-                }}
-                className="mt-3 px-6 py-3 bg-blue-500 text-white rounded-xl font-bold text-xl disabled:bg-gray-400"
-              >
-                決定！
-              </button>
-            </div>
-          )}
-
-          {mindPhase === "guess" && mySocketId !== mindRepId && (
-            <div className="mt-4">
-              <p className="text-2xl font-extrabold">{repName}さんの答えを予想してね！</p>
-              <p className="text-md text-gray-600 mt-1">
-                制限時間： {guessSecondsLeft} 秒
-              </p>
-
-              <QuizQuestion3
-                quiz={questions[mindQuestionIndex].quiz}
-                userAnswer={guessUserAnswer}
-                setUserAnswer={setGuessUserAnswer}
-              />
-
-              <button
-                disabled={guessUserAnswer == null}
-                onClick={() => {
-                  const q = questions[mindQuestionIndex]?.quiz;
-                  if (!q?.choices || guessUserAnswer == null) return;
-
-                  // guessUserAnswer が「選択肢の値」なら idx を探す
-                  const idx = q.choices.findIndex(c => String(c) === String(guessUserAnswer));
-                  // もし QuizQuestion3 が index(0/1/2)を返す仕様なら、ここを idx = guessUserAnswer に変えてOK
-                  const safeIdx = idx >= 0 ? idx : (Number(guessUserAnswer) ?? -1);
-
-                  if (safeIdx < 0 || safeIdx > 2) return;
-
-                  const choice = (["A", "B", "C"] as const)[safeIdx];
-                  setGuessChoice(choice);
-                  socket?.emit("mind_guess_answer", { roomCode, choice });
-
-                  // 送ったら待機フェーズへ
-                  setMindPhase("revealWait"); // ★後述のフェーズ
-                }}
-                className="mt-3 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xl disabled:bg-gray-400"
-              >
-                決定！
-              </button>
-            </div>
-          )}
-
-          {mindPhase === "repQuestion" && mySocketId !== mindRepId && (
-            <div className="mt-6 p-4 bg-white rounded-xl border-2 border-black max-w-md mx-auto">
-              <p className="text-2xl font-extrabold">
-                <span className="text-blue-600">{repName}さん</span>
-                が心理を選んでるよ…
-              </p>
-              <p className="text-lg text-gray-600 mt-2">ちょっと待ってね🙏</p>
-              <p className="text-md text-gray-600 mt-1">
-                制限時間： {repSecondsLeft} 秒
-              </p>
-            </div>
-          )}
-
-          {mindPhase === "guess" && mySocketId === mindRepId && (
-            <div className="mt-6 p-4 bg-white rounded-xl border-2 border-black max-w-md mx-auto">
-              <p className="text-2xl font-extrabold">みんなが回答してるよ…</p>
-              <p className="text-lg text-gray-600 mt-2">ちょっと待ってね🙏</p>
-              <p className="text-md text-gray-600 mt-1">
-                制限時間： {guessSecondsLeft} 秒
-              </p>
-            </div>
-          )}
-
-          {mindPhase === "revealWait" && (
-            <div className="mt-6 p-4 bg-white rounded-xl border-2 border-black max-w-md mx-auto">
-              <p className="text-2xl font-extrabold">みんなの回答を待ってるよ…</p>
-              <p className="text-lg text-gray-600 mt-2">ちょっと待ってね🙏</p>
-            </div>
-          )}
-  
-          {mindPhase === "revealAnswer" && (
-            <div className="mt-3">
-              <p className="mt-2 text-lg md:text-xl text-gray-700">
-                {repName}さんが選んだのは、、
-              </p>
-
-              {showRevealText && (
-                <p className="mt-2 text-xl md:text-3xl text-gray-900 font-extrabold">
-                  「 {repPickedText} 」
-                </p>
-              )}
-            </div>
-          )}
-
-          <div className="flex flex-col items-center mt-2 md:mt-3">
-            {/* メッセージボタン */}
-            <div className="text-center border border-black p-1 rounded-xl bg-white">
-              {["よろしく👋", "やったね✌", "どれだろう🤔", "ありがとう❤"].map((msg) => (
-                <button
-                  key={msg}
-                  onClick={() => sendMessage(msg)}
-                  className="mx-1 my-1 px-2 py-1 text-md md:text-lg md:text-xl rounded-full border-2 border-gray-500 bg-white hover:bg-gray-200"
+            {showGameSet && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+                <motion.div
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  animate={{ scale: 1.3, opacity: 1 }}
+                  transition={{ duration: 0.6 }}
+                  className="text-white text-6xl md:text-8xl font-extrabold"
                 >
-                  {msg}
+                  GAME SET!
+                </motion.div>
+              </div>
+            )}
+
+            {mindPhase === "repIntro" && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+                <div className="bg-white rounded-2xl p-6 w-[360px] text-center border-4 border-black">
+                  {/* <p className="text-2xl text-blue-500 font-extrabold">
+                    {mindRoundIndex + 1}回目！
+                  </p> */}
+                  {/* <p className="text-xl font-bold mt-2">
+                    {`${mindRoundIndex + 1}周目 / 全${mindTotalRounds}周`}
+                  </p> */}
+                  <p className="text-xl font-bold mt-2">
+                    {`${cycleNow}周目 / 全${totalCycles}周（${turnInCycle}/${playerCountNow}人目）`}
+                  </p>
+
+                  <p className="text-lg md:text-xl text-pink-500 mt-3 font-extrabold">
+                    {repNameDisplay}さんの心理を当てよう！
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* {mindPhase === "repQuestion" && mySocketId === mindRepId && (
+              <div className="mt-4">
+                <p className="text-2xl font-extrabold">{repName}さん、今の心理を選んでね！</p>
+                <p className="text-md text-gray-600 mt-1">
+                  制限時間： {repSecondsLeft} 秒
+                </p>
+
+                <QuizQuestion3
+                  quiz={questions[mindQuestionIndex].quiz}
+                  userAnswer={repUserAnswer}
+                  setUserAnswer={setRepUserAnswer}
+                />
+
+                <button
+                  disabled={repUserAnswer == null}
+                  onClick={() => {
+                    const q = questions[mindQuestionIndex]?.quiz;
+                    if (!q?.choices || repUserAnswer == null) return;
+
+                    const idx = q.choices.findIndex(c => String(c) === String(repUserAnswer));
+                    const safeIdx = idx >= 0 ? idx : (Number(repUserAnswer) ?? -1);
+                    if (safeIdx < 0 || safeIdx > 2) return;
+
+                    const choice = (["A","B","C"] as const)[safeIdx];
+
+                    // 代表の回答を送信（isCorrectは今まで通り）
+                    const selected = q.choices[safeIdx];
+                    const isCorrect = String(selected) === String(q.answer);
+
+                    socket?.emit("mind_rep_answer", { roomCode, choice, isCorrect });
+
+                    // UIリセット
+                    setRepChoice(choice);
+                  }}
+                  className="mt-3 px-6 py-3 bg-blue-500 text-white rounded-xl font-bold text-xl disabled:bg-gray-400"
+                >
+                  決定！
                 </button>
-              ))}
+              </div>
+            )} */}
+
+            {mindPhase === "repQuestion" && (
+              <div className="mt-4">
+                <p className="text-2xl font-extrabold">
+                  {mySocketId === mindRepId
+                    ? `${repName}さん、今の心理を選んでね！`
+                    : `${repName}さんの心理を予想してね！`}
+                </p>
+
+                <p className="text-md text-gray-600 mt-1">
+                  制限時間： {repSecondsLeft} 秒
+                </p>
+
+                <QuizQuestion3
+                  quiz={questions[mindQuestionIndex].quiz}
+                  userAnswer={mySocketId === mindRepId ? repUserAnswer : guessUserAnswer}
+                  setUserAnswer={mySocketId === mindRepId ? setRepUserAnswer : setGuessUserAnswer}
+                />
+
+                {mySocketId === mindRepId ? (
+                  repChoice ? (
+                    <div className="mt-3 p-4 bg-white rounded-xl border-2 border-black max-w-md mx-auto">
+                      <p className="text-2xl font-extrabold">みんなが選んでるよ！</p>
+                      <p className="text-lg text-gray-600 mt-2">ちょっと待ってね🙏</p>
+                    </div>
+                  ) : (
+                    <button
+                      disabled={repUserAnswer == null}
+                      onClick={() => {
+                        const q = questions[mindQuestionIndex]?.quiz;
+                        if (!q?.choices || repUserAnswer == null) return;
+
+                        const idx = q.choices.findIndex(c => String(c) === String(repUserAnswer));
+                        const safeIdx = idx >= 0 ? idx : (Number(repUserAnswer) ?? -1);
+                        if (safeIdx < 0 || safeIdx > 2) return;
+
+                        const choice = (["A", "B", "C"] as const)[safeIdx];
+                        const selected = q.choices[safeIdx];
+                        const isCorrect = String(selected) === String(q.answer);
+
+                        setRepChoice(choice);
+                        socket?.emit("mind_rep_answer", { roomCode, choice, isCorrect });
+                      }}
+                      className="mt-3 px-6 py-3 bg-blue-500 text-white rounded-xl font-bold text-xl disabled:bg-gray-400"
+                    >
+                      決定！
+                    </button>
+                  )
+                ) : (
+                  <div className="mt-3 p-4 bg-white rounded-xl border-2 border-black max-w-md mx-auto">
+                    <p className="text-2xl font-extrabold">
+                      <span className="text-blue-600">{repName}さん</span>が選んでるよ！
+                    </p>
+                    <p className="text-lg text-gray-600 mt-2">ちょっと待ってね🙏</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {mindPhase === "guess" && mySocketId !== mindRepId && (
+              <div className="mt-4">
+                <p className="text-2xl font-extrabold">{repName}さんの答えを予想してね！</p>
+                <p className="text-md text-gray-600 mt-1">
+                  制限時間： {guessSecondsLeft} 秒
+                </p>
+
+                <QuizQuestion3
+                  quiz={questions[mindQuestionIndex].quiz}
+                  userAnswer={guessUserAnswer}
+                  setUserAnswer={setGuessUserAnswer}
+                />
+
+                <button
+                  disabled={guessUserAnswer == null}
+                  onClick={() => {
+                    const q = questions[mindQuestionIndex]?.quiz;
+                    if (!q?.choices || guessUserAnswer == null) return;
+
+                    // guessUserAnswer が「選択肢の値」なら idx を探す
+                    const idx = q.choices.findIndex(c => String(c) === String(guessUserAnswer));
+                    // もし QuizQuestion3 が index(0/1/2)を返す仕様なら、ここを idx = guessUserAnswer に変えてOK
+                    const safeIdx = idx >= 0 ? idx : (Number(guessUserAnswer) ?? -1);
+
+                    if (safeIdx < 0 || safeIdx > 2) return;
+
+                    const choice = (["A", "B", "C"] as const)[safeIdx];
+                    setGuessChoice(choice);
+                    socket?.emit("mind_guess_answer", { roomCode, choice });
+
+                    // 送ったら待機フェーズへ
+                    setMindPhase("revealWait"); // ★後述のフェーズ
+                  }}
+                  className="mt-3 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xl disabled:bg-gray-400"
+                >
+                  決定！
+                </button>
+              </div>
+            )}
+
+            {/* {mindPhase === "repQuestion" && mySocketId !== mindRepId && (
+              <div className="mt-6 p-4 bg-white rounded-xl border-2 border-black max-w-md mx-auto">
+                <p className="text-2xl font-extrabold">
+                  <span className="text-blue-600">{repName}さん</span>
+                  が心理を選んでるよ…
+                </p>
+                <p className="text-lg text-gray-600 mt-2">ちょっと待ってね🙏</p>
+                <p className="text-md text-gray-600 mt-1">
+                  制限時間： {repSecondsLeft} 秒
+                </p>
+              </div>
+            )} */}
+
+            {mindPhase === "guess" && mySocketId === mindRepId && (
+              <div className="mt-6 p-4 bg-white rounded-xl border-2 border-black max-w-md mx-auto">
+                <p className="text-2xl font-extrabold">みんなが予想してるよ…</p>
+                <p className="text-lg text-gray-600 mt-2">ちょっと待ってね🙏</p>
+                <p className="text-md text-gray-600 mt-1">
+                  制限時間： {guessSecondsLeft} 秒
+                </p>
+              </div>
+            )}
+
+            {mindPhase === "revealWait" && (
+              <div className="mt-6 p-4 bg-white rounded-xl border-2 border-black max-w-md mx-auto">
+                <p className="text-2xl font-extrabold">みんなの回答を待ってるよ…</p>
+                <p className="text-lg text-gray-600 mt-2">ちょっと待ってね🙏</p>
+              </div>
+            )}
+    
+            {mindPhase === "revealAnswer" && (
+              <div className="mt-3">
+                <p className="mt-2 text-lg md:text-xl text-gray-700">
+                  {repName}さんが選んだのは、、
+                </p>
+
+                {showRevealText && (
+                  <p className="mt-2 text-xl md:text-3xl text-gray-900 font-extrabold">
+                    「 {repPickedText} 」
+                  </p>
+                )}
+              </div>
+            )}
+
+            <div className="flex flex-col items-center mt-2 md:mt-3">
+              {/* メッセージボタン */}
+              <div className="text-center border border-black p-1 rounded-xl bg-white">
+                {["よろしく👋", "やったね✌", "どれだろう🤔", "ありがとう❤"].map((msg) => (
+                  <button
+                    key={msg}
+                    onClick={() => sendMessage(msg)}
+                    className="mx-1 my-1 px-2 py-1 text-md md:text-lg md:text-xl rounded-full border-2 border-gray-500 bg-white hover:bg-gray-200"
+                  >
+                    {msg}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
-        </>
-      ) : (
-        <QuizResult
-          correctCount={correctCount}
-          onRetry={handleRetry}
-          matchEnded={matchEnded}
-          rematchAvailable={rematchAvailable}
-          rematchRequested={rematchRequested}
-          handleNewMatch={handleNewMatch}
-          handleRematch={handleRematch}
-          players={players}
-          predictedWinner={predictedWinner}
-          hasPredicted={hasPredicted}
-          basePoints={basePoints}
-          firstBonusPoints={firstBonusPoints}
-          predictionBonusPoints={predictionBonusPoints}
-          earnedPoints={earnedPoints}
-          earnedExp={earnedExp}
-          isLoggedIn={!!user}
-          awardStatus={awardStatus}
-          onGoLogin={() => router.push("/user/login")}
-          isCodeMatch={mode === "code"}
-          onShareX={handleShareX}
-          myRankNow={myFinalRank}
-          finalRanks={finalRanks}
-        />
-      )}
-    </div>
+          </>
+        ) : (
+          <QuizResult
+            correctCount={correctCount}
+            onRetry={handleRetry}
+            matchEnded={matchEnded}
+            rematchAvailable={rematchAvailable}
+            rematchRequested={rematchRequested}
+            handleNewMatch={handleNewMatch}
+            handleRematch={handleRematch}
+            players={players}
+            predictedWinner={predictedWinner}
+            hasPredicted={hasPredicted}
+            basePoints={basePoints}
+            firstBonusPoints={firstBonusPoints}
+            predictionBonusPoints={predictionBonusPoints}
+            earnedPoints={earnedPoints}
+            earnedExp={earnedExp}
+            isLoggedIn={!!user}
+            awardStatus={awardStatus}
+            onGoLogin={() => router.push("/user/login")}
+            isCodeMatch={mode === "code"}
+            onShareX={handleShareX}
+            myRankNow={myFinalRank}
+            finalRanks={finalRanks}
+          />
+        )}
+      </div>
+      <AnimatePresence>
+        {showGuessStartModal && (
+          <motion.div
+            className="fixed inset-0 z-[999] flex items-center justify-center bg-black/50 px-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              initial={{ scale: 0.85, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 10 }}
+              transition={{ duration: 0.25 }}
+              className="
+                w-full max-w-[420px]
+                rounded-3xl
+                border-4 border-black
+                bg-white
+                p-6
+                text-center
+                shadow-[0_20px_60px_rgba(0,0,0,0.35)]
+              "
+            >
+              <p className="text-4xl mb-2">🧠✨</p>
+
+              <p className="text-2xl md:text-3xl font-extrabold text-gray-900">
+                {repName}さんの心理が決まったよ！
+              </p>
+
+              <p className="mt-3 text-lg md:text-xl font-bold text-blue-600">
+                次はみんなで予想タイム！
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
