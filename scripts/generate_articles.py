@@ -12,16 +12,16 @@ BASE_DIR = pathlib.Path(__file__).resolve().parents[1]
 ARTICLE_DIR = BASE_DIR / "src" / "quizbooks_theme"
 
 THEME_WEIGHTS = {
-    "anime": 5,
-    "game": 4,
-    "zatsugaku": 4,
-    "music": 4,
+    "anime": 3,
+    "game": 3,
+    "zatsugaku": 3,
+    "music": 3,
     "sports": 3,
     "food": 3,
-    "science": 2,
+    "science": 3,
     "character": 3,
-    "manga": 4,
-    "hobby": 2,
+    "manga": 3,
+    "hobby": 3,
 }
 
 THEME_LABELS = {
