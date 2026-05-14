@@ -11,10 +11,20 @@ function sha256(input: string) {
 
 // ✅ ChangePasswordPage と同じ強度チェック
 function validatePassword(password: string): string | null {
-  if (password.length < 12) return "パスワードは12文字以上にしてください。";
-  if (!/[A-Z]/.test(password)) return "英大文字を1文字以上含めてください。";
-  if (!/[a-z]/.test(password)) return "英小文字を1文字以上含めてください。";
-  if (!/[0-9]/.test(password)) return "数字を1文字以上含めてください。";
+  // if (password.length < 12) return "パスワードは12文字以上にしてください。";
+  // if (!/[A-Z]/.test(password)) return "英大文字を1文字以上含めてください。";
+  // if (!/[a-z]/.test(password)) return "英小文字を1文字以上含めてください。";
+  // if (!/[0-9]/.test(password)) return "数字を1文字以上含めてください。";
+  if (password.length < 8) {
+    return "パスワードは8文字以上にしてください。";
+  }
+  // 英字と数字の両方を含むか
+  const hasLetter = /[a-zA-Z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+
+  if (!(hasLetter && hasNumber)) {
+    return "英字と数字を含めてください。";
+  }
   return null;
 }
 

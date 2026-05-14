@@ -18,17 +18,27 @@ export default function ChangePasswordPage() {
 
   // ✅ SignUp と同じ強度チェック
   const validatePassword = (password: string): string | null => {
-    if (password.length < 12) {
-      return "パスワードは12文字以上にしてください。";
+    // if (password.length < 12) {
+    //   return "パスワードは12文字以上にしてください。";
+    // }
+    // if (!/[A-Z]/.test(password)) {
+    //   return "英大文字を1文字以上含めてください。";
+    // }
+    // if (!/[a-z]/.test(password)) {
+    //   return "英小文字を1文字以上含めてください。";
+    // }
+    // if (!/[0-9]/.test(password)) {
+    //   return "数字を1文字以上含めてください。";
+    // }
+    if (password.length < 8) {
+      return "パスワードは8文字以上にしてください。";
     }
-    if (!/[A-Z]/.test(password)) {
-      return "英大文字を1文字以上含めてください。";
-    }
-    if (!/[a-z]/.test(password)) {
-      return "英小文字を1文字以上含めてください。";
-    }
-    if (!/[0-9]/.test(password)) {
-      return "数字を1文字以上含めてください。";
+
+    const hasLetter = /[a-zA-Z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+
+    if (!(hasLetter && hasNumber)) {
+      return "英字と数字を含めてください。";
     }
     return null;
   };
@@ -160,7 +170,8 @@ export default function ChangePasswordPage() {
       <p className="text-sm md:text-base text-gray-700 mb-4">
         新しいパスワードを入力してください。
         <br />
-        12文字以上・英大文字・英小文字・数字をすべて含めてください。
+        {/* 12文字以上・英大文字・英小文字・数字をすべて含めてください。 */}
+        8文字以上で、英字と数字を含めてください。
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-3">
@@ -174,7 +185,8 @@ export default function ChangePasswordPage() {
             required
           />
           <p className="text-xs text-gray-500 mt-1">
-            12文字以上・英大文字・英小文字・数字をすべて含めてください
+            {/* 12文字以上・英大文字・英小文字・数字をすべて含めてください */}
+            8文字以上で、英字と数字を含めてください。
           </p>
         </div>
 

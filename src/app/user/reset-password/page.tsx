@@ -24,10 +24,20 @@ function ResetPasswordFallback() {
 
 // ✅ ChangePasswordPage と同じ強度チェック
 function validatePassword(password: string): string | null {
-  if (password.length < 12) return "パスワードは12文字以上にしてください。";
-  if (!/[A-Z]/.test(password)) return "英大文字を1文字以上含めてください。";
-  if (!/[a-z]/.test(password)) return "英小文字を1文字以上含めてください。";
-  if (!/[0-9]/.test(password)) return "数字を1文字以上含めてください。";
+  // if (password.length < 12) return "パスワードは12文字以上にしてください。";
+  // if (!/[A-Z]/.test(password)) return "英大文字を1文字以上含めてください。";
+  // if (!/[a-z]/.test(password)) return "英小文字を1文字以上含めてください。";
+  // if (!/[0-9]/.test(password)) return "数字を1文字以上含めてください。";
+  if (password.length < 8) {
+    return "パスワードは8文字以上にしてください。";
+  }
+
+  const hasLetter = /[a-zA-Z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+
+  if (!(hasLetter && hasNumber)) {
+    return "英字と数字を含めてください。";
+  }
   return null;
 }
 
@@ -111,7 +121,8 @@ function ResetPasswordInner() {
       </h1>
 
       <p className="text-sm text-gray-700 mb-3">
-        12文字以上・英大文字・英小文字・数字をすべて含めてください。
+        {/* 12文字以上・英大文字・英小文字・数字をすべて含めてください。 */}
+        8文字以上で、英字と数字を含めてください。
       </p>
 
       <form onSubmit={onSubmit} className="space-y-3">

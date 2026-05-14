@@ -22,10 +22,20 @@ export default function SignUpPage() {
 
   // パスワード強度チェック関数
   const validatePassword = (pw: string): string | null => {
-    if (pw.length < 12) return "パスワードは12文字以上にしてください。";
-    if (!/[A-Z]/.test(pw)) return "英大文字を1文字以上含めてください。";
-    if (!/[a-z]/.test(pw)) return "英小文字を1文字以上含めてください。";
-    if (!/[0-9]/.test(pw)) return "数字を1文字以上含めてください。";
+    // if (pw.length < 12) return "パスワードは12文字以上にしてください。";
+    // if (!/[A-Z]/.test(pw)) return "英大文字を1文字以上含めてください。";
+    // if (!/[a-z]/.test(pw)) return "英小文字を1文字以上含めてください。";
+    // if (!/[0-9]/.test(pw)) return "数字を1文字以上含めてください。";
+    if (pw.length < 8) {
+      return "パスワードは8文字以上にしてください。";
+    }
+
+    const hasLetter = /[a-zA-Z]/.test(pw);
+    const hasNumber = /[0-9]/.test(pw);
+
+    if (!(hasLetter && hasNumber)) {
+      return "英字と数字を含めてください。";
+    }
     return null;
   };
 
@@ -223,7 +233,8 @@ export default function SignUpPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                placeholder="12文字以上"
+                // placeholder="12文字以上"
+                placeholder="8文字以上"
               />
               <button
                 type="button"
@@ -238,8 +249,10 @@ export default function SignUpPage() {
 
             {/* ✅ ルール表示（エラーはここでも見えるように） */}
             <div className="text-xs text-gray-500 leading-relaxed">
-              <p>・12文字以上</p>
-              <p>・英大文字 / 英小文字 / 数字をすべて含める</p>
+              {/* <p>・12文字以上</p> */}
+              <p>・8文字以上</p>
+              {/* <p>・英大文字 / 英小文字 / 数字をすべて含める</p> */}
+              <p>・英字と数字を含めてください</p>
             </div>
 
             {password && passwordError && (
