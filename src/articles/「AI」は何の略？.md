@@ -5,7 +5,7 @@ description: "略語の由来に関する雑学"
 quiz:
   title: "AIの略"
   genre: "雑学系"
-  level: "難しい"
+  level: "超難しい"
   question: "「AI」は何の略でしょう？"
   choices:
     - "Advanced Internet"

@@ -837,8 +837,12 @@ export default function QuizModePage() {
     );
 
     const hardQuestions = shuffleArray(
+      list.filter((q) => q.quiz.level === "難しい")
+    );
+
+    const expertQuestions = shuffleArray(
       list.filter(
-        (q) => q.quiz.level !== "かんたん" && q.quiz.level !== "ふつう"
+        (q) => q.quiz.level !== "かんたん" && q.quiz.level !== "ふつう" && q.quiz.level !== "難しい"
       )
     );
 
@@ -848,14 +852,18 @@ export default function QuizModePage() {
     // 次の15問は ふつう
     const next15Normal = normalQuestions.slice(0, 15);
 
+    // 次の10問は 難しい
+    const next10Hard = hardQuestions.slice(0, 10);
+
     // 残りは全難易度からランダム
     const remaining = shuffleArray([
       ...easyQuestions.slice(5),
       ...normalQuestions.slice(15),
-      ...hardQuestions,
+      ...hardQuestions.slice(10),
+      ...expertQuestions,
     ]);
 
-    return [...first5Easy, ...next15Normal, ...remaining];
+    return [...first5Easy, ...next15Normal, ...next10Hard, ...remaining];
   };
 
   const resetGame = () => {

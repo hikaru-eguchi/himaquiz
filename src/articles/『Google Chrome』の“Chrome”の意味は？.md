@@ -5,7 +5,7 @@ description: "IT"
 quiz:
   title: "意味は？"
   genre: "雑学系"
-  level: "難しい"
+  level: "超難しい"
   question: "『Google Chrome』のChromeの意味として近いのは？"
   choices:
     - "高速"

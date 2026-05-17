@@ -5,7 +5,7 @@ description: "サービス"
 quiz:
   title: "意味は？"
   genre: "雑学系"
-  level: "難しい"
+  level: "超難しい"
   question: "『Amazon Prime』のPrimeの意味として近いのは？"
   choices:
     - "最上級"

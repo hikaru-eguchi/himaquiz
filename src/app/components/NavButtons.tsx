@@ -36,6 +36,29 @@ export default function NavButtons() {
     雑学系: "bg-gradient-to-br from-yellow-100 via-green-300 to-green-100",
   };
 
+  const levelMap: Record<string, string> = {
+    かんたん: "/quizzes/level/easy",
+    ふつう: "/quizzes/level/normal",
+    難しい: "/quizzes/level/hard",
+    超難しい: "/quizzes/level/expert",
+  };
+
+  const levels = Object.keys(levelMap);
+
+  const levelBgMap: Record<string, string> = {
+    かんたん:
+      "bg-white border-2 border-sky-400 text-sky-600 shadow-[0_0_0_3px_rgba(56,189,248,0.15)]",
+
+    ふつう:
+      "bg-white border-2 border-yellow-400 text-yellow-600 shadow-[0_0_0_3px_rgba(250,204,21,0.15)]",
+
+    難しい:
+      "bg-white border-2 border-purple-500 text-purple-600 shadow-[0_0_0_3px_rgba(168,85,247,0.15)]",
+
+    超難しい:
+      "bg-white border-2 border-red-500 text-red-600 shadow-[0_0_0_3px_rgba(239,68,68,0.15)]",
+  };
+
   const activeStyle = "md:scale-110 ring-4 ring-blue-300";
   const baseStyle =
     "px-3 md:px-5 py-1 md:py-2 border-2 border-black rounded-full font-bold shadow-sm transition-all cursor-pointer flex-none md:hover:scale-105";
@@ -499,39 +522,75 @@ export default function NavButtons() {
                 <p className="text-xs md:text-sm text-black/70">
                   サクッと遊べる4択クイズ。スキマ時間に脳トレ＆腕試し！
                 </p>
-                <div className={rowWrap}>
-                  <Link
-                    href="/quizzes"
-                    onClick={() => handleNavClick("/quizzes")}
-                  >
-                    <button
-                      className={`${baseStyle} bg-white text-black ${
-                        activeUrl === "/quizzes" ? activeStyle : ""
-                      }`}
-                    >
-                      全て
-                    </button>
-                  </Link>
-
-                  {genres.map((genre) => {
-                    const url = genreMap[genre];
-                    const isActive = activeUrl === url;
-                    return (
-                      <Link
-                        key={genre}
-                        href={url}
-                        onClick={() => handleNavClick(url)}
-                      >
-                        <button
-                          className={`${baseStyle} ${genreBgMap[genre]} text-black ${
-                            isActive ? activeStyle : ""
-                          }`}
+                <div className="mx-auto w-full max-w-[300px] md:max-w-none">
+                  <div className={gameScrollOuter}>
+                    <div className="flex flex-row md:flex-col">
+                      {/* 1行目：ジャンル */}
+                      <div className={gameRow}>
+                        <Link
+                          href="/quizzes"
+                          onClick={() => handleNavClick("/quizzes")}
                         >
-                          {genre}
-                        </button>
-                      </Link>
-                    );
-                  })}
+                          <button
+                            className={`${baseStyle} bg-white text-black ${
+                              activeUrl === "/quizzes" ? activeStyle : ""
+                            }`}
+                          >
+                            全て
+                          </button>
+                        </Link>
+
+                        {genres.map((genre) => {
+                          const url = genreMap[genre];
+                          const isActive = activeUrl === url;
+
+                          return (
+                            <Link
+                              key={genre}
+                              href={url}
+                              onClick={() => handleNavClick(url)}
+                            >
+                              <button
+                                className={`${baseStyle} ${genreBgMap[genre]} text-black ${
+                                  isActive ? activeStyle : ""
+                                }`}
+                              >
+                                {genre}
+                              </button>
+                            </Link>
+                          );
+                        })}
+                      </div>
+
+                      {/* 2行目：難易度 */}
+                      <div className={gameRow}>
+                        {levels.map((level) => {
+                          const url = levelMap[level];
+                          const isActive = activeUrl === url;
+
+                          return (
+                            <Link
+                              key={level}
+                              href={url}
+                              onClick={() => handleNavClick(url)}
+                            >
+                              <button
+                                className={`${baseStyle} ${levelBgMap[level]} text-black ${
+                                  isActive ? activeStyle : ""
+                                }`}
+                              >
+                                {level}
+                              </button>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="mt-1 text-xs text-black/60 text-center md:hidden">
+                    ← 横にスワイプできます →
+                  </p>
                 </div>
               </fieldset>
             </div>

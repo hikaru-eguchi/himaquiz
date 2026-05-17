@@ -5,7 +5,7 @@ description: "言葉の由来雑学"
 quiz:
   title: "OKの由来"
   genre: "雑学系"
-  level: "難しい"
+  level: "超難しい"
   question: "「OK」の由来として有力なのはどれ？"
   choices:
     - "All Correct"

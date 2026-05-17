@@ -1245,25 +1245,33 @@ export default function QuizModePage() {
     );
 
     const hardQuestions = shuffleArray(
+      list.filter((q) => q.quiz.level === "難しい")
+    );
+
+    const expertQuestions = shuffleArray(
       list.filter(
-        (q) => q.quiz.level !== "かんたん" && q.quiz.level !== "ふつう"
+        (q) => q.quiz.level !== "かんたん" && q.quiz.level !== "ふつう" && q.quiz.level !== "難しい"
       )
     );
 
     // 1〜3体目：スケルトンまで → かんたんだけ
-    const first3Easy = easyQuestions.slice(0, 5);
+    const first5Easy = easyQuestions.slice(0, 5);
 
     // 4〜8体目：ミミック〜バーサーカー → ふつうだけ
-    const next5Normal = normalQuestions.slice(0, 15);
+    const next15Normal = normalQuestions.slice(0, 15);
 
-    // 9体目以降：ドラゴン〜 → 全難易度ランダム
+    // 9体目以降：ドラゴン〜 → 難しいだけ
+    const next10Hard = hardQuestions.slice(0, 10);
+
+    // 全難易度ランダム
     const remaining = shuffleArray([
-      ...easyQuestions.slice(3),
-      ...normalQuestions.slice(5),
-      ...hardQuestions,
+      ...easyQuestions.slice(5),
+      ...normalQuestions.slice(15),
+      ...hardQuestions.slice(10),
+      ...expertQuestions,
     ]);
 
-    return [...first3Easy, ...next5Normal, ...remaining];
+    return [...first5Easy, ...next15Normal, ...next10Hard, ...remaining];
   };
 
   const startedRef = useRef(false);

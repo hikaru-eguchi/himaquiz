@@ -5,7 +5,7 @@ description: "ジョジョ雑学クイズ"
 quiz:
   title: "ジョジョ能力クイズ"
   genre: "雑学系"
-  level: "難しい"
+  level: "超難しい"
   question: "『ジョジョの奇妙な冒険』第3部の敵「DIO」の能力は？"
   choices:
     - "未来を見る"

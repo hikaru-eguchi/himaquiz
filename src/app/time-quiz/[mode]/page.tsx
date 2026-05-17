@@ -477,6 +477,47 @@ export default function QuizModePage() {
 
   const shuffleArray = <T,>(arr: T[]) => [...arr].sort(() => Math.random() - 0.5);
 
+  const sortQuestionsForPlay = (list: { id: string; quiz: QuizData }[]) => {
+    const easyQuestions = shuffleArray(
+      list.filter((q) => q.quiz.level === "かんたん")
+    );
+
+    const normalQuestions = shuffleArray(
+      list.filter((q) => q.quiz.level === "ふつう")
+    );
+
+    const hardQuestions = shuffleArray(
+      list.filter((q) => q.quiz.level === "難しい")
+    );
+
+    const expertQuestions = shuffleArray(
+      list.filter(
+        (q) =>
+          q.quiz.level !== "かんたん" &&
+          q.quiz.level !== "ふつう" &&
+          q.quiz.level !== "難しい"
+      )
+    );
+
+    const firstEasy = easyQuestions.slice(0, 2);
+    const nextNormal = normalQuestions.slice(0, 3);
+    const nextHard = hardQuestions.slice(0, 3);
+
+    const remaining = shuffleArray([
+      ...easyQuestions.slice(2),
+      ...normalQuestions.slice(3),
+      ...hardQuestions.slice(3),
+      ...expertQuestions,
+    ]);
+
+    return [
+      ...firstEasy,
+      ...nextNormal,
+      ...nextHard,
+      ...remaining,
+    ];
+  };
+
   const startTimer = () => {
     // 既存があれば止める
     if (timerRef.current) clearInterval(timerRef.current);
@@ -524,7 +565,7 @@ export default function QuizModePage() {
     clearPendingAward();
 
     // 問題をシャッフルし直す（同じ問題順を避けたい場合）
-    setQuestions((prev) => shuffleArray(prev));
+    setQuestions((prev) => sortQuestionsForPlay(prev));
   };
 
   useEffect(() => {
@@ -554,7 +595,7 @@ export default function QuizModePage() {
             },
           }));
 
-        setQuestions(shuffleArray(quizQuestions));
+        setQuestions(sortQuestionsForPlay(quizQuestions));
       } catch (error) {
         console.error("クイズ問題の取得に失敗しました:", error);
       }
@@ -595,6 +636,7 @@ export default function QuizModePage() {
         if (quizLevel === "かんたん") add = 50;
         if (quizLevel === "ふつう") add = 100;
         if (quizLevel === "難しい") add = 150;
+        if (quizLevel === "超難しい") add = 200;
 
         setScoreChange(add);
         setTimeout(() => setScoreChange(null), 800);

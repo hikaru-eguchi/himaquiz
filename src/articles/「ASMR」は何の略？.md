@@ -5,7 +5,7 @@ description: "略語の雑学"
 quiz:
   title: "ASMRの略"
   genre: "雑学系"
-  level: "難しい"
+  level: "超難しい"
   question: "「ASMR」は何の略でしょう？"
   choices:
     - "Automatic Sound Music Reaction"

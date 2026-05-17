@@ -1040,6 +1040,7 @@ export default function QuizModePage() {
       if (level === "かんたん") add = 50;
       if (level === "ふつう") add = 100;
       if (level === "難しい") add = 150;
+      if (level === "超難しい") add = 200;
       setScoreChanges(prev => ({
         ...prev,
         [myId]: add,

@@ -751,8 +751,12 @@ export default function QuizModePage() {
     );
 
     const hardQuestions = shuffleArray(
+      list.filter((q) => q.quiz.level === "難しい")
+    );
+
+    const expertQuestions = shuffleArray(
       list.filter(
-        (q) => q.quiz.level !== "かんたん" && q.quiz.level !== "ふつう"
+        (q) => q.quiz.level !== "かんたん" && q.quiz.level !== "ふつう" && q.quiz.level !== "難しい"
       )
     );
 
@@ -762,14 +766,18 @@ export default function QuizModePage() {
     // 次の4問：ふつう
     const next5Normal = normalQuestions.slice(0, 4);
 
+    // 次の5問：難しい
+    const next5Hard = hardQuestions.slice(0, 5);
+
     // 残り：全難易度ランダム
     const remaining = shuffleArray([
       ...easyQuestions.slice(3),
-      ...normalQuestions.slice(5),
-      ...hardQuestions,
+      ...normalQuestions.slice(4),
+      ...hardQuestions.slice(5),
+      ...expertQuestions,
     ]);
 
-    return [...first3Easy, ...next5Normal, ...remaining];
+    return [...first3Easy, ...next5Normal, ...next5Hard, ...remaining];
   };
 
   useEffect(() => {

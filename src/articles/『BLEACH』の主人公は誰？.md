@@ -5,7 +5,7 @@ description: "アニメ雑学クイズ"
 quiz:
   title: "BLEACHクイズ"
   genre: "雑学系"
-  level: "難しい"
+  level: "超難しい"
   question: "『BLEACH』の主人公の名前は？"
   choices:
     - "黒崎一護"

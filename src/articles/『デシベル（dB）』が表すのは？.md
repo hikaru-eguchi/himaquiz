@@ -5,7 +5,7 @@ description: "音の単位雑学"
 quiz:
   title: "dBの意味"
   genre: "雑学系"
-  level: "難しい"
+  level: "超難しい"
   question: "デシベル（dB）は何を表す単位として使われることが多い？"
   choices:
     - "音の大きさ（強さ）の比"
