@@ -1,4 +1,4 @@
-// src/app/quizzes/genre/知識系/level/超難しい/page.tsx
+// src/app/quizzes/genre/知識系/level/激ムズ/page.tsx
 import Link from "next/link";
 import fs from "fs";
 import path from "path";
@@ -9,7 +9,7 @@ import LevelFilterButtons from "@/app/components/LevelFilterButtons";
 export const metadata = {
   title: "本格派・超むずかしい知識系クイズ｜ひまQ",
   description:
-    "ひまQの知識系クイズ（超むずかしい編）は、知識好きも満足できる超本格派クイズが中心。空き時間にじっくり挑戦したい人向けの暇つぶしクイズです。",
+    "ひまQの知識系クイズ（激ムズ編）は、知識好きも満足できる超本格派クイズが中心。空き時間にじっくり挑戦したい人向けの暇つぶしクイズです。",
 };
 
 interface ArticleMeta {
@@ -66,14 +66,14 @@ export default async function KnowledgeEasyPage({
 }) {
   const genreParam = "knowledge"; // URL 用（英語）
   const displayGenre = "知識系"; // 表示用（日本語）
-  const levelParam = "超難しい";
+  const levelParam = "激ムズ";
   const urlLevelParam = "expert";
   const params = await searchParams;
   const currentPage = Number(params?.page) || 1;
 
   const allArticles = await getSortedArticlesData();
 
-  // ジャンル「知識系」かつレベル「超難しい」のクイズだけ
+  // ジャンル「知識系」かつレベル「激ムズ」のクイズだけ
   const filteredArticles = allArticles.filter(
     (article) => article.genre === displayGenre && article.level === levelParam
   );
@@ -100,7 +100,7 @@ export default async function KnowledgeEasyPage({
       </div>
 
       <h1 className="text-3xl font-bold mb-2 text-center text-blue-600 leading-tight">
-        超難しいレベルの知識系クイズ
+        激ムズレベルの知識系クイズ
       </h1>
 
       {/* ★ クイズ数表示（中央） */}

@@ -251,7 +251,7 @@ export default function HimaQRoulette() {
   };
 
   return (
-    <section className="mx-auto my-10 max-w-[700px]">
+    <section className="mx-auto my-5 max-w-[700px]">
       <div className="relative overflow-hidden rounded-[2.2rem] border-4 border-black bg-gradient-to-br from-yellow-100 via-pink-100 to-sky-100 p-4 md:p-6">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(251,191,36,0.55),transparent_24%),radial-gradient(circle_at_85%_15%,rgba(244,114,182,0.45),transparent_24%),radial-gradient(circle_at_80%_85%,rgba(56,189,248,0.45),transparent_26%)]" />
 

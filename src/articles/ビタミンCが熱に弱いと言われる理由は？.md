@@ -5,7 +5,7 @@ description: "栄養の雑学"
 quiz:
   title: "ビタミンの性質"
   genre: "雑学系"
-  level: "超難しい"
+  level: "激ムズ"
   question: "ビタミンCが加熱で減りやすい主な理由は？"
   choices:
     - "脂に溶けやすい性質だから"

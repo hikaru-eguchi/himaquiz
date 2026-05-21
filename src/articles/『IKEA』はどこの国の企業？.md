@@ -5,7 +5,7 @@ description: "企業"
 quiz:
   title: "この国は？"
   genre: "雑学系"
-  level: "超難しい"
+  level: "激ムズ"
   question: "IKEAはどこの国の企業？"
   choices:
     - "ドイツ"

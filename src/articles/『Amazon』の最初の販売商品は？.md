@@ -5,7 +5,7 @@ description: "企業"
 quiz:
   title: "最初は何？"
   genre: "雑学系"
-  level: "超難しい"
+  level: "激ムズ"
   question: "Amazonが最初に扱った商品は？"
   choices:
     - "家電"

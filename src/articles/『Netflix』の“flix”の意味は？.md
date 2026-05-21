@@ -5,7 +5,7 @@ description: "サービス"
 quiz:
   title: "意味は？"
   genre: "雑学系"
-  level: "超難しい"
+  level: "激ムズ"
   question: "『Netflix』のflixは何を意味する？"
   choices:
     - "映画"

@@ -5,7 +5,7 @@ description: "企業"
 quiz:
   title: "名前の由来は？"
   genre: "雑学系"
-  level: "超難しい"
+  level: "激ムズ"
   question: "Googleの名前の由来はどれ？"
   choices:
     - "創業者の名前"

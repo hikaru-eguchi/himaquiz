@@ -5,7 +5,7 @@ description: "SNSの行動心理に関する問題です"
 quiz:
   title: "SNSを見続ける理由は？"
   genre: "心理系"
-  level: "超難しい"
+  level: "激ムズ"
   question: "人がSNSをやめられなくなる主な心理現象は？"
   choices:
     - "ハロー効果"

@@ -5,7 +5,7 @@ description: "アニメ"
 quiz:
   title: "子どもキャラは誰？"
   genre: "雑学系"
-  level: "超難しい"
+  level: "激ムズ"
   question: "『SPY×FAMILY』に登場する子どもキャラはどれでしょう？"
   choices:
     - "ヨル"

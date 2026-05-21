@@ -5,7 +5,7 @@ description: "IT雑学"
 quiz:
   title: "名前の由来"
   genre: "雑学系"
-  level: "超難しい"
+  level: "激ムズ"
   question: "Bluetoothという名前の由来として知られるのは？"
   choices:
     - "北欧の王のあだ名"

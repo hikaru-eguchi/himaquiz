@@ -5,7 +5,7 @@ description: "略語の雑学"
 quiz:
   title: "PDFの略"
   genre: "雑学系"
-  level: "超難しい"
+  level: "激ムズ"
   question: "「PDF」は何の略でしょう？"
   choices:
     - "Portable Document Format"

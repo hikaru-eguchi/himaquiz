@@ -30,7 +30,7 @@ for (const file of files) {
 
 const output = `export const QUESTION_LEVEL_MAP = ${JSON.stringify(map, null, 2)} as const;
 
-export type QuestionLevel = "かんたん" | "ふつう" | "難しい" | "超難しい";
+export type QuestionLevel = "かんたん" | "ふつう" | "難しい" | "激ムズ";
 `;
 
 fs.writeFileSync(OUTPUT_FILE, output, "utf8");

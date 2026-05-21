@@ -12,11 +12,11 @@ const levelMap: Record<string, string> = {
   かんたん: "easy",
   ふつう: "normal",
   難しい: "hard",
-  超難しい: "expert",
+  激ムズ: "expert",
 };
 
 // ★ 「全て」ボタン追加
-const levels = ["全て", "かんたん", "ふつう", "難しい", "超難しい"];
+const levels = ["全て", "かんたん", "ふつう", "難しい", "激ムズ"];
 
 export default function LevelFilterButtons({ genre }: LevelFilterButtonsProps) {
   const pathname = usePathname();
@@ -39,7 +39,7 @@ export default function LevelFilterButtons({ genre }: LevelFilterButtonsProps) {
     難しい:
       "bg-white border-2 border-purple-500 text-purple-600 shadow-[0_0_0_3px_rgba(168,85,247,0.15)]",
 
-    超難しい:
+    激ムズ:
       "bg-white border-2 border-red-500 text-red-600 shadow-[0_0_0_3px_rgba(239,68,68,0.15)]",
   };
 
@@ -52,7 +52,7 @@ export default function LevelFilterButtons({ genre }: LevelFilterButtonsProps) {
 
     難しい: "ring-4 ring-purple-300",
 
-    超難しい: "ring-4 ring-red-300",
+    激ムズ: "ring-4 ring-red-300",
   };
 
   const handleClick = (levelJp: string) => {

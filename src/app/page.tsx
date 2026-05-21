@@ -8,6 +8,7 @@ import WeeklyRankingSection from "@/app/components/WeeklyRankingSection";
 import RegisterPendingRanking from "@/app/components/RegisterPendingRanking";
 // import DailyFunGacha from "@/app/components/DailyFunGacha";
 import HimaQRoulette from "@/app/components/HimaQRoulette";
+import PopularMatomeSection from "@/app/components/PopularMatomeSection";
 
 export const metadata = {
   title: "無料で遊べる暇つぶしクイズ｜ひまQ",
@@ -772,6 +773,8 @@ export default async function HomePage({
           </div>
         </div>
       </div>
+
+      <PopularMatomeSection />
     </div>
   );
 }

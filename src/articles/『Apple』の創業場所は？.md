@@ -5,7 +5,7 @@ description: "企業"
 quiz:
   title: "『Apple』の創業場所は？"
   genre: "雑学系"
-  level: "超難しい"
+  level: "激ムズ"
   question: "Appleが創業した場所はどこ？"
   choices:
     - "オフィス"

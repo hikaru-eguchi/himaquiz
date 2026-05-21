@@ -40,7 +40,7 @@ export default function NavButtons() {
     かんたん: "/quizzes/level/easy",
     ふつう: "/quizzes/level/normal",
     難しい: "/quizzes/level/hard",
-    超難しい: "/quizzes/level/expert",
+    激ムズ: "/quizzes/level/expert",
   };
 
   const levels = Object.keys(levelMap);
@@ -55,7 +55,7 @@ export default function NavButtons() {
     難しい:
       "bg-white border-2 border-purple-500 text-purple-600 shadow-[0_0_0_3px_rgba(168,85,247,0.15)]",
 
-    超難しい:
+    激ムズ:
       "bg-white border-2 border-red-500 text-red-600 shadow-[0_0_0_3px_rgba(239,68,68,0.15)]",
   };
 

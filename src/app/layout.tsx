@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const genres = ["知識系", "心理系", "雑学系"];
-  const levels = ["かんたん", "ふつう", "難しい", "超難しい"];
+  const levels = ["かんたん", "ふつう", "難しい", "激ムズ"];
 
   return (
     <html lang="ja">

@@ -636,7 +636,7 @@ export default function QuizModePage() {
         if (quizLevel === "かんたん") add = 50;
         if (quizLevel === "ふつう") add = 100;
         if (quizLevel === "難しい") add = 150;
-        if (quizLevel === "超難しい") add = 200;
+        if (quizLevel === "激ムズ") add = 200;
 
         setScoreChange(add);
         setTimeout(() => setScoreChange(null), 800);

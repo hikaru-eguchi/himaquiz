@@ -5,7 +5,7 @@ description: "サービス"
 quiz:
   title: "最初は何？"
   genre: "雑学系"
-  level: "超難しい"
+  level: "激ムズ"
   question: "Netflixが最初に提供していたサービスは？"
   choices:
     - "映画館"

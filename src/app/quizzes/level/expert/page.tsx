@@ -7,9 +7,9 @@ import Pagination from "@/app/components/Pagination";
 import LevelFilterButtons from "@/app/components/LevelFilterButtons";
 
 export const metadata = {
-  title: "超上級者向け・超難しいクイズ｜ひまQ",
+  title: "超上級者向け・激ムズクイズ｜ひまQ",
   description:
-    "ひまQの超むずかしいクイズは、上級者でも手ごたえを感じる超高難度問題。暇つぶしのつもりが本気になる、挑戦しがいのあるクイズです。",
+    "ひまQの激ムズクイズは、上級者でも手ごたえを感じる超高難度問題。暇つぶしのつもりが本気になる、挑戦しがいのあるクイズです。",
 };
 
 interface ArticleMeta {
@@ -64,14 +64,14 @@ type PageProps = {
 };
 
 export default async function EasyLevelPage({ searchParams }: PageProps) {
-  const levelParam = "超難しい";
+  const levelParam = "激ムズ";
   const urlLevelParam = "expert";
   const params = await searchParams;
   const currentPage = Number(params?.page) || 1;
 
   const allArticles = await getSortedArticlesData();
 
-  // 難易度「超難しい」のみ抽出（ジャンルは問わない）
+  // 難易度「激ムズ」のみ抽出（ジャンルは問わない）
   const filteredArticles = allArticles.filter(
     (article) => article.level === levelParam
   );
@@ -97,7 +97,7 @@ export default async function EasyLevelPage({ searchParams }: PageProps) {
       </div>
 
       <h1 className="text-3xl font-bold mb-2 text-center">
-        超難しいレベルの暇つぶしクイズ
+        激ムズレベルの暇つぶしクイズ
       </h1>
 
       {/* クイズ数 */}

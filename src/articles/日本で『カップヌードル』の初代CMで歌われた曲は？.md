@@ -5,7 +5,7 @@ description: "CM雑学クイズ"
 quiz:
   title: "CMクイズ"
   genre: "雑学系"
-  level: "超難しい"
+  level: "激ムズ"
   question: "日本で『カップヌードル』の初代CMで歌われた曲は？"
   choices:
     - "夕焼け小焼け"
