@@ -204,7 +204,7 @@ LINE。
 
 ---
 
-👉[もっと直感心理テストを見る](/quiz-personality)
+👉[もっと直感心理テストを見る](/quiz-psychologicaltest)
 
 ---
 
@@ -408,7 +408,7 @@ LINE。
 
 ---
 
-👉[さらに深層心理テストを見る](/quiz-personality)
+👉[さらに深層心理テストを見る](/quiz-psychologicaltest)
 
 ---
 
@@ -540,7 +540,7 @@ LINEとの相性がかなりいいです。
 
 ---
 
-👉[もっと当たる心理テストを見る](/quiz-personality)
+👉[もっと当たる心理テストを見る](/quiz-psychologicaltest)
 
 ---
 
@@ -660,7 +660,7 @@ LINEとの相性がかなりいいです。
 
 ---
 
-👉[今すぐ直感心理テストに挑戦する](/quiz-personality)
+👉[今すぐ直感心理テストに挑戦する](/quiz-psychologicaltest)
 
 ---
 
@@ -720,4 +720,4 @@ LINE。
 
 ---
 
-**👉[今すぐ心理テストに挑戦する](/quiz-personality)**
+**👉[今すぐ心理テストに挑戦する](/quiz-psychologicaltest)**

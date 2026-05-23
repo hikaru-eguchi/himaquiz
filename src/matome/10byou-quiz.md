@@ -866,7 +866,7 @@ IQ。
 ---
 
 
-👉[心理テスト風の暇つぶし問題はこちら](/quiz-personality)
+👉[心理テスト風の暇つぶし問題はこちら](/quiz-psychologicaltest)
 
 ---
 

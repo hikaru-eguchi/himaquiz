@@ -165,7 +165,7 @@ og:
 
 ---
 
-👉[もっと心理クイズを見る](/quiz-personality)
+👉[もっと心理クイズを見る](/quiz-psychologicaltest)
 
 ---
 
@@ -355,7 +355,7 @@ og:
 
 ---
 
-👉[さらに深層心理テストを見る](/quiz-personality)
+👉[さらに深層心理テストを見る](/quiz-psychologicaltest)
 
 ---
 
@@ -620,7 +620,7 @@ LINEとの相性がかなりいい。
 
 ---
 
-👉[今すぐ心理クイズに挑戦する](/quiz-personality)
+👉[今すぐ心理クイズに挑戦する](/quiz-psychologicaltest)
 
 ---
 
@@ -682,4 +682,4 @@ LINE。
 
 ---
 
-**👉[今すぐ心理クイズに挑戦する](/quiz-personality)**
+**👉[今すぐ心理クイズに挑戦する](/quiz-psychologicaltest)**

@@ -441,6 +441,22 @@ export default async function HomePage({
               </p>
             </div>
           </div>
+          {/* 心理テスト */}
+          <div className="text-center max-w-[280px]">
+            <Link href="/quiz-psychologicaltest" className="w-full md:w-auto flex justify-center">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-pink-500 via-rose-500 to-fuchsia-500 text-white hover:scale-110 transition-all">
+                ❤心理テスト
+              </button>
+            </Link>
+            <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                直感でわかる性格診断！
+              </p>
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                あなたの本当のタイプは？
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -685,6 +701,19 @@ export default async function HomePage({
             <div className="mt-1 rounded-2xl bg-white/85 px-2 py-2 shadow-sm border border-white/70">
               <p className="text-sm md:text-base text-gray-700 leading-tight">
                 1本だけ動かして違う式にしよう。
+              </p>
+            </div>
+          </div>
+
+          <div className="text-center max-w-[280px]">
+            <Link href="/quizbooks_psychological" className="w-full md:w-auto flex justify-center">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-pink-500 to-rose-400 text-white hover:scale-110 transition-all">
+                ❤ 心理テスト
+              </button>
+            </Link>
+            <div className="mt-1 rounded-2xl bg-white/85 px-2 py-2 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                直感でわかるあなたのタイプ。
               </p>
             </div>
           </div>

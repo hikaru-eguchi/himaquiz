@@ -240,6 +240,19 @@ export default function NavButtons() {
                           ひまQ診断
                         </button>
                       </Link>
+
+                      <Link
+                        href="/quiz-psychologicaltest"
+                        onClick={() => handleNavClick("/quiz-psychologicaltest")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-gradient-to-r from-pink-500 via-rose-500 to-fuchsia-500 text-white ring-2 ring-pink-400 md:hover:scale-110 ${
+                            activeUrl === "/quiz-psychologicaltest" ? activeStyle : ""
+                          }`}
+                        >
+                          心理テスト
+                        </button>
+                      </Link>
                     </div>
                   </div>
 
@@ -491,6 +504,19 @@ export default function NavButtons() {
                           }`}
                         >
                           マッチ棒クイズ
+                        </button>
+                      </Link>
+
+                      <Link
+                        href="/quizbooks_psychological"
+                        onClick={() => handleNavClick("/quizbooks_psychological")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-gradient-to-r from-pink-500 to-rose-400 text-white ${
+                            activeUrl === "/quizbooks_psychological" ? activeStyle : ""
+                          }`}
+                        >
+                          心理テスト
                         </button>
                       </Link>
 

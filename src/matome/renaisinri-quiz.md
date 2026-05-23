@@ -230,7 +230,7 @@ LINE。
 
 ---
 
-👉[もっと恋愛心理テストを見る](/quiz-personality)
+👉[もっと恋愛心理テストを見る](/quiz-psychologicaltest)
 
 ---
 
@@ -603,7 +603,7 @@ LINEでも通話でも、
 
 ---
 
-👉[さらに恋愛診断を見る](/quiz-personality)
+👉[さらに恋愛診断を見る](/quiz-psychologicaltest)
 
 ---
 
@@ -1131,7 +1131,7 @@ LINEでも通話でも、
 
 ---
 
-👉[今すぐ恋愛心理テストに挑戦する](/quiz-personality)
+👉[今すぐ恋愛心理テストに挑戦する](/quiz-psychologicaltest)
 
 ---
 
@@ -1206,4 +1206,4 @@ LINE。
 
 ---
 
-**👉[今すぐ恋愛クイズに挑戦する](/quiz-personality)**
+**👉[今すぐ恋愛クイズに挑戦する](/quiz-psychologicaltest)**
