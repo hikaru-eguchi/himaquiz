@@ -322,7 +322,8 @@ const QuizResult = ({
                   次の称号
                 </p>
                 <p className="text-center text-2xl md:text-4xl font-extrabold text-yellow-600 tracking-wide">
-                  「{maskResultTitle(nextTitleInfo.title)}」
+                  {/* 「{maskResultTitle(nextTitleInfo.title)}」 */}
+                  「{nextTitleInfo.title}」
                 </p>
 
                 {/* 残り問題数 */}
@@ -1491,7 +1492,8 @@ export default function QuizModePage() {
                 </p>
 
                 <p className="mt-4 text-xl md:text-3xl font-extrabold text-gray-800 text-center leading-snug">
-                  「{maskTitle(nextTitleInfo.title)}」まであと
+                  {/* 「{maskTitle(nextTitleInfo.title)}」まであと */}
+                  「{nextTitleInfo.title}」まであと
                   <span className="mx-2 inline-block text-red-600 text-3xl md:text-5xl drop-shadow-sm">
                     {nextTitleInfo.remain}
                   </span>

@@ -41,6 +41,15 @@ const GAME_LABEL: Record<
     text: "text-orange-700",
     description: "連続正解で手に入る、ひらめきの証。",
   },
+  time_attack: {
+    label: "タイムアタック",
+    emoji: "⚡",
+    color: "from-cyan-400 via-sky-400 to-blue-500",
+    soft: "from-cyan-50 to-sky-50",
+    border: "border-cyan-200",
+    text: "text-sky-700",
+    description: "最速クリアを目指すスピード系称号。",
+  },
   timed: {
     label: "制限時間クイズ",
     emoji: "⏱️",
@@ -100,6 +109,7 @@ const GAME_LABEL: Record<
 const ORDER = [
   "level",
   "streak",
+  "time_attack",
   "timed",
   "dungeon",
   // "battle",
@@ -111,6 +121,7 @@ const ORDER = [
 const CATEGORY_TOTAL: Record<string, number> = {
   level: 30,
   streak: 32,
+  time_attack: 16,
   timed: 32,
   dungeon: 22,
   coop_dungeon: 15,

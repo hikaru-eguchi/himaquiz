@@ -138,6 +138,19 @@ export default function NavButtons() {
                       </Link>
 
                       <Link
+                        href="/time-attack"
+                        onClick={() => handleNavClick("/time-attack")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-gradient-to-r from-sky-400 via-cyan-400 to-blue-400 text-white ring-2 ring-sky-400 md:hover:scale-110 ${
+                            activeUrl === "/time-attack" ? activeStyle : ""
+                          }`}
+                        >
+                          タイムアタック
+                        </button>
+                      </Link>
+
+                      <Link
                         href="/time-quiz"
                         onClick={() => handleNavClick("/time-quiz")}
                       >

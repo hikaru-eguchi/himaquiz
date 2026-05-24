@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 export type GameKey =
   | "streak"          // 連続正解チャレンジ
+  | "time_attack"     // タイムアタック
   | "timed"           // 制限時間クイズ
   | "dungeon"         // クイズダンジョン
   | "battle"          // クイズバトル
@@ -75,6 +76,7 @@ export async function submitGameResult(
 export function gameLabel(game: GameKey): string {
   switch (game) {
     case "streak": return "連続正解チャレンジ";
+    case "time_attack": return "タイムアタック";
     case "timed": return "制限時間クイズ";
     case "dungeon": return "クイズダンジョン";
     case "battle": return "クイズバトル";
@@ -88,5 +90,6 @@ export function recordKindLabel(kind: string | null): string {
   if (kind === "streak") return "連続正解";
   if (kind === "score") return "スコア";
   if (kind === "stage") return "ステージ";
+  if (kind === "time") return "タイム";
   return kind;
 }

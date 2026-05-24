@@ -315,6 +315,22 @@ export default async function HomePage({
               </p>
             </div>
           </div>
+          {/* タイムアタック */}
+          <div className="text-center max-w-[280px]">
+            <Link href="/time-attack" className="w-full md:w-auto flex justify-center">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-sky-400 via-cyan-400 to-blue-400 text-white hover:scale-110 transition-all">
+                ⚡タイムアタック
+              </button>
+            </Link>
+            <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                5問を何秒でクリアできる？
+              </p>
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                最速タイムを目指そう！
+              </p>
+            </div>
+          </div>
           {/* 制限時間クイズ */}
           <div className="text-center max-w-[280px]">
             <Link href="/time-quiz" className="w-full md:w-auto flex justify-center">
