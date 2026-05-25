@@ -378,7 +378,7 @@ export default function QuizModePage() {
   const code = searchParams?.get("code") || ""; 
   const genre = searchParams?.get("genre") || "";
   const level = searchParams?.get("level") || "";
-  const timeParam = searchParams?.get("time") || "2";
+  const timeParam = searchParams?.get("time") || "1";
   const totalTime = parseInt(timeParam) * 60;
 
   const BONUS_TABLE: Record<number, number[]> = {

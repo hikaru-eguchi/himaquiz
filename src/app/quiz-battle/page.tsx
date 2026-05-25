@@ -15,7 +15,7 @@ export default function QuizMasterPage() {
   const handleDescriptionClick = () => setShowDescription((prev) => !prev);
 
   // ★ 入力された制限時間（クエリで渡す）
-  const [limitTime, setLimitTime] = useState<number | null>(2);
+  const [limitTime, setLimitTime] = useState<number | null>(1);
 
   // ★ PC用キャラ（全3枚）
   const allCharacters = [
@@ -198,7 +198,7 @@ export default function QuizMasterPage() {
             className="text-gray-700 text-md md:text-lg text-center px-4 py-2"
           >
             「クイズバトル」は、だれかと正解数や得点を競う対戦型クイズゲームです。<br />
-            制限時間は 2分間。その間にどれだけ正解できるかで勝負します。<br />
+            制限時間は 1分間。その間にどれだけ正解できるかで勝負します。<br />
             問題の難易度に応じて獲得ポイントが変わります：かんたん…50P、ふつう…100P、むずかしい…150P。<br />
             ただし油断は禁物！3問連続で間違えると、得点が100ポイント減ってしまいます。<br />
             近くの友達とあいことばを合わせてマッチすることも、ネット上の誰かと対戦することも可能です。<br />

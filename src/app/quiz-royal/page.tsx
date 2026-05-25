@@ -15,7 +15,7 @@ export default function QuizMasterPage() {
   const handleDescriptionClick = () => setShowDescription((prev) => !prev);
 
   // ★ 入力された制限時間（クエリで渡す）
-  const [limitTime, setLimitTime] = useState<number | null>(2);
+  const [limitTime, setLimitTime] = useState<number | null>(1);
 
   // ★ PC用キャラ（全6枚）
   const allCharacters = [
@@ -98,7 +98,7 @@ export default function QuizMasterPage() {
           ＜みんなで遊べるクイズゲーム＞
         </p>
         <p className="text-md md:text-2xl font-semibold text-white mb-8">
-          みんなで2分間のクイズバトル！正解を積み上げて王冠をつかみ取れ！
+          みんなで1分間のクイズバトル！正解を積み上げて王冠をつかみ取れ！
         </p>
 
         {/* ★ スマホは2枚、PCは3枚 */}
@@ -226,7 +226,7 @@ export default function QuizMasterPage() {
             className="text-gray-700 text-md md:text-lg text-center px-4 py-2"
           >
             「クイズロワイヤル」は、みんなで正解数や得点を競い合う頂上決戦クイズゲームです。<br />
-            制限時間は 2分間。その短い時間でどれだけ正解を積み上げられるかが勝負のカギ！<br />
+            制限時間は 1分間。その短い時間でどれだけ正解を積み上げられるかが勝負のカギ！<br />
             問題の難易度に応じて獲得ポイントが変化します：かんたん…50P、ふつう…100P、むずかしい…150P、超むずかしい…200P。<br />
             ただし油断は禁物！3問連続で間違えると、得点が100ポイント減ってしまいます。<br />
             近くの友達とあいことばを合わせてマッチすることも、ネット上のライバルと戦うことも可能です。<br />
