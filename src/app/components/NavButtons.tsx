@@ -387,6 +387,19 @@ export default function NavButtons() {
                           心理当てバトル
                         </button>
                       </Link>
+
+                      <Link
+                        href="/quiz-friend"
+                        onClick={() => handleNavClick("/quiz-friend")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-gradient-to-r from-sky-400 via-cyan-300 to-yellow-200 text-white ring-2 ring-cyan-500 md:hover:scale-110 ${
+                            activeUrl === "/quiz-friend" ? activeStyle : ""
+                          }`}
+                        >
+                          なかよし診断
+                        </button>
+                      </Link>
                     </div>
                   </div>
 
