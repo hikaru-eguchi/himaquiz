@@ -661,7 +661,7 @@ export default function QuizFriendCodePage() {
               onClick={handleJoin}
               className="mt-6 w-full rounded-full border-4 border-black bg-gradient-to-r from-sky-200 via-cyan-100 to-yellow-100 px-6 py-4 text-xl md:text-2xl font-extrabold text-gray-800 shadow-lg transition-all hover:scale-105 hover:brightness-105"
             >
-              知り合いとマッチする
+              あいことばでマッチ
             </button>
           </div>
         </div>

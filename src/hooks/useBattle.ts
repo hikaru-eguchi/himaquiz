@@ -23,7 +23,7 @@ export const useBattle = (playerName: string) => {
   const [stageCount, setStageCount] = useState<number>(1);
   const [roomPlayers, setRoomPlayers] = useState<{ socketId: string; name: string }[]>([]);
   const [playerCount, setPlayerCount] = useState("0/4");
-  const [gameType, setGameType] = useState<"quiz" | "royal" | "dungeon" | "dobon" | "majority" | "quick" | "dice" | "mind" | "friend">("quiz");
+  const [gameType, setGameType] = useState<"quiz" | "royal" | "dungeon" | "dobon" | "majority" | "quick" | "dice" | "space" | "mind" | "friend">("quiz");
   const sendMessage = (message: string) => {
     if (!socket || !roomCode) return;
     socket.emit("send_message", { roomCode, fromId: mySocketId, message });
@@ -167,7 +167,7 @@ export const useBattle = (playerName: string) => {
       current,
       max
     }: {
-      gameType: "quiz" | "royal" | "dungeon" | "dobon" | "majority" | "quick" | "dice" | "mind" | "friend";
+      gameType: "quiz" | "royal" | "dungeon" | "dobon" | "majority" | "quick" | "dice" | "space" | "mind" | "friend";
       players: { socketId: string; playerName: string }[];
       current: number;
       max: number;
@@ -176,7 +176,7 @@ export const useBattle = (playerName: string) => {
       setPlayerCount(`${current}/${max}`);
       console.log(`[update_room_count] ${current}/${max}`, players);
 
-      if (gameType === "dungeon" || gameType === "royal" || gameType === "dobon" || gameType === "majority" || gameType === "quick" || gameType === "dice" || gameType === "mind" || gameType === "friend") {
+      if (gameType === "dungeon" || gameType === "royal" || gameType === "dobon" || gameType === "majority" || gameType === "quick" || gameType === "dice" || gameType === "space" || gameType === "mind" || gameType === "friend") {
         setPlayers(players.map(p => ({
           socketId: p.socketId,
           name: p.playerName,
@@ -324,19 +324,20 @@ export const useBattle = (playerName: string) => {
   /* =========================
      参加処理
   ========================= */
-  const joinRandom = (options?: { maxPlayers?: number; gameType?: "quiz" | "royal" | "dungeon" | "dobon" | "majority" | "quick" | "dice" | "mind" | "friend" }, onJoined?: (code: string) => void) => {
+  const joinRandom = (options?: { maxPlayers?: number; gameType?: "quiz" | "royal" | "dungeon" | "dobon" | "majority" | "quick" | "dice" | "space" | "mind" | "friend"; userId?: string | null; }, onJoined?: (code: string) => void) => {
     if (!socket) return;
     const maxPlayers = options?.maxPlayers ?? 2;
     const type = options?.gameType ?? "quiz";
+    const userId = options?.userId ?? null;
     setGameType(type)
-    socket.emit("join_random", { playerName, maxPlayers, gameType: type });
+    socket.emit("join_random", { playerName, maxPlayers, gameType: type, userId, });
     socket.once("start_game", ({ roomCode: code }: { roomCode: string }) => {
       setRoomCode(code);
       onJoined?.(code);
     });
   };
 
-  const joinWithCode = (code: string, count: string, type: "quiz" | "royal" | "dungeon" | "dobon" | "majority" | "quick" | "dice" | "mind" | "friend") => {
+  const joinWithCode = (code: string, count: string, type: "quiz" | "royal" | "dungeon" | "dobon" | "majority" | "quick" | "dice" | "space" | "mind" | "friend", userId?: string | null) => {
     if (!socket) {
       console.warn("[useBattle] joinWithCode: socket 未接続");
       return;
@@ -348,6 +349,7 @@ export const useBattle = (playerName: string) => {
       code: roomKey,
       count,
       gameType: type,
+      userId: userId ?? null,
     });
   };
 

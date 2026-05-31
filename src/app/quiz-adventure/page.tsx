@@ -123,7 +123,7 @@ export default function QuizMasterPage() {
               onClick={handleRandomQuizStart}
               className="w-full md:w-80 px-6 py-2 md:px-8 md:py-4 bg-green-500 text-white rounded-full hover:bg-green-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
             >
-              オンラインでだれかと挑戦
+              オンラインで挑戦
             </button>
             <p className="text-sm text-gray-100 mt-1">※一定時間マッチしないとCPUとの挑戦になります</p>
           </div>
@@ -132,7 +132,7 @@ export default function QuizMasterPage() {
               onClick={() => setShowCodeInput(true)}
               className="w-full md:w-80 px-6 py-2 md:px-8 md:py-4 bg-yellow-500 text-white rounded-full hover:bg-yellow-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
             >
-              知り合いと挑戦
+              あいことばで挑戦
             </button>
             <p className="text-sm text-gray-100 mt-1">※パーティメンバーは 2人〜8人でプレイできます。</p>
           </div>

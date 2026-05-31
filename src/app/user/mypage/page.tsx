@@ -16,6 +16,7 @@ type Profile = {
   avatar_url: string | null;
   friend_code: string | null;
   current_title: string | null;
+  current_skin_id: string | null;
 };
 
 export default function MyPage() {
@@ -27,6 +28,8 @@ export default function MyPage() {
   const [avatarUrl, setAvatarUrl] = useState<string>("/images/初期アイコン.png");
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isTitleChangeOpen, setIsTitleChangeOpen] = useState(false);
+  const [skinUrl, setSkinUrl] = useState("/images/skin_chara1_ボード.png");
+  const [skinName, setSkinName] = useState("ボードスタイル");
 
   useEffect(() => {
     if (userLoading) return;
@@ -48,7 +51,7 @@ export default function MyPage() {
         const { data, error } = await supabase
           .from("profiles")
           .select(
-            "username, user_id, recovery_email, points, level, exp, avatar_character_id, avatar_url, friend_code, current_title"
+            "username, user_id, recovery_email, points, level, exp, avatar_character_id, avatar_url, friend_code, current_title, current_skin_id"
           )
           .eq("id", user.id)
           .single();
@@ -58,6 +61,19 @@ export default function MyPage() {
         } else {
           const p = data as Profile;
           setProfile(p);
+
+          if (p.current_skin_id) {
+            const { data: skin } = await supabase
+              .from("skins")
+              .select("name, image_url")
+              .eq("id", p.current_skin_id)
+              .single();
+
+            if (skin?.image_url) {
+              setSkinUrl(skin.image_url.startsWith("/") ? skin.image_url : `/${skin.image_url}`);
+              setSkinName(skin.name ?? "ボードスタイル");
+            }
+          }
 
           const initial = "/images/初期アイコン.png";
           const saved = p.avatar_url
@@ -188,6 +204,29 @@ export default function MyPage() {
                   </p>
                 </div>
               </div>
+
+              <button
+                type="button"
+                onClick={() => router.push("/user/mypage/edit")}
+                className="mt-4 w-full rounded-3xl bg-white/15 p-4 text-left backdrop-blur transition active:scale-95 hover:bg-white/20"
+              >
+                <p className="text-xs font-black text-white/75">使用中スタイル</p>
+
+                <div className="mt-2 flex items-center gap-3">
+                  <img
+                    src={skinUrl}
+                    alt={skinName}
+                    className="h-20 w-20 rounded-2xl bg-white/90 object-contain p-1"
+                  />
+
+                  <div>
+                    <p className="text-base font-black">{skinName}</p>
+                    <p className="text-xs font-bold text-white/80">
+                      タップして変更
+                    </p>
+                  </div>
+                </div>
+              </button>
 
               <button
                 type="button"

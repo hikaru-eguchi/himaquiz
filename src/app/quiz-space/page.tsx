@@ -4,30 +4,32 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Anton } from "next/font/google";
 import { useRouter } from "next/navigation";
+import { useSupabaseUser } from "@/hooks/useSupabaseUser";
 
 const anton = Anton({ subsets: ["latin"], weight: "400" });
 
 export default function QuizMasterPage() {
   const router = useRouter();
+  const { user } = useSupabaseUser();
 
   const [showDescription, setShowDescription] = useState(false);
 
   const handleDescriptionClick = () => setShowDescription((prev) => !prev);
 
   // ★ 入力された制限時間（クエリで渡す）
-  const [limitTime, setLimitTime] = useState<number | null>(1);
+  const [limitTime, setLimitTime] = useState<number | null>(5);
 
   // ★ PC用キャラ（全6枚）
   const allCharacters = [
-    "/images/quiz_man.png",
-    "/images/quiz.png",
-    "/images/quiz_woman.png",
+    "/images/space2.png",
+    "/images/space1.png",
+    "/images/space3.png",
   ];
 
   // ★ スマホ専用キャラ（2枚だけ）
   const mobileCharacters = [
-    "/images/quiz.png",
-    "/images/quiz_woman.png",
+    "/images/space2.png",
+    "/images/space1.png",
   ];
 
   // ★ 画面サイズで画像を切り替え
@@ -54,7 +56,7 @@ export default function QuizMasterPage() {
 
   // ▼ 全てのクイズから出題（time をクエリに付ける）
   const handleRandomQuizStart = () => {
-    router.push(`/quiz-royal/random?time=${limitTime}`);
+    router.push(`/quiz-space/random?time=${limitTime}`);
   };
 
   // ▼ あいことば対戦
@@ -64,7 +66,11 @@ export default function QuizMasterPage() {
   const [playerCount, setPlayerCount] = useState<number | null>(2);
 
   return (
-    <div className="container mx-auto px-4 py-8 text-center bg-gradient-to-b from-yellow-400 via-amber-300 to-blue-400">
+    <div className="container mx-auto px-4 py-8 text-center bg-gradient-to-b from-[#020617] via-[#0c1635] to-[#2a0b45]">
+      <p className="mx-auto mb-3 inline-flex rounded-full border border-cyan-300/70 bg-white/10 px-4 py-1 text-sm font-black text-cyan-100 shadow-[0_0_24px_rgba(34,211,238,0.35)] backdrop-blur">
+        正解を見つけろ！
+      </p>
+      
       <h1
         className="text-5xl md:text-7xl font-extrabold mb-6 text-center"
         style={{
@@ -88,9 +94,9 @@ export default function QuizMasterPage() {
         }}
       >
         <span className="block md:hidden leading-tight">
-          クイズ<br />ロワイヤル
+          スペース<br />サバイブ
         </span>
-        <span className="hidden md:block">クイズロワイヤル</span>
+        <span className="hidden md:block">スペースサバイブ</span>
       </h1>
 
       <>
@@ -98,7 +104,11 @@ export default function QuizMasterPage() {
           ＜みんなで遊べるクイズゲーム＞
         </p>
         <p className="text-md md:text-2xl font-semibold text-white mb-8">
-          みんなで1分間のクイズバトル！正解を積み上げて王冠をつかみ取れ！
+          宇宙ステージで生き残る、究極のドタバタクイズアクション！
+        </p>
+
+        <p className="mx-auto mb-8 max-w-3xl text-sm font-bold leading-relaxed text-white/75 md:text-lg">
+          4つのエリアのうち、正解のエリアへ移動しよう。隕石・レーザーを避けながら、最後まで生き残れ！
         </p>
 
         {/* ★ スマホは2枚、PCは3枚 */}
@@ -110,7 +120,7 @@ export default function QuizMasterPage() {
               alt={`キャラ${index}`}
               className={`
                 ${visibleCount > index ? "character-animate" : "opacity-0"}
-                w-30 h-32 md:w-50 md:h-52 object-cover rounded-lg
+                w-30 h-30 md:w-70 md:h-70 object-cover rounded-lg
               `}
               style={{ animationDelay: `${index * 0.1}s` }}
             />
@@ -121,7 +131,7 @@ export default function QuizMasterPage() {
           <div>
             <button
               onClick={handleRandomQuizStart}
-              className="w-full md:w-80 px-6 py-2 md:px-8 md:py-4 bg-blue-500 text-white rounded-full hover:bg-blue-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
+              className="w-full md:w-80 px-6 py-2 md:px-8 md:py-4 rounded-full border-2 border-cyan-200 bg-gradient-to-r from-cyan-400 to-blue-600 px-6 py-4 text-lg font-black text-white shadow-[0_0_28px_rgba(34,211,238,0.5)] transition hover:scale-105 md:text-2xl"
             >
               オンラインで対戦
             </button>
@@ -130,11 +140,11 @@ export default function QuizMasterPage() {
           <div>
             <button
               onClick={() => setShowCodeInput(true)}
-              className="w-full md:w-80 px-6 py-2 md:px-8 md:py-4 bg-yellow-500 text-white rounded-full hover:bg-yellow-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
+              className="w-full md:w-80 px-6 py-2 md:px-8 md:py-4 rounded-full border-2 border-fuchsia-200 bg-gradient-to-r from-fuchsia-500 to-purple-700 px-6 py-4 text-lg font-black text-white shadow-[0_0_28px_rgba(217,70,239,0.5)] transition hover:scale-105 md:text-2xl"
             >
               あいことばで対戦
             </button>
-            <p className="text-sm text-gray-100 mt-1">※2人〜8人でプレイできます。</p>
+            <p className="text-sm text-gray-100 mt-1">※2人〜4人でプレイできます。</p>
           </div>
         </div>
 
@@ -142,12 +152,12 @@ export default function QuizMasterPage() {
           <div className="mt-6 bg-white p-4 rounded-xl max-w-md mx-auto border-2 border-black">
             {/* 参加人数 */}
             <p className="text-xl font-bold mb-2">
-              参加人数を入力してください（2〜8人）
+              参加人数を入力してください（2〜4人）
             </p>
             <input
               type="number"
               min={2}
-              max={8}
+              max={4}
               value={playerCount ?? ""} // nullish coalescing で空文字を許可
               onChange={(e) => {
                 const valStr = e.target.value;
@@ -158,7 +168,7 @@ export default function QuizMasterPage() {
                 // フォーカスアウト時に範囲チェック
                 if (playerCount === null) return;
                 if (playerCount < 2) setPlayerCount(2);
-                if (playerCount > 8) setPlayerCount(8);
+                if (playerCount > 4) setPlayerCount(4);
               }}
               className="border px-2 py-1 text-lg w-full mb-4"
             />
@@ -185,8 +195,8 @@ export default function QuizMasterPage() {
 
             <button
               onClick={() => {
-                if (!playerCount || playerCount < 2 || playerCount > 8) {
-                  setCodeError("参加人数は2〜8人で入力してください");
+                if (!playerCount || playerCount < 2 || playerCount > 4) {
+                  setCodeError("参加人数は2〜4人で入力してください");
                   return;
                 }
                 if (!battleCode.trim()) {
@@ -194,16 +204,49 @@ export default function QuizMasterPage() {
                   return;
                 }
                 router.push(
-                  `/quiz-royal/code?time=${limitTime}&code=${battleCode}&count=${playerCount}`
+                  `/quiz-space/code?time=${limitTime}&code=${battleCode}&count=${playerCount}`
                 );
               }}
-              className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded font-bold"
+              className="mt-5 w-full rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-fuchsia-500 px-5 py-3 text-lg font-black text-white transition hover:scale-105"
             >
               マッチ開始
             </button>
           </div>
         )}
 
+        {user && (
+          <div>
+            <button
+              type="button"
+              onClick={() => router.push("/user/mystyle")}
+              className="
+                group
+                ml-0 mt-3
+                inline-flex items-center gap-2
+                rounded-full
+                border-3 border-black
+                bg-gradient-to-r from-white via-cyan-50 to-violet-100
+                px-7 py-3
+                text-base md:text-xl
+                font-black
+                text-violet-800
+                shadow-[0_5px_0_rgba(0,0,0,1)]
+                transition
+                hover:-translate-y-0.5
+                hover:scale-105
+                active:translate-y-1
+                active:shadow-[0_2px_0_rgba(0,0,0,1)]
+                md:ml-3 md:mt-4
+              "
+            >
+              <span className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-cyan-300 to-violet-400 text-white shadow">
+                👕
+              </span>
+              <span>使用スタイルを変更</span>
+            </button>
+          </div>
+        )}
+        
         {/* ▼ 説明ボタン */}
         <button
           onClick={handleDescriptionClick}
@@ -225,14 +268,67 @@ export default function QuizMasterPage() {
             ref={descriptionRef}
             className="text-gray-700 text-md md:text-lg text-center px-4 py-2"
           >
-            「クイズロワイヤル」は、みんなで正解数や得点を競い合う頂上決戦クイズゲームです。<br />
-            制限時間は 1分間。その短い時間でどれだけ正解を積み上げられるかが勝負のカギ！<br />
-            問題の難易度に応じて獲得ポイントが変化します：かんたん…50P、ふつう…100P、むずかしい…150P、超むずかしい…200P。<br />
-            ただし油断は禁物！3問連続で間違えると、得点が100ポイント減ってしまいます。<br />
-            近くの友達とあいことばを合わせてマッチすることも、ネット上のライバルと戦うことも可能です。<br />
-            正解を重ね、ハイスコアを叩き出し、王者の座をつかみ取れ！👑<br />
+            「スペースサバイブ」は、宇宙ステージを走り回りながら、<br />
+            正解エリアへ飛び込んで生き残るドタバタクイズアクションゲーム！🚀<br />
+            4つに分かれたエリアの中から、正解のエリアを見つけて移動しよう！<br />
+            隕石・レーザーなど、いろんなギミックが次々襲いかかる！<br />
+            ステージが進むほど、スピードも難易度もどんどんアップ！🔥<br />
+            10秒後、ハズレエリアにいると即脱落！<br />
+            最後まで生き残って、宇宙No.1サバイバーを目指せ！🛸<br />
             ※オンラインで対戦相手が見つからない場合は、CPU（コンピュータ）との対戦になります。
           </p>
+        </div>
+
+        <div className="mx-auto mt-5 max-w-3xl rounded-3xl border-3 border-black bg-gradient-to-br from-cyan-400 via-violet-500 to-pink-500 p-4 md:p-5 shadow-[0_6px_0_rgba(0,0,0,1)]">
+          <div className="text-center">
+            <p className="text-xl md:text-3xl font-black text-white drop-shadow">
+              操作するキャラの見た目を変えよう！✨
+            </p>
+
+            <p className="mt-2 text-sm md:text-base font-bold leading-relaxed text-white/95">
+              ひまスタイルガチャで、新しい見た目をゲット！
+              <br />
+              ドラゴン・ドローン・気球など、全20種類のスタイルが登場します。
+            </p>
+          </div>
+
+          <div className="hidden md:flex justify-center gap-3 mt-4">
+            <img
+              src="/images/skin_chara1_ボード.png"
+              alt=""
+              className="h-24 object-contain drop-shadow-xl"
+            />
+            <img
+              src="/images/skin_chara2_ジェット（レッド）.png"
+              alt=""
+              className="h-24 object-contain drop-shadow-xl"
+            />
+            <img
+              src="/images/skin_chara3_ジェット（ブルー）.png"
+              alt=""
+              className="h-24 object-contain drop-shadow-xl"
+            />
+          </div>
+
+          <div className="flex md:hidden justify-center gap-3 mt-4">
+            <img
+              src="/images/skin_chara1_ボード.png"
+              alt=""
+              className="h-20 object-contain drop-shadow-xl"
+            />
+            <img
+              src="/images/skin_chara2_ジェット（レッド）.png"
+              alt=""
+              className="h-20 object-contain drop-shadow-xl"
+            />
+          </div>
+
+          <Link
+            href="/style-gacha"
+            className="mt-4 inline-flex rounded-full border-3 border-black bg-yellow-300 px-7 py-3 text-base md:text-xl font-black text-black shadow-[0_5px_0_rgba(0,0,0,1)] hover:scale-105 transition"
+          >
+            🎨 ひまスタイルガチャ
+          </Link>
         </div>
       </>
     </div>

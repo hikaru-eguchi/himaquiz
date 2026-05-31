@@ -52,6 +52,16 @@ export default function ProfileEditPage() {
 
   const [ownedChars, setOwnedChars] = useState<OwnedChar[]>([]);
 
+  type OwnedSkin = {
+    id: string;
+    name: string;
+    image_url: string | null;
+    rarity: string | null;
+  };
+
+  const [ownedSkins, setOwnedSkins] = useState<OwnedSkin[]>([]);
+  const [currentSkinId, setCurrentSkinId] = useState<string | null>(null);
+
   useEffect(() => {
     if (userLoading) return;
     if (!user) {
@@ -62,7 +72,7 @@ export default function ProfileEditPage() {
     const fetchProfile = async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("username, user_id, recovery_email, avatar_character_id, avatar_url, current_title")
+        .select("username, user_id, recovery_email, avatar_character_id, avatar_url, current_title, current_skin_id")
         .eq("id", user.id)
         .single();
 
@@ -72,6 +82,7 @@ export default function ProfileEditPage() {
         setOriginalUserId(data.user_id ?? "");
         setRecoveryEmail(data.recovery_email ?? "");
         setCurrentTitle(data.current_title ?? "");
+        setCurrentSkinId(data.current_skin_id ?? null);
 
         const savedUrl = (data.avatar_url ?? "/images/初期アイコン.png").startsWith("/")
           ? (data.avatar_url ?? "/images/初期アイコン.png")
@@ -150,8 +161,45 @@ export default function ProfileEditPage() {
       setOwnedTitles((data ?? []) as OwnedTitle[]);
     };
 
+    const fetchOwnedSkins = async () => {
+      const { data: rows, error } = await supabase
+        .from("user_skins")
+        .select("skin_id")
+        .eq("user_id", user.id);
+
+      if (error) {
+        console.warn("fetchOwnedSkins error:", error);
+        setOwnedSkins([]);
+        return;
+      }
+
+      const ids = (rows ?? [])
+        .map((r) => r.skin_id)
+        .filter((v): v is string => !!v);
+
+      if (ids.length === 0) {
+        setOwnedSkins([]);
+        return;
+      }
+
+      const { data: skins, error: skinsError } = await supabase
+        .from("skins")
+        .select("id, name, image_url, rarity, no")
+        .in("id", ids)
+        .order("no", { ascending: true });
+
+      if (skinsError) {
+        console.warn("fetch skins error:", skinsError);
+        setOwnedSkins([]);
+        return;
+      }
+
+      setOwnedSkins((skins ?? []) as OwnedSkin[]);
+    };
+
     fetchOwned();
     fetchTitles();
+    fetchOwnedSkins();
   }, [user, userLoading, supabase]);
 
   const handleSubmit = async (e: FormEvent) => {
@@ -255,6 +303,19 @@ export default function ProfileEditPage() {
         setError("プロフィールの更新に失敗しました。");
         setSaving(false);
         return;
+      }
+
+      if (currentSkinId) {
+        const { error: skinError } = await supabase.rpc("set_current_skin", {
+          p_skin_id: currentSkinId,
+        });
+
+        if (skinError) {
+          console.error("set_current_skin error:", skinError);
+          setError("スタイルの更新に失敗しました。");
+          setSaving(false);
+          return;
+        }
       }
 
       window.dispatchEvent(new Event("auth:changed"));
@@ -575,6 +636,104 @@ export default function ProfileEditPage() {
                   </div>
                 </div>
               )}
+            </div>
+            <div className="mt-5 rounded-3xl border-2 border-dashed border-purple-200 bg-gradient-to-br from-purple-50 via-white to-pink-50 p-4 text-center">
+              <p className="text-sm font-black text-gray-800">
+                もっとアイコンを増やしたい？
+              </p>
+              <p className="mt-1 text-xs font-bold text-gray-500">
+                ひまキャラガチャで新しいキャラをゲットして、アイコンに設定できます。
+              </p>
+
+              <button
+                type="button"
+                onClick={() => router.push("/quiz-gacha")}
+                className="mt-3 w-full rounded-2xl border-2 border-black bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-3 text-sm font-black text-white shadow-[0_4px_0_rgba(0,0,0,1)] active:translate-y-[2px] active:shadow-[0_2px_0_rgba(0,0,0,1)]"
+              >
+                🎁 ひまキャラガチャで増やす
+              </button>
+            </div>
+          </section>
+
+          <section className="rounded-[2rem] border border-cyan-100 bg-white p-4 shadow-sm">
+            <div className="mb-4">
+              <p className="text-xs font-black text-cyan-500">STYLE</p>
+              <h2 className="text-lg font-black text-gray-900">使用中スタイル</h2>
+              <p className="mt-1 text-xs font-bold text-gray-500">
+                ゲームで操作するキャラの見た目を変更できます。
+              </p>
+            </div>
+
+            {ownedSkins.length === 0 ? (
+              <div className="rounded-3xl border-2 border-dashed border-gray-200 bg-gray-50 p-5 text-center">
+                <p className="font-black text-gray-700">
+                  まだ所持スタイルがありません
+                </p>
+                <p className="mt-1 text-xs font-bold text-gray-500">
+                  ひまスタイルガチャでゲットできます
+                </p>
+              </div>
+            ) : (
+              <div className="max-h-95 overflow-y-auto rounded-3xl border border-gray-100 bg-cyan-50/50 p-3">
+                <div className="grid grid-cols-3 gap-3 md:grid-cols-4">
+                  {ownedSkins.map((skin) => {
+                    const url = skin.image_url
+                      ? skin.image_url.startsWith("/")
+                        ? skin.image_url
+                        : `/${skin.image_url}`
+                      : "/images/skin_chara1_ボード.png";
+
+                    const selected = currentSkinId === skin.id;
+
+                    return (
+                      <button
+                        key={skin.id}
+                        type="button"
+                        onClick={() => setCurrentSkinId(skin.id)}
+                        className={`group rounded-3xl border-2 bg-white p-2 shadow-sm transition active:scale-95 ${
+                          selected
+                            ? "border-cyan-500 ring-4 ring-cyan-100"
+                            : "border-gray-100 hover:border-cyan-200 hover:bg-cyan-50"
+                        }`}
+                      >
+                        <div className="rounded-2xl bg-white p-1">
+                          <img
+                            src={url}
+                            alt={skin.name}
+                            className="aspect-square w-full object-contain transition group-hover:scale-105"
+                          />
+                        </div>
+
+                        <p className="mt-2 truncate text-xs font-black text-gray-700">
+                          {skin.name}
+                        </p>
+
+                        {skin.rarity && (
+                          <p className="text-[10px] font-bold text-gray-500">
+                            {skin.rarity}
+                          </p>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            <div className="mt-5 rounded-3xl border-2 border-dashed border-cyan-200 bg-gradient-to-br from-cyan-50 via-white to-violet-50 p-4 text-center">
+              <p className="text-sm font-black text-gray-800">
+                操作キャラの見た目をもっと変えたい？
+              </p>
+              <p className="mt-1 text-xs font-bold text-gray-500">
+                ひまスタイルガチャで、ドラゴン・ドローン・気球などのスタイルをゲットできます。
+              </p>
+
+              <button
+                type="button"
+                onClick={() => router.push("/style-gacha")}
+                className="mt-3 w-full rounded-2xl border-2 border-black bg-gradient-to-r from-cyan-400 via-violet-500 to-pink-500 px-4 py-3 text-sm font-black text-white shadow-[0_4px_0_rgba(0,0,0,1)] active:translate-y-[2px] active:shadow-[0_2px_0_rgba(0,0,0,1)]"
+              >
+                ✨ ひまスタイルガチャへ
+              </button>
             </div>
           </section>
 

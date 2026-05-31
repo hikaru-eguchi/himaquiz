@@ -24,6 +24,8 @@ export default function HeaderMenu() {
   const [avatarPreviewOpen, setAvatarPreviewOpen] = useState(false);
 
   const [infoOpen, setInfoOpen] = useState(false);
+  const [gachaOpen, setGachaOpen] = useState(false);
+  const [collectionOpen, setCollectionOpen] = useState(false);
 
   const resetHeader = () => {
     setUser(null);
@@ -155,6 +157,12 @@ export default function HeaderMenu() {
     router.refresh();
   };
 
+  const closeAllMenu = () => {
+    setGachaOpen(false);
+    setCollectionOpen(false);
+    setInfoOpen(false);
+    setOpen(false);
+  };
 
   return (
     <>
@@ -275,7 +283,7 @@ export default function HeaderMenu() {
                 マイプロフィール
               </Link>
               
-              <Link
+              {/* <Link
                 href="/quiz-gacha"
                 className="bg-gradient-to-r from-red-500 via-sky-500 to-green-500 text-white py-2 px-4 rounded text-center hover:opacity-90"
                 onClick={() => setOpen(false)}
@@ -289,9 +297,21 @@ export default function HeaderMenu() {
                 onClick={() => setOpen(false)}
               >
                 称号ガチャ
-              </Link>
+              </Link> */}
 
-              <Link
+              <button
+                type="button"
+                onClick={() => setGachaOpen(true)}
+                className="
+                  bg-gradient-to-r from-cyan-400 via-violet-500 to-pink-500
+                  text-white py-2 px-4 rounded text-center
+                  hover:opacity-90 transition cursor-pointer shadow-md
+                "
+              >
+                ガチャ🎰
+              </button>
+
+              {/* <Link
                 href="/user/mycharacters"
                 className="
                   bg-gradient-to-r from-pink-500 via-purple-400 via-blue-300 to-green-400
@@ -301,7 +321,19 @@ export default function HeaderMenu() {
                 onClick={() => setOpen(false)}
               >
                 マイキャラ図鑑📖
-              </Link>
+              </Link> */}
+
+              <button
+                type="button"
+                onClick={() => setCollectionOpen(true)}
+                className="
+                  bg-gradient-to-r from-pink-500 via-purple-400 via-blue-300 to-green-400
+                  text-white py-2 px-4 rounded text-center
+                  hover:opacity-90 transition cursor-pointer shadow-md
+                "
+              >
+                図鑑📖
+              </button>
 
               <button
                 onClick={() => setConfirmOpen(true)}
@@ -420,6 +452,175 @@ export default function HeaderMenu() {
                 className="mt-4 md:mt-8 w-full rounded-4xl bg-white py-3 text-lg md:text-xl font-extrabold hover:scale-[1.01] transition"
               >
                 変更する
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+        {gachaOpen && (
+          <motion.div
+            className="fixed inset-0 z-[65] flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setGachaOpen(false)}
+          >
+            <div className="absolute inset-0 bg-black/60" />
+
+            <motion.div
+              className="relative w-[92%] max-w-sm rounded-3xl bg-white p-5 shadow-2xl border-3 border-black"
+              initial={{ scale: 0.95, y: 10, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.97, y: 10, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 380, damping: 28 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="text-center">
+                <p className="text-2xl md:text-3xl font-black text-gray-900">
+                  ガチャ一覧🎰
+                </p>
+                <p className="mt-1 text-sm font-bold text-gray-500">
+                  ポイントでいろんな報酬をゲット！
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setGachaOpen(false)}
+                className="absolute top-3 right-3 text-xl text-gray-500 hover:text-black"
+              >
+                ✕
+              </button>
+
+              <div className="mt-5 grid gap-3">
+                <Link
+                  href="/quiz-gacha"
+                  onClick={closeAllMenu}
+                  className="
+                    rounded-2xl border-2 border-black
+                    bg-gradient-to-r from-red-500 via-sky-500 to-green-500
+                    px-4 py-3 text-white shadow-md hover:scale-[1.02] transition
+                  "
+                >
+                  <p className="text-lg font-black">ひまキャラガチャ</p>
+                  <p className="mt-1 text-xs font-bold text-white/90">
+                    キャラを集めて図鑑を埋めよう！
+                  </p>
+                </Link>
+
+                <Link
+                  href="/title-gacha"
+                  onClick={closeAllMenu}
+                  className="
+                    rounded-2xl border-2 border-black
+                    bg-gradient-to-r from-purple-500 via-pink-400 to-yellow-300
+                    px-4 py-3 text-white shadow-md hover:scale-[1.02] transition
+                  "
+                >
+                  <p className="text-lg font-black">称号ガチャ👑</p>
+                  <p className="mt-1 text-xs font-bold text-white/90">
+                    プロフィールに飾れる称号をゲット！
+                  </p>
+                </Link>
+
+                <Link
+                  href="/style-gacha"
+                  onClick={closeAllMenu}
+                  className="
+                    rounded-2xl border-2 border-black
+                    bg-gradient-to-r from-cyan-400 via-violet-500 to-pink-500
+                    px-4 py-3 text-white shadow-md hover:scale-[1.02] transition
+                  "
+                >
+                  <p className="text-lg font-black">ひまスタイルガチャ🎨</p>
+                  <p className="mt-1 text-xs font-bold text-white/90">
+                    ゲームで使う自分の見た目をゲット！
+                  </p>
+                </Link>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setGachaOpen(false)}
+                className="mt-5 w-full rounded-xl bg-black text-white py-2 font-bold hover:opacity-90 transition"
+              >
+                閉じる
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+        {collectionOpen && (
+          <motion.div
+            className="fixed inset-0 z-[65] flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setCollectionOpen(false)}
+          >
+            <div className="absolute inset-0 bg-black/60" />
+
+            <motion.div
+              className="relative w-[92%] max-w-sm rounded-3xl bg-white p-5 shadow-2xl border-3 border-black"
+              initial={{ scale: 0.95, y: 10, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.97, y: 10, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 380, damping: 28 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="text-center">
+                <p className="text-2xl md:text-3xl font-black text-gray-900">
+                  図鑑一覧📖
+                </p>
+                <p className="mt-1 text-sm font-bold text-gray-500">
+                  集めたキャラやスタイルを確認しよう！
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setCollectionOpen(false)}
+                className="absolute top-3 right-3 text-xl text-gray-500 hover:text-black"
+              >
+                ✕
+              </button>
+
+              <div className="mt-5 grid gap-3">
+                <Link
+                  href="/user/mycharacters"
+                  onClick={closeAllMenu}
+                  className="
+                    rounded-2xl border-2 border-black
+                    bg-gradient-to-r from-pink-500 via-purple-400 via-blue-300 to-green-400
+                    px-4 py-3 text-white shadow-md hover:scale-[1.02] transition
+                  "
+                >
+                  <p className="text-lg font-black">マイキャラ図鑑📖</p>
+                  <p className="mt-1 text-xs font-bold text-white/90">
+                    ガチャで手に入れたキャラを確認！
+                  </p>
+                </Link>
+
+                <Link
+                  href="/user/mystyle"
+                  onClick={closeAllMenu}
+                  className="
+                    rounded-2xl border-2 border-black
+                    bg-gradient-to-r from-cyan-400 via-violet-500 to-pink-500
+                    px-4 py-3 text-white shadow-md hover:scale-[1.02] transition
+                  "
+                >
+                  <p className="text-lg font-black">ひまスタイル図鑑🎨</p>
+                  <p className="mt-1 text-xs font-bold text-white/90">
+                    ゲームで使う見た目を確認！
+                  </p>
+                </Link>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setCollectionOpen(false)}
+                className="mt-5 w-full rounded-xl bg-black text-white py-2 font-bold hover:opacity-90 transition"
+              >
+                閉じる
               </button>
             </motion.div>
           </motion.div>

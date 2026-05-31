@@ -102,7 +102,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </header>
 
           {/* ===== MAIN ===== */}
-          <main className="flex-grow container mx-auto px-6 py-3 mt-6 bg-white rounded-3xl shadow-xl overflow-auto">
+          <main className="flex-grow container mx-auto px-1 py-1 md:px-6 md:py-3 mt-6 bg-white rounded-3xl shadow-xl overflow-auto">
             <ResultModalProvider>
               {children}
             </ResultModalProvider>

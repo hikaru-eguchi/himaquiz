@@ -265,7 +265,7 @@ export default function QuizFriendPage() {
           onClick={() => setShowCodeInput((prev) => !prev)}
           className="w-full md:w-80 px-6 py-3 md:px-8 md:py-4 bg-sky-400 text-white rounded-full hover:scale-105 cursor-pointer text-lg md:text-2xl font-extrabold shadow-lg transition-transform border-2 border-black"
         >
-          知り合いと遊ぶ
+          あいことばでマッチ
         </button>
 
         <p className="text-sm text-gray-700 mt-2">
@@ -330,8 +330,6 @@ export default function QuizFriendPage() {
           最後に正答率から理解度を発表！🎉
           <br />
           当たっても外れても盛り上がる、なかよし診断ゲームです。✨
-          <br />
-          ※知り合いとのみ遊べます。
         </p>
       </div>
     </div>
