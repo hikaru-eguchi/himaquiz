@@ -1608,7 +1608,7 @@ export default function SpaceSurviveModePage() {
                           width={60}
                           height={60}
                           className={`
-                            h-10 w-10 md:h-[66px] md:w-[66px]
+                            h-12 w-12 md:h-[66px] md:w-[66px]
                             object-contain
 
                             ${
