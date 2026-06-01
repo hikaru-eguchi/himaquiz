@@ -572,6 +572,33 @@ function SpaceResult({
   );
 }
 
+function ArrowIcon({ dir }: { dir: Direction }) {
+  const rotate =
+    dir === "up"
+      ? "rotate-0"
+      : dir === "right"
+      ? "rotate-90"
+      : dir === "down"
+      ? "rotate-180"
+      : "-rotate-90";
+
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      className={`h-9 w-9 ${rotate}`}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 4v16" />
+      <path d="M5 11l7-7 7 7" />
+    </svg>
+  );
+}
+
 function MobileControls({
   onPress,
   onRelease,
@@ -600,19 +627,36 @@ function MobileControls({
     <div className="fixed bottom-4 left-1/2 z-40 w-[320px] -translate-x-1/2 rounded-3xl border border-white/15 bg-black/60 p-5 backdrop-blur">
       <div className="grid grid-cols-3 gap-4">
         <div />
-        <button className={btn} {...bind("up")}>
-          ↑
+        <button
+          aria-label="上に移動"
+          className={btn}
+          {...bind("up")}
+        >
+          <ArrowIcon dir="up" />
         </button>
-        <div />
 
-        <button className={btn} {...bind("left")}>
-          ←
+        <button
+          aria-label="左に移動"
+          className={btn}
+          {...bind("left")}
+        >
+          <ArrowIcon dir="left" />
         </button>
-        <button className={btn} {...bind("down")}>
-          ↓
+
+        <button
+          aria-label="下に移動"
+          className={btn}
+          {...bind("down")}
+        >
+          <ArrowIcon dir="down" />
         </button>
-        <button className={btn} {...bind("right")}>
-          →
+
+        <button
+          aria-label="右に移動"
+          className={btn}
+          {...bind("right")}
+        >
+          <ArrowIcon dir="right" />
         </button>
       </div>
     </div>
