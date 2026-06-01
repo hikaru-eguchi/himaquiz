@@ -384,7 +384,7 @@ export default function NavButtons() {
                             activeUrl === "/quiz-space" ? activeStyle : ""
                           }`}
                         >
-                          スペースサバイブ
+                          スペースクイズ
                         </button>
                       </Link>
 

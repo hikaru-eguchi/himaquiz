@@ -599,11 +599,11 @@ export default async function HomePage({
               </p>
             </div>
           </div>
-          {/* スペースサバイブ */}
+          {/* スペースクイズ */}
           <div className="text-center max-w-[280px]">
             <Link href="/quiz-space" className="w-full md:w-auto flex justify-center">
               <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-cyan-500 via-purple-600 to-fuchsia-500 text-white hover:scale-110 hover:shadow-[0_0_40px_rgba(168,85,247,0.8)] transition-all">
-                🛸スペースサバイブ
+                🛸スペースクイズ
               </button>
             </Link>
             <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">

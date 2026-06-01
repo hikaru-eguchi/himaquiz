@@ -21,15 +21,15 @@ export default function QuizMasterPage() {
 
   // ★ PC用キャラ（全6枚）
   const allCharacters = [
-    "/images/space2.png",
-    "/images/space1.png",
-    "/images/space3.png",
+    "/images/skin_chara2_ジェット（レッド）.png",
+    "/images/skin_chara1_ボード.png",
+    "/images/skin_chara4_ジェット（グリーン）.png",
   ];
 
   // ★ スマホ専用キャラ（2枚だけ）
   const mobileCharacters = [
-    "/images/space2.png",
-    "/images/space1.png",
+    "/images/skin_chara2_ジェット（レッド）.png",
+    "/images/skin_chara1_ボード.png",
   ];
 
   // ★ 画面サイズで画像を切り替え
@@ -94,9 +94,9 @@ export default function QuizMasterPage() {
         }}
       >
         <span className="block md:hidden leading-tight">
-          スペース<br />サバイブ
+          スペース<br />クイズ
         </span>
-        <span className="hidden md:block">スペースサバイブ</span>
+        <span className="hidden md:block">スペースクイズ</span>
       </h1>
 
       <>
@@ -268,7 +268,7 @@ export default function QuizMasterPage() {
             ref={descriptionRef}
             className="text-gray-700 text-md md:text-lg text-center px-4 py-2"
           >
-            「スペースサバイブ」は、宇宙ステージを走り回りながら、<br />
+            「スペースクイズ」は、宇宙ステージを走り回りながら、<br />
             正解エリアへ飛び込んで生き残るドタバタクイズアクションゲーム！🚀<br />
             4つに分かれたエリアの中から、正解のエリアを見つけて移動しよう！<br />
             隕石・レーザーなど、いろんなギミックが次々襲いかかる！<br />
@@ -312,7 +312,7 @@ export default function QuizMasterPage() {
 
           <div className="flex md:hidden justify-center gap-3 mt-4">
             <img
-              src="/images/skin_chara1_ボード.png"
+              src="/images/skin_chara4_ジェット（グリーン）.png"
               alt=""
               className="h-20 object-contain drop-shadow-xl"
             />

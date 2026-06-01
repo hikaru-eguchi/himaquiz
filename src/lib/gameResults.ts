@@ -9,7 +9,7 @@ export type GameKey =
   | "battle"          // クイズバトル
   | "coop_dungeon"    // 協力ダンジョン
   | "survival"        // サバイバル
-  | "space";          // スペースサバイブ
+  | "space";          // スペースクイズ
 
 export type TitleThreshold = { threshold: number; title: string };
 
@@ -83,7 +83,7 @@ export function gameLabel(game: GameKey): string {
     case "battle": return "クイズバトル";
     case "coop_dungeon": return "協力ダンジョン";
     case "survival": return "サバイバルクイズ";
-    case "space": return "スペースサバイブ";
+    case "space": return "スペースクイズ";
   }
 }
 

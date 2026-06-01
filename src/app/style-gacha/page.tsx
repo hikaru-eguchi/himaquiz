@@ -408,13 +408,13 @@ export default function HimaStyleGachaPage() {
               <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-br from-cyan-200 via-violet-200 to-pink-200 blur-xl" />
 
               <div className="relative hidden h-[300px] items-end justify-center gap-3 rounded-[2rem] border-3 border-black bg-white/70 p-4 shadow-inner md:flex">
-                {styleSkins.slice(0, 3).map((skin, index) => (
+                {[styleSkins[3], styleSkins[1], styleSkins[2]].map((skin, index) => (
                   <motion.img
                     key={skin.no}
                     src={skin.image}
                     alt={skin.name}
                     className={`object-contain drop-shadow-2xl ${
-                      index === 1 ? "h-64" : "h-52"
+                      index === 1 ? "h-58" : "h-58"
                     }`}
                     animate={{ y: [0, -10, 0] }}
                     transition={{
@@ -426,14 +426,23 @@ export default function HimaStyleGachaPage() {
                 ))}
               </div>
 
-              <div className="relative flex h-[260px] items-end justify-center rounded-[2rem] border-3 border-black bg-white/70 p-4 shadow-inner md:hidden">
-                <motion.img
-                  src="/images/skin_chara1_ボード.png"
-                  alt="ボードスタイル"
-                  className="h-56 object-contain drop-shadow-2xl"
-                  animate={{ y: [0, -10, 0] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                />
+              <div className="relative flex h-[260px] items-end justify-center rounded-[2rem] border-3 border-black bg-white/70 p-3 shadow-inner md:hidden">
+                {[styleSkins[3], styleSkins[1], styleSkins[2]].map((skin, index) => (
+                  <motion.img
+                    key={skin.no}
+                    src={skin.image}
+                    alt={skin.name}
+                    className={`object-contain drop-shadow-2xl ${
+                      index === 1 ? "h-28 -translate-y-24" : "h-28 translate-y-0"
+                    }`}
+                    animate={{ y: [0, -8, 0] }}
+                    transition={{
+                      duration: 2 + index * 0.2,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  />
+                ))}
               </div>
             </div>
           </div>

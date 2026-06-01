@@ -835,7 +835,7 @@ export default function SpaceSurviveModePage() {
           user_id: authedUserId,
           change: payload.points,
           reason:
-            `スペースサバイブ獲得: 正解${payload.correctCount}問=${payload.basePoints}P` +
+            `スペースクイズ獲得: 正解${payload.correctCount}問=${payload.basePoints}P` +
             (payload.survivalBonusPoints
               ? ` / 突破ボーナス${payload.survivalBonusPoints}P`
               : "") +
@@ -850,7 +850,7 @@ export default function SpaceSurviveModePage() {
         const { error: logError2 } = await supabase.from("user_exp_logs").insert({
           user_id: authedUserId,
           change: payload.exp,
-          reason: `スペースサバイブEXP獲得: 正解${payload.correctCount}問 → ${payload.exp}EXP`,
+          reason: `スペースクイズEXP獲得: 正解${payload.correctCount}問 → ${payload.exp}EXP`,
         });
         if (logError2) console.log("insert user_exp_logs error raw:", logError2);
       }
@@ -1016,14 +1016,14 @@ export default function SpaceSurviveModePage() {
 
   const handleShareX = () => {
     const text = [
-      "【ひまQ｜スペースサバイブ🛸】",
+      "【ひまQ｜スペースクイズ🛸】",
       `順位：${myRank ?? "-"}位`,
       `正解数：${correctCount}問`,
       `突破ステージ：${survivedStages}`,
       `獲得：${earnedPoints}P / ${earnedExp}EXP`,
       "",
       "👇ひまQ（みんなで遊べるクイズ）",
-      "#ひまQ #スペースサバイブ #クイズゲーム",
+      "#ひまQ #スペースクイズ #クイズゲーム",
     ].join("\n");
 
     openXShare({ text, url: buildTopUrl() });
@@ -1397,13 +1397,13 @@ export default function SpaceSurviveModePage() {
                 exit={{ opacity: 0, y: 18 }}
               >
                 <p className="mb-4 text-lg font-bold text-white/70 md:text-2xl">
-                  準備できたら「サバイブ開始！」を押そう！
+                  準備できたら「対戦スタート！」を押そう！
                 </p>
                 <button
                   onClick={handleReady}
                   className="animate-pulse rounded-full border-2 border-yellow-100 bg-gradient-to-r from-cyan-400 via-blue-500 to-fuchsia-500 px-8 py-4 text-2xl font-black text-white shadow-[0_0_35px_rgba(217,70,239,0.55)] transition hover:scale-110"
                 >
-                  サバイブ開始！
+                  対戦スタート！
                 </button>
               </motion.div>
             )}
@@ -1430,11 +1430,11 @@ export default function SpaceSurviveModePage() {
     >
       <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.15)_1px,transparent_1px)] [background-size:24px_24px] opacity-30" />
 
-      <div className="relative mx-auto max-w-7xl px-3 py-3 md:px-6 md:py-6">
+      <div className="relative mx-auto max-w-7xl px-1 py-1 md:px-6 md:py-6">
         {!finished ? (
           <>
             <div className="mb-3 grid gap-3 md:grid-cols-[1fr_280px]">
-              <section className="rounded-3xl border border-white/15 bg-black/35 p-3 backdrop-blur">
+              <section className="rounded-3xl border border-white/15 bg-black/35 p-1 md:p-3 backdrop-blur">
                 <div
                   className={`mb-3 rounded-3xl border ${theme.border} bg-gradient-to-r ${theme.panel} p-3 text-center ${theme.glow}`}
                 >
