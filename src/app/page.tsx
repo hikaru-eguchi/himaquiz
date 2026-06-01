@@ -647,6 +647,22 @@ export default async function HomePage({
               </p>
             </div>
           </div>
+          {/* これどっち？ */}
+          <div className="text-center max-w-[280px]">
+            <Link href="/quiz-koredochi" className="w-full md:w-auto flex justify-center">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-cyan-400 via-violet-300 to-pink-400 text-white hover:scale-110 transition-all">
+                🤝これどっち？
+              </button>
+            </Link>
+            <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                みんなと意見は合う？
+              </p>
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                友達とできるシンクロゲーム！
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 

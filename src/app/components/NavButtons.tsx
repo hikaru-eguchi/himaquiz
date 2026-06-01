@@ -413,6 +413,19 @@ export default function NavButtons() {
                           なかよし診断
                         </button>
                       </Link>
+
+                      <Link
+                        href="/quiz-koredochi"
+                        onClick={() => handleNavClick("/quiz-koredochi")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-gradient-to-r from-cyan-400 via-violet-300 to-pink-400 text-white ring-2 ring-pink-500 md:hover:scale-110 ${
+                            activeUrl === "/quiz-koredochi" ? activeStyle : ""
+                          }`}
+                        >
+                          これどっち？
+                        </button>
+                      </Link>
                     </div>
                   </div>
 
