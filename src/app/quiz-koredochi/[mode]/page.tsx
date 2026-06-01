@@ -431,14 +431,14 @@ export default function QuizKoredochiCodePage() {
     return (
       <div className={`min-h-screen ${theme.page} px-4 py-8 text-center`}>
         <div className="mx-auto max-w-xl rounded-3xl border-4 border-black bg-white/85 p-5 shadow-xl backdrop-blur">
-          <div className="rounded-3xl border-4 border-black bg-gradient-to-r from-cyan-100 via-violet-100 to-pink-100 px-4 py-5 shadow">
+          {/* <div className="rounded-3xl border-4 border-black bg-gradient-to-r from-cyan-100 via-violet-100 to-pink-100 px-4 py-5 shadow">
             <p className="text-4xl md:text-5xl font-black text-gray-900">
               🤝 これどっち？
             </p>
             <p className="mt-2 text-sm md:text-base font-bold text-gray-700">
               みんなと何個気持ちが合うかな？
             </p>
-          </div>
+          </div> */}
 
           <div className="mt-6">
             <p className="text-xl md:text-2xl font-extrabold text-gray-800">
@@ -579,7 +579,7 @@ export default function QuizKoredochiCodePage() {
       <div className="mx-auto max-w-4xl">
         <div className="mb-4 rounded-3xl border-4 border-black bg-white/85 px-4 py-4 shadow-xl backdrop-blur">
           <h1 className="text-3xl md:text-5xl font-extrabold text-gray-900">
-            🤝 これどっち？
+            これどっち？
           </h1>
 
           <p className="mt-2 text-sm md:text-lg font-bold text-gray-700">

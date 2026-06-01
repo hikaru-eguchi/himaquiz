@@ -70,11 +70,11 @@ export default function QuizKoredochiPage() {
         }}
       >
         <span className="block md:hidden leading-tight">
-          🤝 これ
+          これ
           <br />
           どっち？
         </span>
-        <span className="hidden md:block">🤝 これどっち？</span>
+        <span className="hidden md:block">これどっち？</span>
       </h1>
 
       <>
