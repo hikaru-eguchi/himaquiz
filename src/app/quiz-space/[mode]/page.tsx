@@ -607,7 +607,7 @@ function MobileControls({
   onRelease: (dir: Direction) => void;
 }) {
   const btn =
-    "flex h-20 w-20 items-center justify-center rounded-3xl border border-cyan-200/60 bg-white/10 text-4xl font-black text-white shadow-[0_0_24px_rgba(34,211,238,0.35)] backdrop-blur active:scale-95";
+    "pointer-events-auto flex h-20 w-20 touch-none select-none items-center justify-center rounded-3xl border border-cyan-200/60 bg-white/10 text-white shadow-[0_0_24px_rgba(34,211,238,0.35)] backdrop-blur active:scale-95";
 
   const bind = (dir: Direction) => ({
     onTouchStart: (e: React.TouchEvent<HTMLButtonElement>) => {
@@ -624,38 +624,21 @@ function MobileControls({
   });
 
   return (
-    <div className="fixed bottom-4 left-1/2 z-40 w-[320px] -translate-x-1/2 rounded-3xl border border-white/15 bg-black/60 p-5 backdrop-blur">
-      <div className="grid grid-cols-3 gap-4">
+    <div className="pointer-events-none fixed bottom-4 left-1/2 z-40 w-[320px] -translate-x-1/2 rounded-3xl border border-white/15 bg-black/60 p-5 backdrop-blur">
+      <div className="grid grid-cols-3 place-items-center gap-4">
         <div />
-        <button
-          aria-label="上に移動"
-          className={btn}
-          {...bind("up")}
-        >
+        <button aria-label="上に移動" className={btn} {...bind("up")}>
           <ArrowIcon dir="up" />
         </button>
+        <div />
 
-        <button
-          aria-label="左に移動"
-          className={btn}
-          {...bind("left")}
-        >
+        <button aria-label="左に移動" className={btn} {...bind("left")}>
           <ArrowIcon dir="left" />
         </button>
-
-        <button
-          aria-label="下に移動"
-          className={btn}
-          {...bind("down")}
-        >
+        <button aria-label="下に移動" className={btn} {...bind("down")}>
           <ArrowIcon dir="down" />
         </button>
-
-        <button
-          aria-label="右に移動"
-          className={btn}
-          {...bind("right")}
-        >
+        <button aria-label="右に移動" className={btn} {...bind("right")}>
           <ArrowIcon dir="right" />
         </button>
       </div>
