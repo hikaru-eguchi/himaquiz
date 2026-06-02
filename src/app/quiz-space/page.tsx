@@ -21,14 +21,14 @@ export default function QuizMasterPage() {
 
   // ★ PC用キャラ（全6枚）
   const allCharacters = [
-    "/images/skin_chara2_ジェット（レッド）.png",
+    "/images/space_inseki.png",
     "/images/skin_chara1_ボード.png",
-    "/images/skin_chara4_ジェット（グリーン）.png",
+    "/images/space_sentouki.png",
   ];
 
   // ★ スマホ専用キャラ（2枚だけ）
   const mobileCharacters = [
-    "/images/skin_chara2_ジェット（レッド）.png",
+    "/images/space_inseki.png",
     "/images/skin_chara1_ボード.png",
   ];
 

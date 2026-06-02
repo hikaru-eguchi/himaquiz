@@ -83,7 +83,7 @@ export default function QuizKoredochiPage() {
         </p>
 
         <p className="text-md md:text-2xl font-semibold text-white mb-8">
-          みんなと意見は合う？価値観の違いも楽しもう！
+          みんなと意見は合う？目指せ全員シンクロ！究極の2択ゲーム！
         </p>
 
         <div className="flex justify-center gap-2 md:gap-4 mb-8">

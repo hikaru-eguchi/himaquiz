@@ -100,17 +100,17 @@ const getTheme = () => {
 };
 
 const getSynchroLabel = (rate: number) => {
-  if (rate >= 100) return "奇跡の全問シンクロ";
-  if (rate >= 85) return "以心伝心レベル";
-  if (rate >= 70) return "かなり気が合う";
-  if (rate >= 50) return "いい感じに近い";
-  if (rate >= 30) return "違いも楽しい関係";
-  return "新発見だらけ";
+  if (rate >= 100) return "奇跡の全問シンクロ！";
+  if (rate >= 85) return "息ピッタリ！";
+  if (rate >= 70) return "かなり似てる！";
+  if (rate >= 50) return "相性バツグン！";
+  if (rate >= 30) return "いいコンビかも！";
+  return "まだまだ発見がいっぱい！";
 };
 
 const getSynchroComment = (rate: number) => {
   if (rate >= 100) {
-    return "全問一致！価値観がかなり近いメンバーです。同じことを考えていた瞬間が多すぎます。";
+    return "全問一致！価値観がかなり近いです。同じことを考えていた瞬間が多すぎます。";
   }
 
   if (rate >= 85) {
@@ -129,7 +129,7 @@ const getSynchroComment = (rate: number) => {
     return "意外な違いがたくさん見つかる結果です。答え合わせをするとかなり盛り上がりそうです。";
   }
 
-  return "かなり個性が分かれました。違いを楽しめるメンバーです。次はもっと合うかも？";
+  return "かなり個性が分かれました。違いを楽しめます。次はもっと合うかも？";
 };
 
 const getResultStyle = (rate: number) => {
@@ -153,7 +153,7 @@ const getResultStyle = (rate: number) => {
     return {
       card: "bg-gradient-to-br from-cyan-100 via-violet-100 to-pink-50 border-violet-400",
       text: "text-violet-600",
-      badge: "🫶",
+      badge: "✨",
     };
   }
 
@@ -168,7 +168,7 @@ const getResultStyle = (rate: number) => {
   return {
     card: "bg-gradient-to-br from-white via-violet-50 to-pink-50 border-violet-200",
     text: "text-violet-500",
-    badge: "💫",
+    badge: "🎉",
   };
 };
 
@@ -548,12 +548,12 @@ export default function QuizKoredochiCodePage() {
           </div>
 
           <p className="mt-5 text-gray-700 font-bold">
-            ランダムに出る2択のお題に答えて、みんなと何問シンクロできるか遊びます。
+            ランダムに出る2択のお題に答えて、みんなと何問シンクロできるかチャレンジしよう！
           </p>
 
-          <p className="mt-2 text-sm md:text-base text-gray-600 font-bold">
-            勝ち負けではなく、合うところも違うところも楽しむゲームです。
-          </p>
+          {/* <p className="mt-2 text-sm md:text-base text-gray-600 font-bold">
+            シンクロ率100％を目指す、ドキドキの2択ゲーム！
+          </p> */}
 
           {!readyToStart ? (
             <motion.button
@@ -577,48 +577,61 @@ export default function QuizKoredochiCodePage() {
   return (
     <div className={`min-h-screen ${theme.page} px-4 py-6 text-center`}>
       <div className="mx-auto max-w-4xl">
-        <div className="mb-4 rounded-3xl border-4 border-black bg-white/85 px-4 py-4 shadow-xl backdrop-blur">
-          <h1 className="text-3xl md:text-5xl font-extrabold text-gray-900">
-            これどっち？
-          </h1>
+        <div className="mb-5 rounded-[32px] border-4 border-black bg-gradient-to-r from-cyan-400 via-violet-400 to-pink-400 p-1 shadow-[0_8px_0_rgba(0,0,0,1)]">
+          <div className="rounded-[28px] bg-white/90 p-4">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+              <div className="text-center md:text-left">
+                <p className="text-3xl md:text-2xl font-black text-gray-900">
+                  Q {questionIndex + 1}
+                  <span className="text-lg md:text-base text-gray-500">
+                    {" "}
+                    / {totalQuestions}
+                  </span>
+                </p>
 
-          <p className="mt-2 text-sm md:text-lg font-bold text-gray-700">
-            {questionIndex + 1} / {totalQuestions}問
-          </p>
-
-          <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
-            {displayPlayers.map((p) => {
-              const active = p.socketId === mySocketId;
-
-              return (
-                <div
-                  key={p.socketId}
-                  className={`
-                    rounded-2xl border-4 px-3 py-3 shadow
-                    ${active ? theme.choiceActive : "border-black bg-white"}
-                  `}
-                >
-                  <p className="truncate text-base md:text-lg font-extrabold">
-                    {active ? "あなた" : ellipsizeName(p.playerName)}
-                  </p>
+                <div className="mx-auto mt-2 h-4 max-w-[220px] overflow-hidden rounded-full border-2 border-black bg-white md:mx-0">
+                  <div
+                    className="h-full bg-gradient-to-r from-cyan-400 via-violet-400 to-pink-400"
+                    style={{
+                      width: `${((questionIndex + 1) / totalQuestions) * 100}%`,
+                    }}
+                  />
                 </div>
-              );
-            })}
-          </div>
+              </div>
 
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <div className="rounded-2xl border-4 border-black bg-white px-3 py-3">
-              <p className="text-sm font-bold text-gray-500">シンクロ数</p>
-              <p className="text-2xl font-black text-violet-600">
-                {synchroCount}
-              </p>
+              <div className="mt-4 flex justify-center gap-2 md:mt-0 md:justify-end">
+                <div className="min-w-[120px] rounded-2xl border-4 border-black bg-violet-500 px-4 py-2 text-white shadow">
+                  <p className="text-xs font-black">⚡シンクロ</p>
+                  <p className="text-2xl font-black">{synchroCount}</p>
+                </div>
+
+                <div className="min-w-[120px] rounded-2xl border-4 border-black bg-pink-500 px-4 py-2 text-white shadow">
+                  <p className="text-xs font-black">🌈全員一致</p>
+                  <p className="text-2xl font-black">{allMatchCount}</p>
+                </div>
+              </div>
             </div>
 
-            <div className="rounded-2xl border-4 border-black bg-white px-3 py-3">
-              <p className="text-sm font-bold text-gray-500">全員一致</p>
-              <p className="text-2xl font-black text-pink-600">
-                {allMatchCount}
-              </p>
+            <div className="mt-4 flex flex-wrap justify-center gap-2">
+              {displayPlayers.map((p) => {
+                const active = p.socketId === mySocketId;
+
+                return (
+                  <div
+                    key={p.socketId}
+                    className={`
+                      rounded-full border-4 px-4 py-2 font-black shadow-sm
+                      ${
+                        active
+                          ? "border-black bg-yellow-300 text-gray-900"
+                          : "border-black bg-white text-gray-800"
+                      }
+                    `}
+                  >
+                    {active ? "👑 あなた" : `🤝 ${ellipsizeName(p.playerName)}`}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -664,9 +677,9 @@ export default function QuizKoredochiCodePage() {
                         }
                       `}
                     >
-                      <span className="mb-2 block text-sm md:text-base text-gray-500">
+                      {/* <span className="mb-2 block text-sm md:text-base text-gray-500">
                         {choice.key === "A" ? "A" : "B"}
-                      </span>
+                      </span> */}
                       {choice.text}
                     </button>
                   );
