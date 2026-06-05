@@ -29,11 +29,11 @@ type RankRow = {
   name: string;
   score: number;
   rank: number;
-  survivedStages?: number;
+  foundLetters?: number;
   correctCount?: number;
 };
 
-type SpacePlayer = {
+type WordPlayer = {
   socketId: string;
   name: string;
   x: number;
@@ -41,9 +41,13 @@ type SpacePlayer = {
   alive: boolean;
   score: number;
   rank?: number;
-  survivedStages?: number;
+  foundLetters?: string[] | number;
+  foundLetterCount?: number;
   correctCount?: number;
-  eliminatedReason?: "wrong_area" | "meteor" | "laser" | "flame" | "timeout" | "unknown";
+  eliminatedReason?:
+    | "wrong_area"
+    | "timeout"
+    | "unknown";
   invincibleUntil?: number;
   speedBoostUntil?: number;
   eliminatedAt?: number;
@@ -52,30 +56,17 @@ type SpacePlayer = {
   isCpu?: boolean;
 };
 
-type SpaceObstacle = {
+type WordBookItem = {
   id: string;
-  type: "meteor" | "laser";
+  type: "letter" | "hint" | "fake";
   x: number;
   y: number;
-  w: number;
-  h: number;
+  solved?: boolean;
+  usedBy?: string[];
 };
 
-type SpaceItem = {
-  id: string;
-  type: "invincible" | "speed" | "score";
-  x: number;
-  y: number;
-};
 
-type SpaceFlame = {
-  id: string;
-  x: number;
-  y: number;
-  size: number;
-};
-
-type SpaceQuestion = {
+type WordQuestion = {
   question: string;
   choices: string[];
   correctIndex: number;
@@ -83,13 +74,27 @@ type SpaceQuestion = {
   explanation?: string;
 };
 
-type SpaceGameResult = {
+type WordBookQuestionPayload = {
+  bookId: string;
+  bookType: "letter" | "hint" | "fake";
+  question: WordQuestion;
+};
+
+type MazeWall = {
+  id: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+};
+
+type WordGameResult = {
   finalRanks: RankRow[];
   eliminationGroups: string[][];
   winnerSocketIds: string[];
 };
 
-type SpaceGameState = {
+type WordGameState = {
   roomCode: string;
   phase:
     | "waiting"
@@ -100,19 +105,23 @@ type SpaceGameState = {
     | "stageResult"
     | "gameSet"
     | "gameOver";
-  stage: number;
   timeLeft: number;
   safeSize?: number;
   safeMin?: number;
   safeMax?: number;
-  question: SpaceQuestion;
-  players: SpacePlayer[];
-  obstacles: SpaceObstacle[];
-  items: SpaceItem[];
-  flames: SpaceFlame[];
+  question: WordQuestion;
+  players: WordPlayer[];
+  walls?: MazeWall[];
+  items: WordBookItem[];
+  books?: WordBookItem[];
+  targetLength?: number;
+  foundLetters?: string[] | number;
+  foundLetterCount?: number;
+  hints?: string[];
+  answerCooldownUntil?: number;
   message?: string;
   stageResultMessage?: string;
-  gameResult?: SpaceGameResult;
+  gameResult?: WordGameResult;
 };
 
 type PendingAward = {
@@ -125,64 +134,12 @@ type PendingAward = {
   createdAt: number;
 };
 
-const PENDING_KEY = "space_survive_award_pending_v1";
-
-// const PLAYER_EMOJIS = ["🛸", "🚀", "👾", "🌟"];
+const PENDING_KEY = "word_chase_award_pending_v1";
 
 const BONUS_TABLE: Record<number, number[]> = {
   2: [300],
   3: [400, 200],
   4: [500, 250, 120],
-};
-
-const STAGE_THEME: Record<
-  number,
-  {
-    label: string;
-    title: string;
-    bg: string;
-    panel: string;
-    glow: string;
-    border: string;
-    accent: string;
-  }
-> = {
-  1: {
-    label: "STAGE 1",
-    title: "平和",
-    bg: "from-emerald-500/30 via-cyan-500/20 to-slate-950",
-    panel: "from-emerald-400/25 to-cyan-400/10",
-    glow: "shadow-[0_0_35px_rgba(52,211,153,0.45)]",
-    border: "border-emerald-300",
-    accent: "text-emerald-200",
-  },
-  2: {
-    label: "STAGE 2",
-    title: "注意",
-    bg: "from-yellow-400/30 via-orange-500/20 to-slate-950",
-    panel: "from-yellow-300/25 to-orange-500/10",
-    glow: "shadow-[0_0_35px_rgba(251,191,36,0.45)]",
-    border: "border-yellow-300",
-    accent: "text-yellow-200",
-  },
-  3: {
-    label: "STAGE 3",
-    title: "危険",
-    bg: "from-red-500/30 via-pink-600/20 to-slate-950",
-    panel: "from-red-500/25 to-pink-600/10",
-    glow: "shadow-[0_0_35px_rgba(244,63,94,0.45)]",
-    border: "border-red-300",
-    accent: "text-red-200",
-  },
-  4: {
-    label: "STAGE 4",
-    title: "カオス",
-    bg: "from-purple-600/35 via-fuchsia-600/25 to-slate-950",
-    panel: "from-purple-500/30 to-fuchsia-600/15",
-    glow: "shadow-[0_0_35px_rgba(217,70,239,0.5)]",
-    border: "border-fuchsia-300",
-    accent: "text-fuchsia-200",
-  },
 };
 
 const bannedWords = [
@@ -205,19 +162,58 @@ const bannedWords = [
   "asshole",
 ];
 
-const reasonLabel = (reason?: SpacePlayer["eliminatedReason"]) => {
-  if (reason === "wrong_area") return "ハズレエリア";
-  if (reason === "meteor") return "隕石に直撃";
-  if (reason === "laser") return "レーザー命中";
-  if (reason === "flame") return "炎に接触";
+
+const WORD_WORLD_WIDTH = 2400;
+const WORD_WORLD_HEIGHT = 1700;
+const WORD_ANSWER_X = WORD_WORLD_WIDTH / 2;
+const WORD_ANSWER_Y = WORD_WORLD_HEIGHT / 2;
+const WORD_ANSWER_RADIUS = 180;
+
+const BOOK_EMOJIS = [
+  "📖",
+  "📚",
+  "📘",
+  "📙",
+  "📕",
+  "📗",
+];
+
+// const toWorldX = (value: number) =>
+//   value <= 100 ? (value / 100) * WORD_WORLD_WIDTH : value;
+
+// const toWorldY = (value: number) =>
+//   value <= 100 ? (value / 100) * WORD_WORLD_HEIGHT : value;
+
+// const toWorldW = (value: number) =>
+//   value <= 100 ? (value / 100) * WORD_WORLD_WIDTH : value;
+
+// const toWorldH = (value: number) =>
+//   value <= 100 ? (value / 100) * WORD_WORLD_HEIGHT : value;
+
+const toWorldX = (value: number) => value;
+const toWorldY = (value: number) => value;
+const toWorldW = (value: number) => value;
+const toWorldH = (value: number) => value;
+
+const isInsideAnswerArea = (player?: WordPlayer | null) => {
+  if (!player) return false;
+  const x = toWorldX(player.x);
+  const y = toWorldY(player.y);
+  const dx = x - WORD_ANSWER_X;
+  const dy = y - WORD_ANSWER_Y;
+  return Math.sqrt(dx * dx + dy * dy) <= WORD_ANSWER_RADIUS;
+};
+
+const reasonLabel = (reason?: WordPlayer["eliminatedReason"]) => {
+  if (reason === "wrong_area") return "偽物本";
   if (reason === "timeout") return "時間切れ";
-  return "脱落";
+  return "終了";
 };
 
 const calcPlacementBonus = (
   playerCount: number,
   ranksNow: RankRow[],
-  mySocketId: string
+  mySocketId: string,
 ) => {
   const table = BONUS_TABLE[playerCount] ?? [];
   const me = ranksNow.find((r) => r.socketId === mySocketId);
@@ -231,17 +227,50 @@ const calcPlacementBonus = (
   return table[me.rank - 1] ?? 0;
 };
 
-const buildRanksFromPlayers = (players: SpacePlayer[]): RankRow[] => {
+const buildRanksFromPlayers = (players: WordPlayer[]): RankRow[] => {
   return [...players]
     .map((p, index) => ({
       socketId: p.socketId,
       name: p.name,
       score: p.score ?? 0,
       rank: p.rank ?? index + 1,
-      survivedStages: p.survivedStages ?? 0,
+      foundLetters: Array.isArray(p.foundLetters)
+        ? p.foundLetters.length
+        : p.foundLetters ?? 0,
       correctCount: p.correctCount ?? 0,
     }))
     .sort((a, b) => a.rank - b.rank || b.score - a.score);
+};
+
+const getPlayerFoundCount = (player: WordPlayer) => {
+  if (Array.isArray(player.foundLetters)) {
+    return player.foundLetters.length;
+  }
+
+  return player.foundLetters ?? 0;
+};
+
+const ProgressBooks = ({
+  found,
+  total,
+}: {
+  found: number;
+  total: number;
+}) => {
+  return (
+    <div className="flex items-center gap-1">
+      {Array.from({ length: total }).map((_, index) => (
+        <span
+          key={index}
+          className={`text-sm md:text-base ${
+            index < found ? "opacity-100" : "opacity-30 grayscale"
+          }`}
+        >
+          📖
+        </span>
+      ))}
+    </div>
+  );
 };
 
 const savePendingAward = (payload: PendingAward) => {
@@ -256,7 +285,7 @@ const clearPendingAward = () => {
   } catch {}
 };
 
-function SpaceGlassCard({
+function WordGlassCard({
   children,
   className = "",
 }: {
@@ -265,19 +294,19 @@ function SpaceGlassCard({
 }) {
   return (
     <div
-      className={`rounded-3xl border border-white/15 bg-black/35 shadow-[0_0_35px_rgba(34,211,238,0.55),0_0_80px_rgba(168,85,247,0.35)] backdrop-blur ${className}`}
+      className={`rounded-3xl border border-amber-200/20 bg-[#4a2f1b]/85 shadow-[0_0_35px_rgba(245,158,11,0.28),0_0_80px_rgba(180,83,9,0.25)] backdrop-blur ${className}`}
     >
       {children}
     </div>
   );
 }
 
-function SpaceResult({
+function WordChaseResult({
   myRank,
   ranks,
   players,
   correctCount,
-  survivedStages,
+  foundLetters,
   basePoints,
   placementBonusPoints,
   survivalBonusPoints,
@@ -295,9 +324,9 @@ function SpaceResult({
 }: {
   myRank: number | null;
   ranks: RankRow[];
-  players: SpacePlayer[];
+  players: WordPlayer[];
   correctCount: number;
-  survivedStages: number;
+  foundLetters: number;
   basePoints: number;
   placementBonusPoints: number;
   survivalBonusPoints: number;
@@ -333,10 +362,10 @@ function SpaceResult({
     myRank === 1
       ? "text-yellow-200 drop-shadow-[0_0_25px_rgba(250,204,21,0.85)]"
       : myRank === 2
-      ? "text-cyan-100 drop-shadow-[0_0_20px_rgba(34,211,238,0.65)]"
-      : myRank === 3
-      ? "text-orange-200 drop-shadow-[0_0_20px_rgba(251,146,60,0.65)]"
-      : "text-white";
+        ? "text-amber-100 drop-shadow-[0_0_20px_rgba(34,211,238,0.65)]"
+        : myRank === 3
+          ? "text-orange-200 drop-shadow-[0_0_20px_rgba(251,146,60,0.65)]"
+          : "text-white";
 
   return (
     <motion.div
@@ -345,8 +374,8 @@ function SpaceResult({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <p className="mb-2 text-sm font-black tracking-[0.45em] text-cyan-200">
-        SPACE SURVIVE RESULT
+      <p className="mb-2 text-sm font-black tracking-[0.45em] text-amber-200">
+        WORD CHASE RESULT
       </p>
 
       {showText1 && (
@@ -359,34 +388,36 @@ function SpaceResult({
             GAME SET!
           </p> */}
           {/* <p className="mt-2 text-sm font-bold text-white/65 md:text-lg">
-            宇宙サバイバル終了！
+            本の世界サバイバル終了！
           </p> */}
           <p className="mt-2 text-sm md:text-xl font-bold text-white/65 md:text-lg">
-            最終結果
+            探索結果
           </p>
         </motion.div>
       )}
 
       {showText2 && (
         <div className="mb-5 grid grid-cols-2 gap-3 md:grid-cols-4">
-          <SpaceGlassCard className="p-4">
-            <p className="text-xs font-bold text-white/55">正解数</p>
-            <p className="text-3xl font-black text-cyan-200">{correctCount}</p>
-          </SpaceGlassCard>
-          <SpaceGlassCard className="p-4">
-            <p className="text-xs font-bold text-white/55">突破ステージ</p>
+          <WordGlassCard className="p-4">
+            <p className="text-xs font-bold text-white/55">クイズ正解</p>
+            <p className="text-3xl font-black text-amber-200">{correctCount}</p>
+          </WordGlassCard>
+          <WordGlassCard className="p-4">
+            <p className="text-xs font-bold text-white/55">見つけた文字</p>
             <p className="text-3xl font-black text-fuchsia-200">
-              {survivedStages}
+              {foundLetters}
             </p>
-          </SpaceGlassCard>
-          <SpaceGlassCard className="p-4">
+          </WordGlassCard>
+          <WordGlassCard className="p-4">
             <p className="text-xs font-bold text-white/55">獲得P</p>
-            <p className="text-3xl font-black text-yellow-200">{earnedPoints}</p>
-          </SpaceGlassCard>
-          <SpaceGlassCard className="p-4">
+            <p className="text-3xl font-black text-yellow-200">
+              {earnedPoints}
+            </p>
+          </WordGlassCard>
+          <WordGlassCard className="p-4">
             <p className="text-xs font-bold text-white/55">EXP</p>
             <p className="text-3xl font-black text-purple-200">{earnedExp}</p>
-          </SpaceGlassCard>
+          </WordGlassCard>
         </div>
       )}
 
@@ -397,24 +428,26 @@ function SpaceResult({
           transition={{ duration: 0.55 }}
           className="mx-auto mb-6 rounded-[2rem] border border-yellow-200/40 bg-gradient-to-r from-yellow-300/15 via-cyan-300/10 to-fuchsia-400/15 p-5 shadow-[0_0_40px_rgba(250,204,21,0.22)]"
         >
-          <p className="text-sm font-black text-white/60">あなたの順位</p>
+          <p className="text-sm font-black text-white/60">あなたの結果</p>
           <p className={`text-6xl font-black md:text-8xl ${rankClass}`}>
             {myRank ? `${myRank}位` : "集計中"}
           </p>
           {myRank === 1 && (
             <p className="mt-2 text-2xl font-black text-yellow-200">
-              👑 宇宙No.1サバイバー！
+              👑 最速ワードプレイヤー！
             </p>
           )}
         </motion.div>
       )}
 
       {showText4 && (
-        <SpaceGlassCard className="mb-6 p-4">
-          <p className="mb-3 text-xl font-black text-cyan-100">みんなの順位</p>
+        <WordGlassCard className="mb-6 p-4">
+          <p className="mb-3 text-xl font-black text-amber-100">みんなの結果</p>
           <div className="space-y-2">
             {ranks.map((rank, index) => {
-              const p = players.find((player) => player.socketId === rank.socketId);
+              const p = players.find(
+                (player) => player.socketId === rank.socketId,
+              );
               return (
                 <div
                   key={rank.socketId}
@@ -425,10 +458,10 @@ function SpaceResult({
                       rank.rank === 1
                         ? "text-yellow-200"
                         : rank.rank === 2
-                        ? "text-cyan-100"
-                        : rank.rank === 3
-                        ? "text-orange-200"
-                        : "text-white/70"
+                          ? "text-amber-100"
+                          : rank.rank === 3
+                            ? "text-orange-200"
+                            : "text-white/70"
                     }`}
                   >
                     {rank.rank}位
@@ -449,13 +482,13 @@ function SpaceResult({
               );
             })}
           </div>
-        </SpaceGlassCard>
+        </WordGlassCard>
       )}
 
       {showButton && (
-        <SpaceGlassCard className="mb-6 p-5">
+        <WordGlassCard className="mb-6 p-5">
           <div className="mb-3 text-base font-bold leading-relaxed text-white/80 md:text-lg">
-            <p className="text-cyan-200">
+            <p className="text-amber-200">
               正解ポイント：{basePoints}P（{correctCount}問 × 10P）
             </p>
             {survivalBonusPoints > 0 && (
@@ -489,7 +522,8 @@ function SpaceResult({
               )}
               {awardStatus === "error" && (
                 <p className="font-black text-red-300">
-                  ❌ ポイント加算に失敗しました。時間をおいて再度お試しください。
+                  ❌
+                  ポイント加算に失敗しました。時間をおいて再度お試しください。
                 </p>
               )}
               {awardStatus === "need_login" && (
@@ -511,7 +545,7 @@ function SpaceResult({
               </button>
             </div>
           )}
-        </SpaceGlassCard>
+        </WordGlassCard>
       )}
 
       {showButton && (
@@ -533,14 +567,16 @@ function SpaceResult({
                   : "bg-gradient-to-r from-yellow-300 to-orange-500 text-black"
               }`}
             >
-              {rematchRequested ? "ほかのサバイバーを待っています…" : "もう一回サバイブ！"}
+              {rematchRequested
+                ? "ほかのプレイヤーを待っています…"
+                : "もう一回やる！"}
             </button>
           ) : (
             <button
               onClick={onNewMatch}
               className="w-full rounded-full bg-gradient-to-r from-cyan-400 to-fuchsia-500 px-6 py-3 text-lg font-black text-white shadow-[0_0_25px_rgba(34,211,238,0.35)] md:w-auto"
             >
-              もう一戦いく！
+              もう一回やる！
             </button>
           )}
 
@@ -556,8 +592,8 @@ function SpaceResult({
       )}
 
       {showButton && rematchRequested && !rematchAvailable && (
-        <p className="mb-6 rounded-2xl border border-cyan-300/30 bg-black/40 px-4 py-3 text-center text-lg font-black text-cyan-100">
-          ほかのサバイバーの準備を待っています…
+        <p className="mb-6 rounded-2xl border border-cyan-300/30 bg-black/40 px-4 py-3 text-center text-lg font-black text-amber-100">
+          ほかのプレイヤーの準備を待っています…
         </p>
       )}
 
@@ -565,7 +601,7 @@ function SpaceResult({
         <RecommendedMultiplayerGames
           title="次はみんなでどれ行く？🎮"
           count={4}
-          excludeHref="/quiz-space"
+          excludeHref="/quiz-word"
         />
       )}
     </motion.div>
@@ -577,10 +613,10 @@ function ArrowIcon({ dir }: { dir: Direction }) {
     dir === "up"
       ? "rotate-0"
       : dir === "right"
-      ? "rotate-90"
-      : dir === "down"
-      ? "rotate-180"
-      : "-rotate-90";
+        ? "rotate-90"
+        : dir === "down"
+          ? "rotate-180"
+          : "-rotate-90";
 
   return (
     <svg
@@ -646,7 +682,7 @@ function MobileControls({
   );
 }
 
-export default function SpaceSurviveModePage() {
+export default function WordChaseModePage() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -667,12 +703,18 @@ export default function SpaceSurviveModePage() {
   const [maxPlayers, setMaxPlayers] = useState(4);
   const [roomFull, setRoomFull] = useState(false);
   const [showStartButton, setShowStartButton] = useState(false);
-  const [gameState, setGameState] = useState<SpaceGameState | null>(null);
+  const [gameState, setGameState] = useState<WordGameState | null>(null);
   const [finished, setFinished] = useState(false);
   const [rematchRequested, setRematchRequested] = useState(false);
   const [rematchAvailable, setRematchAvailable] = useState(false);
   const [matchEnded, setMatchEnded] = useState(false);
   const [battleKey, setBattleKey] = useState(0);
+  const [showAnswerBox, setShowAnswerBox] = useState(false);
+  const [answerText, setAnswerText] = useState("");
+  const [answerError, setAnswerError] = useState<string | null>(null);
+  const [bookQuestion, setBookQuestion] = useState<WordBookQuestionPayload | null>(null);
+  const [bookResultMessage, setBookResultMessage] = useState<string | null>(null);
+  const answerAreaOpenedRef = useRef(false);
 
   const [earnedPoints, setEarnedPoints] = useState(0);
   const [earnedExp, setEarnedExp] = useState(0);
@@ -685,6 +727,11 @@ export default function SpaceSurviveModePage() {
   const sentRef = useRef(false);
   const roomLockedRef = useRef(false);
   const pressedRef = useRef<Set<Direction>>(new Set());
+  const mapViewportRef = useRef<HTMLDivElement | null>(null);
+  const [viewportSize, setViewportSize] = useState({ width: 900, height: 620 });
+
+  const [answerSuccessMessage, setAnswerSuccessMessage] = useState<string | null>(null);
+  const [showGameSetText, setShowGameSetText] = useState(false);
 
   const {
     joinRandom,
@@ -697,11 +744,49 @@ export default function SpaceSurviveModePage() {
     socket,
   } = useBattle(playerName);
 
-  const theme = STAGE_THEME[gameState?.stage ?? 1] ?? STAGE_THEME[1];
+  useEffect(() => {
+    const el = mapViewportRef.current;
+    if (!el) return;
 
-  const DEFAULT_PLAYER_IMAGE = "/images/space_player.png";
+    // const update = () => {
+    //   const rect = el.getBoundingClientRect();
+    //   setViewportSize({ width: rect.width, height: rect.height });
+    // };
+    const update = () => {
+      const rect = el.getBoundingClientRect();
 
-  const getPlayerImage = (player: SpacePlayer) => {
+      if (rect.width <= 0 || rect.height <= 0) return;
+
+      setViewportSize({
+        width: rect.width,
+        height: rect.height,
+      });
+    };
+
+    update();
+
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    window.addEventListener("resize", update);
+
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", update);
+    };
+  }, [joined, bothReady]);
+
+  const theme = {
+    label: "WORD CHASE",
+    bg: "from-[#4a1810] via-[#7c2d12] to-[#d97706]",
+    panel: "from-amber-300/25 via-orange-300/10 to-orange-500/15",
+    glow: "shadow-[0_0_35px_rgba(245,158,11,0.35)]",
+    border: "border-amber-300",
+    accent: "text-amber-200",
+  };
+
+  const DEFAULT_PLAYER_IMAGE = "/images/skin_chara1_ボード.png";
+
+  const getPlayerImage = (player: WordPlayer) => {
     if (player.isCpu) return DEFAULT_PLAYER_IMAGE;
 
     if (player.skinImageUrl) {
@@ -718,31 +803,88 @@ export default function SpaceSurviveModePage() {
     playerName: p.name,
   }));
 
-  const displayPlayers: SpacePlayer[] = useMemo(() => {
+  const displayPlayers: WordPlayer[] = useMemo(() => {
     if (gameState?.players?.length) return gameState.players;
 
     return playersFromBattle.map((p, index) => ({
       socketId: p.socketId,
       name: p.playerName,
-      x: 18 + index * 18,
-      y: 50,
+      x: WORD_ANSWER_X - 90 + index * 60,
+      y: WORD_ANSWER_Y,
       alive: true,
       score: 0,
       rank: undefined,
-      survivedStages: 0,
+      foundLetters: 0,
       correctCount: 0,
     }));
   }, [gameState, playersFromBattle]);
 
   const me = displayPlayers.find((p) => p.socketId === mySocketId);
+  const cameraTargetX = me ? toWorldX(me.x) : WORD_ANSWER_X;
+  const cameraTargetY = me ? toWorldY(me.y) : WORD_ANSWER_Y;
+  const safeViewportWidth =
+    viewportSize.width > 0 ? viewportSize.width : 900;
+
+  const safeViewportHeight =
+    viewportSize.height > 0 ? viewportSize.height : 620;
+  // const cameraX = Math.min(
+  //   0,
+  //   Math.max(viewportSize.width - WORD_WORLD_WIDTH, viewportSize.width / 2 - cameraTargetX),
+  // );
+  // const cameraY = Math.min(
+  //   0,
+  //   Math.max(viewportSize.height - WORD_WORLD_HEIGHT, viewportSize.height / 2 - cameraTargetY),
+  // );
+  const cameraX = Math.min(
+    0,
+    Math.max(
+      safeViewportWidth - WORD_WORLD_WIDTH,
+      safeViewportWidth / 2 - cameraTargetX
+    ),
+  );
+
+  const cameraY = Math.min(
+    0,
+    Math.max(
+      safeViewportHeight - WORD_WORLD_HEIGHT,
+      safeViewportHeight / 2 - cameraTargetY
+    ),
+  );
   const allPlayersReady = roomPlayers.length >= maxPlayers;
   const isDead = !!me && !me.alive;
   const finalRanks = gameState?.gameResult?.finalRanks?.length
     ? gameState.gameResult.finalRanks
     : buildRanksFromPlayers(displayPlayers);
-  const myRank = finalRanks.find((r) => r.socketId === mySocketId)?.rank ?? null;
+  const myRank =
+    finalRanks.find((r) => r.socketId === mySocketId)?.rank ?? null;
   const correctCount = me?.correctCount ?? 0;
-  const survivedStages = me?.survivedStages ?? 0;
+
+  const foundLetterList = Array.isArray(me?.foundLetters)
+    ? me.foundLetters
+    : [];
+
+  const foundLetters =
+    typeof me?.foundLetters === "number"
+      ? me.foundLetters
+      : foundLetterList.length;
+
+  const targetLength = gameState?.targetLength ?? Math.max(5, foundLetters, 5);
+  const visibleBooks = gameState?.books ?? gameState?.items ?? [];
+  const totalBooks = targetLength + 2 + 3;
+  const remainingBooks = visibleBooks.length;
+  const myFoundLetters =
+    foundLetterList.length > 0
+      ? foundLetterList
+      : Array.from({ length: targetLength }, (_, i) =>
+          i < foundLetters ? "?" : "",
+        );
+  const hints = gameState?.hints ?? [];
+  const cooldownMs = Math.max(
+    0,
+    (gameState?.answerCooldownUntil ?? 0) - Date.now(),
+  );
+  const cooldownSec = Math.ceil(cooldownMs / 1000);
+  const inAnswerArea = isInsideAnswerArea(me);
 
   const ensureAuthedUserId = async (): Promise<string | null> => {
     const { data: u1, error: e1 } = await supabase.auth.getUser();
@@ -790,7 +932,7 @@ export default function SpaceSurviveModePage() {
 
       window.dispatchEvent(new Event("points:updated"));
       window.dispatchEvent(
-        new CustomEvent("profile:updated", { detail: { oldLevel, newLevel } })
+        new CustomEvent("profile:updated", { detail: { oldLevel, newLevel } }),
       );
 
       if (newLevel > oldLevel) {
@@ -801,7 +943,7 @@ export default function SpaceSurviveModePage() {
               p_user_id: authedUserId,
               p_old_level: oldLevel,
               p_new_level: newLevel,
-            }
+            },
           );
 
           if (rErr) {
@@ -809,7 +951,9 @@ export default function SpaceSurviveModePage() {
           } else {
             const rewardRow = Array.isArray(r) ? r[0] : r;
             const awardedPoints = Number(rewardRow?.awarded_points ?? 0);
-            const awardedTitle = (rewardRow?.awarded_title ?? null) as string | null;
+            const awardedTitle = (rewardRow?.awarded_title ?? null) as
+              | string
+              | null;
 
             if (awardedPoints > 0 || awardedTitle) {
               window.dispatchEvent(new Event("points:updated"));
@@ -821,7 +965,7 @@ export default function SpaceSurviveModePage() {
                     awardedPoints,
                     awardedTitle,
                   },
-                })
+                }),
               );
             }
           }
@@ -831,28 +975,34 @@ export default function SpaceSurviveModePage() {
       }
 
       if (payload.points > 0) {
-        const { error: logError } = await supabase.from("user_point_logs").insert({
-          user_id: authedUserId,
-          change: payload.points,
-          reason:
-            `スペースクイズ獲得: 正解${payload.correctCount}問=${payload.basePoints}P` +
-            (payload.survivalBonusPoints
-              ? ` / 突破ボーナス${payload.survivalBonusPoints}P`
-              : "") +
-            (payload.placementBonusPoints
-              ? ` / 順位ボーナス${payload.placementBonusPoints}P`
-              : ""),
-        });
-        if (logError) console.log("insert user_point_logs error raw:", logError);
+        const { error: logError } = await supabase
+          .from("user_point_logs")
+          .insert({
+            user_id: authedUserId,
+            change: payload.points,
+            reason:
+              `ワードチェイス獲得: 正解${payload.correctCount}問=${payload.basePoints}P` +
+              (payload.survivalBonusPoints
+                ? ` / 突破ボーナス${payload.survivalBonusPoints}P`
+                : "") +
+              (payload.placementBonusPoints
+                ? ` / 順位ボーナス${payload.placementBonusPoints}P`
+                : ""),
+          });
+        if (logError)
+          console.log("insert user_point_logs error raw:", logError);
       }
 
       if (payload.exp > 0) {
-        const { error: logError2 } = await supabase.from("user_exp_logs").insert({
-          user_id: authedUserId,
-          change: payload.exp,
-          reason: `スペースクイズEXP獲得: 正解${payload.correctCount}問 → ${payload.exp}EXP`,
-        });
-        if (logError2) console.log("insert user_exp_logs error raw:", logError2);
+        const { error: logError2 } = await supabase
+          .from("user_exp_logs")
+          .insert({
+            user_id: authedUserId,
+            change: payload.exp,
+            reason: `ワードチェイスEXP獲得: 正解${payload.correctCount}問 → ${payload.exp}EXP`,
+          });
+        if (logError2)
+          console.log("insert user_exp_logs error raw:", logError2);
       }
 
       clearPendingAward();
@@ -867,7 +1017,7 @@ export default function SpaceSurviveModePage() {
   const sendMove = (dir: Direction, pressed: boolean) => {
     if (!socket || !roomCode || finished) return;
 
-    socket.emit("space_move_input", {
+    socket.emit("word_move_input", {
       roomCode,
       dir,
       pressed,
@@ -899,16 +1049,30 @@ export default function SpaceSurviveModePage() {
     setRematchAvailable(false);
     setMatchEnded(false);
     setGameState(null);
+    setShowAnswerBox(false);
+    setAnswerText("");
+    setAnswerError(null);
+    setBookQuestion(null);
+    setBookResultMessage(null);
+    answerAreaOpenedRef.current = false;
     setEarnedPoints(0);
     setEarnedExp(0);
     setBasePoints(0);
     setPlacementBonusPoints(0);
     setSurvivalBonusPoints(0);
     setAwardStatus("idle");
+    setAnswerSuccessMessage(null);
+    setShowGameSetText(false);
     awardedOnceRef.current = false;
     sentRef.current = false;
     clearPendingAward();
     releaseAll();
+    pressedRef.current.clear();
+    answerAreaOpenedRef.current = false;
+    setBookQuestion(null);
+    setBookResultMessage(null);
+    setAnswerSuccessMessage(null);
+    setShowGameSetText(false);
   };
 
   const handleJoin = () => {
@@ -931,25 +1095,28 @@ export default function SpaceSurviveModePage() {
     roomLockedRef.current = false;
 
     if (mode === "random") {
-      joinRandom({ maxPlayers: 4, gameType: "space", userId: user?.id ?? null }, (createdCode) => {
-        setRoomCode(createdCode);
+      joinRandom(
+        { maxPlayers: 4, gameType: "word", userId: user?.id ?? null },
+        (createdCode) => {
+          setRoomCode(createdCode);
 
-        setTimeout(() => {
-          socket?.emit("space_join", {
-            roomCode: createdCode,
-            playerName: name,
-            userId: user?.id ?? null,
-          });
-        }, 300);
-      });
+          setTimeout(() => {
+            socket?.emit("word_join", {
+              roomCode: createdCode,
+              playerName: name,
+              userId: user?.id ?? null,
+            });
+          }, 300);
+        },
+      );
     } else {
-      const roomKey = `space_${code}`;
+      const roomKey = `word_${code}`;
 
-      joinWithCode(code, count, "space", user?.id ?? null);
+      joinWithCode(code, count, "word", user?.id ?? null);
       setRoomCode(roomKey);
 
       setTimeout(() => {
-        socket?.emit("space_join", {
+        socket?.emit("word_join", {
           roomCode: roomKey,
           playerName: name,
           userId: user?.id ?? null,
@@ -964,8 +1131,40 @@ export default function SpaceSurviveModePage() {
     sendReady(0);
     setReadyToStart(true);
 
-    socket.emit("space_ready", {
+    socket.emit("word_ready", {
       roomCode,
+    });
+  };
+
+  const handleSubmitBookAnswer = (choiceIndex: number) => {
+    if (!socket || !roomCode || !bookQuestion) return;
+
+    socket.emit("word_book_answer", {
+      roomCode,
+      choiceIndex,
+    });
+
+    setBookQuestion(null);
+  };
+
+  const handleSubmitAnswer = () => {
+    if (!socket || !roomCode) return;
+    const answer = answerText.trim();
+
+    if (!answer) {
+      setAnswerError("答えを入力してください");
+      return;
+    }
+
+    if (cooldownSec > 0) {
+      setAnswerError(`あと${cooldownSec}秒待ってから回答できます`);
+      return;
+    }
+
+    setAnswerError(null);
+    socket.emit("word_submit_answer", {
+      roomCode,
+      answer,
     });
   };
 
@@ -974,9 +1173,9 @@ export default function SpaceSurviveModePage() {
 
     setRematchRequested(true);
 
-    socket.emit("send_ready", {
+    socket.emit("request_rematch", {
       roomCode,
-      gameType: "space",
+      gameType: "word",
     });
   };
 
@@ -988,24 +1187,27 @@ export default function SpaceSurviveModePage() {
     roomLockedRef.current = false;
 
     if (mode === "random") {
-      joinRandom({ maxPlayers: 4, gameType: "space", userId: user?.id ?? null }, (createdCode) => {
-        setRoomCode(createdCode);
+      joinRandom(
+        { maxPlayers: 4, gameType: "word", userId: user?.id ?? null },
+        (createdCode) => {
+          setRoomCode(createdCode);
 
-        setTimeout(() => {
-          socket?.emit("space_join", {
-            roomCode: createdCode,
-            playerName,
-            userId: user?.id ?? null,
-          });
-        }, 300);
-      });
+          setTimeout(() => {
+            socket?.emit("word_join", {
+              roomCode: createdCode,
+              playerName,
+              userId: user?.id ?? null,
+            });
+          }, 300);
+        },
+      );
     } else {
-      joinWithCode(code, count, "space", user?.id ?? null);
-      const nextRoomCode = `space_${code}`;
+      joinWithCode(code, count, "word", user?.id ?? null);
+      const nextRoomCode = `word_${code}`;
       setRoomCode(nextRoomCode);
 
       setTimeout(() => {
-        socket?.emit("space_join", {
+        socket?.emit("word_join", {
           roomCode: nextRoomCode,
           playerName,
           userId: user?.id ?? null,
@@ -1016,14 +1218,14 @@ export default function SpaceSurviveModePage() {
 
   const handleShareX = () => {
     const text = [
-      "【ひまQ｜スペースクイズ🛸】",
+      "【ひまQ｜ワードチェイス📚】",
       `順位：${myRank ?? "-"}位`,
-      `正解数：${correctCount}問`,
-      `突破ステージ：${survivedStages}`,
+      `クイズ正解：${correctCount}問`,
+      `見つけた文字：${foundLetters}`,
       `獲得：${earnedPoints}P / ${earnedExp}EXP`,
       "",
       "👇ひまQ（みんなで遊べるクイズ）",
-      "#ひまQ #スペースクイズ #クイズゲーム",
+      "#ひまQ #ワードチェイス #クイズゲーム",
     ].join("\n");
 
     openXShare({ text, url: buildTopUrl() });
@@ -1056,10 +1258,10 @@ export default function SpaceSurviveModePage() {
         if (current >= max) {
           roomLockedRef.current = true;
         }
-      }
+      },
     );
 
-    socket.on("space_state", (state: SpaceGameState) => {
+    socket.on("word_state", (state: WordGameState) => {
       setGameState(state);
 
       if (state.phase === "gameOver") {
@@ -1071,33 +1273,75 @@ export default function SpaceSurviveModePage() {
       }
     });
 
-    socket.on("space_game_result", (state: SpaceGameState) => {
+    socket.on("word_game_result", (state: WordGameState) => {
       setGameState(state);
       setFinished(true);
     });
 
-    socket.on("space_match_ended", () => {
+    socket.on("word_book_question", (payload: WordBookQuestionPayload) => {
+      setBookQuestion(payload);
+      setBookResultMessage(null);
+      setShowAnswerBox(false);
+    });
+
+    socket.on("word_book_result", (payload: { ok: boolean; message?: string }) => {
+      setBookResultMessage(payload.message ?? (payload.ok ? "正解！" : "不正解！"));
+      window.setTimeout(() => setBookResultMessage(null), 2800);
+    });
+
+    socket.on("word_answer_result", (payload: { ok?: boolean; locked?: boolean; waitMs?: number; message?: string }) => {
+      if (payload.ok) {
+        setAnswerError(null);
+        setShowAnswerBox(false);
+
+        setAnswerSuccessMessage(
+          payload.message ?? "ワード正解！"
+        );
+
+        setTimeout(() => {
+          setShowGameSetText(true);
+        }, 1800);
+
+        setTimeout(() => {
+          setFinished(true);
+        }, 3200);
+
+        return;
+      }
+
+      if (payload.locked) {
+        setAnswerError(`まだ回答できません。あと${Math.ceil((payload.waitMs ?? 0) / 1000)}秒`);
+        return;
+      }
+
+      setAnswerError(`不正解！次は${Math.ceil((payload.waitMs ?? 5000) / 1000)}秒後に回答できます`);
+    });
+
+    socket.on("word_match_ended", () => {
       setMatchEnded(true);
       setFinished(true);
     });
 
-    socket.on("space_rematch_start", () => {
+    socket.on("rematch_start", () => {
       resetLocalMatchState();
       setReadyToStart(true);
     });
 
-    socket.on("space_rematch_available", () => {
+    socket.on("word_rematch_available", () => {
       setRematchAvailable(true);
     });
 
     return () => {
       socket.off("room_full");
       socket.off("update_room_count");
-      socket.off("space_state");
-      socket.off("space_game_result");
-      socket.off("space_match_ended");
-      socket.off("space_rematch_start");
-      socket.off("space_rematch_available");
+      socket.off("word_state");
+      socket.off("word_game_result");
+      socket.off("word_book_question");
+      socket.off("word_book_result");
+      socket.off("word_answer_result");
+      socket.off("word_match_ended");
+      socket.off("rematch_start");
+      socket.off("word_rematch_available");
     };
   }, [socket, playerName, roomCode]);
 
@@ -1113,7 +1357,7 @@ export default function SpaceSurviveModePage() {
         e.preventDefault();
       }
 
-      if (e.repeat) return;
+      if (e.repeat || bookQuestion || showAnswerBox) return;
 
       if (e.key === "ArrowUp") pressDirection("up");
       if (e.key === "ArrowDown") pressDirection("down");
@@ -1122,23 +1366,33 @@ export default function SpaceSurviveModePage() {
     };
 
     const onKeyUp = (e: KeyboardEvent) => {
-      const isArrowKey =
+      if (e.key === "ArrowUp") {
+        releaseDirection("up");
+      }
+
+      if (e.key === "ArrowDown") {
+        releaseDirection("down");
+      }
+
+      if (e.key === "ArrowLeft") {
+        releaseDirection("left");
+      }
+
+      if (e.key === "ArrowRight") {
+        releaseDirection("right");
+      }
+
+      if (
         e.key === "ArrowUp" ||
         e.key === "ArrowDown" ||
         e.key === "ArrowLeft" ||
-        e.key === "ArrowRight";
-
-      if (isArrowKey) {
+        e.key === "ArrowRight"
+      ) {
         e.preventDefault();
       }
-
-      if (e.key === "ArrowUp") releaseDirection("up");
-      if (e.key === "ArrowDown") releaseDirection("down");
-      if (e.key === "ArrowLeft") releaseDirection("left");
-      if (e.key === "ArrowRight") releaseDirection("right");
     };
 
-    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keydown", onKeyDown, { passive: false });
     window.addEventListener("keyup", onKeyUp);
     window.addEventListener("blur", releaseAll);
 
@@ -1164,18 +1418,36 @@ export default function SpaceSurviveModePage() {
   }, [allPlayersReady, bothReady]);
 
   useEffect(() => {
+    if (!inAnswerArea) {
+      answerAreaOpenedRef.current = false;
+      return;
+    }
+
+    if (
+      answerAreaOpenedRef.current ||
+      finished ||
+      bookQuestion ||
+      gameState?.phase !== "playing"
+    ) return;
+
+    answerAreaOpenedRef.current = true;
+    setShowAnswerBox(true);
+  }, [inAnswerArea, finished, bookQuestion]);
+
+  useEffect(() => {
     if (!finished) return;
     if (!mySocketId) return;
 
     const ranks = finalRanks;
-    const myRankNow = ranks.find((r) => r.socketId === mySocketId)?.rank ?? null;
+    const myRankNow =
+      ranks.find((r) => r.socketId === mySocketId)?.rank ?? null;
     if (!myRankNow) return;
 
     const base = correctCount * 10;
-    const survival = survivedStages * 20;
+    const survival = foundLetters * 20;
     const placement = calcPlacementBonus(maxPlayers, ranks, mySocketId);
     const earned = base + survival + placement;
-    const expEarned = correctCount * 20 + survivedStages * 10;
+    const expEarned = correctCount * 20 + foundLetters * 10;
 
     setBasePoints(base);
     setSurvivalBonusPoints(survival);
@@ -1211,7 +1483,8 @@ export default function SpaceSurviveModePage() {
     if (sentRef.current) return;
 
     const ranks = finalRanks;
-    const myRankNow = ranks.find((r) => r.socketId === mySocketId)?.rank ?? null;
+    const myRankNow =
+      ranks.find((r) => r.socketId === mySocketId)?.rank ?? null;
     if (!myRankNow) return;
 
     sentRef.current = true;
@@ -1227,38 +1500,41 @@ export default function SpaceSurviveModePage() {
           p_score_add: earnedPoints,
           p_correct_add: correctCount,
           p_play_add: 1,
-          p_best_streak: survivedStages,
+          p_best_streak: foundLetters,
         });
 
         if (weeklyErr) {
           console.log("upsert_weekly_stats error:", weeklyErr);
         }
 
-        const { error: monthlyErr } = await supabase.rpc("upsert_monthly_stats", {
-          p_user_id: user!.id,
-          p_month_start: monthStart,
-          p_score_add: earnedPoints,
-          p_correct_add: correctCount,
-          p_play_add: 1,
-          p_best_streak: survivedStages,
-        });
+        const { error: monthlyErr } = await supabase.rpc(
+          "upsert_monthly_stats",
+          {
+            p_user_id: user!.id,
+            p_month_start: monthStart,
+            p_score_add: earnedPoints,
+            p_correct_add: correctCount,
+            p_play_add: 1,
+            p_best_streak: foundLetters,
+          },
+        );
 
         if (monthlyErr) {
           console.log("upsert_monthly_stats error:", monthlyErr);
         }
 
         const res = await submitGameResult(supabase, {
-          game: "space",
-          score: survivedStages,
+          game: "word",
+          score: foundLetters,
           title: null,
           firstPlace: myRankNow === 1,
           writeLog: true,
         });
 
-        const modal = buildResultModalPayload("space", res);
+        const modal = buildResultModalPayload("word", res);
         if (modal) pushModal(modal);
       } catch (e) {
-        console.error("[space_survive] submitGameResult error:", e);
+        console.error("[word_chase] submitGameResult error:", e);
       }
     })();
   }, [
@@ -1269,23 +1545,23 @@ export default function SpaceSurviveModePage() {
     finalRanks,
     earnedPoints,
     correctCount,
-    survivedStages,
+    foundLetters,
     supabase,
     pushModal,
   ]);
 
   if (!joined) {
     return (
-      <main className="overflow-hidden bg-gradient-to-b from-[#020617] via-[#0c1635] to-[#2a0b45] text-white">
+      <main className="overflow-hidden bg-gradient-to-b from-[#4a1810] via-[#7c2d12] to-[#d97706] text-white">
         <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.15)_1px,transparent_1px)] [background-size:24px_24px] opacity-30" />
 
         <div className="mx-auto flex max-w-3xl flex-col items-center justify-center px-4 my-20 text-center">
-          <p className="mb-3 rounded-full border border-cyan-300/60 bg-white/10 px-4 py-1 text-sm font-black tracking-[0.3em] text-cyan-100">
-            SPACE SURVIVE
+          <p className="mb-3 rounded-full border border-amber-300/60 bg-white/10 px-4 py-1 text-sm font-black tracking-[0.3em] text-amber-100">
+            WORD CHASE
           </p>
 
-          <SpaceGlassCard className="w-full max-w-md p-5">
-            <p className="mb-3 text-xl font-black text-cyan-100">
+          <WordGlassCard className="w-full max-w-md p-5">
+            <p className="mb-3 text-xl font-black text-amber-100">
               ニックネームを入力してください
             </p>
             <input
@@ -1301,7 +1577,7 @@ export default function SpaceSurviveModePage() {
               }}
               maxLength={10}
               placeholder="最大10文字"
-              className="mb-3 w-full rounded-2xl border border-cyan-300/60 bg-white/10 px-4 py-3 text-center text-xl font-black text-white outline-none placeholder:text-white/40"
+              className="mb-3 w-full rounded-2xl border border-amber-300/60 bg-white/10 px-4 py-3 text-center text-xl font-black text-white outline-none placeholder:text-white/45"
             />
 
             {nameError && (
@@ -1310,9 +1586,9 @@ export default function SpaceSurviveModePage() {
 
             <button
               onClick={handleJoin}
-              className="w-full rounded-full border-2 border-cyan-200 bg-gradient-to-r from-cyan-400 via-blue-500 to-fuchsia-500 px-8 py-3 text-xl font-black text-white shadow-[0_0_30px_rgba(34,211,238,0.45)] transition hover:scale-105"
+              className="w-full rounded-full border-2 border-amber-200 bg-gradient-to-r from-amber-400 via-yellow-500 to-orange-500 px-8 py-3 text-xl font-black text-white shadow-[0_0_30px_rgba(245,158,11,0.45)] transition hover:scale-105"
             >
-              宇宙へ出発する
+              本の世界へ出発する
             </button>
 
             {roomFull && (
@@ -1320,7 +1596,7 @@ export default function SpaceSurviveModePage() {
                 このルームは満員です。
               </p>
             )}
-          </SpaceGlassCard>
+          </WordGlassCard>
         </div>
       </main>
     );
@@ -1328,17 +1604,17 @@ export default function SpaceSurviveModePage() {
 
   if (!allPlayersReady) {
     return (
-      <main className="bg-gradient-to-b from-[#020617] via-[#0c1635] to-[#2a0b45] px-4 py-10 text-center text-white">
+      <main className="bg-gradient-to-b from-[#4a1810] via-[#7c2d12] to-[#d97706] px-4 py-10 text-center text-white">
         <div className="mx-auto max-w-2xl">
-          <p className="mb-3 text-sm font-black tracking-[0.4em] text-cyan-200">
+          <p className="mb-3 text-sm font-black tracking-[0.4em] text-amber-200">
             MATCHING
           </p>
           <h1 className="mb-6 text-4xl font-black md:text-6xl">
-            サバイバー待機中…
+            プレイヤー待機中…
           </h1>
 
-          <SpaceGlassCard className="p-6">
-            <p className="mb-2 text-xl font-black text-cyan-100">
+          <WordGlassCard className="p-6">
+            <p className="mb-2 text-xl font-black text-amber-100">
               あなた：{playerName}
             </p>
             <p className="text-3xl font-black text-yellow-200 animate-pulse">
@@ -1347,7 +1623,7 @@ export default function SpaceSurviveModePage() {
             <p className="mt-3 text-sm font-bold text-white/60">
               {/* 最大4人まで。メンバーが揃うと準備画面に進みます。 */}
             </p>
-          </SpaceGlassCard>
+          </WordGlassCard>
         </div>
       </main>
     );
@@ -1355,9 +1631,9 @@ export default function SpaceSurviveModePage() {
 
   if (allPlayersReady && !bothReady) {
     return (
-      <main className="bg-gradient-to-b from-[#020617] via-[#0c1635] to-[#2a0b45] px-4 py-10 text-center text-white">
+      <main className="bg-gradient-to-b from-[#4a1810] via-[#7c2d12] to-[#d97706] px-4 py-10 text-center text-white">
         <div className="mx-auto max-w-3xl">
-          <p className="mb-3 text-sm font-black tracking-[0.4em] text-cyan-200">
+          <p className="mb-3 text-sm font-black tracking-[0.4em] text-amber-200">
             READY ROOM
           </p>
           <h1
@@ -1375,10 +1651,10 @@ export default function SpaceSurviveModePage() {
 
           <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
             {roomPlayers.map((p, i) => (
-              <SpaceGlassCard key={p.socketId} className="p-3">
+              <WordGlassCard key={p.socketId} className="p-3">
                 {/* <p className="text-3xl">{PLAYER_EMOJIS[i % PLAYER_EMOJIS.length]}</p> */}
                 <p className="truncate font-black text-white">{p.playerName}</p>
-              </SpaceGlassCard>
+              </WordGlassCard>
             ))}
           </div>
 
@@ -1395,7 +1671,7 @@ export default function SpaceSurviveModePage() {
                 </p>
                 <button
                   onClick={handleReady}
-                  className="animate-pulse rounded-full border-2 border-yellow-100 bg-gradient-to-r from-cyan-400 via-blue-500 to-fuchsia-500 px-8 py-4 text-2xl font-black text-white shadow-[0_0_35px_rgba(217,70,239,0.55)] transition hover:scale-110"
+                  className="animate-pulse rounded-full border-2 border-yellow-100 bg-gradient-to-r from-[#6b1d1d] via-[#a16207] to-[#f59e0b] px-8 py-4 text-2xl font-black text-white shadow-[0_0_35px_rgba(245,158,11,0.55)] transition hover:scale-110"
                 >
                   対戦スタート！
                 </button>
@@ -1404,7 +1680,7 @@ export default function SpaceSurviveModePage() {
           </AnimatePresence>
 
           {readyToStart && (
-            <p className="mt-4 text-2xl font-black text-cyan-100 animate-pulse">
+            <p className="mt-4 text-2xl font-black text-amber-100 animate-pulse">
               全員の準備を待っています…
             </p>
           )}
@@ -1417,9 +1693,7 @@ export default function SpaceSurviveModePage() {
     <main
       key={battleKey}
       className={`overflow-hidden bg-gradient-to-b ${
-        finished
-          ? "from-[#020617] via-[#0c1635] to-[#2a0b45]"
-          : theme.bg
+        finished ? "from-[#4a1810] via-[#7c2d12] to-[#d97706]" : theme.bg
       } text-white`}
     >
       <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.15)_1px,transparent_1px)] [background-size:24px_24px] opacity-30" />
@@ -1432,13 +1706,17 @@ export default function SpaceSurviveModePage() {
                 <div
                   className={`mb-3 rounded-3xl border ${theme.border} bg-gradient-to-r ${theme.panel} p-3 text-center ${theme.glow}`}
                 >
-                  <p className={`text-sm md:text-md font-black ${theme.accent}`}>
+                  <p
+                    className={`text-sm md:text-md font-black ${theme.accent}`}
+                  >
                     {theme.label}
                   </p>
 
                   <p className="mt-1 text-2xl font-black text-white md:text-4xl">
+                    {/* {gameState?.question?.question ??
+                      "本を探してクイズに正解し、文字とヒントを集めよう！"} */}
                     {gameState?.question?.question ??
-                      "問題待機中：サーバーから問題が届くとここに表示されます"}
+                      "本に書いてあるキーワードは？全部集めて一番早く答えを当てよう！"}
                   </p>
 
                   <div className="mt-1 md:mt-4 flex justify-center">
@@ -1458,7 +1736,7 @@ export default function SpaceSurviveModePage() {
                       </span>
 
                       <span className="text-2xl md:text-4xl font-black text-yellow-200 md:text-4xl animate-pulse">
-                        {gameState?.timeLeft ?? 10}
+                        {gameState?.timeLeft ?? 180}
                       </span>
 
                       <span className="ml-1 text-xl font-black text-yellow-100">
@@ -1466,142 +1744,108 @@ export default function SpaceSurviveModePage() {
                       </span>
                     </div>
                   </div>
+                  
+                  <div className="mt-2 flex justify-center">
+                    <div className="rounded-full border-2 border-amber-200/50 bg-black/45 px-4 py-1 text-sm font-black text-amber-100 shadow-[0_0_20px_rgba(245,158,11,0.35)]">
+                      📚 残り本 {remainingBooks}冊
+                    </div>
+                  </div>
                 </div>
 
                 <div
-                  className={`relative mx-auto aspect-square w-full max-w-[680px] overflow-hidden rounded-[2rem] border-4 ${theme.border} bg-slate-950/80 ${theme.glow}`}
+                  ref={mapViewportRef}
+                  className={`relative mx-auto h-[68vh] min-h-[520px] w-full max-w-[980px] overflow-hidden rounded-[2rem] border-4 ${theme.border} bg-[#1f1208] ${theme.glow}`}
                 >
-                  {gameState?.safeMin != null && gameState?.safeMax != null && (
-                    <div
-                      className="pointer-events-none absolute border-4 border-cyan-200/70 bg-cyan-300/5 shadow-[0_0_40px_rgba(34,211,238,0.55)]"
-                      style={{
-                        left: `${gameState.safeMin}%`,
-                        top: `${gameState.safeMin}%`,
-                        width: `${gameState.safeMax - gameState.safeMin}%`,
-                        height: `${gameState.safeMax - gameState.safeMin}%`,
-                      }}
-                    />
-                  )}
                   <div
-                    className="
-                      absolute
-                      grid
-                      grid-cols-2
-                      grid-rows-2
-                      rounded-[2rem]
-                      overflow-hidden
-                      border-2
-                      border-white/20
-                      shadow-[0_0_25px_rgba(255,255,255,0.15)]
-                    "
+                    className="absolute left-0 top-0"
                     style={{
-                      left: `${gameState?.safeMin ?? 0}%`,
-                      top: `${gameState?.safeMin ?? 0}%`,
-                      width: `${(gameState?.safeMax ?? 100) - (gameState?.safeMin ?? 0)}%`,
-                      height: `${(gameState?.safeMax ?? 100) - (gameState?.safeMin ?? 0)}%`,
+                      width: WORD_WORLD_WIDTH,
+                      height: WORD_WORLD_HEIGHT,
+                      transform: `translate3d(${cameraX}px, ${cameraY}px, 0)`,
+                      transition: "transform 80ms linear",
                     }}
                   >
-                    {(gameState?.question?.choices ?? [
-                      "りんご",
-                      "バナナ",
-                      "みかん",
-                      "ロケット",
-                    ]).map((choice, index) => (
-                      <div
-                        key={`${choice}-${index}`}
-                        className="
-                          flex
-                          items-center
-                          justify-center
-                          border
-                          border-white/10
-                          bg-black/25
-                          backdrop-blur
-                          text-center
-                          font-black
-                          text-white
-                          text-sm
-                          md:text-3xl
-                        "
-                      >
-                        {choice}
-                      </div>
-                    ))}
+                  <div className="absolute inset-0 bg-[#3a2413]" />
+                  {/* <div className="absolute inset-0 bg-[linear-gradient(rgba(251,191,36,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(251,191,36,0.12)_1px,transparent_1px)] [background-size:72px_72px]" /> */}
+
+                  {(gameState?.walls ?? []).map((wall) => (
+                    <div
+                      key={wall.id}
+                      className="absolute rounded-md border-2 border-amber-100/60 bg-gradient-to-br from-[#d6a35a] via-[#8b5e34] to-[#3b2416] shadow-[0_0_18px_rgba(251,191,36,0.35),inset_0_2px_0_rgba(255,255,255,0.22)]"
+                      style={{
+                        left: `${wall.x}px`,
+                        top: `${wall.y}px`,
+                        width: `${wall.w}px`,
+                        height: `${wall.h}px`,
+                      }}
+                    />
+                  ))}
+
+                  <div
+                    className="absolute h-56 w-56 -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-amber-200/45 bg-yellow-200/5 shadow-[0_0_50px_rgba(251,191,36,0.35)]"
+                    style={{
+                      left: WORD_ANSWER_X,
+                      top: WORD_ANSWER_Y,
+                    }}
+                  />
+
+                  <div
+                    className="absolute z-10 flex h-32 w-32 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full border-4 border-yellow-200 bg-gradient-to-br from-yellow-200 via-amber-300 to-orange-500 text-black shadow-[0_0_38px_rgba(250,204,21,0.75)] md:h-44 md:w-44"
+                    style={{
+                      left: WORD_ANSWER_X,
+                      top: WORD_ANSWER_Y,
+                    }}
+                  >
+                    <span className="text-5xl md:text-7xl">
+                      📖
+                    </span>
+
+                    <span className="text-xs font-black md:text-sm">
+                      解答の書
+                    </span>
                   </div>
 
-                  {gameState?.flames?.map((flame) => (
-                    <div
-                      key={flame.id}
-                      className="
-                        absolute
-                        flex
-                        items-center
-                        justify-center
-                        rounded-full
-                        bg-red-500/20
-                        text-2xl
-                        shadow-[0_0_22px_rgba(248,113,113,0.9)]
-                        md:text-4xl
-                        animate-pulse
-                      "
-                      style={{
-                        left: `${flame.x}%`,
-                        top: `${flame.y}%`,
-                        width: `${flame.size}%`,
-                        height: `${flame.size}%`,
-                        transform: "translate(-50%, -50%)",
-                      }}
-                    >
-                      🔥
-                    </div>
-                  ))}
+                  {(gameState?.books ?? gameState?.items ?? [])
+                    .filter((book) => !book.usedBy?.includes(mySocketId ?? ""))
+                    .map((book) => {
+                    const bookStyle =
+                      book.type === "hint"
+                        ? "border-red-200 bg-gradient-to-br from-red-500 to-rose-800 text-yellow-100 shadow-[0_0_22px_rgba(248,113,113,0.75)]"
+                        : book.type === "fake"
+                          ? "border-stone-300 bg-gradient-to-br from-stone-500 to-amber-900 text-stone-100 shadow-[0_0_18px_rgba(120,113,108,0.55)]"
+                          : "border-emerald-200 bg-gradient-to-br from-emerald-400 to-green-800 text-yellow-100 shadow-[0_0_22px_rgba(52,211,153,0.65)]";
 
-                  {gameState?.obstacles?.map((obstacle) => (
-                    <div
-                      key={obstacle.id}
-                      className={`absolute flex items-center justify-center font-black ${
-                        obstacle.type === "meteor"
-                          ? "rounded-full bg-orange-500 text-3xl shadow-[0_0_22px_rgba(251,146,60,0.95)]"
-                          : "rounded-full bg-gradient-to-r from-red-200 via-red-500 to-red-200 shadow-[0_0_35px_rgba(239,68,68,1),0_0_70px_rgba(248,113,113,0.75)]"
-                      }`}
-                      style={{
-                        left: `${obstacle.x}%`,
-                        top: `${obstacle.y}%`,
-                        width: `${obstacle.w}%`,
-                        height: `${obstacle.h}%`,
-                        transform: "translate(-50%, -50%)",
-                      }}
-                    >
-                      {obstacle.type === "meteor" ? "☄️" : ""}
-                    </div>
-                  ))}
+                    const icon =
+                      BOOK_EMOJIS[
+                        book.id
+                          .split("")
+                          .reduce((a, c) => a + c.charCodeAt(0), 0) %
+                          BOOK_EMOJIS.length
+                      ];
 
-                  {gameState?.items?.map((item) => (
-                    <div
-                      key={item.id}
-                      className="absolute flex h-8 w-8 items-center justify-center rounded-full bg-yellow-300 text-lg shadow-[0_0_18px_rgba(250,204,21,0.9)] md:h-10 md:w-10"
-                      style={{
-                        left: `${item.x}%`,
-                        top: `${item.y}%`,
-                        transform: "translate(-50%, -50%)",
-                      }}
-                    >
-                      ⭐
-                    </div>
-                  ))}
+                    return (
+                      <div
+                        key={book.id}
+                        className={`absolute flex h-12 w-12 items-center justify-center rounded-2xl border-2 text-2xl font-black md:h-16 md:w-16 md:text-3xl ${bookStyle} ${book.solved ? "opacity-45 grayscale" : ""}`}
+                        style={{
+                          left: `${toWorldX(book.x)}px`,
+                          top: `${toWorldY(book.y)}px`,
+                          transform: "translate(-50%, -50%)",
+                        }}
+                      >
+                        {icon}
+                      </div>
+                    );
+                  })}
 
                   {displayPlayers.map((player, index) => {
                     const isMe = player.socketId === mySocketId;
-                    const hasShield =
-                      typeof player.invincibleUntil === "number" &&
-                      player.invincibleUntil > Date.now();
-
                     return (
                       <motion.div
                         key={player.socketId}
                         animate={{
-                          left: `${player.x}%`,
-                          top: `${player.y}%`,
+                          left: `${toWorldX(player.x)}px`,
+                          top: `${toWorldY(player.y)}px`,
                         }}
                         transition={{ type: "tween", duration: 0.08 }}
                         style={{
@@ -1662,6 +1906,188 @@ export default function SpaceSurviveModePage() {
                     );
                   })}
 
+                  </div>
+
+                  {/* <div className="pointer-events-none absolute left-1/2 top-1/2 z-30 h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-yellow-200/40" /> */}
+
+                  <AnimatePresence>
+                    {bookQuestion && (
+                      <motion.div
+                        className="absolute inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                      >
+                        <motion.div
+                          initial={{ scale: 0.85, opacity: 0, y: 12 }}
+                          animate={{ scale: 1, opacity: 1, y: 0 }}
+                          exit={{ scale: 0.9, opacity: 0, y: 12 }}
+                          className="w-full max-w-lg rounded-[2rem] border-4 border-[#3b2416] bg-[#fff5d6] p-5 text-center text-[#3b2416] shadow-[0_8px_0_rgba(59,36,22,1)]"
+                        >
+                          <p className="text-sm font-black tracking-[0.25em] text-[#8b3a1f]">
+                            {bookQuestion.bookType === "letter"
+                              ? "文字の本"
+                              : bookQuestion.bookType === "hint"
+                                ? "ヒントの本"
+                                : "あやしい本"}
+                          </p>
+                          <p className="mt-2 text-xl font-black md:text-2xl">
+                            {bookQuestion.question.question}
+                          </p>
+
+                          <div className="mt-5 grid gap-3">
+                            {bookQuestion.question.choices.map((choice, index) => (
+                              <button
+                                key={`${choice}-${index}`}
+                                type="button"
+                                onClick={() => handleSubmitBookAnswer(index)}
+                                className="rounded-2xl border-3 border-[#3b2416] bg-white px-4 py-3 text-lg font-black text-[#3b2416] shadow-[0_4px_0_rgba(59,36,22,1)] transition hover:-translate-y-0.5 active:translate-y-1 active:shadow-none"
+                              >
+                                {choice}
+                              </button>
+                            ))}
+                          </div>
+                        </motion.div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  <AnimatePresence>
+                    {bookResultMessage && (
+                      <motion.div
+                        className="absolute left-1/2 top-4 z-40 w-[90%] max-w-md -translate-x-1/2 rounded-3xl border-3 border-[#3b2416] bg-[#fff2cf] px-4 py-3 text-center text-lg font-black text-[#3b2416] shadow-[0_5px_0_rgba(59,36,22,1)]"
+                        initial={{ opacity: 0, y: -14 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -14 }}
+                      >
+                        {bookResultMessage}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  <AnimatePresence>
+                    {showAnswerBox && (
+                      <motion.div
+                        className="absolute inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                      >
+                        <motion.div
+                          initial={{ scale: 0.85, opacity: 0, y: 12 }}
+                          animate={{ scale: 1, opacity: 1, y: 0 }}
+                          exit={{ scale: 0.9, opacity: 0, y: 12 }}
+                          className="w-full max-w-md rounded-[2rem] border-4 border-amber-300 bg-[#fff5d6] p-5 text-center text-[#2b1645] shadow-[0_8px_0_rgba(0,0,0,1)]"
+                        >
+                          <p className="text-sm font-black tracking-[0.25em] text-amber-700">
+                            中央の辞書ページ
+                          </p>
+                          <p className="mt-1 text-2xl font-black md:text-3xl">
+                            答えを入力！
+                          </p>
+
+                          <div className="mt-4 flex justify-center gap-2">
+                            {Array.from({ length: targetLength }).map(
+                              (_, i) => (
+                                <span
+                                  key={i}
+                                  className="grid h-10 w-10 place-items-center rounded-xl border-2 border-black bg-white text-xl font-black shadow-[0_3px_0_rgba(0,0,0,1)]"
+                                >
+                                  {myFoundLetters[i] || "□"}
+                                </span>
+                              ),
+                            )}
+                          </div>
+
+                          <div className="mt-4 rounded-2xl border-2 border-emerald-500 bg-emerald-100 px-3 py-2 text-sm font-black text-emerald-900">
+                            見つけた文字：
+                            {foundLetterList.length > 0
+                              ? foundLetterList.join(" ・ ")
+                              : "まだなし"}
+                          </div>
+
+                          {hints.length > 0 && (
+                            <div className="mt-4 rounded-2xl border-2 border-amber-600 bg-amber-100 px-3 py-2 text-sm font-black text-amber-900">
+                              ヒント：{hints.join(" / ")}
+                            </div>
+                          )}
+
+                          <input
+                            value={answerText}
+                            onChange={(e) => {
+                              setAnswerText(e.target.value.slice(0, 12));
+                              setAnswerError(null);
+                            }}
+                            disabled={cooldownSec > 0}
+                            placeholder={
+                              cooldownSec > 0
+                                ? `あと${cooldownSec}秒待ってね`
+                                : "ひらがなで入力"
+                            }
+                            className="mt-4 w-full rounded-2xl border-3 border-black bg-white px-4 py-3 text-center text-xl font-black outline-none disabled:bg-stone-200"
+                          />
+
+                          {answerError && (
+                            <p className="mt-2 font-black text-red-600">
+                              {answerError}
+                            </p>
+                          )}
+
+                          <div className="mt-4 grid grid-cols-2 gap-3">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setShowAnswerBox(false);
+                                (document.activeElement as HTMLElement)?.blur();
+                              }}
+                              className="rounded-full border-3 border-black bg-white px-4 py-3 font-black shadow-[0_4px_0_rgba(0,0,0,1)] active:translate-y-1 active:shadow-none"
+                            >
+                              戻る
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleSubmitAnswer}
+                              disabled={cooldownSec > 0}
+                              className="rounded-full border-3 border-black bg-gradient-to-r from-yellow-300 to-orange-500 px-4 py-3 font-black text-black shadow-[0_4px_0_rgba(0,0,0,1)] active:translate-y-1 active:shadow-none disabled:opacity-50"
+                            >
+                              回答する
+                            </button>
+                          </div>
+                        </motion.div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  <AnimatePresence>
+                    {answerSuccessMessage && (
+                      <motion.div className="absolute inset-0 z-[80] flex items-center justify-center bg-black/75 p-4 text-center backdrop-blur-sm">
+                        <motion.div
+                          initial={{ scale: 0.75, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0.9, opacity: 0 }}
+                          className="rounded-[2rem] border-4 border-yellow-200 bg-[#fff5d6] px-6 py-6 text-3xl font-black text-[#3b2416] shadow-[0_8px_0_rgba(59,36,22,1)] md:text-5xl"
+                        >
+                          {answerSuccessMessage}
+                        </motion.div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  <AnimatePresence>
+                    {showGameSetText && (
+                      <motion.div className="absolute inset-0 z-[90] flex items-center justify-center bg-black/85 text-center backdrop-blur-sm">
+                        <motion.p
+                          initial={{ scale: 0.6, opacity: 0 }}
+                          animate={{ scale: [1.25, 1], opacity: 1 }}
+                          exit={{ scale: 0.9, opacity: 0 }}
+                          className="text-6xl font-black text-yellow-200 drop-shadow-[0_0_35px_rgba(250,204,21,0.9)] md:text-8xl"
+                        >
+                          GAME SET!
+                        </motion.p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
                   <AnimatePresence>
                     {gameState?.phase === "countdown" && (
                       <motion.div
@@ -1700,7 +2126,7 @@ export default function SpaceSurviveModePage() {
                         initial={{ opacity: 0, y: -16 }}
                         animate={{ opacity: 1, y: 0 }}
                       >
-                        脱落しました：ほかのサバイバーを見守ろう
+                        終了しました：ほかのプレイヤーを見守ろう
                       </motion.div>
                     )}
 
@@ -1716,11 +2142,8 @@ export default function SpaceSurviveModePage() {
                           animate={{ scale: [0.9, 1.08, 1], opacity: 1 }}
                           transition={{ duration: 0.45 }}
                         >
-                          <p className="text-sm font-black tracking-[0.5em] text-cyan-200">
-                            SPACE SURVIVE
-                          </p>
-                          <p className="mt-2 text-6xl font-black text-white drop-shadow-[0_0_25px_rgba(255,255,255,0.9)] md:text-8xl">
-                            STAGE {gameState.stage}
+                          <p className="text-sm font-black tracking-[0.5em] text-amber-200">
+                            WORD CHASE
                           </p>
                           {/* <p className="mt-3 text-2xl font-black text-yellow-200">
                             {theme.title}
@@ -1738,15 +2161,16 @@ export default function SpaceSurviveModePage() {
                       >
                         <motion.div
                           initial={{ scale: 0.65, opacity: 0, rotate: -4 }}
-                          animate={{ scale: [0.9, 1.15, 1], opacity: 1, rotate: 0 }}
+                          animate={{
+                            scale: [0.9, 1.15, 1],
+                            opacity: 1,
+                            rotate: 0,
+                          }}
                           transition={{ duration: 0.55 }}
                         >
                           <p className="text-7xl font-black text-white drop-shadow-[0_0_35px_rgba(255,255,255,1)] md:text-9xl">
                             GAME SET!
                           </p>
-                          {/* <p className="mt-4 text-xl font-black text-cyan-100 md:text-3xl">
-                            宇宙サバイバル終了！
-                          </p> */}
                         </motion.div>
                       </motion.div>
                     )}
@@ -1755,11 +2179,128 @@ export default function SpaceSurviveModePage() {
               </section>
 
               <aside className="rounded-3xl border border-white/15 bg-black/35 p-4 backdrop-blur">
-                <p className="mb-3 text-center text-xl font-black text-cyan-100">
+                <WordGlassCard className="mb-4 p-3">
+                  <p className="mb-3 text-center text-sm font-black tracking-[0.25em] text-amber-200">
+                    発見した文字
+                  </p>
+
+                  <div className="space-y-2">
+                    {displayPlayers.map((player) => {
+                      const isMe = player.socketId === mySocketId;
+                      const found = getPlayerFoundCount(player);
+
+                      return (
+                        <div
+                          key={player.socketId}
+                          className={`rounded-2xl border px-3 py-2 ${
+                            isMe
+                              ? "border-yellow-300 bg-yellow-300/20"
+                              : "border-white/10 bg-white/10"
+                          }`}
+                        >
+                          <div className="mb-1 flex items-center justify-between gap-2">
+                            <span className="min-w-0 truncate text-sm font-black text-white">
+                              {isMe ? "YOU" : player.name}
+                            </span>
+                            <span className="text-xs font-black text-amber-100">
+                              {found}/{targetLength}
+                            </span>
+                          </div>
+
+                          <ProgressBooks found={found} total={targetLength} />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </WordGlassCard>
+                <p className="mb-3 text-center text-xl font-black text-amber-100">
                   プレイヤー
                 </p>
 
                 <div className="space-y-2">
+                  <AnimatePresence>
+                    {showAnswerBox && (
+                      <motion.div
+                        className="absolute inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                      >
+                        <motion.div
+                          initial={{ scale: 0.85, opacity: 0, y: 12 }}
+                          animate={{ scale: 1, opacity: 1, y: 0 }}
+                          exit={{ scale: 0.9, opacity: 0, y: 12 }}
+                          className="w-full max-w-md rounded-[2rem] border-4 border-amber-300 bg-[#fff5d6] p-5 text-center text-[#2b1645] shadow-[0_8px_0_rgba(0,0,0,1)]"
+                        >
+                          <p className="text-sm font-black tracking-[0.25em] text-amber-700">
+                            中央の辞書ページ
+                          </p>
+                          <p className="mt-1 text-2xl font-black md:text-3xl">
+                            答えを入力！
+                          </p>
+
+                          <div className="mt-4 flex justify-center gap-2">
+                            {Array.from({ length: targetLength }).map(
+                              (_, i) => (
+                                <span
+                                  key={i}
+                                  className="grid h-10 w-10 place-items-center rounded-xl border-2 border-black bg-white text-xl font-black shadow-[0_3px_0_rgba(0,0,0,1)]"
+                                >
+                                  {myFoundLetters[i] || "□"}
+                                </span>
+                              ),
+                            )}
+                          </div>
+
+                          {hints.length > 0 && (
+                            <div className="mt-4 rounded-2xl border-2 border-amber-600 bg-amber-100 px-3 py-2 text-sm font-black text-amber-900">
+                              ヒント：{hints.join(" / ")}
+                            </div>
+                          )}
+
+                          <input
+                            value={answerText}
+                            onChange={(e) => {
+                              setAnswerText(e.target.value.slice(0, 12));
+                              setAnswerError(null);
+                            }}
+                            disabled={cooldownSec > 0}
+                            placeholder={
+                              cooldownSec > 0
+                                ? `あと${cooldownSec}秒待ってね`
+                                : "ひらがなで入力"
+                            }
+                            className="mt-4 w-full rounded-2xl border-3 border-black bg-white px-4 py-3 text-center text-xl font-black outline-none disabled:bg-stone-200"
+                          />
+
+                          {answerError && (
+                            <p className="mt-2 font-black text-red-600">
+                              {answerError}
+                            </p>
+                          )}
+
+                          <div className="mt-4 grid grid-cols-2 gap-3">
+                            <button
+                              type="button"
+                              onClick={() => setShowAnswerBox(false)}
+                              className="rounded-full border-3 border-black bg-white px-4 py-3 font-black shadow-[0_4px_0_rgba(0,0,0,1)] active:translate-y-1 active:shadow-none"
+                            >
+                              戻る
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleSubmitAnswer}
+                              disabled={cooldownSec > 0}
+                              className="rounded-full border-3 border-black bg-gradient-to-r from-yellow-300 to-orange-500 px-4 py-3 font-black text-black shadow-[0_4px_0_rgba(0,0,0,1)] active:translate-y-1 active:shadow-none disabled:opacity-50"
+                            >
+                              回答する
+                            </button>
+                          </div>
+                        </motion.div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
                   {displayPlayers.map((player, index) => {
                     const isMe = player.socketId === mySocketId;
 
@@ -1782,11 +2323,14 @@ export default function SpaceSurviveModePage() {
                               player.alive ? "text-emerald-300" : "text-red-300"
                             }`}
                           >
-                            {player.alive ? "生存" : reasonLabel(player.eliminatedReason)}
+                            {player.alive
+                              ? "探索中"
+                              : reasonLabel(player.eliminatedReason)}
                           </p>
                         </div>
                         <p className="mt-1 text-sm font-bold text-white/70">
-                          SCORE：{player.score}
+                          文字：{player.foundLetters ?? 0}/{targetLength} /
+                          クイズ：{player.correctCount ?? 0}
                         </p>
                       </div>
                     );
@@ -1812,12 +2356,12 @@ export default function SpaceSurviveModePage() {
             </p>
           </>
         ) : (
-          <SpaceResult
+          <WordChaseResult
             myRank={myRank}
             ranks={finalRanks}
             players={displayPlayers}
             correctCount={correctCount}
-            survivedStages={survivedStages}
+            foundLetters={foundLetters}
             basePoints={basePoints}
             placementBonusPoints={placementBonusPoints}
             survivalBonusPoints={survivalBonusPoints}

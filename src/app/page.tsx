@@ -602,7 +602,7 @@ export default async function HomePage({
           {/* スペースクイズ */}
           <div className="text-center max-w-[280px]">
             <Link href="/quiz-space" className="w-full md:w-auto flex justify-center">
-              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-cyan-500 via-purple-600 to-fuchsia-500 text-white hover:scale-110 hover:shadow-[0_0_40px_rgba(168,85,247,0.8)] transition-all">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-cyan-500 via-purple-600 to-fuchsia-500 text-white hover:scale-110 transition-all">
                 🛸スペースクイズ
               </button>
             </Link>
@@ -612,6 +612,22 @@ export default async function HomePage({
               </p>
               <p className="text-sm md:text-base text-gray-700 leading-tight">
                 最後まで生き残る宇宙クイズバトル！
+              </p>
+            </div>
+          </div>
+          {/* ワードチェイス */}
+          <div className="text-center max-w-[280px]">
+            <Link href="/quiz-word" className="w-full md:w-auto flex justify-center">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-[#6b1d1d] via-[#a16207] to-[#f59e0b] text-white hover:scale-110 transition-all">
+                🔍ワードチェイス
+              </button>
+            </Link>
+            <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                迷路の中で文字を集めろ！
+              </p>
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                誰より早く単語を当てる探索クイズバトル！
               </p>
             </div>
           </div>

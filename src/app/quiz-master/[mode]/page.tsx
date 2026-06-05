@@ -177,19 +177,19 @@ const enemies = [
   { id: "mimic", name: "ミミック", image: "/images/ミミック_1.png", hp: 250, attack: 200, description: "宝箱に化けるトリッキーな敵。油断すると噛まれる！" },
   { id: "lizardman", name: "リザードマン", image: "/images/リザードマン_1.png", hp: 400, attack: 300, description: "鱗に覆われた戦士。高い身体能力と鋭い爪で攻撃してくる。" },
   { id: "golem", name: "ゴーレム", image: "/images/ゴーレム_1.png", hp: 600, attack: 450, description: "岩と魔力で作られた巨人。圧倒的な防御力を誇る。" },
-  { id: "cerberus", name: "ケルベロス", image: "/images/ケルベロス_1.png", hp: 700, attack: 550, description: "冥界を守る三つ首の魔獣。素早い連続攻撃が脅威。" },
-  { id: "berserker", name: "バーサーカー", image: "/images/バーサーカー_1.png", hp: 900, attack: 700, description: "理性を失った狂戦士。攻撃力が非常に高い。" },
-  { id: "dragon", name: "ドラゴン", image: "/images/ドラゴン_1.png", hp: 1200, attack: 1000, description: "火を吹く巨大竜。圧倒的な力を誇る古代の王者。" },
-  { id: "fenikkusu", name: "フェニックス", image: "/images/フェニックス_1.png", hp: 1500, attack: 1250, description: "不死鳥の炎を操る神秘的な生物。燃え盛る翼で攻撃。" },
-  { id: "leviathan", name: "リヴァイアサン", image: "/images/リヴァイアサン_1.png", hp: 2000, attack: 1700, description: "海の深淵から現れる巨大モンスター。水流で圧倒する。" },
-  { id: "blackdragon", name: "ブラックドラゴン", image: "/images/ブラックドラゴン_1.png", hp: 3500, attack: 2500, description: "闇の力を宿す黒竜。魔法攻撃も強力。" },
-  { id: "kingdemon", name: "キングデーモン", image: "/images/キングデーモン_1.png", hp: 4500, attack: 3500, description: "魔界を統べる悪魔の王。圧倒的な魔力と威圧感を放つ。" },
-  { id: "kinghydra", name: "キングヒドラ", image: "/images/キングヒドラ_1.png", hp: 5000, attack: 4500, description: "複数の首を持つ巨大魔獣。倒しても再生する恐怖の存在。" },
-  { id: "ordin", name: "オーディン", image: "/images/オーディン_1.png", hp: 6000, attack: 6000, description: "知恵と戦の神。魔法と剣技を極めた伝説の戦士。" },
-  { id: "poseidon", name: "ポセイドン", image: "/images/ポセイドン_1.png", hp: 7500, attack: 7500, description: "海の神。雷と津波で敵を蹴散らす力を持つ。" },
-  { id: "hades", name: "ハデス", image: "/images/ハデス_1.png", hp: 8500, attack: 8500, description: "冥界の支配者。死者の力を操り、強大な攻撃を仕掛ける。" },
-  { id: "zeus", name: "ゼウス", image: "/images/ゼウス_1.png", hp: 10000, attack: 10000, description: "天空の王。雷霆を操る全知全能の神。" },
-  { id: "gundarimyouou", name: "軍荼利明王（ぐんだりみょうおう）", image: "/images/軍荼利明王_1.png", hp: 12500, attack: 12500, description: "仏教の怒りの守護神。恐怖の炎で全てを焼き尽くす。" },
+  { id: "cerberus", name: "ケルベロス", image: "/images/ケルベロス_1.png", hp: 700, attack: 700, description: "冥界を守る三つ首の魔獣。素早い連続攻撃が脅威。" },
+  { id: "berserker", name: "バーサーカー", image: "/images/バーサーカー_1.png", hp: 900, attack: 1000, description: "理性を失った狂戦士。攻撃力が非常に高い。" },
+  { id: "dragon", name: "ドラゴン", image: "/images/ドラゴン_1.png", hp: 1200, attack: 1500, description: "火を吹く巨大竜。圧倒的な力を誇る古代の王者。" },
+  { id: "fenikkusu", name: "フェニックス", image: "/images/フェニックス_1.png", hp: 1500, attack: 1800, description: "不死鳥の炎を操る神秘的な生物。燃え盛る翼で攻撃。" },
+  { id: "leviathan", name: "リヴァイアサン", image: "/images/リヴァイアサン_1.png", hp: 2000, attack: 2500, description: "海の深淵から現れる巨大モンスター。水流で圧倒する。" },
+  { id: "blackdragon", name: "ブラックドラゴン", image: "/images/ブラックドラゴン_1.png", hp: 3500, attack: 3500, description: "闇の力を宿す黒竜。魔法攻撃も強力。" },
+  { id: "kingdemon", name: "キングデーモン", image: "/images/キングデーモン_1.png", hp: 4500, attack: 4500, description: "魔界を統べる悪魔の王。圧倒的な魔力と威圧感を放つ。" },
+  { id: "kinghydra", name: "キングヒドラ", image: "/images/キングヒドラ_1.png", hp: 5000, attack: 5000, description: "複数の首を持つ巨大魔獣。倒しても再生する恐怖の存在。" },
+  { id: "ordin", name: "オーディン", image: "/images/オーディン_1.png", hp: 7000, attack: 7000, description: "知恵と戦の神。魔法と剣技を極めた伝説の戦士。" },
+  { id: "poseidon", name: "ポセイドン", image: "/images/ポセイドン_1.png", hp: 8000, attack: 8000, description: "海の神。雷と津波で敵を蹴散らす力を持つ。" },
+  { id: "hades", name: "ハデス", image: "/images/ハデス_1.png", hp: 10000, attack: 10000, description: "冥界の支配者。死者の力を操り、強大な攻撃を仕掛ける。" },
+  { id: "zeus", name: "ゼウス", image: "/images/ゼウス_1.png", hp: 12000, attack: 12000, description: "天空の王。雷霆を操る全知全能の神。" },
+  { id: "gundarimyouou", name: "軍荼利明王（ぐんだりみょうおう）", image: "/images/軍荼利明王_1.png", hp: 15000, attack: 15000, description: "仏教の怒りの守護神。恐怖の炎で全てを焼き尽くす。" },
   { id: "maou", name: "魔王", image: "/images/魔王_1.png", hp: 30000, attack: 30000, description: "世界を闇に包もうとする存在。圧倒的な魔力を秘める。" },
   { id: "yuusya_game", name: "クイズマスターの最強勇者", image: "/images/勇者1_1.png", hp: 50000, attack: 50000, description: "全てのクイズと戦闘を制した伝説の勇者。前人未到の強さを誇る。" },
   { id: "quizou", name: "クイズ王", image: "/images/王様_1.png", hp: 100000, attack: 100000, description: "クイズの王様。クイズ界の支配者。" },
@@ -561,7 +561,24 @@ const QuizResult = ({
   return (
     <div className="text-center mt-6">
       {showScore && (
-        <p className="text-3xl md:text-5xl mb-4 md:mb-6">
+        // <p
+        //   // className={`text-3xl md:text-5xl mb-4 md:mb-6 ${
+        //   //   isSecret || correctCount >= 7
+        //   //     ? "text-white"
+        //   //     : "text-gray-900"
+        //   // }`}
+        //   className="text-3xl md:text-5xl mb-4 md:mb-6 text-orange-700"
+        // >
+          <p
+            className="
+              text-3xl md:text-5xl
+              mb-4 md:mb-6
+              font-black
+              text-orange-500
+              drop-shadow-lg
+              tracking-wide
+            "
+          >
           {isSecret
             ? (secretCleared
                 ? `${secretBossName}を倒した！`
@@ -569,11 +586,11 @@ const QuizResult = ({
             : `ステージ ${correctCount} までクリア！`}
         </p>
       )}
-      {showText && <p className="text-xl md:text-2xl text-gray-600 mb-2">あなたの称号は…</p>}
+      {/* {showText && <p className="text-xl md:text-2xl text-gray-600 mb-2">あなたの称号は…</p>} */}
 
       {showRank && (
         <>
-          <div className="flex flex-col md:flex-row items-center justify-center mb-10 gap-4 md:gap-10">
+          {/* <div className="flex flex-col md:flex-row items-center justify-center mb-10 gap-4 md:gap-10">
             <img src="/images/yuusya_game.png" alt="勇者" className="w-0 h-0 md:w-50 md:h-50" />
             <p
               className={`text-4xl md:text-6xl font-bold drop-shadow-lg text-center animate-pulse ${
@@ -588,10 +605,10 @@ const QuizResult = ({
               <img src="/images/yuusya_game.png" alt="勇者" className="w-30 h-30 md:w-0 md:h-0" />
               <img src="/images/dragon.png" alt="ドラゴン" className="w-30 h-30 md:w-50 md:h-50" />
             </div>
-          </div>
+          </div> */}
 
           {/* ★ 正解数に応じたコメント */}
-          {(() => {
+          {/* {(() => {
             const text = isSecret
               ? (secretCleared
                   ? secretComment
@@ -599,11 +616,64 @@ const QuizResult = ({
               : getRankComment();
 
             return text ? (
-              <p className="text-lg md:text-2xl text-gray-800 mb-8 font-bold whitespace-pre-line">
+              <p className="text-lg md:text-2xl text-gray-900 mb-8 font-bold whitespace-pre-line">
                 {text}
               </p>
             ) : null;
-          })()}
+          })()} */}
+
+          <div className="mb-10">
+            {/* 白いカード：あなたの称号は〜コメントまで */}
+            <div className="mx-auto max-w-3xl rounded-3xl border-4 border-yellow-300 bg-white px-5 py-6 md:px-8 md:py-8 shadow-2xl">
+              {showText && (
+                <p className="text-xl md:text-2xl text-gray-600 mb-3 font-bold">
+                  あなたの称号は…
+                </p>
+              )}
+
+              <p
+                className={`text-4xl md:text-6xl font-bold drop-shadow-lg text-center animate-pulse ${
+                  isFinalStage ? "final-title text-yellow-400" : "text-blue-600"
+                }`}
+              >
+                {isSecret
+                  ? secretCleared
+                    ? secretTitle ?? "討伐者"
+                    : "秘密の冒険者"
+                  : getTitle()}
+              </p>
+
+              {/* ★ 正解数に応じたコメント */}
+              {(() => {
+                const text = isSecret
+                  ? secretCleared
+                    ? secretComment
+                    : "惜しくも討伐できなかった…！\nもう一度挑戦してリベンジしよう🔥"
+                  : getRankComment();
+
+                return text ? (
+                  <p className="mt-4 text-lg md:text-2xl text-gray-900 font-bold whitespace-pre-line">
+                    {text}
+                  </p>
+                ) : null;
+              })()}
+            </div>
+
+            {/* 画像：カードの外。PCは左右、スマホは下 */}
+            <div className="mt-5 flex flex-row items-center justify-center gap-4 md:gap-10">
+              <img
+                src="/images/yuusya_game.png"
+                alt="勇者"
+                className="w-30 h-30 md:w-50 md:h-50"
+              />
+              <img
+                src="/images/dragon.png"
+                alt="ドラゴン"
+                className="w-30 h-30 md:w-50 md:h-50"
+              />
+            </div>
+          </div>
+
           {/* ★ 追加：獲得ポイント表示 */}
           <div className="mx-auto max-w-[520px] bg-white border-2 border-black rounded-xl p-4 shadow mt-2">
             <p className="text-xl md:text-2xl font-extrabold text-gray-800">
@@ -939,6 +1009,7 @@ export default function QuizModePage() {
   const [timeLeft, setTimeLeft] = useState(30);
   const incorrectRef = useRef<string | null>(incorrectMessage);
   const [characterHP, setCharacterHP] = useState<number | null>(null);
+  const [characterMaxHP, setCharacterMaxHP] = useState<number | null>(null);
   const [enemyHP, setEnemyHP] = useState<number | null>(null);
   const [attackMessage, setAttackMessage] = useState<string | null>(null);
   const [isAttacking, setIsAttacking] = useState(false);
@@ -988,7 +1059,7 @@ export default function QuizModePage() {
   const secretEnemy = isSecret ? getSecretEnemy(boss || "ancient_dragon", variant) : null;
   const secretRes = isSecret ? getSecretResult(boss || "ancient_dragon", variant) : null;
   const getPlayerStats = (characterId: string) => {
-  const base = characters.find((c) => c.id === characterId);
+    const base = characters.find((c) => c.id === characterId);
     if (!base) return null;
 
     const mul = isSecret ? 20 : 1;
@@ -996,6 +1067,157 @@ export default function QuizModePage() {
       ...base,
       hp: base.hp * mul,
       Attack: base.Attack * mul,
+    };
+  };
+
+  const getHpPercent = (current: number | null, max: number | null) => {
+    if (current === null || max === null || max <= 0) return 0;
+    return Math.max(0, Math.min(100, (current / max) * 100));
+  };
+
+  const getHpBarColor = (current: number | null, max: number | null) => {
+    const percent = getHpPercent(current, max);
+
+    if (percent >= 60) return "bg-green-500";
+    if (percent >= 30) return "bg-yellow-400";
+    return "bg-red-500";
+  };
+
+  const HpGauge = ({
+    label,
+    current,
+    max,
+    enemy = false,
+  }: {
+    label: string;
+    current: number | null;
+    max: number | null;
+    enemy?: boolean;
+  }) => {
+    const percent = getHpPercent(current, max);
+    const color = getHpBarColor(current, max);
+
+    return (
+      <div className="mx-auto mt-2 w-full max-w-[260px]">
+        <div
+          className={`mb-1 flex items-center gap-2 text-xs md:text-sm font-black ${
+            enemy ? "text-purple-200" : "text-gray-800"
+          }`}
+        >
+          <span>{label}</span>
+          <span>
+            {current ?? 0} / {max ?? 0}
+          </span>
+        </div>
+
+        <div className="h-4 md:h-5 w-full overflow-hidden rounded-full border-2 border-black bg-gray-200 shadow-inner">
+          <div
+            className={`h-full rounded-full transition-all duration-500 ${color}`}
+            style={{ width: `${percent}%` }}
+          />
+        </div>
+      </div>
+    );
+  };
+
+  const getDungeonBgClass = () => {
+    if (course === "secret") {
+      return "bg-gradient-to-b from-slate-700 via-violet-400 to-slate-200";
+    }
+
+    const stage = currentStage + 1;
+
+    if (stage <= 3) {
+      return "bg-gradient-to-b from-emerald-100 via-lime-100 to-yellow-100";
+    }
+
+    if (stage <= 6) {
+      return "bg-gradient-to-b from-stone-200 via-orange-100 to-amber-200";
+    }
+
+    if (stage <= 9) {
+      return "bg-gradient-to-b from-red-600 via-orange-200 to-amber-100";
+    }
+
+    if (stage <= 12) {
+      return "bg-gradient-to-b from-purple-800 via-purple-200 to-fuchsia-100";
+    }
+
+    if (stage <= 15) {
+      return "bg-gradient-to-b from-yellow-500 via-yellow-100 to-orange-100";
+    }
+
+    if (stage <= 18) {
+      return "bg-gradient-to-b from-blue-900 via-blue-200 to-indigo-100";
+    }
+
+    return "bg-gradient-to-b from-black via-purple-900 to-slate-900";
+  };
+
+  const getStageTheme = () => {
+    if (course === "secret") {
+      return {
+        text: "text-white",
+        border: "border-fuchsia-700",
+        button:
+          "bg-gradient-to-r from-purple-900 via-fuchsia-900 to-black hover:from-purple-800 hover:via-fuchsia-800 hover:to-gray-900",
+      };
+    }
+
+    const stage = currentStage + 1;
+
+    if (stage <= 3) {
+      return {
+        text: "text-emerald-500",
+        border: "border-emerald-300",
+        button: "bg-emerald-500 hover:bg-emerald-600",
+      };
+    }
+
+    if (stage <= 6) {
+      return {
+        text: "text-orange-600",
+        border: "border-orange-300",
+        button: "bg-orange-500 hover:bg-orange-600",
+      };
+    }
+
+    if (stage <= 9) {
+      return {
+        text: "text-yellow-100",
+        border: "border-orange-400",
+        button: "bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600",
+      };
+    }
+
+    if (stage <= 12) {
+      return {
+        text: "text-fuchsia-100",
+        border: "border-purple-300",
+        button: "bg-purple-500 hover:bg-purple-600",
+      };
+    }
+
+    if (stage <= 15) {
+      return {
+        text: "text-white",
+        border: "border-yellow-100",
+        button: "bg-yellow-500 hover:bg-yellow-600",
+      };
+    }
+
+    if (stage <= 18) {
+      return {
+        text: "text-white",
+        border: "border-blue-200",
+        button: "bg-blue-500 hover:bg-blue-600",
+      };
+    }
+
+    return {
+      text: "text-yellow-200",
+      border: "border-yellow-200",
+      button: "bg-yellow-500 hover:bg-yellow-600",
     };
   };
 
@@ -1084,8 +1306,17 @@ export default function QuizModePage() {
     isAttackingRef.current = false;
 
     // HP/レベル初期化
-    const char = characters.find((c) => c.id === character);
-    if (char) setCharacterHP(char.hp);
+    // const char = characters.find((c) => c.id === character);
+    // if (char) {
+    //   setCharacterHP(char.hp);
+    //   setCharacterMaxHP(char.hp);
+    // }
+    const char = character ? getPlayerStats(character) : null;
+
+    if (char) {
+      setCharacterHP(char.hp);
+      setCharacterMaxHP(char.hp);
+    }
     setCharacterLevel(1);
     setEnemyHP(getEnemyForStage(1, course, boss, variant).hp);
     setCharacter(null)
@@ -1206,7 +1437,11 @@ export default function QuizModePage() {
     if (!character) return;
 
     const char = getPlayerStats(character);
-    if (char) setCharacterHP(char.hp);
+
+    if (char) {
+      setCharacterHP(char.hp);
+      setCharacterMaxHP(char.hp);
+    }
 
     setEnemyHP(getEnemyForStage(1, course, boss, variant).hp);
   }, [character, isSecret, course, boss, variant]);
@@ -1231,7 +1466,7 @@ export default function QuizModePage() {
     list: { id: string; quiz: QuizData }[],
     course?: string
   ) => {
-    // シークレットは今まで通り全ランダム
+    // シークレットは全ランダム
     if (course === "secret") {
       return shuffleArray(list);
     }
@@ -1249,29 +1484,54 @@ export default function QuizModePage() {
     );
 
     const expertQuestions = shuffleArray(
-      list.filter(
-        (q) => q.quiz.level !== "かんたん" && q.quiz.level !== "ふつう" && q.quiz.level !== "難しい"
-      )
+      list.filter((q) => q.quiz.level === "激ムズ")
     );
 
-    // 1〜3体目：スケルトンまで → かんたんだけ
-    const first5Easy = easyQuestions.slice(0, 5);
+    // 1～3問：かんたん
+    const first3Easy = easyQuestions.slice(0, 3);
 
-    // 4〜8体目：ミミック〜バーサーカー → ふつうだけ
-    const next15Normal = normalQuestions.slice(0, 15);
+    // 4～8問：ふつう
+    const next5Normal = normalQuestions.slice(0, 5);
 
-    // 9体目以降：ドラゴン〜 → 難しいだけ
-    const next10Hard = hardQuestions.slice(0, 10);
+    // 9～13問：ふつう + 難しい ランダム
+    const next5NormalHardRandom = shuffleArray([
+      ...normalQuestions.slice(5),
+      ...hardQuestions,
+    ]).slice(0, 5);
 
-    // 全難易度ランダム
-    const remaining = shuffleArray([
-      ...easyQuestions.slice(5),
-      ...normalQuestions.slice(15),
-      ...hardQuestions.slice(10),
+    // ここまで使った問題IDを除外
+    const usedIdsBeforeHard = new Set([
+      ...first3Easy,
+      ...next5Normal,
+      ...next5NormalHardRandom,
+    ].map((q) => q.id));
+
+    // 14～19問：難しい
+    const next6Hard = hardQuestions
+      .filter((q) => !usedIdsBeforeHard.has(q.id))
+      .slice(0, 6);
+
+    // ここまで使った問題IDを除外
+    const usedIds = new Set([
+      ...first3Easy,
+      ...next5Normal,
+      ...next5NormalHardRandom,
+      ...next6Hard,
+    ].map((q) => q.id));
+
+    // 20問以降：難しい + 激ムズ ランダム
+    const remainingHardAndExpert = shuffleArray([
+      ...hardQuestions.filter((q) => !usedIds.has(q.id)),
       ...expertQuestions,
     ]);
 
-    return [...first5Easy, ...next15Normal, ...next10Hard, ...remaining];
+    return [
+      ...first3Easy,
+      ...next5Normal,
+      ...next5NormalHardRandom,
+      ...next6Hard,
+      ...remainingHardAndExpert,
+    ];
   };
 
   const startedRef = useRef(false);
@@ -1367,24 +1627,33 @@ export default function QuizModePage() {
   };
 
   const animateHP = (
-    startHP: number, 
-    damage: number, 
-    setHP: React.Dispatch<React.SetStateAction<number | null>>, 
+    startHP: number,
+    damage: number,
+    setHP: React.Dispatch<React.SetStateAction<number | null>>,
     callback: () => void,
     speed: number
   ) => {
+    const targetHP = Math.max(startHP - damage, 0);
+
+    // どれだけ大ダメージでも最大0.6秒くらいで終わらせる
+    const duration = 600;
+    const frameTime = 30;
+    const steps = Math.max(1, Math.floor(duration / frameTime));
+
+    const totalDecrease = startHP - targetHP;
+    const decreasePerStep = Math.max(1, Math.ceil(totalDecrease / steps));
+
     let currentHP = startHP;
-    const targetHP = Math.max(startHP - damage, 0); // ここで0未満にならないように
 
     const interval = setInterval(() => {
-      currentHP = Math.max(currentHP - 1, targetHP);
+      currentHP = Math.max(currentHP - decreasePerStep, targetHP);
       setHP(currentHP);
 
       if (currentHP <= targetHP) {
         clearInterval(interval);
         callback();
       }
-    }, speed); // 1減少ごとに10ms→ステージによって変化する
+    }, frameTime);
   };
 
   const attackEnemy = () => {
@@ -1450,9 +1719,19 @@ export default function QuizModePage() {
 
           // 🎉 ステージごとにレベル +ステージの数
           setCharacterLevel(newLevel);
+          // setCharacterHP((prevHP) => {
+          //   const baseHP = characters.find((c) => c.id === character)?.hp ?? 0;
+          //   return (prevHP ?? 0) + baseHP * (currentStage + 1);
+          // });
+          const baseHP = characters.find((c) => c.id === character)?.hp ?? 0;
+          const hpUp = baseHP * (currentStage + 1);
+
           setCharacterHP((prevHP) => {
-            const baseHP = characters.find((c) => c.id === character)?.hp ?? 0;
-            return (prevHP ?? 0) + baseHP * (currentStage + 1);
+            return (prevHP ?? 0) + hpUp;
+          });
+
+          setCharacterMaxHP((prevMaxHP) => {
+            return (prevMaxHP ?? 0) + hpUp;
           });
 
           // ⭐ レベルアップメッセージをセット！
@@ -2281,14 +2560,30 @@ export default function QuizModePage() {
       {showEnemyAttackEffect && (
         <EnemyAttackEffect enemy={getEnemyForStage(currentStage + 1, course, boss)} />
       )}
-      <div className="container mx-auto p-2 md:p-8 text-center bg-gradient-to-b from-purple-50 via-purple-100 to-purple-200">
+      {/* <div className="container mx-auto p-2 md:p-8 text-center bg-gradient-to-b from-purple-50 via-purple-100 to-purple-200"> */}
+      <div
+        // className={`container mx-auto min-h-screen p-2 md:p-8 text-center transition-all duration-700 ${getDungeonBgClass()}`}
+        className={`container mx-auto min-h-screen p-2 md:p-8 text-center transition-all duration-700 ${
+          finished
+            ? "bg-gradient-to-b from-yellow-200 via-amber-100 to-yellow-50"
+            : getDungeonBgClass()
+        }`}
+      >
         {!finished ? (
           <>
-            <h2 className="text-5xl md:text-6xl font-extrabold mb-6 text-purple-500 drop-shadow-lg">
-              STAGE {currentStage + 1}
-            </h2>
+            {/* <h2 className="text-5xl md:text-6xl font-extrabold mb-6 text-purple-500 drop-shadow-lg"> */}
+            {course !== "secret" && (
+              <h2
+                className={`text-5xl md:text-6xl font-extrabold mb-6 drop-shadow-lg ${getStageTheme().text}`}
+              >
+                STAGE {currentStage + 1}
+              </h2>
+            )}
 
-            <div className="mb-3 bg-white p-3 border-2 border-purple-300 rounded-xl mx-auto w-full max-w-md md:max-w-xl">
+            {/* <div className="mb-3 bg-white p-3 border-2 border-purple-300 rounded-xl mx-auto w-full max-w-md md:max-w-xl"> */}
+            <div
+              className={`mb-3 bg-white p-3 border-2 rounded-xl mx-auto w-full max-w-md md:max-w-xl ${getStageTheme().border}`}
+            >
               <p className="text-xl md:text-2xl text-center mb-2">{getEnemyForStage(currentStage + 1, course, boss, variant).name}が現れた！クイズに正解して倒そう！</p>
               {/* 横並び */}
               <div className="flex flex-col items-center md:flex-row justify-center md:gap-12">
@@ -2319,9 +2614,17 @@ export default function QuizModePage() {
                       <p className="text-sm md:text-xl font-semibold">
                         レベル：{characterLevel}
                       </p>
-                      <p className="text-sm md:text-xl font-semibold">
+                      {character && (
+                        <HpGauge
+                          // label="自分HP"
+                          label="HP"
+                          current={characterHP}
+                          max={characterMaxHP}
+                        />
+                      )}
+                      {/* <p className="text-sm md:text-xl font-semibold">
                         HP：{characterHP}
-                      </p>
+                      </p> */}
                       <p className="text-sm md:text-xl font-semibold">
                         攻撃力：{getCharacterAttack()}
                       </p>
@@ -2341,9 +2644,16 @@ export default function QuizModePage() {
                       <p className="text-xl md:text-2xl font-bold text-purple-200 max-w-[100px]">
                         {getEnemyForStage(currentStage + 1, course, boss, variant).name}
                       </p>
-                      <p className="text-sm md:text-xl font-semibold text-purple-200">
+                      <HpGauge
+                        // label="敵HP"
+                        label="HP"
+                        current={enemyHP}
+                        max={getEnemyForStage(currentStage + 1, course, boss, variant).hp}
+                        enemy
+                      />
+                      {/* <p className="text-sm md:text-xl font-semibold text-purple-200">
                         HP： {enemyHP}
-                      </p>
+                      </p> */}
                       <p className="text-sm md:text-xl font-semibold text-purple-200">
                         攻撃力：{getEnemyForStage(currentStage + 1, course, boss, variant).attack}
                       </p>
@@ -2407,10 +2717,20 @@ export default function QuizModePage() {
             {/* 次のステージへ進むボタン */}
             {showNextStageButton && (
               <button
-                className="px-5 py-3 md:px-6 md:py-4 mb-3 text-white text-xl md:text-2xl font-bold rounded-xl 
-                          bg-gradient-to-r from-purple-400 via-purple-500 to-purple-600
-                          hover:from-purple-500 hover:via-purple-600 hover:to-purple-600
-                          shadow-lg shadow-pink-300 cursor-pointer animate-pulse"
+                // className="px-5 py-3 md:px-6 md:py-4 mb-3 text-white text-xl md:text-2xl font-bold rounded-xl 
+                //           bg-gradient-to-r from-purple-400 via-purple-500 to-purple-600
+                //           hover:from-purple-500 hover:via-purple-600 hover:to-purple-600
+                //           shadow-lg shadow-pink-300 cursor-pointer animate-pulse"
+                className={`
+                  px-5 py-3 md:px-6 md:py-4 mb-3
+                  text-white text-xl md:text-2xl font-bold
+                  rounded-xl
+                  shadow-lg
+                  cursor-pointer
+                  animate-pulse
+                  transition-all duration-300
+                  ${getStageTheme().button}
+                `}
                 onClick={() => {
                   const nextStage = currentStage + 1;
                   setCurrentStage(nextStage);
@@ -2463,14 +2783,14 @@ export default function QuizModePage() {
                           {answerExplanation && (
                             <div className="mt-5 md:mt-15 text-center">
                               <p className="text-xl md:text-2xl font-bold text-blue-600">解説📖</p>
-                              <p className="mt-1 md:mt-2 text-lg md:text-xl text-gray-700">{answerExplanation}</p>
+                              <p className="mt-1 md:mt-2 text-lg md:text-xl text-gray-900">{answerExplanation}</p>
                             </div>
                           )}
 
                           {trivia && (
                             <div className="mt-5 md:mt-10 text-center">
                               <p className="text-xl md:text-2xl font-bold text-yellow-600">知って得する豆知識💡</p>
-                              <p className="mt-1 md:mt-2 text-lg md:text-xl text-gray-700">{trivia}</p>
+                              <p className="mt-1 md:mt-2 text-lg md:text-xl text-gray-900">{trivia}</p>
                             </div>
                           )}
                         </>
@@ -2559,6 +2879,7 @@ export default function QuizModePage() {
                               const healText = characterLevel * 30 * mul;
 
                               setCharacterHP(prev => (prev ?? 0) + healHp);
+                              setCharacterMaxHP((prev) => (prev ?? 0) + healHp);
                               setHealing(healText);
                               setLastHealUsedIndex(currentIndex);
                             }}
@@ -2612,6 +2933,7 @@ export default function QuizModePage() {
                           className="px-5 py-3 md:px-6 border-2 border-pink-200 bg-gradient-to-r from-yellow-400 via-red-400 to-pink-500 text-white text-lg md:text-xl font-bold  rounded-lg shadow-md hover:from-yellow-500 hover:via-red-500 hover:to-pink-600 transition-all cursor-pointer"
                           onClick={() => {
                             setCharacterHP(prev => (prev ?? 0) + 5000);
+                            setCharacterMaxHP((prev) => (prev ?? 0) + 5000);
                             setCharacterLevel(prev => prev + 50); // 攻撃力にもレベル依存して加算されます
                             setMiracleSeedCount(prev => prev - 1);
                             setLevelUp(50); // レベルアップ表示
