@@ -167,7 +167,7 @@ const WORD_WORLD_WIDTH = 2400;
 const WORD_WORLD_HEIGHT = 1700;
 const WORD_ANSWER_X = WORD_WORLD_WIDTH / 2;
 const WORD_ANSWER_Y = WORD_WORLD_HEIGHT / 2;
-const WORD_ANSWER_RADIUS = 180;
+const WORD_ANSWER_RADIUS = 120;
 
 const BOOK_EMOJIS = [
   "📖",
@@ -1712,11 +1712,11 @@ export default function WordChaseModePage() {
                     {theme.label}
                   </p>
 
-                  <p className="mt-1 text-2xl font-black text-white md:text-4xl">
+                  <p className="mt-1 text-xl font-black text-white md:text-3xl">
                     {/* {gameState?.question?.question ??
                       "本を探してクイズに正解し、文字とヒントを集めよう！"} */}
                     {gameState?.question?.question ??
-                      "本に書いてあるキーワードは？全部集めて一番早く答えを当てよう！"}
+                      "📚本を探して文字を集めよう！💡ヒント本もどこかにあるかも？🔤集めた文字を並び替えて、中央の「解答の書」で解答しよう！"}
                   </p>
 
                   <div className="mt-1 md:mt-4 flex justify-center">
@@ -1754,7 +1754,7 @@ export default function WordChaseModePage() {
 
                 <div
                   ref={mapViewportRef}
-                  className={`relative mx-auto h-[68vh] min-h-[520px] w-full max-w-[980px] overflow-hidden rounded-[2rem] border-4 ${theme.border} bg-[#1f1208] ${theme.glow}`}
+                  className={`relative mx-auto h-[60vh] md:h-[68vh] min-h-[440px] md:min-h-[520px] w-full max-w-[980px] overflow-hidden rounded-[2rem] border-4 ${theme.border} bg-[#1f1208] ${theme.glow}`}
                 >
                   <div
                     className="absolute left-0 top-0"
@@ -2179,9 +2179,9 @@ export default function WordChaseModePage() {
               </section>
 
               <aside className="rounded-3xl border border-white/15 bg-black/35 p-4 backdrop-blur">
-                <WordGlassCard className="mb-4 p-3">
+                {/* <WordGlassCard className="mb-4 p-3">
                   <p className="mb-3 text-center text-sm font-black tracking-[0.25em] text-amber-200">
-                    発見した文字
+                    文字発見状況
                   </p>
 
                   <div className="space-y-2">
@@ -2212,9 +2212,10 @@ export default function WordChaseModePage() {
                       );
                     })}
                   </div>
-                </WordGlassCard>
+                </WordGlassCard> */}
                 <p className="mb-3 text-center text-xl font-black text-amber-100">
-                  プレイヤー
+                  {/* プレイヤー */}
+                  探索状況
                 </p>
 
                 <div className="space-y-2">
@@ -2301,7 +2302,14 @@ export default function WordChaseModePage() {
                     )}
                   </AnimatePresence>
 
-                  {displayPlayers.map((player, index) => {
+                  {/* {displayPlayers.map((player, index) => { */}
+                  {[...displayPlayers]
+                    .sort((a, b) => {
+                      if (a.socketId === mySocketId) return -1;
+                      if (b.socketId === mySocketId) return 1;
+                      return 0;
+                    })
+                    .map((player, index) => {
                     const isMe = player.socketId === mySocketId;
 
                     return (
@@ -2328,9 +2336,21 @@ export default function WordChaseModePage() {
                               : reasonLabel(player.eliminatedReason)}
                           </p>
                         </div>
+                        {/* <p className="mt-1 text-sm font-bold text-white/70">
+                          見つけた文字：{player.foundLetters ?? 0} / {targetLength}
+                           / クイズ：{player.correctCount ?? 0}
+                        </p> */}
+                        {/* {isMe && (
+                          <p className="mt-1 text-sm font-bold text-white/70">
+                            見つけた文字：{player.foundLetters ?? 0} / {targetLength}
+                          </p>
+                        )} */}
                         <p className="mt-1 text-sm font-bold text-white/70">
-                          文字：{player.foundLetters ?? 0}/{targetLength} /
-                          クイズ：{player.correctCount ?? 0}
+                          見つけた文字：
+                          {isMe
+                            ? (player.foundLetters ?? 0)
+                            : getPlayerFoundCount(player)}
+                          / {targetLength}
                         </p>
                       </div>
                     );
