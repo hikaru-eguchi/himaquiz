@@ -599,6 +599,22 @@ export default async function HomePage({
               </p>
             </div>
           </div>
+          {/* クイズおにごっこ */}
+          <div className="text-center max-w-[280px]">
+            <Link href="/quiz-onigokko" className="w-full md:w-auto flex justify-center">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-red-600 via-red-500 to-orange-300 text-white hover:scale-110 transition-all">
+                👹クイズおにごっこ
+              </button>
+            </Link>
+            <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                捕まれば鬼に交代！
+              </p>
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                ハラハラ追いかけっこクイズアクション！
+              </p>
+            </div>
+          </div>
           {/* スペースクイズ */}
           <div className="text-center max-w-[280px]">
             <Link href="/quiz-space" className="w-full md:w-auto flex justify-center">
@@ -627,7 +643,7 @@ export default async function HomePage({
                 迷路の中で文字を集めろ！
               </p>
               <p className="text-sm md:text-base text-gray-700 leading-tight">
-                誰より早く単語を当てる探索クイズバトル！
+                誰よりも早く単語を当てる探索クイズ！
               </p>
             </div>
           </div>

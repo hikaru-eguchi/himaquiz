@@ -135,6 +135,7 @@ export default function QuizMasterPage() {
             >
               オンラインで対戦
             </button>
+            <p className="text-sm text-gray-100 mt-1">※2人〜4人でプレイできます。</p>
             {/* <p className="text-sm text-gray-100 mt-1">※一定時間マッチしないとCPUとの対戦になります</p> */}
           </div>
           <div>
