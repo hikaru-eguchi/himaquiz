@@ -181,103 +181,209 @@ const QuizResult = ({
     return () => timers.forEach(clearTimeout);
   }, []);
 
-  return (
-    <motion.div
-      className={`text-center mt-6 rounded-lg`}
-    >
+  // return (
+  //   <motion.div
+  //     className={`text-center mt-6 rounded-lg`}
+  //   >
 
-      {/* ============================
-          🔥 スコア表示
-      ============================ */}
+  //     {/* ============================
+  //         🔥 スコア表示
+  //     ============================ */}
+  //     {showScore && (
+  //       <>
+  //         <p className="text-3xl md:text-5xl mb-2 md:mb-6">
+  //           正解数：{correctCount}問
+  //         </p>
+
+  //         <p className="text-3xl md:text-5xl font-bold mb-2 md:mb-6">
+  //           ステージ {stageCount} までクリア！
+  //         </p>
+  //       </>
+  //     )}
+
+  //     {showText && <p className="text-xl md:text-2xl text-gray-600 mb-2">あなたの称号は…</p>}
+
+  //     {showRank && (
+  //       <>
+  //         <div className="flex flex-col md:flex-row items-center justify-center mb-10 gap-4 md:gap-10">
+  //           <img src="/images/yuusya_game.png" alt="勇者" className="w-0 h-0 md:w-50 md:h-50" />
+  //           <p
+  //             className={`text-4xl md:text-6xl font-bold drop-shadow-lg text-center animate-pulse text-blue-600
+  //             }`}
+  //           >
+  //             {getTitle()}
+  //           </p>
+  //           <div className="flex flex-row md:flex-row items-center justify-center gap-4 md:gap-8">
+  //             <img src="/images/yuusya_game.png" alt="勇者" className="w-30 h-30 md:w-0 md:h-0" />
+  //             <img src="/images/dragon.png" alt="ドラゴン" className="w-30 h-30 md:w-50 md:h-50" />
+  //           </div>
+  //         </div>
+
+  //         {/* ★ 正解数に応じたコメント */}
+  //         {getRankComment() && (
+  //           <p className="text-lg md:text-2xl text-gray-800 mb-8 font-bold whitespace-pre-line">
+  //             {getRankComment()}
+  //           </p>
+  //         )}
+  //       </>
+  //     )}
+
+  //     {showButton && (
+  //       <div className="mx-auto max-w-[520px] bg-white border-2 border-black rounded-xl p-4 shadow mt-6">
+  //           <>
+  //             <div className="mb-2 text-lg md:text-xl text-gray-700 font-bold">
+  //               <p className="text-blue-500">正解数ポイント：{basePoints}P（{correctCount}問 × 10P）</p>
+  //               <p className="text-yellow-500">ステージクリアボーナス：{stageBonusPoints}P（STAGE {stageCount}）</p>
+  //             </div>
+
+  //             <p className="text-xl md:text-2xl font-extrabold text-gray-800">
+  //               今回の獲得ポイント： <span className="text-green-600">{earnedPoints} P</span>
+  //             </p>
+  //             <p className="text-xl md:text-2xl font-extrabold text-gray-800 mt-2">
+  //               今回の獲得経験値： <span className="text-purple-600">{earnedExp} EXP</span>
+  //             </p>
+
+  //             {isLoggedIn ? (
+  //               <>
+  //                 {awardStatus === "awarding" && (
+  //                   <p className="text-md md:text-xl text-gray-600 mt-2">
+  //                     ポイント反映中...
+  //                   </p>
+  //                 )}
+  //                 {awardStatus === "awarded" && (
+  //                   <p className="text-md md:text-xl text-green-700 font-bold mt-2">
+  //                     ✅ ポイントを加算しました！
+  //                   </p>
+  //                 )}
+  //                 {awardStatus === "error" && (
+  //                   <p className="text-md md:text-xl text-red-600 font-bold mt-2">
+  //                     ❌ ポイント加算に失敗しました。時間をおいて再度お試しください。
+  //                   </p>
+  //                 )}
+  //               </>
+  //             ) : (
+  //               <div className="mt-2">
+  //                 <p className="text-md md:text-xl text-gray-700 font-bold">
+  //                   ※未ログインのため受け取れません。ログイン（無料）すると次からポイントを受け取れます！
+  //                 </p>
+  //                 <button
+  //                   onClick={onGoLogin}
+  //                   className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg font-bold hover:bg-blue-600 cursor-pointer"
+  //                 >
+  //                   ログインする
+  //                 </button>
+  //                 <p className="text-md md:text-xl text-gray-700 font-bold mt-2">
+  //                   ログインなしでも、引き続き遊べます👇
+  //                 </p>
+  //               </div>
+  //             )}
+  //           </>
+  //       </div>
+  //     )}
+  return (
+    <motion.div className="text-center mt-6 rounded-3xl px-2 md:px-6">
       {showScore && (
-        <>
-          <p className="text-3xl md:text-5xl mb-2 md:mb-6">
+        <div className="mb-8">
+          <p className="text-3xl md:text-5xl mb-5 font-black text-green-500 drop-shadow-lg tracking-wide">
             正解数：{correctCount}問
           </p>
 
-          <p className="text-3xl md:text-5xl font-bold mb-2 md:mb-6">
+          <p className="text-3xl md:text-5xl font-black mb-2 text-amber-500 drop-shadow-lg tracking-wide">
             ステージ {stageCount} までクリア！
           </p>
-        </>
+        </div>
       )}
-
-      {showText && <p className="text-xl md:text-2xl text-gray-600 mb-2">あなたの称号は…</p>}
 
       {showRank && (
         <>
-          <div className="flex flex-col md:flex-row items-center justify-center mb-10 gap-4 md:gap-10">
-            <img src="/images/yuusya_game.png" alt="勇者" className="w-0 h-0 md:w-50 md:h-50" />
-            <p
-              className={`text-4xl md:text-6xl font-bold drop-shadow-lg text-center animate-pulse text-blue-600
-              }`}
-            >
-              {getTitle()}
-            </p>
-            <div className="flex flex-row md:flex-row items-center justify-center gap-4 md:gap-8">
-              <img src="/images/yuusya_game.png" alt="勇者" className="w-30 h-30 md:w-0 md:h-0" />
-              <img src="/images/dragon.png" alt="ドラゴン" className="w-30 h-30 md:w-50 md:h-50" />
+          <div className="mb-10">
+            <div className="mx-auto max-w-3xl rounded-3xl border-4 border-yellow-300 bg-white px-5 py-6 md:px-8 md:py-8 shadow-2xl">
+              {showText && (
+                <p className="text-xl md:text-2xl text-gray-600 mb-3 font-bold">
+                  あなたの称号は…
+                </p>
+              )}
+
+              <p className="text-4xl md:text-6xl font-bold drop-shadow-lg text-center animate-pulse text-blue-600">
+                {getTitle()}
+              </p>
+
+              {getRankComment() && (
+                <p className="mt-4 text-lg md:text-2xl text-gray-900 font-bold whitespace-pre-line">
+                  {getRankComment()}
+                </p>
+              )}
+            </div>
+
+            <div className="mt-5 flex flex-row items-center justify-center gap-4 md:gap-10">
+              <img
+                src="/images/yuusya_game.png"
+                alt="勇者"
+                className="w-30 h-30 md:w-50 md:h-50"
+              />
+              <img
+                src="/images/dragon.png"
+                alt="ドラゴン"
+                className="w-30 h-30 md:w-50 md:h-50"
+              />
             </div>
           </div>
-
-          {/* ★ 正解数に応じたコメント */}
-          {getRankComment() && (
-            <p className="text-lg md:text-2xl text-gray-800 mb-8 font-bold whitespace-pre-line">
-              {getRankComment()}
-            </p>
-          )}
         </>
       )}
 
       {showButton && (
-        <div className="mx-auto max-w-[520px] bg-white border-2 border-black rounded-xl p-4 shadow mt-6">
+        <div className="mx-auto max-w-[560px] bg-white border-2 border-black rounded-2xl p-4 shadow-2xl mt-6">
+          <div className="mb-2 text-lg md:text-xl text-gray-700 font-bold">
+            <p className="text-blue-500">
+              正解数ポイント：{basePoints}P（{correctCount}問 × 10P）
+            </p>
+            <p className="text-yellow-500">
+              ステージクリアボーナス：{stageBonusPoints}P（STAGE {stageCount}）
+            </p>
+          </div>
+
+          <p className="text-xl md:text-2xl font-extrabold text-gray-800">
+            今回の獲得ポイント： <span className="text-green-600">{earnedPoints} P</span>
+          </p>
+
+          <p className="text-xl md:text-2xl font-extrabold text-gray-800 mt-2">
+            今回の獲得経験値： <span className="text-purple-600">{earnedExp} EXP</span>
+          </p>
+
+          {isLoggedIn ? (
             <>
-              <div className="mb-2 text-lg md:text-xl text-gray-700 font-bold">
-                <p className="text-blue-500">正解数ポイント：{basePoints}P（{correctCount}問 × 10P）</p>
-                <p className="text-yellow-500">ステージクリアボーナス：{stageBonusPoints}P（STAGE {stageCount}）</p>
-              </div>
-
-              <p className="text-xl md:text-2xl font-extrabold text-gray-800">
-                今回の獲得ポイント： <span className="text-green-600">{earnedPoints} P</span>
-              </p>
-              <p className="text-xl md:text-2xl font-extrabold text-gray-800 mt-2">
-                今回の獲得経験値： <span className="text-purple-600">{earnedExp} EXP</span>
-              </p>
-
-              {isLoggedIn ? (
-                <>
-                  {awardStatus === "awarding" && (
-                    <p className="text-md md:text-xl text-gray-600 mt-2">
-                      ポイント反映中...
-                    </p>
-                  )}
-                  {awardStatus === "awarded" && (
-                    <p className="text-md md:text-xl text-green-700 font-bold mt-2">
-                      ✅ ポイントを加算しました！
-                    </p>
-                  )}
-                  {awardStatus === "error" && (
-                    <p className="text-md md:text-xl text-red-600 font-bold mt-2">
-                      ❌ ポイント加算に失敗しました。時間をおいて再度お試しください。
-                    </p>
-                  )}
-                </>
-              ) : (
-                <div className="mt-2">
-                  <p className="text-md md:text-xl text-gray-700 font-bold">
-                    ※未ログインのため受け取れません。ログイン（無料）すると次からポイントを受け取れます！
-                  </p>
-                  <button
-                    onClick={onGoLogin}
-                    className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg font-bold hover:bg-blue-600 cursor-pointer"
-                  >
-                    ログインする
-                  </button>
-                  <p className="text-md md:text-xl text-gray-700 font-bold mt-2">
-                    ログインなしでも、引き続き遊べます👇
-                  </p>
-                </div>
+              {awardStatus === "awarding" && (
+                <p className="text-md md:text-xl text-gray-600 mt-2">
+                  ポイント反映中...
+                </p>
+              )}
+              {awardStatus === "awarded" && (
+                <p className="text-md md:text-xl text-green-700 font-bold mt-2">
+                  ✅ ポイントを加算しました！
+                </p>
+              )}
+              {awardStatus === "error" && (
+                <p className="text-md md:text-xl text-red-600 font-bold mt-2">
+                  ❌ ポイント加算に失敗しました。時間をおいて再度お試しください。
+                </p>
               )}
             </>
+          ) : (
+            <div className="mt-2">
+              <p className="text-md md:text-xl text-gray-700 font-bold">
+                ※未ログインのため受け取れません。ログイン（無料）すると次からポイントを受け取れます！
+              </p>
+              <button
+                onClick={onGoLogin}
+                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg font-bold hover:bg-blue-600 cursor-pointer"
+              >
+                ログインする
+              </button>
+              <p className="text-md md:text-xl text-gray-700 font-bold mt-2">
+                ログインなしでも、引き続き遊べます👇
+              </p>
+            </div>
+          )}
         </div>
       )}
 
@@ -1736,6 +1842,94 @@ export default function QuizModePage() {
     return 0;
   });
 
+  const getCoopDungeonBgClass = () => {
+    const stage = finished ? clearedStageCount : stageCount;
+
+    if (stage <= 3) {
+      return "bg-gradient-to-b from-emerald-100 via-lime-100 to-yellow-100";
+    }
+
+    if (stage <= 6) {
+      return "bg-gradient-to-b from-stone-200 via-orange-100 to-amber-200";
+    }
+
+    if (stage <= 9) {
+      return "bg-gradient-to-b from-red-600 via-orange-200 to-amber-100";
+    }
+
+    if (stage <= 12) {
+      return "bg-gradient-to-b from-purple-800 via-purple-200 to-fuchsia-100";
+    }
+
+    if (stage <= 15) {
+      return "bg-gradient-to-b from-yellow-500 via-yellow-100 to-orange-100";
+    }
+
+    if (stage <= 18) {
+      return "bg-gradient-to-b from-blue-900 via-blue-200 to-indigo-100";
+    }
+
+    return "bg-gradient-to-b from-black via-purple-900 to-slate-900";
+  };
+
+  const getCoopStageTheme = () => {
+    const stage = stageCount;
+
+    if (stage <= 3) {
+      return {
+        text: "text-emerald-500",
+        border: "border-emerald-300",
+        button: "bg-emerald-500 hover:bg-emerald-600",
+      };
+    }
+
+    if (stage <= 6) {
+      return {
+        text: "text-orange-600",
+        border: "border-orange-300",
+        button: "bg-orange-500 hover:bg-orange-600",
+      };
+    }
+
+    if (stage <= 9) {
+      return {
+        text: "text-yellow-100",
+        border: "border-orange-400",
+        button: "bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600",
+      };
+    }
+
+    if (stage <= 12) {
+      return {
+        text: "text-fuchsia-100",
+        border: "border-purple-300",
+        button: "bg-purple-500 hover:bg-purple-600",
+      };
+    }
+
+    if (stage <= 15) {
+      return {
+        text: "text-white",
+        border: "border-yellow-100",
+        button: "bg-yellow-500 hover:bg-yellow-600",
+      };
+    }
+
+    if (stage <= 18) {
+      return {
+        text: "text-white",
+        border: "border-blue-200",
+        button: "bg-blue-500 hover:bg-blue-600",
+      };
+    }
+
+    return {
+      text: "text-yellow-200",
+      border: "border-yellow-200",
+      button: "bg-yellow-500 hover:bg-yellow-600",
+    };
+  };
+
   // Xシェア機能
   const handleShareX = () => {
     const text = [
@@ -1752,7 +1946,19 @@ export default function QuizModePage() {
   };
 
   return (
-    <div className="container mx-auto p-8 text-center bg-gradient-to-b from-indigo-300 via-slate-300 to-sky-300" key={battleKey}>
+    // <div className="container mx-auto p-8 text-center bg-gradient-to-b from-indigo-300 via-slate-300 to-sky-300" key={battleKey}>
+    // <div
+    //   className={`container mx-auto p-8 text-center min-h-screen transition-colors duration-700 ${getCoopDungeonBgClass()}`}
+    //   key={battleKey}
+    // >  
+    <div
+      className={`container mx-auto p-8 text-center min-h-screen transition-all duration-700 ${
+        finished
+          ? "bg-gradient-to-b from-yellow-200 via-amber-100 to-yellow-50"
+          : getCoopDungeonBgClass()
+      }`}
+      key={battleKey}
+    >
       <EndConfirmModal
         open={showEndConfirm}
         disabled={phase === "result"}
@@ -1794,7 +2000,9 @@ export default function QuizModePage() {
         <>
           {dungeonStart && (
             <>
-              <h2 className="text-5xl md:text-6xl font-extrabold mb-4 text-white drop-shadow-lg">
+              <h2
+                className={`text-5xl md:text-6xl font-extrabold mb-4 drop-shadow-lg ${getCoopStageTheme().text}`}
+              >
                 STAGE {stageCount}
               </h2>
 
@@ -1805,7 +2013,10 @@ export default function QuizModePage() {
                 </p>
               </div>
 
-              <div className="mb-1 md:mb-2 bg-white p-3 border-2 border-purple-200 rounded-xl mx-auto w-full max-w-md md:max-w-xl">
+              {/* <div className="mb-1 md:mb-2 bg-white p-3 border-2 border-purple-200 rounded-xl mx-auto w-full max-w-md md:max-w-xl"> */}
+              <div
+                className={`mb-1 md:mb-2 bg-white p-3 border-2 rounded-xl mx-auto w-full max-w-md md:max-w-xl ${getCoopStageTheme().border}`}
+              >
                 <p className="text-xl md:text-2xl text-center font-bold">
                   {displayedEnemyHP == 0
                     ? `${getEnemyForStage(stageCount).name}を倒した！🎉`

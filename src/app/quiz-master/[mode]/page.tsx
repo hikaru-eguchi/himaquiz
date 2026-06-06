@@ -574,7 +574,7 @@ const QuizResult = ({
               text-3xl md:text-5xl
               mb-4 md:mb-6
               font-black
-              text-orange-500
+              text-amber-500
               drop-shadow-lg
               tracking-wide
             "
