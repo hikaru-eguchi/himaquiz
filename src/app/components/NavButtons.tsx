@@ -83,8 +83,9 @@ export default function NavButtons() {
     (isOpen ? "max-h-[3000px] opacity-100 mt-2" : "max-h-0 opacity-0 mt-0");
 
   // ✅ 背景色（ちょい変え版）
-  const bgSolo = "bg-gradient-to-br from-purple-50 via-violet-50 to-fuchsia-50"; // 1人用：紫寄り
+  const bgSolo = "bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50"; // 1人用：紫寄り
   const bgMulti = "bg-gradient-to-br from-sky-50 via-indigo-50 to-fuchsia-50"; // みんな：寒色寄り
+  const bgFriend = "bg-gradient-to-br from-pink-50 via-rose-50 to-amber-50"; // 友達
   const bgBox = "bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50"; // クイズBOX：黄色より
   const bgGacha = "bg-gradient-to-br from-emerald-50 via-lime-50 to-yellow-50"; // ガチャ：キラッと系
 
@@ -275,6 +276,127 @@ export default function NavButtons() {
                 </div>
               </fieldset>
 
+              {/* 友達と遊べる */}
+              <fieldset className={`${groupBox} ${bgFriend} md:flex-1`}>
+                <legend className={groupLegend}>
+                  👥友達と遊べるクイズゲーム
+                </legend>
+
+                <p className="text-xs md:text-sm text-black/70">
+                  合言葉を作って、友達や恋人、家族だけで楽しもう！🤝
+                </p>
+
+                <div className="mx-auto w-full max-w-[300px] md:max-w-none">
+                  <div className={gameScrollOuter}>
+                    <div className={gameRow}>
+                      <Link
+                        href="/quiz-mind"
+                        onClick={() => handleNavClick("/quiz-mind")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-gradient-to-r from-pink-600 via-rose-500 to-amber-200 text-white ring-2 ring-rose-500 md:hover:scale-110 ${
+                            activeUrl === "/quiz-mind" ? activeStyle : ""
+                          }`}
+                        >
+                          心理当てバトル
+                        </button>
+                      </Link>
+
+                      <Link
+                        href="/quiz-usohonto"
+                        onClick={() => handleNavClick("/quiz-usohonto")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-[linear-gradient(135deg,#2563eb_0%,#7c3aed_45%,#e11d48_55%,#fb7185_100%)] text-white ring-2 ring-purple-500 md:hover:scale-110 ${
+                            activeUrl === "/quiz-usohonto" ? activeStyle : ""
+                          }`}
+                        >
+                          ウソ？ホント？ゲーム
+                        </button>
+                      </Link>
+
+                      <Link
+                        href="/quiz-koredochi"
+                        onClick={() => handleNavClick("/quiz-koredochi")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-gradient-to-r from-cyan-400 via-violet-300 to-pink-400 text-white ring-2 ring-pink-400 md:hover:scale-110 ${
+                            activeUrl === "/quiz-koredochi" ? activeStyle : ""
+                          }`}
+                        >
+                          これどっち？
+                        </button>
+                      </Link>
+
+                      <Link
+                        href="/quiz-synchro"
+                        onClick={() => handleNavClick("/quiz-synchro")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 text-white ring-2 ring-fuchsia-500 md:hover:scale-110 ${
+                            activeUrl === "/quiz-synchro" ? activeStyle : ""
+                          }`}
+                        >
+                          シンクロランキング
+                        </button>
+                      </Link>
+
+                      <Link
+                        href="/quiz-friend"
+                        onClick={() => handleNavClick("/quiz-friend")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-gradient-to-r from-sky-400 via-cyan-300 to-yellow-200 text-white ring-2 ring-cyan-500 md:hover:scale-110 ${
+                            activeUrl === "/quiz-friend" ? activeStyle : ""
+                          }`}
+                        >
+                          なかよし診断
+                        </button>
+                      </Link>
+
+                      <Link
+                        href="/quiz-timetalk"
+                        onClick={() => handleNavClick("/quiz-timetalk")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-500 text-white ring-2 ring-teal-500 md:hover:scale-110 ${
+                            activeUrl === "/quiz-timetalk" ? activeStyle : ""
+                          }`}
+                        >
+                          タイムトーク
+                        </button>
+                      </Link>
+                    </div>
+                  </div>
+
+                  <p className="mt-1 text-xs text-black/60 text-center md:hidden">
+                    ← 横にスワイプできます →
+                  </p>
+                </div>
+              </fieldset>
+
+              {/* ガチャ */}
+              {/* <fieldset className={`${groupBox} ${bgGacha} md:flex-1`}>
+                <legend className={groupLegend}>ガチャコーナー</legend>
+
+                <div className={rowWrap}>
+                  <Link
+                    href="/quiz-gacha"
+                    onClick={() => handleNavClick("/quiz-gacha")}
+                  >
+                    <button
+                      className={`${baseStyle} bg-gradient-to-r from-red-400 via-sky-400 to-green-400 text-white ring-2 ring-white md:hover:scale-110 ${
+                        activeUrl === "/quiz-gacha" ? activeStyle : ""
+                      }`}
+                    >
+                      ひまQガチャ
+                    </button>
+                  </Link>
+                </div>
+              </fieldset> */}
+            </div>
+
+            <div className="flex flex-col md:flex-row gap-3 md:gap-4">
               {/* みんなで遊べる */}
               <fieldset className={`${groupBox} ${bgMulti} md:flex-1`}>
                 <legend className={groupLegend}>🌐みんなで遊べるクイズゲーム</legend>
@@ -414,7 +536,7 @@ export default function NavButtons() {
                         </button>
                       </Link>
 
-                      <Link
+                      {/* <Link
                         href="/quiz-mind"
                         onClick={() => handleNavClick("/quiz-mind")}
                       >
@@ -451,7 +573,7 @@ export default function NavButtons() {
                         >
                           これどっち？
                         </button>
-                      </Link>
+                      </Link> */}
                     </div>
                   </div>
 
@@ -461,35 +583,13 @@ export default function NavButtons() {
                 </div>
               </fieldset>
 
-              {/* ガチャ */}
-              {/* <fieldset className={`${groupBox} ${bgGacha} md:flex-1`}>
-                <legend className={groupLegend}>ガチャコーナー</legend>
-
-                <div className={rowWrap}>
-                  <Link
-                    href="/quiz-gacha"
-                    onClick={() => handleNavClick("/quiz-gacha")}
-                  >
-                    <button
-                      className={`${baseStyle} bg-gradient-to-r from-red-400 via-sky-400 to-green-400 text-white ring-2 ring-white md:hover:scale-110 ${
-                        activeUrl === "/quiz-gacha" ? activeStyle : ""
-                      }`}
-                    >
-                      ひまQガチャ
-                    </button>
-                  </Link>
-                </div>
-              </fieldset> */}
-            </div>
-
-            <div className="flex flex-col md:flex-row gap-3 md:gap-4">
               <fieldset
                 className={`${groupBox} ${bgBox} md:flex-1`}
               >
                 {/* <legend className={groupLegend}>クイズ問題集</legend> */}
                 <legend className={groupLegend}>🧩ひまQクイズBOX</legend>
                 <p className="text-xs md:text-sm text-black/70">
-                  いろんなクイズで遊び放題！気になるクイズに今すぐ挑戦しよう！
+                  いろんなクイズで遊び放題！気になるクイズに挑戦しよう！
                 </p>
                 <div className="mx-auto w-full max-w-[300px] md:max-w-none">
                   <div className={gameScrollOuter}>
@@ -618,7 +718,8 @@ export default function NavButtons() {
                   </p>
                 </div>
               </fieldset>
-
+            </div>
+            <div>
               <fieldset
                 className={`${groupBox} bg-gradient-to-br from-emerald-50 via-sky-50 to-yellow-50 md:flex-1`}
               >
@@ -626,9 +727,10 @@ export default function NavButtons() {
                 <p className="text-xs md:text-sm text-black/70">
                   サクッと遊べる4択クイズ。スキマ時間に脳トレ＆腕試し！
                 </p>
-                <div className="mx-auto w-full max-w-[300px] md:max-w-none">
+                <div className="mx-auto w-full max-w-[300px] md:max-w-none md:mt-2">
                   <div className={gameScrollOuter}>
-                    <div className="flex flex-row md:flex-col">
+                    {/* <div className="flex flex-row md:flex-col"> */}
+                    <div className="flex flex-nowrap md:flex-row md:justify-center md:gap-8">
                       {/* 1行目：ジャンル */}
                       <div className={gameRow}>
                         <Link

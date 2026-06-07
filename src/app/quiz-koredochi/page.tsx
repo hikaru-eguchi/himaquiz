@@ -79,7 +79,7 @@ export default function QuizKoredochiPage() {
 
       <>
         <p className="text-md md:text-2xl font-semibold text-white mb-2 md:mb-4">
-          ＜みんなで遊べるシンクロゲーム＞
+          ＜友達と遊べるシンクロゲーム＞
         </p>
 
         <p className="text-md md:text-2xl font-semibold text-white mb-8">

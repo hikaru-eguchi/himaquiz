@@ -95,7 +95,7 @@ export default function QuizMasterPage() {
 
       <>
         <p className="text-md md:text-2xl font-semibold text-white mb-2 md:mb-4">
-          ＜みんなで遊べるクイズゲーム＞
+          ＜友達と遊べる心理ゲーム＞
         </p>
         <p className="text-md md:text-2xl font-semibold text-white mb-8">
           相手の心理を見抜け！いちばん心を読めるのは誰だ！？

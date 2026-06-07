@@ -7,7 +7,7 @@ import { useBattle } from "../../../hooks/useBattle";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
 import RecommendedMultiplayerGames from "@/app/components/RecommendedMultiplayerGames";
 
-type KoredochiPhase =
+type SynchroPhase =
   | "name"
   | "waiting"
   | "ready"
@@ -15,52 +15,48 @@ type KoredochiPhase =
   | "reveal"
   | "result";
 
-type ChoiceKey = "A" | "B";
-
 type Player = {
   socketId: string;
   playerName: string;
 };
 
-type KoredochiChoice = {
-  key: ChoiceKey;
+type SynchroChoice = {
+  id: string;
   text: string;
 };
 
-type KoredochiQuestionPayload = {
+type SynchroQuestionPayload = {
   questionId?: string;
   question: string;
-  choices: KoredochiChoice[];
+  choices: SynchroChoice[];
   questionIndex: number;
   totalQuestions: number;
 };
 
-type KoredochiRoundResultPayload = {
+type SynchroRoundResultPayload = {
   questionId?: string;
   question: string;
-  choices: KoredochiChoice[];
-  answers: Record<string, ChoiceKey>;
-  counts: Record<ChoiceKey, number>;
-  matched: boolean;
-  allMatched: boolean;
-  majorityChoice: ChoiceKey | null;
+  choices: SynchroChoice[];
+  answers: Record<string, string[]>;
+  playerNames?: Record<string, string>;
+  sameRankCount: number;
+  sameItemCount: number;
+  roundScore: number;
+  maxRoundScore: number;
+  roundRate: number;
   questionIndex: number;
   totalQuestions: number;
-  synchroCount: number;
-  allMatchCount: number;
-  matchPairCount?: number;
-  totalPairCount?: number;
-  roundRate?: number;
-  synchroRate?: number;
+  totalScore: number;
+  maxTotalScore: number;
+  synchroRate: number;
 };
 
-type KoredochiGameEndPayload = {
-  synchroCount: number;
-  allMatchCount: number;
+type SynchroGameEndPayload = {
+  totalScore: number;
+  maxTotalScore: number;
+  synchroRate: number;
   totalQuestions: number;
-  synchroRate?: number;
-  pairRates?: Record<string, number>;
-  questionResults?: KoredochiRoundResultPayload[];
+  questionResults?: SynchroRoundResultPayload[];
 };
 
 const bannedWords = [
@@ -83,6 +79,8 @@ const bannedWords = [
   "asshole",
 ];
 
+const rankLabels = ["1位", "2位", "3位"];
+
 const ellipsizeName = (name: string, maxLen = 6) => {
   const chars = Array.from(name);
   if (chars.length <= maxLen) return name;
@@ -91,56 +89,56 @@ const ellipsizeName = (name: string, maxLen = 6) => {
 
 const getTheme = () => {
   return {
-    page: "bg-gradient-to-b from-cyan-400 via-violet-300 to-pink-400",
+    page: "bg-gradient-to-b from-violet-400 via-fuchsia-300 to-yellow-300",
     mainText: "text-violet-600",
     button:
-      "bg-gradient-to-r from-cyan-500 via-violet-500 to-pink-500 text-white hover:scale-105 hover:brightness-110",
+      "bg-gradient-to-r from-violet-500 via-fuchsia-500 to-yellow-400 text-white hover:scale-105 hover:brightness-110",
     subButton:
-      "bg-gradient-to-r from-cyan-100 via-violet-100 to-pink-100 text-gray-800 hover:scale-105 hover:brightness-105",
+      "bg-gradient-to-r from-violet-100 via-fuchsia-100 to-yellow-100 text-gray-800 hover:scale-105 hover:brightness-105",
     questionBox:
-      "bg-gradient-to-br from-cyan-50 via-white to-pink-50 border-violet-400 text-gray-900",
+      "bg-gradient-to-br from-violet-50 via-white to-yellow-50 border-violet-400 text-gray-900",
     choiceActive:
-      "border-violet-600 bg-gradient-to-br from-cyan-100 via-violet-100 to-pink-100 ring-4 ring-violet-300 scale-[1.03]",
+      "border-violet-600 bg-gradient-to-br from-violet-100 via-fuchsia-100 to-yellow-100 ring-4 ring-violet-300 scale-[1.03]",
   };
 };
 
 const getSynchroLabel = (rate: number) => {
-  if (rate >= 100) return "奇跡の全問シンクロ！";
-  if (rate >= 85) return "息ピッタリ！";
-  if (rate >= 70) return "かなり似てる！";
-  if (rate >= 50) return "相性バツグン！";
-  if (rate >= 30) return "いいコンビかも！";
-  return "まだまだ発見がいっぱい！";
+  if (rate >= 100) return "奇跡の完全シンクロ！";
+  if (rate >= 85) return "ほぼ同じランキング！";
+  if (rate >= 70) return "かなり好みが近い！";
+  if (rate >= 50) return "いい感じに合ってる！";
+  if (rate >= 30) return "似てるところもある！";
+  return "違いが楽しいランキング！";
 };
 
 const getSynchroComment = (rate: number) => {
   if (rate >= 100) {
-    return "全問一致！価値観がかなり近いです。同じことを考えていた瞬間が多すぎます。";
+    return "1位から3位までかなりそろっています。好みや価値観がびっくりするほど近いです。";
   }
 
   if (rate >= 85) {
-    return "かなり高いシンクロ率です。好みや感覚が似ていて、自然と同じ答えを選べています。";
+    return "かなり高いシンクロ率です。順位の感覚まで近く、同じものを大事にしている可能性が高そうです。";
   }
 
   if (rate >= 70) {
-    return "しっかり気が合っています。たまに違う答えが出るのも、会話が盛り上がるポイントです。";
+    return "しっかり気が合っています。順位違いも含めて、似たものを選ぶことが多いです。";
   }
 
   if (rate >= 50) {
-    return "半分以上は意見が合っています。似ているところと違うところのバランスがちょうどいいです。";
+    return "半分くらいは感覚が近い結果です。合うところと違うところのバランスがちょうどいいです。";
   }
 
   if (rate >= 30) {
-    return "意外な違いがたくさん見つかる結果です。答え合わせをするとかなり盛り上がりそうです。";
+    return "意外な共通点が少し見つかる結果です。答え合わせするとかなり盛り上がりそうです。";
   }
 
-  return "かなり個性が分かれました。違いを楽しめます。次はもっと合うかも？";
+  return "ランキングの個性がかなり分かれました。違いを楽しめる組み合わせです。";
 };
 
 const getResultStyle = (rate: number) => {
   if (rate >= 100) {
     return {
-      card: "bg-gradient-to-br from-yellow-100 via-pink-100 to-cyan-100 border-yellow-400",
+      card: "bg-gradient-to-br from-yellow-100 via-white to-violet-100 border-yellow-400",
       text: "text-yellow-600",
       badge: "🌈👑",
     };
@@ -148,36 +146,36 @@ const getResultStyle = (rate: number) => {
 
   if (rate >= 85) {
     return {
-      card: "bg-gradient-to-br from-pink-100 via-violet-100 to-cyan-100 border-pink-400",
-      text: "text-pink-600",
+      card: "bg-gradient-to-br from-violet-100 via-fuchsia-100 to-yellow-100 border-violet-400",
+      text: "text-violet-600",
       badge: "✨🤝",
     };
   }
 
   if (rate >= 70) {
     return {
-      card: "bg-gradient-to-br from-cyan-100 via-violet-100 to-pink-50 border-violet-400",
-      text: "text-violet-600",
+      card: "bg-gradient-to-br from-fuchsia-100 via-white to-yellow-50 border-fuchsia-400",
+      text: "text-fuchsia-600",
       badge: "✨",
     };
   }
 
   if (rate >= 50) {
     return {
-      card: "bg-gradient-to-br from-white via-cyan-50 to-pink-50 border-cyan-300",
-      text: "text-cyan-600",
+      card: "bg-gradient-to-br from-white via-violet-50 to-yellow-50 border-violet-300",
+      text: "text-violet-600",
       badge: "🤝",
     };
   }
 
   return {
-    card: "bg-gradient-to-br from-white via-violet-50 to-pink-50 border-violet-200",
-    text: "text-violet-500",
+    card: "bg-gradient-to-br from-white via-fuchsia-50 to-yellow-50 border-fuchsia-200",
+    text: "text-fuchsia-600",
     badge: "🎉",
   };
 };
 
-export default function QuizKoredochiCodePage() {
+export default function QuizSynchroCodePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -200,7 +198,7 @@ export default function QuizKoredochiCodePage() {
 
   const theme = getTheme();
 
-  const [phase, setPhase] = useState<KoredochiPhase>("name");
+  const [phase, setPhase] = useState<SynchroPhase>("name");
   const [playerName, setPlayerName] = useState("");
   const [nameError, setNameError] = useState<string | null>(null);
 
@@ -213,24 +211,28 @@ export default function QuizKoredochiCodePage() {
   const [totalQuestions, setTotalQuestions] = useState(questionCount);
 
   const [currentQuestion, setCurrentQuestion] = useState("");
-  const [currentChoices, setCurrentChoices] = useState<KoredochiChoice[]>([]);
-  const [selectedChoice, setSelectedChoice] = useState<ChoiceKey | null>(null);
+  const [currentChoices, setCurrentChoices] = useState<SynchroChoice[]>([]);
+  const [selectedRanking, setSelectedRanking] = useState<string[]>([]);
   const [submittedAnswer, setSubmittedAnswer] = useState(false);
 
   const [lastResult, setLastResult] =
-    useState<KoredochiRoundResultPayload | null>(null);
+    useState<SynchroRoundResultPayload | null>(null);
 
-  const [synchroCount, setSynchroCount] = useState(0);
-  const [allMatchCount, setAllMatchCount] = useState(0);
+  const [totalScore, setTotalScore] = useState(0);
+  const [maxTotalScore, setMaxTotalScore] = useState(0);
+  const [synchroRate, setSynchroRate] = useState(0);
   const [questionResults, setQuestionResults] = useState<
-    KoredochiRoundResultPayload[]
+    SynchroRoundResultPayload[]
   >([]);
+
+  const [nextReady, setNextReady] = useState(false);
+  const [nextReadyCount, setNextReadyCount] = useState(0);
+  const [nextReadyTotal, setNextReadyTotal] = useState(playerMaxCount);
 
   const [finished, setFinished] = useState(false);
 
   const {
     joinWithCode,
-    resetMatch,
     players: rawPlayers,
     mySocketId,
     socket,
@@ -246,22 +248,14 @@ export default function QuizKoredochiCodePage() {
   );
 
   const displayPlayers = roomPlayers.length > 0 ? roomPlayers : players;
-
-  const [synchroRate, setSynchroRate] = useState(0);
-
   const resultStyle = getResultStyle(synchroRate);
 
-  const myLastChoice =
-    lastResult && mySocketId ? lastResult.answers?.[mySocketId] : null;
+  const myLastRanking =
+    lastResult && mySocketId ? lastResult.answers?.[mySocketId] ?? [] : [];
 
-  const myLastChoiceText =
-    lastResult?.choices.find((choice) => choice.key === myLastChoice)?.text ||
-    "";
-
-  const majorityChoiceText =
-    lastResult?.choices.find(
-      (choice) => choice.key === lastResult.majorityChoice
-    )?.text || "";
+  const getChoiceText = (choiceId: string, choices = currentChoices) => {
+    return choices.find((choice) => choice.id === choiceId)?.text || choiceId;
+  };
 
   const handleJoin = () => {
     const trimmedName = playerName.trim();
@@ -280,12 +274,13 @@ export default function QuizKoredochiCodePage() {
     }
 
     setNameError(null);
-    const normalizedRoomCode = `koredochi_${code}`;
+
+    const normalizedRoomCode = `synchro_${code}`;
 
     setRoomCode(normalizedRoomCode);
     setPhase("waiting");
 
-    joinWithCode(code, String(playerMaxCount), "koredochi");
+    joinWithCode(code, String(playerMaxCount), "synchro");
   };
 
   const handleStartReady = () => {
@@ -297,20 +292,40 @@ export default function QuizKoredochiCodePage() {
       roomCode,
       socketId: mySocketId,
       handicap: 0,
-      gameType: "koredochi",
+      gameType: "synchro",
       questionCount,
       playerMaxCount,
     });
   };
 
-  const handleSubmitAnswer = () => {
-    if (!socket || !roomCode || !selectedChoice || submittedAnswer) return;
+  const handleSelectChoice = (choiceId: string) => {
+    if (submittedAnswer) return;
+    if (selectedRanking.includes(choiceId)) return;
+    if (selectedRanking.length >= 3) return;
+
+    setSelectedRanking((prev) => [...prev, choiceId]);
+  };
+
+  const handleRemoveRanking = (choiceId: string) => {
+    if (submittedAnswer) return;
+
+    setSelectedRanking((prev) => prev.filter((id) => id !== choiceId));
+  };
+
+  const handleClearRanking = () => {
+    if (submittedAnswer) return;
+    setSelectedRanking([]);
+  };
+
+  const handleSubmitRanking = () => {
+    if (!socket || !roomCode || submittedAnswer) return;
+    if (selectedRanking.length !== 3) return;
 
     setSubmittedAnswer(true);
 
-    socket.emit("koredochi_submit_answer", {
+    socket.emit("synchro_submit_ranking", {
       roomCode,
-      choice: selectedChoice,
+      ranking: selectedRanking,
     });
   };
 
@@ -320,15 +335,15 @@ export default function QuizKoredochiCodePage() {
 
     setCurrentQuestion("");
     setCurrentChoices([]);
-    setSelectedChoice(null);
+    setSelectedRanking([]);
     setSubmittedAnswer(false);
 
     setLastResult(null);
-    setSynchroCount(0);
-    setAllMatchCount(0);
+    setTotalScore(0);
+    setMaxTotalScore(0);
+    setSynchroRate(0);
     setQuestionResults([]);
     setFinished(false);
-    setSynchroRate(0);
   };
 
   const handleRematch = () => {
@@ -339,7 +354,7 @@ export default function QuizKoredochiCodePage() {
 
     socket.emit("request_rematch", {
       roomCode,
-      gameType: "koredochi",
+      gameType: "synchro",
     });
 
     setPhase("waiting");
@@ -347,13 +362,12 @@ export default function QuizKoredochiCodePage() {
 
   const handleShareX = () => {
     const text = [
-      "【ひまQ｜これどっち？🤝】",
+      "【ひまQ｜シンクロランキング🤝】",
       `シンクロ率：${synchroRate}%`,
       `結果：${getSynchroLabel(synchroRate)}`,
-      `全員一致：${allMatchCount}回`,
       "",
       "👇ひまQで遊ぶ",
-      "#ひまQ #これどっち #シンクロゲーム",
+      "#ひまQ #シンクロランキング #ランキングゲーム",
     ].join("\n");
 
     openXShare({ text, url: buildTopUrl() });
@@ -383,31 +397,34 @@ export default function QuizKoredochiCodePage() {
       setPhase("playing");
     };
 
-    const onQuestionStart = (payload: KoredochiQuestionPayload) => {
+    const onQuestionStart = (payload: SynchroQuestionPayload) => {
       setQuestionIndex(payload.questionIndex);
       setTotalQuestions(payload.totalQuestions);
       setCurrentQuestion(payload.question);
       setCurrentChoices(payload.choices);
-      setSelectedChoice(null);
+      setSelectedRanking([]);
       setSubmittedAnswer(false);
       setLastResult(null);
       setPhase("playing");
     };
 
-    const onRoundResult = (payload: KoredochiRoundResultPayload) => {
+    const onRoundResult = (payload: SynchroRoundResultPayload) => {
       setLastResult(payload);
-      setSynchroCount(payload.synchroCount ?? 0);
-      setAllMatchCount(payload.allMatchCount ?? 0);
+      setTotalScore(payload.totalScore ?? 0);
+      setMaxTotalScore(payload.maxTotalScore ?? 0);
       setSynchroRate(payload.synchroRate ?? 0);
       setQuestionResults((prev) => [...prev, payload]);
-      setSelectedChoice(null);
+      setSelectedRanking([]);
       setSubmittedAnswer(false);
       setPhase("reveal");
+      setNextReady(false);
+      setNextReadyCount(0);
+      setNextReadyTotal(displayPlayers.length || playerMaxCount);
     };
 
-    const onGameEnd = (payload: KoredochiGameEndPayload) => {
-      setSynchroCount(payload.synchroCount ?? 0);
-      setAllMatchCount(payload.allMatchCount ?? 0);
+    const onGameEnd = (payload: SynchroGameEndPayload) => {
+      setTotalScore(payload.totalScore ?? 0);
+      setMaxTotalScore(payload.maxTotalScore ?? 0);
       setSynchroRate(payload.synchroRate ?? 0);
       setTotalQuestions(payload.totalQuestions ?? questionCount);
 
@@ -419,18 +436,31 @@ export default function QuizKoredochiCodePage() {
       setPhase("result");
     };
 
+    const onNextReadyUpdate = ({
+      readyCount,
+      total,
+    }: {
+      readyCount: number;
+      total: number;
+    }) => {
+      setNextReadyCount(readyCount);
+      setNextReadyTotal(total);
+    };
+
     socket.on("update_room_count", onRoomCount);
     socket.on("both_ready_start", onBothReadyStart);
-    socket.on("koredochi_question_start", onQuestionStart);
-    socket.on("koredochi_round_result", onRoundResult);
-    socket.on("koredochi_game_end", onGameEnd);
+    socket.on("synchro_question_start", onQuestionStart);
+    socket.on("synchro_round_result", onRoundResult);
+    socket.on("synchro_game_end", onGameEnd);
+    socket.on("synchro_next_ready_update", onNextReadyUpdate);
 
     return () => {
       socket.off("update_room_count", onRoomCount);
       socket.off("both_ready_start", onBothReadyStart);
-      socket.off("koredochi_question_start", onQuestionStart);
-      socket.off("koredochi_round_result", onRoundResult);
-      socket.off("koredochi_game_end", onGameEnd);
+      socket.off("synchro_question_start", onQuestionStart);
+      socket.off("synchro_round_result", onRoundResult);
+      socket.off("synchro_game_end", onGameEnd);
+      socket.off("synchro_next_ready_update", onNextReadyUpdate);
     };
   }, [socket, phase, playerMaxCount, questionCount]);
 
@@ -438,14 +468,14 @@ export default function QuizKoredochiCodePage() {
     return (
       <div className={`min-h-screen ${theme.page} px-4 py-8 text-center`}>
         <div className="mx-auto max-w-xl rounded-3xl border-4 border-black bg-white/85 p-5 shadow-xl backdrop-blur">
-          {/* <div className="rounded-3xl border-4 border-black bg-gradient-to-r from-cyan-100 via-violet-100 to-pink-100 px-4 py-5 shadow">
+          <div className="rounded-3xl border-4 border-black bg-gradient-to-r from-violet-100 via-fuchsia-100 to-yellow-100 px-4 py-5 shadow">
             <p className="text-4xl md:text-5xl font-black text-gray-900">
-              🤝 これどっち？
+              🤝 シンクロランキング
             </p>
             <p className="mt-2 text-sm md:text-base font-bold text-gray-700">
-              みんなと何個気持ちが合うかな？
+              みんなのベスト3はどれだけ合う？
             </p>
-          </div> */}
+          </div>
 
           <div className="mt-6">
             <p className="text-xl md:text-2xl font-extrabold text-gray-800">
@@ -555,12 +585,8 @@ export default function QuizKoredochiCodePage() {
           </div>
 
           <p className="mt-5 text-gray-700 font-bold">
-            ランダムに出る2択のお題に答えて、みんなと何問シンクロできるかチャレンジしよう！
+            お題に合わせて1位・2位・3位を選ぼう！順位までそろうと高得点！
           </p>
-
-          {/* <p className="mt-2 text-sm md:text-base text-gray-600 font-bold">
-            シンクロ率100％を目指す、ドキドキの2択ゲーム！
-          </p> */}
 
           {!readyToStart ? (
             <motion.button
@@ -584,7 +610,7 @@ export default function QuizKoredochiCodePage() {
   return (
     <div className={`min-h-screen ${theme.page} px-4 py-6 text-center`}>
       <div className="mx-auto max-w-4xl">
-        <div className="mb-5 rounded-[32px] border-4 border-black bg-gradient-to-r from-cyan-400 via-violet-400 to-pink-400 p-1 shadow-[0_8px_0_rgba(0,0,0,1)]">
+        <div className="mb-5 rounded-[32px] border-4 border-black bg-gradient-to-r from-violet-400 via-fuchsia-400 to-yellow-300 p-1 shadow-[0_8px_0_rgba(0,0,0,1)]">
           <div className="rounded-[28px] bg-white/90 p-4">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between">
               <div className="text-center md:text-left">
@@ -598,7 +624,7 @@ export default function QuizKoredochiCodePage() {
 
                 <div className="mx-auto mt-2 h-4 max-w-[220px] overflow-hidden rounded-full border-2 border-black bg-white md:mx-0">
                   <div
-                    className="h-full bg-gradient-to-r from-cyan-400 via-violet-400 to-pink-400"
+                    className="h-full bg-gradient-to-r from-violet-400 via-fuchsia-400 to-yellow-300"
                     style={{
                       width: `${((questionIndex + 1) / totalQuestions) * 100}%`,
                     }}
@@ -608,13 +634,16 @@ export default function QuizKoredochiCodePage() {
 
               <div className="mt-4 flex justify-center gap-2 md:mt-0 md:justify-end">
                 <div className="min-w-[120px] rounded-2xl border-4 border-black bg-violet-500 px-4 py-2 text-white shadow">
-                  <p className="text-xs font-black">⚡シンクロ</p>
-                  <p className="text-2xl font-black">{synchroCount}</p>
+                  <p className="text-xs font-black">🤝シンクロ率</p>
+                  <p className="text-2xl font-black">{synchroRate}%</p>
                 </div>
 
-                <div className="min-w-[120px] rounded-2xl border-4 border-black bg-pink-500 px-4 py-2 text-white shadow">
-                  <p className="text-xs font-black">🌈全員一致</p>
-                  <p className="text-2xl font-black">{allMatchCount}</p>
+                <div className="min-w-[120px] rounded-2xl border-4 border-black bg-yellow-400 px-4 py-2 text-gray-900 shadow">
+                  <p className="text-xs font-black">⭐スコア</p>
+                  <p className="text-2xl font-black">
+                    {totalScore}
+                    <span className="text-sm">/{maxTotalScore || "-"}</span>
+                  </p>
                 </div>
               </div>
             </div>
@@ -653,60 +682,115 @@ export default function QuizKoredochiCodePage() {
               className="rounded-3xl border-4 border-black bg-white/90 p-5 shadow-xl"
             >
               <p className="text-lg md:text-xl font-bold text-gray-500">
-                直感で選ぼう！
+                1位・2位・3位の順番で選ぼう！
               </p>
 
               <div
                 className={`mt-4 rounded-3xl border-4 px-4 py-5 shadow ${theme.questionBox}`}
               >
                 <p className="text-2xl md:text-4xl font-extrabold">
-                  {currentQuestion || "問題を読み込み中…"}
+                  {currentQuestion || "お題を読み込み中…"}
                 </p>
+              </div>
+
+              <div className="mt-5 grid grid-cols-1 md:grid-cols-3 gap-3">
+                {[0, 1, 2].map((index) => {
+                  const choiceId = selectedRanking[index];
+                  const hasChoice = !!choiceId;
+
+                  return (
+                    <div
+                      key={index}
+                      className={`
+                        rounded-3xl border-4 border-black px-4 py-5 shadow
+                        ${
+                          index === 0
+                            ? "bg-yellow-100"
+                            : index === 1
+                            ? "bg-violet-100"
+                            : "bg-fuchsia-100"
+                        }
+                      `}
+                    >
+                      <p className="text-3xl font-black text-gray-900">
+                        {rankLabels[index]}
+                      </p>
+
+                      <p className="mt-2 min-h-[40px] text-xl md:text-2xl font-extrabold text-gray-900">
+                        {hasChoice
+                          ? getChoiceText(choiceId)
+                          : "まだ未選択"}
+                      </p>
+
+                      {hasChoice && (
+                        <button
+                          onClick={() => handleRemoveRanking(choiceId)}
+                          disabled={submittedAnswer}
+                          className="mt-3 rounded-full border-2 border-black bg-white px-4 py-1 text-sm font-bold text-gray-700 disabled:opacity-50"
+                        >
+                          外す
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
 
               <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
                 {currentChoices.map((choice) => {
-                  const active = selectedChoice === choice.key;
+                  const selectedIndex = selectedRanking.indexOf(choice.id);
+                  const active = selectedIndex >= 0;
 
                   return (
                     <button
-                      key={choice.key}
-                      onClick={() => {
-                        if (submittedAnswer) return;
-                        setSelectedChoice(choice.key);
-                      }}
+                      key={choice.id}
+                      onClick={() => handleSelectChoice(choice.id)}
+                      disabled={submittedAnswer || active}
                       className={`
-                        rounded-3xl border-4 px-4 py-8 text-2xl md:text-4xl font-extrabold shadow-md transition-all
+                        rounded-3xl border-4 px-4 py-5 text-2xl md:text-3xl font-extrabold shadow-md transition-all
                         ${
                           active
                             ? theme.choiceActive
-                            : "border-black bg-white opacity-80 hover:opacity-100 hover:scale-[1.02]"
+                            : "border-black bg-white opacity-90 hover:opacity-100 hover:scale-[1.02]"
                         }
+                        ${submittedAnswer ? "cursor-not-allowed" : ""}
                       `}
                     >
-                      {/* <span className="mb-2 block text-sm md:text-base text-gray-500">
-                        {choice.key === "A" ? "A" : "B"}
-                      </span> */}
+                      {active && (
+                        <span className="mb-2 block text-base font-black text-violet-700">
+                          {rankLabels[selectedIndex]}に選択中
+                        </span>
+                      )}
                       {choice.text}
                     </button>
                   );
                 })}
               </div>
 
-              <button
-                onClick={handleSubmitAnswer}
-                disabled={!selectedChoice || submittedAnswer}
-                className={`
-                  mt-6 w-full rounded-full border-4 border-black px-6 py-4 text-xl md:text-2xl font-extrabold shadow-lg transition-all
-                  ${
-                    selectedChoice && !submittedAnswer
-                      ? theme.button
-                      : "bg-gray-200 text-gray-400"
-                  }
-                `}
-              >
-                {submittedAnswer ? "みんなの回答待ち…" : "これにする！"}
-              </button>
+              <div className="mt-5 flex flex-col md:flex-row gap-3">
+                <button
+                  onClick={handleClearRanking}
+                  disabled={submittedAnswer || selectedRanking.length === 0}
+                  className="w-full rounded-full border-4 border-black bg-white px-6 py-3 text-lg md:text-xl font-extrabold text-gray-800 shadow transition-all hover:scale-105 disabled:opacity-50"
+                >
+                  選び直す
+                </button>
+
+                <button
+                  onClick={handleSubmitRanking}
+                  disabled={selectedRanking.length !== 3 || submittedAnswer}
+                  className={`
+                    w-full rounded-full border-4 border-black px-6 py-3 text-lg md:text-xl font-extrabold shadow-lg transition-all
+                    ${
+                      selectedRanking.length === 3 && !submittedAnswer
+                        ? theme.button
+                        : "bg-gray-200 text-gray-400"
+                    }
+                  `}
+                >
+                  {submittedAnswer ? "みんなの回答待ち…" : "このランキングにする！"}
+                </button>
+              </div>
             </motion.div>
           )}
 
@@ -723,11 +807,7 @@ export default function QuizKoredochiCodePage() {
               </p>
 
               <h2 className="mt-2 text-2xl md:text-4xl font-extrabold text-gray-900">
-                {lastResult.allMatched
-                  ? "🌈 全員一致！"
-                  : lastResult.matched
-                  ? "🤝 シンクロ！"
-                  : "🤔 意見が分かれた！"}
+                今回のシンクロ率 {lastResult.roundRate}%
               </h2>
 
               <div
@@ -738,66 +818,118 @@ export default function QuizKoredochiCodePage() {
                 </p>
               </div>
 
-              <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
-                {lastResult.choices.map((choice) => {
-                  const count = lastResult.counts?.[choice.key] ?? 0;
-                  const isMine = myLastChoice === choice.key;
-                  const isMajority = lastResult.majorityChoice === choice.key;
+              <div className="mt-5 grid grid-cols-2 gap-3">
+                <div className="rounded-2xl border-4 border-black bg-yellow-100 p-4">
+                  <p className="text-sm font-bold text-gray-500">
+                    順位まで一致
+                  </p>
+                  <p className="text-3xl md:text-4xl font-black text-yellow-600">
+                    {lastResult.sameRankCount}
+                  </p>
+                </div>
 
-                  return (
-                    <div
-                      key={choice.key}
-                      className={`
-                        rounded-3xl border-4 px-4 py-5 shadow
-                        ${
-                          isMine
-                            ? "border-violet-600 bg-gradient-to-br from-cyan-100 via-violet-100 to-pink-100"
-                            : "border-black bg-white"
-                        }
-                      `}
-                    >
-                      <p className="text-sm font-bold text-gray-500">
-                        {choice.key}
-                      </p>
-
-                      <p className="mt-1 text-2xl md:text-3xl font-extrabold text-gray-900">
-                        {choice.text}
-                      </p>
-
-                      <p className="mt-3 text-xl md:text-2xl font-black text-violet-600">
-                        {count}人
-                      </p>
-
-                      {isMine && (
-                        <p className="mt-2 text-sm font-extrabold text-pink-600">
-                          あなたの回答
-                        </p>
-                      )}
-
-                      {isMajority && !lastResult.allMatched && (
-                        <p className="mt-2 text-sm font-extrabold text-cyan-600">
-                          多数派
-                        </p>
-                      )}
-                    </div>
-                  );
-                })}
+                <div className="rounded-2xl border-4 border-black bg-violet-100 p-4">
+                  <p className="text-sm font-bold text-gray-500">
+                    選んだもの一致
+                  </p>
+                  <p className="text-3xl md:text-4xl font-black text-violet-600">
+                    {lastResult.sameItemCount}
+                  </p>
+                </div>
               </div>
 
-              <div className="mt-5 rounded-2xl border-4 border-black bg-white px-4 py-4">
-                <p className="text-lg md:text-xl font-bold text-gray-700">
-                  あなたは「{myLastChoiceText || "未回答"}」を選びました
+              {myLastRanking.length > 0 && (
+                <div className="mt-5 rounded-3xl border-4 border-black bg-white px-4 py-4">
+                  <p className="text-xl md:text-2xl font-extrabold text-gray-900">
+                    あなたのランキング
+                  </p>
+
+                  <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3">
+                    {myLastRanking.map((choiceId, index) => (
+                      <div
+                        key={`${choiceId}-${index}`}
+                        className="rounded-2xl border-2 border-black bg-gradient-to-br from-violet-50 to-yellow-50 px-3 py-3"
+                      >
+                        <p className="text-lg font-black text-violet-600">
+                          {rankLabels[index]}
+                        </p>
+                        <p className="text-xl font-black text-gray-900">
+                          {getChoiceText(choiceId, lastResult.choices)}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-5 rounded-3xl border-4 border-black bg-white/95 p-4 text-left">
+                <p className="text-xl md:text-2xl font-extrabold text-gray-900 text-center">
+                  みんなのランキング
                 </p>
 
-                {lastResult.majorityChoice && (
-                  <p className="mt-1 text-sm md:text-base font-bold text-gray-500">
-                    多数派は「{majorityChoiceText}」
-                  </p>
-                )}
+                <div className="mt-4 space-y-3">
+                  {Object.entries(lastResult.answers).map(
+                    ([socketId, ranking]) => {
+                      const name =
+                        socketId === mySocketId
+                          ? "あなた"
+                          : lastResult.playerNames?.[socketId] ||
+                            displayPlayers.find((p) => p.socketId === socketId)
+                              ?.playerName ||
+                            "プレイヤー";
+
+                      return (
+                        <div
+                          key={socketId}
+                          className="rounded-2xl border-4 border-black bg-gradient-to-r from-violet-50 to-yellow-50 px-4 py-3 shadow"
+                        >
+                          <p className="text-lg font-black text-gray-900">
+                            {name}
+                          </p>
+
+                          <div className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-2">
+                            {ranking.map((choiceId, index) => (
+                              <p
+                                key={`${socketId}-${choiceId}-${index}`}
+                                className="rounded-xl bg-white px-3 py-2 text-sm md:text-base font-bold text-gray-700 border-2 border-black"
+                              >
+                                {rankLabels[index]}：{" "}
+                                {getChoiceText(choiceId, lastResult.choices)}
+                              </p>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    }
+                  )}
+                </div>
               </div>
 
-              <p className="mt-4 text-sm md:text-base text-gray-500">
-                次の問題に進みます…
+              <button
+                onClick={() => {
+                  if (!socket || !roomCode || nextReady) return;
+
+                  setNextReady(true);
+
+                  socket.emit("synchro_next_question", {
+                    roomCode,
+                  });
+                }}
+                disabled={nextReady}
+                className={`
+                  mt-6 w-full rounded-full border-4 border-black px-6 py-4 text-xl md:text-2xl font-extrabold shadow-lg transition-all
+                  ${
+                    nextReady
+                      ? "bg-gray-200 text-gray-400"
+                      : theme.button
+                  }
+                `}
+              >
+                {nextReady ? "みんなを待っています…" : "次のランキングに行く！"}
+              </button>
+
+              <p className="mt-3 text-sm md:text-base font-bold text-gray-600">
+                次へ準備：{nextReadyCount} / {nextReadyTotal}
               </p>
             </motion.div>
           )}
@@ -830,16 +962,16 @@ export default function QuizKoredochiCodePage() {
 
               <div className="mt-5 grid grid-cols-2 gap-3">
                 <div className="rounded-2xl border-4 border-black bg-white p-4">
-                  <p className="text-sm font-bold text-gray-500">シンクロ</p>
+                  <p className="text-sm font-bold text-gray-500">合計スコア</p>
                   <p className="text-3xl md:text-4xl font-black text-violet-600">
-                    {synchroCount} / {totalQuestions}
+                    {totalScore}
                   </p>
                 </div>
 
                 <div className="rounded-2xl border-4 border-black bg-white p-4">
-                  <p className="text-sm font-bold text-gray-500">全員一致</p>
-                  <p className="text-3xl md:text-4xl font-black text-pink-600">
-                    {allMatchCount}回
+                  <p className="text-sm font-bold text-gray-500">最大スコア</p>
+                  <p className="text-3xl md:text-4xl font-black text-yellow-600">
+                    {maxTotalScore}
                   </p>
                 </div>
               </div>
@@ -847,50 +979,36 @@ export default function QuizKoredochiCodePage() {
               {questionResults.length > 0 && (
                 <div className="mt-6 rounded-3xl border-4 border-black bg-white/90 p-4 text-left">
                   <p className="text-xl md:text-2xl font-extrabold text-gray-900 text-center">
-                    問題ごとの結果
+                    お題ごとの結果
                   </p>
 
                   <div className="mt-4 space-y-3">
-                    {questionResults.map((result, index) => {
-                      const choiceA = result.choices.find(
-                        (choice) => choice.key === "A"
-                      );
-                      const choiceB = result.choices.find(
-                        (choice) => choice.key === "B"
-                      );
+                    {questionResults.map((result, index) => (
+                      <div
+                        key={`${result.questionId ?? index}-${index}`}
+                        className="rounded-2xl border-4 border-black bg-white px-4 py-3 shadow"
+                      >
+                        <p className="text-sm font-black text-violet-500">
+                          Q{index + 1}
+                        </p>
 
-                      return (
-                        <div
-                          key={`${result.questionId ?? index}-${index}`}
-                          className="rounded-2xl border-4 border-black bg-white px-4 py-3 shadow"
-                        >
-                          <p className="text-sm font-black text-violet-500">
-                            Q{index + 1}
+                        <p className="mt-1 text-base md:text-lg font-extrabold text-gray-900">
+                          {result.question}
+                        </p>
+
+                        <div className="mt-2 grid grid-cols-3 gap-2 text-sm md:text-base font-bold text-gray-700 text-center">
+                          <p className="rounded-xl bg-yellow-50 px-3 py-2">
+                            順位一致：{result.sameRankCount}
                           </p>
-
-                          <p className="mt-1 text-base md:text-lg font-extrabold text-gray-900">
-                            {result.question}
+                          <p className="rounded-xl bg-violet-50 px-3 py-2">
+                            選択一致：{result.sameItemCount}
                           </p>
-
-                          <div className="mt-2 grid grid-cols-2 gap-2 text-sm md:text-base font-bold text-gray-700">
-                            <p className="rounded-xl bg-cyan-50 px-3 py-2">
-                              {choiceA?.text}：{result.counts?.A ?? 0}人
-                            </p>
-                            <p className="rounded-xl bg-pink-50 px-3 py-2">
-                              {choiceB?.text}：{result.counts?.B ?? 0}人
-                            </p>
-                          </div>
-
-                          <p className="mt-2 text-sm font-extrabold">
-                            {result.allMatched
-                              ? "🌈 全員一致"
-                              : result.matched
-                              ? "🤝 シンクロ"
-                              : "🤔 意見が分かれた"}
+                          <p className="rounded-xl bg-fuchsia-50 px-3 py-2">
+                            {result.roundRate}%
                           </p>
                         </div>
-                      );
-                    })}
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
@@ -911,7 +1029,7 @@ export default function QuizKoredochiCodePage() {
                 </button>
 
                 <button
-                  onClick={() => router.push("/quiz-koredochi")}
+                  onClick={() => router.push("/quiz-synchro")}
                   className={`rounded-xl border-4 border-black px-6 py-3 text-xl font-extrabold shadow-md transition-all ${theme.subButton}`}
                 >
                   トップに戻る
@@ -921,7 +1039,7 @@ export default function QuizKoredochiCodePage() {
               <RecommendedMultiplayerGames
                 title="次はどれで遊ぶ？🎮"
                 count={4}
-                excludeHref="/quiz-koredochi"
+                excludeHref="/quiz-synchro"
               />
             </motion.div>
           )}
