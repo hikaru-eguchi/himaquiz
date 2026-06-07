@@ -301,17 +301,17 @@ export default function NavButtons() {
                           心理当てバトル
                         </button>
                       </Link>
-
+                      
                       <Link
-                        href="/quiz-usohonto"
-                        onClick={() => handleNavClick("/quiz-usohonto")}
+                        href="/quiz-friend"
+                        onClick={() => handleNavClick("/quiz-friend")}
                       >
                         <button
-                          className={`${baseStyle} bg-[linear-gradient(135deg,#2563eb_0%,#7c3aed_45%,#e11d48_55%,#fb7185_100%)] text-white ring-2 ring-purple-500 md:hover:scale-110 ${
-                            activeUrl === "/quiz-usohonto" ? activeStyle : ""
+                          className={`${baseStyle} bg-gradient-to-r from-sky-400 via-cyan-300 to-yellow-200 text-white ring-2 ring-cyan-500 md:hover:scale-110 ${
+                            activeUrl === "/quiz-friend" ? activeStyle : ""
                           }`}
                         >
-                          ウソ？ホント？ゲーム
+                          なかよし診断
                         </button>
                       </Link>
 
@@ -340,17 +340,17 @@ export default function NavButtons() {
                           シンクロランキング
                         </button>
                       </Link>
-
+                      
                       <Link
-                        href="/quiz-friend"
-                        onClick={() => handleNavClick("/quiz-friend")}
+                        href="/quiz-usohonto"
+                        onClick={() => handleNavClick("/quiz-usohonto")}
                       >
                         <button
-                          className={`${baseStyle} bg-gradient-to-r from-sky-400 via-cyan-300 to-yellow-200 text-white ring-2 ring-cyan-500 md:hover:scale-110 ${
-                            activeUrl === "/quiz-friend" ? activeStyle : ""
+                          className={`${baseStyle} bg-[linear-gradient(135deg,#2563eb_0%,#7c3aed_45%,#e11d48_55%,#fb7185_100%)] text-white ring-2 ring-purple-500 md:hover:scale-110 ${
+                            activeUrl === "/quiz-usohonto" ? activeStyle : ""
                           }`}
                         >
-                          なかよし診断
+                          ウソ？ホント？ゲーム
                         </button>
                       </Link>
 

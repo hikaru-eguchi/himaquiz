@@ -503,19 +503,19 @@ export default async function HomePage({
               </p>
             </div>
           </div>
-          {/* ウソ？ホント？ゲーム */}
+          {/* なかよし診断 */}
           <div className="text-center max-w-[280px]">
-            <Link href="/quiz-usohonto" className="w-full md:w-auto flex justify-center">
-              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-[linear-gradient(135deg,#2563eb_0%,#7c3aed_45%,#e11d48_55%,#fb7185_100%)] text-white hover:scale-110 transition-all">
-                🎭ウソ？ホント？ゲーム
+            <Link href="/quiz-friend" className="w-full md:w-auto flex justify-center">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-sky-400 via-cyan-300 to-yellow-200 text-white hover:scale-110 transition-all">
+                💞なかよし診断
               </button>
             </Link>
             <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
               <p className="text-sm md:text-base text-gray-700 leading-tight">
-                その話、信じていい？
+                相手のこと、どれくらい知ってる？
               </p>
               <p className="text-sm md:text-base text-gray-700 leading-tight">
-                話がウソかホントかを見抜け！
+                友達・恋人と盛り上がる理解度テスト！
               </p>
             </div>
           </div>
@@ -551,19 +551,19 @@ export default async function HomePage({
               </p>
             </div>
           </div>
-          {/* なかよし診断 */}
+          {/* ウソ？ホント？ゲーム */}
           <div className="text-center max-w-[280px]">
-            <Link href="/quiz-friend" className="w-full md:w-auto flex justify-center">
-              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-sky-400 via-cyan-300 to-yellow-200 text-white hover:scale-110 transition-all">
-                💞なかよし診断
+            <Link href="/quiz-usohonto" className="w-full md:w-auto flex justify-center">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-[linear-gradient(135deg,#2563eb_0%,#7c3aed_45%,#e11d48_55%,#fb7185_100%)] text-white hover:scale-110 transition-all">
+                🎭ウソ？ホント？ゲーム
               </button>
             </Link>
             <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
               <p className="text-sm md:text-base text-gray-700 leading-tight">
-                相手のこと、どれくらい知ってる？
+                その話、信じていい？
               </p>
               <p className="text-sm md:text-base text-gray-700 leading-tight">
-                友達・恋人と盛り上がる理解度テスト！
+                話がウソかホントかを見抜け！
               </p>
             </div>
           </div>
