@@ -290,6 +290,19 @@ export default function NavButtons() {
                   <div className={gameScrollOuter}>
                     <div className={gameRow}>
                       <Link
+                        href="/quiz-hirameki"
+                        onClick={() => handleNavClick("/quiz-hirameki")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-gradient-to-r from-yellow-400 via-amber-300 to-orange-300 text-white ring-2 ring-yellow-500 md:hover:scale-110 ${
+                            activeUrl === "/quiz-hirameki" ? activeStyle : ""
+                          }`}
+                        >
+                          ひらめきクイズ
+                        </button>
+                      </Link>
+
+                      <Link
                         href="/quiz-mind"
                         onClick={() => handleNavClick("/quiz-mind")}
                       >
