@@ -16,6 +16,7 @@ import { getWeekStartJST } from "@/lib/week";
 import { getMonthStartJST } from "@/lib/month";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
 import RecommendedMultiplayerGames from "@/app/components/RecommendedMultiplayerGames";
+import OnlineGameNotice from "@/app/components/OnlineGameNotice";
 
 type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
 
@@ -1415,6 +1416,8 @@ export default function QuizModePage() {
 
   if (!joined) {
     return (
+      <>
+      <OnlineGameNotice />
       <div className="container p-8 text-center">
         <h2 className="text-3xl md:text-5xl mb-2 md:mb-4">あなたのニックネームを入力してください</h2>
         <p className="text-xl md:text-2xl text-gray-500 mb-4 md:mb-6">※最大10文字まで入力できます</p>
@@ -1460,12 +1463,14 @@ export default function QuizModePage() {
           対戦相手を探す
         </button>
       </div>
+      </>
     );
   }
 
   if (!allPlayersReady) {
     return (
       <>
+        <OnlineGameNotice />
         <div className="text-center">
           {/* 自分のニックネーム */}
           {playerName && (
@@ -1485,6 +1490,8 @@ export default function QuizModePage() {
 
   if (allPlayersReady && !bothReady) {
     return (
+      <>
+      <OnlineGameNotice />
       <div className="container p-8 text-center">
         <div>
           <p className="text-3xl md:text-5xl font-extrabold text-yellow-400 mb-6 animate-pulse drop-shadow-[0_0_10px_yellow]">
@@ -1547,6 +1554,7 @@ export default function QuizModePage() {
           </p>
         )}
       </div>
+      </>
     );
   }
 
@@ -1575,6 +1583,8 @@ export default function QuizModePage() {
   const isOverlay = countdown !== null || qCountdown !== null;
 
   return (
+    <>
+    <OnlineGameNotice />
     <div className="container mx-auto p-8 text-center bg-gradient-to-b from-cyan-400 via-sky-100 to-cyan-400" key={battleKey}>
       {(countdown !== null || qCountdown !== null) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95">
@@ -1834,5 +1844,6 @@ export default function QuizModePage() {
         />
       )}
     </div>
+    </>
   );
 }

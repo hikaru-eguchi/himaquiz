@@ -15,6 +15,7 @@ import { getWeekStartJST } from "@/lib/week";
 import { getMonthStartJST } from "@/lib/month";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
 import RecommendedMultiplayerGames from "@/app/components/RecommendedMultiplayerGames";
+import OnlineGameNotice from "@/app/components/OnlineGameNotice";
 
 type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
 
@@ -1097,6 +1098,8 @@ export default function QuizModePage() {
 
   if (joined && questions.length === 0)
     return (
+      <>
+      <OnlineGameNotice />
       <div className="text-center">
         {/* 自分のニックネーム */}
         {playerName && (
@@ -1109,10 +1112,13 @@ export default function QuizModePage() {
           対戦相手を探しています...
         </p>
       </div>
+      </>
     );
 
   if (!joined) {
     return (
+      <>
+      <OnlineGameNotice />
       <div className="container p-8 text-center">
         <h2 className="text-3xl md:text-5xl mb-2 md:mb-4">あなたのニックネームを入力してください</h2>
         <p className="text-xl md:text-2xl text-gray-500 mb-4 md:mb-6">※最大10文字まで入力できます</p>
@@ -1158,19 +1164,25 @@ export default function QuizModePage() {
           対戦相手を探す
         </button>
       </div>
+      </>
     );
   }
 
   if (!roomReady || !matched) {
     return (
+      <>
+      <OnlineGameNotice />
       <div className="container p-8 text-center">
         <p className="text-3xl md:text-5xl mt-35 text-center animate-pulse">対戦相手を探しています...</p>
       </div>
+      </>
     );
   }
 
   if (matched && !bothReady) {
     return (
+      <>
+      <OnlineGameNotice />
       <div className="container p-8 text-center">
         <h2 className="text-3xl md:text-5xl font-extrabold mb-4 md:mb-6">
           {opponent
@@ -1235,6 +1247,7 @@ export default function QuizModePage() {
           </div>
         )}
       </div>
+      </>
     );
   }
 
@@ -1262,6 +1275,8 @@ export default function QuizModePage() {
   };
 
   return (
+    <>
+    <OnlineGameNotice />
     <div className="container mx-auto p-8 text-center bg-gradient-to-b from-pink-200 via-yellow-200 to-green-200">
       {countdown !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
@@ -1466,5 +1481,6 @@ export default function QuizModePage() {
         />
       )}
     </div>
+    </>
   );
 }

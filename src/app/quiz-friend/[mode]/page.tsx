@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useBattle } from "../../../hooks/useBattle";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
 import RecommendedMultiplayerGames from "@/app/components/RecommendedMultiplayerGames";
+import OnlineGameNotice from "@/app/components/OnlineGameNotice";
 
 type FriendMode = "friend" | "lover";
 type FriendGenre = "daily" | "image" | "love" | "choice";
@@ -628,6 +629,8 @@ export default function QuizFriendCodePage() {
 
   if (phase === "name") {
     return (
+      <>
+      <OnlineGameNotice />
       <div className={`${theme.page} px-4 py-8 text-center`}>
         <div className="mx-auto max-w-xl rounded-3xl border-4 border-black bg-white/80 p-5 shadow-xl">
           <div className="mt-6">
@@ -666,11 +669,14 @@ export default function QuizFriendCodePage() {
           </div>
         </div>
       </div>
+      </>
     );
   }
 
   if (phase === "waiting") {
     return (
+      <>
+      <OnlineGameNotice />
       <div className={`${theme.page} px-4 py-8 text-center`}>
         <div className="mx-auto max-w-xl rounded-3xl border-4 border-black bg-white/80 p-5 shadow-xl">
           <p className="text-2xl md:text-4xl font-extrabold text-gray-800 animate-pulse">
@@ -692,11 +698,14 @@ export default function QuizFriendCodePage() {
           )}
         </div>
       </div>
+      </>
     );
   }
 
   if (phase === "ready") {
     return (
+      <>
+      <OnlineGameNotice />
       <div className={`${theme.page} px-4 py-8 text-center`}>
         <div className="mx-auto max-w-2xl rounded-3xl border-4 border-black bg-white/80 p-5 shadow-xl">
           <p className={`text-3xl md:text-5xl font-extrabold ${theme.mainText}`}>
@@ -736,11 +745,14 @@ export default function QuizFriendCodePage() {
           )}
         </div>
       </div>
+      </>
     );
   }
 
   if (phase === "createAll") {
     return (
+      <>
+      <OnlineGameNotice />
       <div className={`${theme.page} px-4 py-6 text-center`}>
         <div className="mx-auto max-w-4xl">
           <div className="mb-4 rounded-3xl border-4 border-black bg-white/80 px-4 py-4 shadow-xl">
@@ -843,11 +855,14 @@ export default function QuizFriendCodePage() {
           </button>
         </div>
       </div>
+      </>
     );
   }
 
   if (phase === "waitingQuestions") {
     return (
+      <>
+      <OnlineGameNotice />
       <div className={`${theme.page} px-4 py-8 text-center`}>
         <div className="mx-auto max-w-xl rounded-3xl border-4 border-black bg-white/80 p-5 shadow-xl">
           <p className="text-2xl md:text-4xl font-extrabold text-gray-800 animate-pulse">
@@ -863,10 +878,13 @@ export default function QuizFriendCodePage() {
           </p>
         </div>
       </div>
+      </>
     );
   }
 
   return (
+    <>
+    <OnlineGameNotice />
     <div className={`${theme.page} px-4 py-6 text-center`}>
       <div className="mx-auto max-w-4xl">
         <div className="mb-4 rounded-3xl border-4 border-black bg-white/80 px-4 py-4 shadow-xl">
@@ -1093,5 +1111,6 @@ export default function QuizFriendCodePage() {
         </AnimatePresence>
       </div>
     </div>
+    </>
   );
 }

@@ -16,6 +16,7 @@ import { getWeekStartJST } from "@/lib/week";
 import { getMonthStartJST } from "@/lib/month";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
 import RecommendedMultiplayerGames from "@/app/components/RecommendedMultiplayerGames";
+import OnlineGameNotice from "@/app/components/OnlineGameNotice";
 
 type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
 
@@ -1700,6 +1701,8 @@ export default function QuizModePage() {
 
   if (!finished && !joined) {
     return (
+      <>
+      <OnlineGameNotice />
       <div className="container p-8 text-center">
         <h2 className="text-3xl md:text-5xl mb-2 md:mb-4">あなたのニックネームを入力してください</h2>
         <p className="text-xl md:text-2xl text-gray-500 mb-4 md:mb-6">※最大10文字まで入力できます</p>
@@ -1745,12 +1748,14 @@ export default function QuizModePage() {
           仲間を探す
         </button>
       </div>
+      </>
     );
   }
 
   if (!finished && !allPlayersReady) {
     return (
       <>
+        <OnlineGameNotice />
         <div className="text-center">
           {/* 自分のニックネーム */}
           {playerName && (
@@ -1770,6 +1775,8 @@ export default function QuizModePage() {
 
   if (!finished && allPlayersReady && !bothReady) {
     return (
+      <>
+      <OnlineGameNotice />
       <div className="container p-8 text-center">
         <div>
           <p className="text-3xl md:text-5xl font-extrabold text-yellow-400 mb-6 animate-pulse drop-shadow-[0_0_10px_yellow]">
@@ -1832,6 +1839,7 @@ export default function QuizModePage() {
           </p>
         )}
       </div>
+      </>
     );
   }
 
@@ -1951,6 +1959,8 @@ export default function QuizModePage() {
     //   className={`container mx-auto p-8 text-center transition-colors duration-700 ${getCoopDungeonBgClass()}`}
     //   key={battleKey}
     // >  
+    <>
+    <OnlineGameNotice />
     <div
       className={`container mx-auto p-8 text-center transition-all duration-700 ${
         finished
@@ -2436,5 +2446,6 @@ export default function QuizModePage() {
         />
       )}
     </div>
+    </>
   );
 }

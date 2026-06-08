@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useBattle } from "../../../hooks/useBattle";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
 import RecommendedMultiplayerGames from "@/app/components/RecommendedMultiplayerGames";
+import OnlineGameNotice from "@/app/components/OnlineGameNotice";
 
 type KoredochiPhase =
   | "name"
@@ -436,6 +437,8 @@ export default function QuizKoredochiCodePage() {
 
   if (phase === "name") {
     return (
+      <>
+      <OnlineGameNotice />
       <div className={`${theme.page} px-4 py-8 text-center`}>
         <div className="mx-auto max-w-xl rounded-3xl border-4 border-black bg-white/85 p-5 shadow-xl backdrop-blur">
           {/* <div className="rounded-3xl border-4 border-black bg-gradient-to-r from-cyan-100 via-violet-100 to-pink-100 px-4 py-5 shadow">
@@ -487,11 +490,14 @@ export default function QuizKoredochiCodePage() {
           </div>
         </div>
       </div>
+      </>
     );
   }
 
   if (phase === "waiting") {
     return (
+      <>
+      <OnlineGameNotice />
       <div className={`${theme.page} px-4 py-8 text-center`}>
         <div className="mx-auto max-w-xl rounded-3xl border-4 border-black bg-white/85 p-5 shadow-xl backdrop-blur">
           <p className="text-2xl md:text-4xl font-extrabold text-gray-800 animate-pulse">
@@ -528,11 +534,14 @@ export default function QuizKoredochiCodePage() {
           </div>
         </div>
       </div>
+      </>
     );
   }
 
   if (phase === "ready") {
     return (
+      <>
+      <OnlineGameNotice />
       <div className={`${theme.page} px-4 py-8 text-center`}>
         <div className="mx-auto max-w-2xl rounded-3xl border-4 border-black bg-white/85 p-5 shadow-xl backdrop-blur">
           <p className={`text-3xl md:text-5xl font-extrabold ${theme.mainText}`}>
@@ -578,10 +587,13 @@ export default function QuizKoredochiCodePage() {
           )}
         </div>
       </div>
+      </>
     );
   }
 
   return (
+    <>
+    <OnlineGameNotice />
     <div className={`${theme.page} px-4 py-6 text-center`}>
       <div className="mx-auto max-w-4xl">
         <div className="mb-5 rounded-[32px] border-4 border-black bg-gradient-to-r from-cyan-400 via-violet-400 to-pink-400 p-1 shadow-[0_8px_0_rgba(0,0,0,1)]">
@@ -930,5 +942,6 @@ export default function QuizKoredochiCodePage() {
         {finished && phase !== "result" && null}
       </div>
     </div>
+    </>
   );
 }

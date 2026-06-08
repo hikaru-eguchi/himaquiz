@@ -14,6 +14,7 @@ import { getMonthStartJST } from "@/lib/month";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
 import RecommendedMultiplayerGames from "@/app/components/RecommendedMultiplayerGames";
 import Image from "next/image";
+import OnlineGameNotice from "@/app/components/OnlineGameNotice";
 
 type Direction = "up" | "down" | "left" | "right";
 
@@ -1556,6 +1557,7 @@ export default function QuizOnigokkoModePage() {
   if (!joined) {
     return (
       <main className="overflow-hidden bg-gradient-to-b from-red-500 via-orange-300 to-yellow-200 text-white">
+        <OnlineGameNotice />
         <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.15)_1px,transparent_1px)] [background-size:24px_24px] opacity-30" />
 
         <div className="mx-auto flex max-w-3xl flex-col items-center justify-center px-4 my-20 text-center">
@@ -1608,6 +1610,7 @@ export default function QuizOnigokkoModePage() {
   if (!allPlayersReady) {
     return (
       <main className="bg-gradient-to-b from-red-500 via-orange-300 to-yellow-200 px-4 py-10 text-center text-white">
+        <OnlineGameNotice />
         <div className="mx-auto max-w-2xl">
           <p className="mb-3 text-sm font-black tracking-[0.4em] text-amber-200">
             MATCHING
@@ -1632,6 +1635,7 @@ export default function QuizOnigokkoModePage() {
   if (allPlayersReady && !bothReady) {
     return (
       <main className="bg-gradient-to-b from-red-500 via-orange-300 to-yellow-200 px-4 py-10 text-center text-white">
+        <OnlineGameNotice />
         <div className="mx-auto max-w-3xl">
           <p className="mb-3 text-sm font-black tracking-[0.4em] text-amber-200">
             READY ROOM
@@ -1696,6 +1700,7 @@ export default function QuizOnigokkoModePage() {
         finished ? "from-red-500 via-orange-300 to-yellow-200" : theme.bg
       } text-white`}
     >
+      <OnlineGameNotice />
       <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.15)_1px,transparent_1px)] [background-size:24px_24px] opacity-30" />
 
       <div className="relative mx-auto max-w-7xl px-1 py-1 md:px-6 md:py-6">
