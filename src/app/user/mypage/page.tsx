@@ -113,7 +113,7 @@ export default function MyPage() {
 
   if (userLoading) {
     return (
-      <main className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-yellow-50 p-4">
+      <main className="bg-gradient-to-b from-sky-50 via-white to-yellow-50 p-4">
         <div className="mx-auto max-w-md space-y-4">
           <div className="h-44 animate-pulse rounded-[2rem] bg-gray-200" />
           <div className="h-28 animate-pulse rounded-3xl bg-gray-200" />
@@ -127,7 +127,7 @@ export default function MyPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-yellow-50 p-4">
+      <main className="bg-gradient-to-b from-sky-50 via-white to-yellow-50 p-4">
         <div className="mx-auto max-w-md space-y-4">
           <div className="h-44 animate-pulse rounded-[2rem] bg-gray-200" />
           <div className="h-28 animate-pulse rounded-3xl bg-gray-200" />
@@ -159,7 +159,7 @@ export default function MyPage() {
 
   return (
     <>
-      <main className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-yellow-50 px-4 py-5">
+      <main className="bg-gradient-to-b from-sky-50 via-white to-yellow-50 px-4 py-5">
         <div className="mx-auto max-w-md space-y-4">
           <section className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-sky-500 via-blue-500 to-purple-500 p-5 text-white shadow-lg">
             <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/20 blur-2xl" />

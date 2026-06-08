@@ -46,7 +46,7 @@ export default async function MatomeDetailPage({ params }: Props) {
     .slice(0, 3);
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-yellow-50 via-orange-50 to-sky-50 py-4 md:py-10">
+    <main className="bg-gradient-to-b from-yellow-50 via-orange-50 to-sky-50 py-4 md:py-10">
       <article className="mx-auto max-w-[880px] px-4">
         <div className="mb-5">
           <Link

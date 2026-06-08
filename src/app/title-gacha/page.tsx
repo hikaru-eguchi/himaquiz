@@ -670,8 +670,8 @@ export default function TitleGachaPage() {
 
   if (!userLoading && !user) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-900 via-slate-900 to-black px-4">
-        <div className="min-h-screen flex items-center justify-center">
+      <div className="bg-gradient-to-b from-purple-900 via-slate-900 to-black px-4">
+        <div className="flex items-center justify-center">
           <div className="max-w-xl w-full rounded-3xl border-4 border-yellow-300 bg-white/95 p-6 md:p-10 text-center shadow-2xl">
             <p className="text-4xl md:text-6xl">👑</p>
 
@@ -707,7 +707,7 @@ export default function TitleGachaPage() {
 
   if (userLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex items-center justify-center">
         読み込み中...
       </div>
     );
@@ -716,7 +716,7 @@ export default function TitleGachaPage() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,#facc15_0%,#7e22ce_35%,#111827_75%)]">
+    <div className="bg-[radial-gradient(circle_at_top,#facc15_0%,#7e22ce_35%,#111827_75%)]">
       <div className="container mx-auto px-4 py-6 text-center">
         <div className="mx-auto max-w-5xl rounded-3xl border-4 border-yellow-300 bg-black/40 p-4 md:p-8 shadow-2xl backdrop-blur">
           <p className="text-5xl md:text-7xl">👑</p>

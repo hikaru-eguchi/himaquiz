@@ -2562,8 +2562,8 @@ export default function QuizModePage() {
       )}
       {/* <div className="container mx-auto p-2 md:p-8 text-center bg-gradient-to-b from-purple-50 via-purple-100 to-purple-200"> */}
       <div
-        // className={`container mx-auto min-h-screen p-2 md:p-8 text-center transition-all duration-700 ${getDungeonBgClass()}`}
-        className={`container mx-auto min-h-screen p-2 md:p-8 text-center transition-all duration-700 ${
+        // className={`container mx-auto p-2 md:p-8 text-center transition-all duration-700 ${getDungeonBgClass()}`}
+        className={`container mx-auto p-2 md:p-8 text-center transition-all duration-700 ${
           finished
             ? "bg-gradient-to-b from-yellow-200 via-amber-100 to-yellow-50"
             : getDungeonBgClass()

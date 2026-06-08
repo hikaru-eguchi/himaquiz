@@ -59,8 +59,8 @@ export default function QuizMasterPage() {
   // ✅ 未ログインなら「ログイン誘導画面」
   if (!userLoading && !user) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-emerald-300 via-green-600 to-emerald-700">
-        <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="bg-gradient-to-b from-emerald-300 via-green-600 to-emerald-700">
+        <div className="flex items-center justify-center px-4">
           <div className="bg-white/90 backdrop-blur p-6 md:p-10 rounded-2xl border-2 border-black shadow-xl text-center max-w-xl w-full">
             <p className="text-2xl md:text-3xl font-extrabold text-gray-800">
               このゲームはログイン（無料）すると遊べるよ！
@@ -98,7 +98,7 @@ export default function QuizMasterPage() {
   // ✅ ログイン状態読み込み中
   if (userLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex items-center justify-center">
         読み込み中...
       </div>
     );

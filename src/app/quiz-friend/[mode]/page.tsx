@@ -628,7 +628,7 @@ export default function QuizFriendCodePage() {
 
   if (phase === "name") {
     return (
-      <div className={`min-h-screen ${theme.page} px-4 py-8 text-center`}>
+      <div className={`${theme.page} px-4 py-8 text-center`}>
         <div className="mx-auto max-w-xl rounded-3xl border-4 border-black bg-white/80 p-5 shadow-xl">
           <div className="mt-6">
             <p className="text-xl md:text-2xl font-extrabold text-gray-800">
@@ -671,7 +671,7 @@ export default function QuizFriendCodePage() {
 
   if (phase === "waiting") {
     return (
-      <div className={`min-h-screen ${theme.page} px-4 py-8 text-center`}>
+      <div className={`${theme.page} px-4 py-8 text-center`}>
         <div className="mx-auto max-w-xl rounded-3xl border-4 border-black bg-white/80 p-5 shadow-xl">
           <p className="text-2xl md:text-4xl font-extrabold text-gray-800 animate-pulse">
             相手を待っています…
@@ -697,7 +697,7 @@ export default function QuizFriendCodePage() {
 
   if (phase === "ready") {
     return (
-      <div className={`min-h-screen ${theme.page} px-4 py-8 text-center`}>
+      <div className={`${theme.page} px-4 py-8 text-center`}>
         <div className="mx-auto max-w-2xl rounded-3xl border-4 border-black bg-white/80 p-5 shadow-xl">
           <p className={`text-3xl md:text-5xl font-extrabold ${theme.mainText}`}>
             2人そろったよ！
@@ -741,7 +741,7 @@ export default function QuizFriendCodePage() {
 
   if (phase === "createAll") {
     return (
-      <div className={`min-h-screen ${theme.page} px-4 py-6 text-center`}>
+      <div className={`${theme.page} px-4 py-6 text-center`}>
         <div className="mx-auto max-w-4xl">
           <div className="mb-4 rounded-3xl border-4 border-black bg-white/80 px-4 py-4 shadow-xl">
             <h1 className="text-3xl md:text-5xl font-extrabold text-gray-900">
@@ -848,7 +848,7 @@ export default function QuizFriendCodePage() {
 
   if (phase === "waitingQuestions") {
     return (
-      <div className={`min-h-screen ${theme.page} px-4 py-8 text-center`}>
+      <div className={`${theme.page} px-4 py-8 text-center`}>
         <div className="mx-auto max-w-xl rounded-3xl border-4 border-black bg-white/80 p-5 shadow-xl">
           <p className="text-2xl md:text-4xl font-extrabold text-gray-800 animate-pulse">
             相手の入力完了を待っています…
@@ -867,7 +867,7 @@ export default function QuizFriendCodePage() {
   }
 
   return (
-    <div className={`min-h-screen ${theme.page} px-4 py-6 text-center`}>
+    <div className={`${theme.page} px-4 py-6 text-center`}>
       <div className="mx-auto max-w-4xl">
         <div className="mb-4 rounded-3xl border-4 border-black bg-white/80 px-4 py-4 shadow-xl">
           <h1 className="text-3xl md:text-5xl font-extrabold text-gray-900">

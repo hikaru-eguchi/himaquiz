@@ -319,7 +319,7 @@ export default function HimaStyleGachaPage() {
 
   if (userLoading) {
     return (
-      <div className="min-h-screen grid place-items-center bg-gradient-to-br from-cyan-300 via-violet-400 to-pink-400">
+      <div className="grid place-items-center bg-gradient-to-br from-cyan-300 via-violet-400 to-pink-400">
         <p className="font-black text-white text-2xl drop-shadow">読み込み中...</p>
       </div>
     );
@@ -327,7 +327,7 @@ export default function HimaStyleGachaPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-cyan-300 via-violet-400 to-pink-400 px-4 py-10">
+      <div className="bg-gradient-to-br from-cyan-300 via-violet-400 to-pink-400 px-4 py-10">
         <div className="mx-auto max-w-xl rounded-[2rem] border-4 border-black bg-white/90 p-6 text-center shadow-[0_8px_0_rgba(0,0,0,1)]">
           <p className="text-2xl font-black text-zinc-900">
             ひまスタイルガチャはログインすると遊べるよ！
@@ -357,7 +357,7 @@ export default function HimaStyleGachaPage() {
   const canRoll = points >= GACHA_COST && !rolling;
 
   return (
-    <div className="min-h-screen overflow-hidden bg-gradient-to-br from-cyan-300 via-violet-500 to-pink-400">
+    <div className="overflow-hidden bg-gradient-to-br from-cyan-300 via-violet-500 to-pink-400">
       <div className="pointer-events-none fixed inset-0 opacity-40">
         <div className="absolute left-[-80px] top-[-80px] h-72 w-72 rounded-full bg-white blur-3xl" />
         <div className="absolute bottom-10 right-[-80px] h-80 w-80 rounded-full bg-cyan-200 blur-3xl" />

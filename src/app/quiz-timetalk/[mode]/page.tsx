@@ -475,7 +475,7 @@ export default function QuizTimeTalkCodePage() {
 
   if (phase === "name") {
     return (
-      <div className={`min-h-screen ${theme.page} px-4 py-8 text-center`}>
+      <div className={`${theme.page} px-4 py-8 text-center`}>
         <div className="mx-auto max-w-xl rounded-3xl border-4 border-black bg-white/90 p-5 shadow-xl backdrop-blur">
           <div className="rounded-3xl border-4 border-black bg-gradient-to-r from-emerald-100 via-white to-lime-100 px-4 py-5 shadow">
             <p className="text-4xl md:text-5xl font-black text-gray-900">
@@ -534,7 +534,7 @@ export default function QuizTimeTalkCodePage() {
 
   if (phase === "waiting") {
     return (
-      <div className={`min-h-screen ${theme.page} px-4 py-8 text-center`}>
+      <div className={`${theme.page} px-4 py-8 text-center`}>
         <div className="mx-auto max-w-xl rounded-3xl border-4 border-black bg-white/90 p-5 shadow-xl backdrop-blur">
           <p className="text-2xl md:text-4xl font-extrabold text-gray-800 animate-pulse">
             みんなを待っています…
@@ -569,7 +569,7 @@ export default function QuizTimeTalkCodePage() {
 
   if (phase === "ready") {
     return (
-      <div className={`min-h-screen ${theme.page} px-4 py-8 text-center`}>
+      <div className={`${theme.page} px-4 py-8 text-center`}>
         <div className="mx-auto max-w-2xl rounded-3xl border-4 border-black bg-white/90 p-5 shadow-xl backdrop-blur">
           <p className={`text-3xl md:text-5xl font-extrabold ${theme.mainText}`}>
             全員そろったよ！
@@ -614,7 +614,7 @@ export default function QuizTimeTalkCodePage() {
   }
 
   return (
-    <div className={`min-h-screen ${theme.page} px-4 py-6 text-center`}>
+    <div className={`${theme.page} px-4 py-6 text-center`}>
       <div className="mx-auto max-w-4xl">
         <div className="mb-5 rounded-[32px] border-4 border-black bg-gradient-to-r from-emerald-400 via-teal-400 to-lime-300 p-1 shadow-[0_8px_0_rgba(0,0,0,1)]">
           <div className="rounded-[28px] bg-white/95 p-4">

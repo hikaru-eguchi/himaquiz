@@ -128,7 +128,7 @@ export default function QuizFriendPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 text-center min-h-screen bg-gradient-to-b from-sky-400 via-cyan-300 to-yellow-200">
+    <div className="container mx-auto px-4 py-8 text-center bg-gradient-to-b from-sky-400 via-cyan-300 to-yellow-200">
       <h1
         className="text-5xl md:text-7xl font-extrabold mb-6 text-center"
         style={{

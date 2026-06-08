@@ -44,7 +44,7 @@ export default function KanjiSpotDiffPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-yellow-50 via-orange-50 to-amber-100 p-6">
+    <main className="bg-gradient-to-br from-yellow-50 via-orange-50 to-amber-100 p-6">
       <div className="mx-auto max-w-5xl rounded-[28px] border-2 border-amber-300 bg-white p-6 shadow-xl">
         <h1 className="mb-6 text-center text-2xl font-extrabold text-gray-800 md:text-3xl">
           漢字間違い探し画像メーカー

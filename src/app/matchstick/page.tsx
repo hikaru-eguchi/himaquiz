@@ -115,7 +115,7 @@ export default function MatchstickPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-100 p-6">
+    <main className="bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-100 p-6">
       <div className="mx-auto max-w-4xl rounded-3xl border-2 border-amber-200 bg-white p-6 shadow-xl">
         <h1 className="mb-6 text-center text-2xl font-bold text-gray-800 md:text-3xl">
           マッチ棒画像メーカー

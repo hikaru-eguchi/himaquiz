@@ -626,7 +626,7 @@ export default function QuizMazePage() {
 
   if (!selectedStage) {
     return (
-      <div className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_#fbdb5e,_#fc8b2e_45%,_#81361d_100%)]">
+      <div className="overflow-hidden bg-[radial-gradient(circle_at_top,_#fbdb5e,_#fc8b2e_45%,_#81361d_100%)]">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-10 left-8 w-28 h-28 rounded-full bg-white/15 blur-2xl" />
           <div className="absolute top-32 right-10 w-40 h-40 rounded-full bg-yellow-200/10 blur-3xl" />
@@ -720,7 +720,7 @@ export default function QuizMazePage() {
   }
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_#fef3c7,_#fdba74_35%,_#7c2d12_100%)]">
+    <div className="overflow-hidden bg-[radial-gradient(circle_at_top,_#fef3c7,_#fdba74_35%,_#7c2d12_100%)]">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-8 left-8 w-24 h-24 bg-white/20 rounded-full blur-2xl" />
         <div className="absolute top-28 right-8 w-32 h-32 bg-yellow-200/15 rounded-full blur-3xl" />

@@ -88,7 +88,7 @@ export default function TimeAttackPage() {
   const descriptionRef = useRef<HTMLParagraphElement>(null);
 
   return (
-    <div className="container mx-auto min-h-screen md:px-4 px-2 py-8 text-center bg-gradient-to-b from-cyan-100 via-sky-200 to-blue-300">
+    <div className="container mx-auto md:px-4 px-2 py-8 text-center bg-gradient-to-b from-cyan-100 via-sky-200 to-blue-300">
       <h1
         className="text-5xl md:text-7xl font-extrabold mb-6 text-center"
         style={{

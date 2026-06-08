@@ -355,7 +355,7 @@ export default function ProfileEditPage() {
 
   if (userLoading || loading) {
     return (
-      <main className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-yellow-50 px-4 py-5">
+      <main className="bg-gradient-to-b from-sky-50 via-white to-yellow-50 px-4 py-5">
         <div className="mx-auto max-w-md space-y-4">
           <div className="h-12 animate-pulse rounded-2xl bg-gray-200" />
           <div className="h-40 animate-pulse rounded-[2rem] bg-gray-200" />
@@ -367,7 +367,7 @@ export default function ProfileEditPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-yellow-50 px-4 py-5">
+    <main className="bg-gradient-to-b from-sky-50 via-white to-yellow-50 px-4 py-5">
       <div className="mx-auto max-w-md space-y-4">
         <div className="flex justify-start">
           <button

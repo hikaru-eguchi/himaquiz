@@ -10,7 +10,7 @@ export const metadata = {
 export default function MatomePage() {
   const matomeItems = getAllMatome();
   return (
-    <main className="min-h-screen bg-gradient-to-b from-yellow-50 via-orange-50 to-sky-50 py-4 md:py-10">
+    <main className="bg-gradient-to-b from-yellow-50 via-orange-50 to-sky-50 py-4 md:py-10">
       <div className="mx-auto max-w-[980px] px-4">
         <section className="mb-6 rounded-[28px] border-2 border-black bg-white p-5 text-center shadow-[6px_6px_0_rgba(0,0,0,0.85)] md:p-8">
           <p className="mx-auto mb-3 inline-block rounded-full border-2 border-black bg-yellow-300 px-4 py-1 text-sm font-black shadow-md md:text-base">

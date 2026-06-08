@@ -1948,11 +1948,11 @@ export default function QuizModePage() {
   return (
     // <div className="container mx-auto p-8 text-center bg-gradient-to-b from-indigo-300 via-slate-300 to-sky-300" key={battleKey}>
     // <div
-    //   className={`container mx-auto p-8 text-center min-h-screen transition-colors duration-700 ${getCoopDungeonBgClass()}`}
+    //   className={`container mx-auto p-8 text-center transition-colors duration-700 ${getCoopDungeonBgClass()}`}
     //   key={battleKey}
     // >  
     <div
-      className={`container mx-auto p-8 text-center min-h-screen transition-all duration-700 ${
+      className={`container mx-auto p-8 text-center transition-all duration-700 ${
         finished
           ? "bg-gradient-to-b from-yellow-200 via-amber-100 to-yellow-50"
           : getCoopDungeonBgClass()

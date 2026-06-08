@@ -233,7 +233,7 @@ export default function TitlesPage() {
 
   if (userLoading) {
     return (
-      <main className="min-h-screen bg-gradient-to-b from-purple-50 via-white to-yellow-50">
+      <main className="bg-gradient-to-b from-purple-50 via-white to-yellow-50">
         <div className="mx-auto max-w-4xl p-4">
           <div className="animate-pulse h-40 rounded-[2rem] bg-gray-200 mb-4" />
           <div className="grid gap-3 sm:grid-cols-2">
@@ -247,7 +247,7 @@ export default function TitlesPage() {
 
   if (!user) {
     return (
-      <main className="min-h-screen bg-gradient-to-b from-purple-50 via-white to-yellow-50">
+      <main className="bg-gradient-to-b from-purple-50 via-white to-yellow-50">
         <div className="mx-auto max-w-3xl p-4">
           <div className="overflow-hidden rounded-[2rem] border-2 border-purple-100 bg-white shadow-sm">
             <div className="bg-gradient-to-r from-purple-500 via-pink-400 to-yellow-300 p-1" />
@@ -284,7 +284,7 @@ export default function TitlesPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-purple-50 via-white to-yellow-50">
+    <main className="bg-gradient-to-b from-purple-50 via-white to-yellow-50">
       <div className="mx-auto max-w-4xl p-4 pb-10">
         <section className="relative overflow-hidden rounded-[2rem] border-2 border-white bg-gradient-to-br from-purple-600 via-pink-500 to-yellow-300 p-6 text-white shadow-lg">
           <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/20 blur-2xl" />

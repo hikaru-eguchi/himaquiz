@@ -220,7 +220,7 @@ export default function QuizModePage() {
 
   if (!selectedDiagnosis) {
     return (
-      <div className="relative overflow-hidden min-h-screen bg-gradient-to-b from-sky-400 via-indigo-300 to-blue-200">
+      <div className="relative overflow-hidden bg-gradient-to-b from-sky-400 via-indigo-300 to-blue-200">
         <div className="absolute -top-10 -left-10 w-40 h-40 bg-white/20 rounded-full blur-xl" />
         <div className="absolute top-20 right-10 w-56 h-56 bg-pink-300/20 rounded-full blur-2xl" />
         <div className="absolute bottom-10 left-1/4 w-72 h-72 bg-yellow-200/20 rounded-full blur-2xl" />

@@ -52,7 +52,7 @@ const genres: {
 
 export default function QuizFriendRematchSelectPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-white" />}>
+    <Suspense fallback={<div className="bg-white" />}>
       <QuizFriendRematchSelectContent />
     </Suspense>
   );
@@ -86,7 +86,7 @@ function QuizFriendRematchSelectContent() {
   return (
     <div
       className={`
-        min-h-screen px-4 py-8 text-center
+        px-4 py-8 text-center
         ${
           selectedMode === "lover"
             ? "bg-gradient-to-b from-pink-400 via-rose-200 to-yellow-100"

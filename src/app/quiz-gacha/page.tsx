@@ -1173,8 +1173,8 @@ export default function QuizMasterPage() {
 
   if (!userLoading && !user) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-red-300 via-blue-200 to-green-200">
-        <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="bg-gradient-to-b from-red-300 via-blue-200 to-green-200">
+        <div className="flex items-center justify-center px-4">
           <div className="bg-white/90 backdrop-blur p-6 md:p-10 rounded-2xl border-2 border-black shadow-xl text-center max-w-xl w-full">
 
             <p className="mt-4 text-lg md:text-2xl font-bold text-gray-800">
@@ -1212,7 +1212,7 @@ export default function QuizMasterPage() {
 
   if (userLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex items-center justify-center">
         読み込み中...
       </div>
     );
@@ -1224,7 +1224,7 @@ export default function QuizMasterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-red-400 via-blue-200 to-green-200">
+    <div className="bg-gradient-to-b from-red-400 via-blue-200 to-green-200">
       <div className="container mx-auto px-4 py-6 text-center">
         <div className="mx-auto max-w-5xl rounded-3xl border-4 border-white/80 bg-black/35 p-4 md:p-8 shadow-2xl backdrop-blur">
           {/* タイトル */}
