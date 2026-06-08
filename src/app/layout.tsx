@@ -8,6 +8,7 @@ import HeaderMenu from "./components/HeaderMenu";
 import { LevelUpToast } from "./components/LevelUpToast";
 import { LevelUpRewardModal } from "./components/LevelUpRewardModal";
 import ResultModalProvider from "./components/ResultModalProvider";
+import ConnectionNotice from "./components/ConnectionNotice";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const yomogi = Yomogi({ weight: "400", subsets: ["latin"], variable: "--font-yomogi" });
@@ -101,8 +102,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <NavButtons />
           </header>
 
+          <ConnectionNotice />
+
           {/* ===== MAIN ===== */}
-          <main className="flex-grow container mx-auto px-1 py-1 md:px-6 md:py-3 mt-6 bg-white rounded-3xl shadow-xl overflow-auto">
+          <main className="flex-grow container mx-auto px-1 py-1 md:p-3 mt-1 md:mt-3 bg-white rounded-3xl shadow-xl overflow-auto">
             <ResultModalProvider>
               {children}
             </ResultModalProvider>

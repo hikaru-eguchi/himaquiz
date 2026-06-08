@@ -210,6 +210,14 @@ export default function QuizUsoHontoCodePage() {
       .sort((a, b) => b.score - a.score);
   }, [displayPlayers, scores]);
 
+  const topScore = ranking[0]?.score ?? 0;
+
+  const winners = ranking.filter(
+    (p) => p.score === topScore
+  );
+
+  const isDraw = winners.length >= 2;
+
   const myScore = mySocketId ? scores[mySocketId] ?? 0 : 0;
 
   const handleJoin = () => {
@@ -440,7 +448,7 @@ export default function QuizUsoHontoCodePage() {
 
   if (phase === "name") {
     return (
-      <div className={`min-h-screen ${theme.page} px-4 py-8 text-center`}>
+      <div className={`${theme.page} px-4 py-8 text-center`}>
         <div className="mx-auto max-w-xl rounded-3xl border-4 border-black bg-white/90 p-5 shadow-xl backdrop-blur">
           <div className="rounded-3xl border-4 border-black bg-gradient-to-r from-blue-100 via-purple-100 to-rose-100 px-4 py-5 shadow">
             <p className="text-4xl md:text-5xl font-black text-gray-900">
@@ -496,7 +504,7 @@ export default function QuizUsoHontoCodePage() {
 
   if (phase === "waiting") {
     return (
-      <div className={`min-h-screen ${theme.page} px-4 py-8 text-center`}>
+      <div className={`${theme.page} px-4 py-8 text-center`}>
         <div className="mx-auto max-w-xl rounded-3xl border-4 border-black bg-white/90 p-5 shadow-xl backdrop-blur">
           <p className="text-2xl md:text-4xl font-extrabold text-gray-800 animate-pulse">
             みんなを待っています…
@@ -537,7 +545,7 @@ export default function QuizUsoHontoCodePage() {
 
   if (phase === "ready") {
     return (
-      <div className={`min-h-screen ${theme.page} px-4 py-8 text-center`}>
+      <div className={`${theme.page} px-4 py-8 text-center`}>
         <div className="mx-auto max-w-2xl rounded-3xl border-4 border-black bg-white/90 p-5 shadow-xl backdrop-blur">
           <p className={`text-3xl md:text-5xl font-extrabold ${theme.mainText}`}>
             全員そろったよ！
@@ -594,7 +602,7 @@ export default function QuizUsoHontoCodePage() {
   }
 
   return (
-    <div className={`min-h-screen ${theme.page} px-4 py-6 text-center`}>
+    <div className={`${theme.page} px-4 py-6 text-center`}>
       <div className="mx-auto max-w-4xl">
         <div className="mb-5 rounded-[32px] border-4 border-black bg-gradient-to-r from-blue-600 via-purple-600 to-rose-500 p-1 shadow-[0_8px_0_rgba(0,0,0,1)]">
           <div className="rounded-[28px] bg-white/95 p-4">
@@ -1003,13 +1011,22 @@ export default function QuizUsoHontoCodePage() {
 
               {ranking[0] && (
                 <div className="mt-5 rounded-3xl border-4 border-black bg-gradient-to-br from-yellow-100 via-white to-rose-100 px-4 py-5 shadow">
-                  <p className="text-xl font-black text-gray-500">優勝</p>
+                  <p className="text-xl font-black text-gray-500">
+                    {isDraw ? "同率優勝" : "優勝"}
+                  </p>
                   <p className="mt-2 text-4xl md:text-6xl font-black text-gray-900">
-                    🏆 {ranking[0].playerName}さん
+                    {isDraw
+                      ? "🤝 引き分け！"
+                      : `🏆 ${ranking[0].playerName}さん`}
                   </p>
                   <p className="mt-3 text-2xl md:text-3xl font-black text-purple-700">
                     {ranking[0].score}点
                   </p>
+                  {isDraw && (
+                    <p className="mt-2 text-lg md:text-xl font-bold text-gray-700">
+                      {winners.map((p) => p.playerName).join(" ・ ")} さん
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -1020,15 +1037,21 @@ export default function QuizUsoHontoCodePage() {
                     className={`
                       rounded-3xl border-4 border-black px-4 py-4 shadow text-left
                       ${
-                        index === 0
+                        isDraw && index < winners.length
                           ? "bg-yellow-50"
-                          : "bg-gradient-to-r from-blue-50 to-rose-50"
+                          : index === 0
+                            ? "bg-yellow-50"
+                            : "bg-gradient-to-r from-blue-50 to-rose-50"
                       }
                     `}
                   >
                     <div className="flex items-center justify-between gap-3">
                       <p className="text-2xl md:text-3xl font-black text-gray-900">
-                        {index === 0 ? "🏆" : `${index + 1}位`}
+                        {isDraw && index < winners.length
+                          ? "🤝"
+                          : index === 0
+                            ? "🏆"
+                            : `${index + 1}位`}
                       </p>
 
                       <p className="text-xl md:text-2xl font-black text-purple-700">
@@ -1041,7 +1064,9 @@ export default function QuizUsoHontoCodePage() {
                     </p>
 
                     <p className="mt-1 text-sm md:text-base font-bold text-gray-600">
-                      {getResultLabel(index + 1)}
+                      {isDraw && index < winners.length
+                        ? "同率優勝！"
+                        : getResultLabel(index + 1)}
                     </p>
                   </div>
                 ))}
