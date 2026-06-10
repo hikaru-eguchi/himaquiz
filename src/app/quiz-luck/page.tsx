@@ -21,12 +21,12 @@ export default function QuizMasterPage() {
   // ★ PC用キャラ
   const allCharacters = [
     "/images/quiz_man.png",
-    "/images/quiz.png",
+    "/images/quiz_dice.png",
     "/images/quiz_woman.png",
   ];
 
   // ★ スマホ専用キャラ
-  const mobileCharacters = ["/images/quiz.png", "/images/quiz_woman.png"];
+  const mobileCharacters = ["/images/quiz_dice.png", "/images/quiz_woman.png"];
 
   // ★ 画面サイズで表示画像を切り替え
   const [characters, setCharacters] = useState<string[]>([]);

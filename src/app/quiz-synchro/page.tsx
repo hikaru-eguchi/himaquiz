@@ -14,11 +14,11 @@ export default function QuizSynchroPage() {
 
   const allCharacters = [
     "/images/quiz_man.png",
-    "/images/quiz.png",
+    "/images/quiz_synchro.png",
     "/images/quiz_woman.png",
   ];
 
-  const mobileCharacters = ["/images/quiz.png", "/images/quiz_woman.png"];
+  const mobileCharacters = ["/images/quiz_synchro.png", "/images/quiz_woman.png"];
 
   const [characters, setCharacters] = useState<string[]>([]);
   const [visibleCount, setVisibleCount] = useState(0);

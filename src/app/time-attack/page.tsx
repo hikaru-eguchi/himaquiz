@@ -36,13 +36,13 @@ export default function TimeAttackPage() {
   // ★ PC用キャラ（全6枚）
   const allCharacters = [
     "/images/quiz_man.png",
-    "/images/quiz.png",
+    "/images/quiz_time.png",
     "/images/quiz_woman.png",
   ];
 
   // ★ スマホ専用キャラ（2枚だけ）
   const mobileCharacters = [
-    "/images/quiz.png",
+    "/images/quiz_time.png",
     "/images/quiz_woman.png",
   ];
 

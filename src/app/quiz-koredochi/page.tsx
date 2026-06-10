@@ -14,11 +14,11 @@ export default function QuizKoredochiPage() {
 
   const allCharacters = [
     "/images/quiz_man.png",
-    "/images/quiz.png",
+    "/images/quiz_koredochi.png",
     "/images/quiz_woman.png",
   ];
 
-  const mobileCharacters = ["/images/quiz.png", "/images/quiz_woman.png"];
+  const mobileCharacters = ["/images/quiz_koredochi.png", "/images/quiz_woman.png"];
 
   const [characters, setCharacters] = useState<string[]>([]);
   const [visibleCount, setVisibleCount] = useState(0);
