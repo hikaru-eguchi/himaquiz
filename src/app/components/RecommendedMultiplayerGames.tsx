@@ -16,7 +16,7 @@ const MULTI_GAMES: GameCard[] = [
   {
     key: "battle",
     href: "/quiz-battle",
-    label: "クイズバトル🔥",
+    label: "🔥クイズバトル",
     desc1: "2分間でどれだけ正解できるか勝負だ！",
     desc2: "相手よりハイスコアを狙おう！",
     buttonClassName:
@@ -25,7 +25,7 @@ const MULTI_GAMES: GameCard[] = [
   {
     key: "royal",
     href: "/quiz-royal",
-    label: "クイズロワイヤル👑",
+    label: "👑クイズロワイヤル",
     desc1: "みんなで2分間のクイズバトル！",
     desc2: "正解を積み上げて王冠をつかみ取れ！",
     buttonClassName:
@@ -34,7 +34,7 @@ const MULTI_GAMES: GameCard[] = [
   {
     key: "adventure",
     href: "/quiz-adventure",
-    label: "協力ダンジョン⚔",
+    label: "⚔協力ダンジョン",
     desc1: "仲間と力を合わせてクイズに挑め！",
     desc2: "クイズに正解して、強敵を打ち倒そう！",
     buttonClassName:
@@ -43,7 +43,7 @@ const MULTI_GAMES: GameCard[] = [
   {
     key: "dobon",
     href: "/quiz-dobon",
-    label: "サバイバルクイズ💀",
+    label: "💀サバイバルクイズ",
     desc1: "３問間違えたら即脱落！",
     desc2: "君は最後まで生き残れるか！？",
     buttonClassName:
@@ -52,7 +52,7 @@ const MULTI_GAMES: GameCard[] = [
   {
     key: "majority",
     href: "/quiz-majority",
-    label: "多数決クイズ🗳️",
+    label: "🗳️多数決クイズ",
     desc1: "多数決で運命が決まる！",
     desc2: "最後のステージまでたどり着けるか！？",
     buttonClassName:
@@ -61,7 +61,7 @@ const MULTI_GAMES: GameCard[] = [
   {
     key: "quick",
     href: "/quiz-quick",
-    label: "瞬発力クイズ⚡",
+    label: "⚡瞬発力クイズ",
     desc1: "迷ってるヒマはない！",
     desc2: "君は2秒で正解できるか！？",
     buttonClassName:
@@ -70,20 +70,38 @@ const MULTI_GAMES: GameCard[] = [
   {
     key: "dice",
     href: "/quiz-dice",
-    label: "サイコロクイズ🎲",
+    label: "🎲サイコロクイズ",
     desc1: "サイコロ次第でポイント爆増！？",
     desc2: "運も実力も試されるドキドキクイズ！",
     buttonClassName:
       "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-green-700 via-emerald-500 to-amber-300 text-white hover:scale-110 transition-all",
   },
   {
-    key: "mind",
-    href: "/quiz-mind",
-    label: "心理当てバトル🧠",
-    desc1: "相手の心理を見抜け！",
-    desc2: "いちばん心を読めるのは誰だ！？",
+    key: "onigokko",
+    href: "/quiz-onigokko",
+    label: "👹クイズおにごっこ",
+    desc1: "捕まれば鬼に交代！",
+    desc2: "ハラハラ追いかけっこクイズアクション！",
     buttonClassName:
-      "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-pink-600 via-rose-500 to-amber-200 text-white hover:scale-110 transition-all",
+      "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-red-600 via-red-500 to-orange-300 text-white hover:scale-110 transition-all",
+  },
+  {
+    key: "space",
+    href: "/quiz-space",
+    label: "🛸スペースクイズ",
+    desc1: "正解エリアへ急げ！",
+    desc2: "最後まで生き残る宇宙クイズバトル！",
+    buttonClassName:
+      "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-cyan-500 via-purple-600 to-fuchsia-500 text-white hover:scale-110 transition-all",
+  },
+  {
+    key: "word",
+    href: "/quiz-word",
+    label: "🔍ワードチェイス",
+    desc1: "迷路の中で文字を集めろ！",
+    desc2: "誰よりも早く単語を当てる探索クイズ！",
+    buttonClassName:
+      "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-[#6b1d1d] via-[#a16207] to-[#f59e0b] text-white hover:scale-110 transition-all",
   },
 ];
 
@@ -112,19 +130,25 @@ export default function RecommendedMultiplayerGames({
   }, [count, excludeHref]);
 
   return (
-    <section className="mt-12 bg-white p-5 rounded-xl border-2 border-black">
-      <h3 className="text-xl md:text-3xl font-extrabold text-gray-800 mb-6">
+    <section className="mt-6 md:mt-12 bg-white p-3 md:p-5 rounded-xl border-2 border-black">
+      <h3 className="text-xl md:text-3xl font-extrabold text-gray-800 mb-2 md:mb-6">
         {title}
       </h3>
 
-      <div className="flex flex-wrap justify-center gap-6">
+      <div className="flex flex-wrap justify-center gap-2 md:gap-6">
         {items.map((g) => (
           <div key={g.key} className="text-center max-w-[260px]">
             <Link href={g.href} className="w-full md:w-auto flex justify-center">
               <button className={g.buttonClassName}>{g.label}</button>
             </Link>
-            <p className="mt-2 text-sm md:text-base text-gray-700 leading-tight">{g.desc1}</p>
-            <p className="text-sm md:text-base text-gray-700 leading-tight">{g.desc2}</p>
+            <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                {g.desc1}
+              </p>
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                {g.desc2}
+              </p>
+            </div>
           </div>
         ))}
       </div>

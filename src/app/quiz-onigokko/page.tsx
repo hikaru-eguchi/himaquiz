@@ -125,7 +125,7 @@ export default function QuizOnigokkoPage() {
           >
             オンラインで対戦
           </button>
-          <p className="text-sm text-red-900 mt-1">※2人〜4人でプレイできます。</p>
+          <p className="text-sm text-red-900 mt-1">※4人でプレイできます。</p>
         </div>
 
         <div>

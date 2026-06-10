@@ -493,7 +493,7 @@ export default async function HomePage({
             </Link>
             <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
               <p className="text-sm md:text-base text-gray-700 leading-tight">
-                でてくるヒントで当てろ！
+                でてくるヒントで答えを当てろ！
               </p>
               <p className="text-sm md:text-base text-gray-700 leading-tight">
                 みんなでできる早押しクイズゲーム！
@@ -563,7 +563,7 @@ export default async function HomePage({
                 みんなのベスト3は同じ？
               </p>
               <p className="text-sm md:text-base text-gray-700 leading-tight">
-                順位をシンクロさせよう！
+                順位を選んでシンクロさせよう！
               </p>
             </div>
           </div>

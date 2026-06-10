@@ -15,7 +15,7 @@ import { getWeekStartJST } from "@/lib/week";
 import { getMonthStartJST } from "@/lib/month";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
 import { useCallback } from "react";
-import RecommendedMultiplayerGames from "@/app/components/RecommendedMultiplayerGames";
+import RecommendedFriendsGames from "@/app/components/RecommendedFriendsGames";
 import OnlineGameNotice from "@/app/components/OnlineGameNotice";
 
 type RankRow = { socketId: string; name: string; score: number; rank: number };
@@ -386,8 +386,8 @@ const QuizResult = ({
       )}
       {showButton && (
         <>
-          <RecommendedMultiplayerGames
-            title="次はみんなでどれ行く？🎮"
+          <RecommendedFriendsGames
+            title="次はどれで遊ぶ？👥"
             count={4}
             excludeHref="/quiz-mind"
           />

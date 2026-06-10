@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useBattle } from "../../../hooks/useBattle";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
-import RecommendedMultiplayerGames from "@/app/components/RecommendedMultiplayerGames";
+import RecommendedFriendsGames from "@/app/components/RecommendedFriendsGames";
 import OnlineGameNotice from "@/app/components/OnlineGameNotice";
 
 type UsoHontoPhase =
@@ -1143,18 +1143,22 @@ export default function QuizUsoHontoCodePage() {
                   トップに戻る
                 </button>
               </div>
-
-              <RecommendedMultiplayerGames
-                title="次はどれで遊ぶ？🎮"
-                count={4}
-                excludeHref="/quiz-usohonto"
-              />
             </motion.div>
           )}
         </AnimatePresence>
 
         {finished && phase !== "result" && null}
       </div>
+      
+      {phase === "result" && (
+        <>
+          <RecommendedFriendsGames
+            title="次はどれで遊ぶ？👥"
+            count={4}
+            excludeHref="/quiz-usohonto"
+          />
+        </>
+      )}
     </div>
     </>
   );

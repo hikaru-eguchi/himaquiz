@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useBattle } from "../../../hooks/useBattle";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
-import RecommendedMultiplayerGames from "@/app/components/RecommendedMultiplayerGames";
+import RecommendedFriendsGames from "@/app/components/RecommendedFriendsGames";
 import OnlineGameNotice from "@/app/components/OnlineGameNotice";
 
 type TimeTalkPhase =
@@ -166,7 +166,7 @@ export default function QuizTimeTalkCodePage() {
 
   const [topic, setTopic] = useState("");
   const [mission, setMission] = useState("");
-  const [slotTopic, setSlotTopic] = useState("お題を決めよう！");
+  const [slotTopic, setSlotTopic] = useState("お題ルーレット！");
   const [targetSeconds, setTargetSeconds] = useState(30);
 
   const [countdown, setCountdown] = useState(3);
@@ -277,7 +277,7 @@ export default function QuizTimeTalkCodePage() {
     setCurrentSpeaker(null);
 
     setTopic("");
-    setSlotTopic("お題を決めよう！");
+    setSlotTopic("お題ルーレット！");
     setTargetSeconds(30);
 
     setCountdown(3);
@@ -362,7 +362,7 @@ export default function QuizTimeTalkCodePage() {
       setCurrentSpeaker(payload.speaker);
 
       setTopic("");
-      setSlotTopic("お題を決めよう！");
+      setSlotTopic("お題ルーレット！");
       setElapsed(0);
       setTalkStartAt(null);
       setStopped(false);
@@ -735,7 +735,7 @@ export default function QuizTimeTalkCodePage() {
 
               <div className={`mt-6 rounded-3xl border-4 px-4 py-5 ${theme.accentPanel}`}>
                 <p className="text-2xl md:text-4xl font-black">
-                  お題を決めよう！
+                  お題ルーレット！
                 </p>
               </div>
 
@@ -1063,18 +1063,22 @@ export default function QuizTimeTalkCodePage() {
                   トップに戻る
                 </button>
               </div>
-
-              <RecommendedMultiplayerGames
-                title="次はどれで遊ぶ？🎮"
-                count={4}
-                excludeHref="/quiz-timetalk"
-              />
             </motion.div>
           )}
         </AnimatePresence>
 
         {finished && phase !== "result" && null}
       </div>
+      
+      {phase === "result" && (
+        <>
+          <RecommendedFriendsGames
+            title="次はどれで遊ぶ？👥"
+            count={4}
+            excludeHref="/quiz-timetalk"
+          />
+        </>
+      )}
     </div>
     </>
   );

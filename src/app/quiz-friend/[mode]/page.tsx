@@ -5,7 +5,7 @@ import { useSearchParams, useRouter  } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useBattle } from "../../../hooks/useBattle";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
-import RecommendedMultiplayerGames from "@/app/components/RecommendedMultiplayerGames";
+import RecommendedFriendsGames from "@/app/components/RecommendedFriendsGames";
 import OnlineGameNotice from "@/app/components/OnlineGameNotice";
 
 type FriendMode = "friend" | "lover";
@@ -1100,16 +1100,20 @@ export default function QuizFriendCodePage() {
                   もう一回遊ぶ
                 </button>
               </div>
-
-              <RecommendedMultiplayerGames
-                title="次はどれで遊ぶ？🎮"
-                count={4}
-                excludeHref="/quiz-friend"
-              />
             </motion.div>
           )}
         </AnimatePresence>
       </div>
+      
+      {phase === "result" && (
+        <>
+          <RecommendedFriendsGames
+            title="次はどれで遊ぶ？👥"
+            count={4}
+            excludeHref="/quiz-friend"
+          />
+        </>
+      )}
     </div>
     </>
   );
