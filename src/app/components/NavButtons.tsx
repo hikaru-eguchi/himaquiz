@@ -549,6 +549,19 @@ export default function NavButtons() {
                         </button>
                       </Link>
 
+                      <Link
+                        href="/quiz-arena"
+                        onClick={() => handleNavClick("/quiz-arena")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-[radial-gradient(circle_at_top,#fde68a_0%,#fb7185_28%,#7c3aed_62%,#111827_100%)] text-white ring-2 ring-red-400 md:hover:scale-110 ${
+                            activeUrl === "/quiz-arena" ? activeStyle : ""
+                          }`}
+                        >
+                          クイズアリーナ
+                        </button>
+                      </Link>
+
                       {/* <Link
                         href="/quiz-mind"
                         onClick={() => handleNavClick("/quiz-mind")}

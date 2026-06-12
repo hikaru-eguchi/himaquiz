@@ -5,7 +5,18 @@ export interface Player {
   socketId: string;
   name: string;
   score: number;
+  characterId?: string | null;
+  characterName?: string | null;
+  characterImage?: string | null;
+  characterRarity?: string | null;
 }
+
+export type ArenaCharacterPayload = {
+  characterId: string;
+  characterName: string;
+  characterImage: string;
+  characterRarity: string;
+};
 
 export const useBattle = (playerName: string) => {
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -23,7 +34,7 @@ export const useBattle = (playerName: string) => {
   const [stageCount, setStageCount] = useState<number>(1);
   const [roomPlayers, setRoomPlayers] = useState<{ socketId: string; name: string }[]>([]);
   const [playerCount, setPlayerCount] = useState("0/4");
-  const [gameType, setGameType] = useState<"quiz" | "royal" | "dungeon" | "dobon" | "majority" | "quick" | "dice" | "onigokko" | "space" | "word" | "hirameki" | "mind" | "usohonto" | "friend" | "koredochi" | "synchro" | "timetalk">("quiz");
+  const [gameType, setGameType] = useState<"quiz" | "arena" | "royal" | "dungeon" | "dobon" | "majority" | "quick" | "dice" | "onigokko" | "space" | "word" | "hirameki" | "mind" | "usohonto" | "friend" | "koredochi" | "synchro" | "timetalk">("quiz");
   const sendMessage = (message: string) => {
     if (!socket || !roomCode) return;
     socket.emit("send_message", { roomCode, fromId: mySocketId, message });
@@ -167,8 +178,16 @@ export const useBattle = (playerName: string) => {
       current,
       max
     }: {
-      gameType: "quiz" | "royal" | "dungeon" | "dobon" | "majority" | "quick" | "dice" | "onigokko" | "space" | "word" | "hirameki" | "mind" | "usohonto" | "friend" | "koredochi" | "synchro" | "timetalk";
-      players: { socketId: string; playerName: string }[];
+      gameType: "quiz" | "arena" | "royal" | "dungeon" | "dobon" | "majority" | "quick" | "dice" | "onigokko" | "space" | "word" | "hirameki" | "mind" | "usohonto" | "friend" | "koredochi" | "synchro" | "timetalk";
+      // players: { socketId: string; playerName: string }[];
+      players: {
+        socketId: string;
+        playerName: string;
+        characterId?: string | null;
+        characterName?: string | null;
+        characterImage?: string | null;
+        characterRarity?: string | null;
+      }[];
       current: number;
       max: number;
     }) => {
@@ -176,11 +195,15 @@ export const useBattle = (playerName: string) => {
       setPlayerCount(`${current}/${max}`);
       console.log(`[update_room_count] ${current}/${max}`, players);
 
-      if (gameType === "dungeon" || gameType === "royal" || gameType === "dobon" || gameType === "majority" || gameType === "quick" || gameType === "dice" || gameType === "onigokko" || gameType === "space" || gameType === "word" || gameType === "hirameki" || gameType === "mind" || gameType === "usohonto" || gameType === "friend" || gameType === "koredochi" || gameType === "synchro" || gameType === "timetalk") {
+      if (gameType === "arena" || gameType === "dungeon" || gameType === "royal" || gameType === "dobon" || gameType === "majority" || gameType === "quick" || gameType === "dice" || gameType === "onigokko" || gameType === "space" || gameType === "word" || gameType === "hirameki" || gameType === "mind" || gameType === "usohonto" || gameType === "friend" || gameType === "koredochi" || gameType === "synchro" || gameType === "timetalk") {
         setPlayers(players.map(p => ({
           socketId: p.socketId,
           name: p.playerName,
-          score: 0, // 初期スコア
+          score: 0,
+          characterId: p.characterId ?? null,
+          characterName: p.characterName ?? null,
+          characterImage: p.characterImage ?? null,
+          characterRarity: p.characterRarity ?? null,
         })));
       }
     };
@@ -324,20 +347,43 @@ export const useBattle = (playerName: string) => {
   /* =========================
      参加処理
   ========================= */
-  const joinRandom = (options?: { maxPlayers?: number; gameType?: "quiz" | "royal" | "dungeon" | "dobon" | "majority" | "quick" | "dice" | "onigokko" | "space" | "word" | "hirameki" | "mind" | "usohonto" | "friend" | "koredochi" | "synchro" | "timetalk"; userId?: string | null; }, onJoined?: (code: string) => void) => {
+  // const joinRandom = (options?: { maxPlayers?: number; gameType?: "quiz" | "arena" | "royal" | "dungeon" | "dobon" | "majority" | "quick" | "dice" | "onigokko" | "space" | "word" | "hirameki" | "mind" | "usohonto" | "friend" | "koredochi" | "synchro" | "timetalk"; userId?: string | null; }, onJoined?: (code: string) => void) => {
+  const joinRandom = (
+    options?: {
+      maxPlayers?: number;
+      gameType?: "quiz" | "arena" | "royal" | "dungeon" | "dobon" | "majority" | "quick" | "dice" | "onigokko" | "space" | "word" | "hirameki" | "mind" | "usohonto" | "friend" | "koredochi" | "synchro" | "timetalk";
+      userId?: string | null;
+      character?: ArenaCharacterPayload | null;
+    },
+    onJoined?: (code: string) => void
+  ) => {
     if (!socket) return;
     const maxPlayers = options?.maxPlayers ?? 2;
     const type = options?.gameType ?? "quiz";
     const userId = options?.userId ?? null;
     setGameType(type)
-    socket.emit("join_random", { playerName, maxPlayers, gameType: type, userId, });
+    // socket.emit("join_random", { playerName, maxPlayers, gameType: type, userId, });
+    socket.emit("join_random", {
+      playerName,
+      maxPlayers,
+      gameType: type,
+      userId,
+      character: options?.character ?? null,
+    });
     socket.once("start_game", ({ roomCode: code }: { roomCode: string }) => {
       setRoomCode(code);
       onJoined?.(code);
     });
   };
 
-  const joinWithCode = (code: string, count: string, type: "quiz" | "royal" | "dungeon" | "dobon" | "majority" | "quick" | "dice" | "onigokko" | "space" | "word" | "hirameki" | "mind" | "usohonto" | "friend" | "koredochi" | "synchro" | "timetalk", userId?: string | null) => {
+  // const joinWithCode = (code: string, count: string, type: "quiz" | "arena" | "royal" | "dungeon" | "dobon" | "majority" | "quick" | "dice" | "onigokko" | "space" | "word" | "hirameki" | "mind" | "usohonto" | "friend" | "koredochi" | "synchro" | "timetalk", userId?: string | null) => {
+  const joinWithCode = (
+    code: string,
+    count: string,
+    type: "quiz" | "arena" | "royal" | "dungeon" | "dobon" | "majority" | "quick" | "dice" | "onigokko" | "space" | "word" | "hirameki" | "mind" | "usohonto" | "friend" | "koredochi" | "synchro" | "timetalk",
+    userId?: string | null,
+    character?: ArenaCharacterPayload | null
+  ) => {
     if (!socket) {
       console.warn("[useBattle] joinWithCode: socket 未接続");
       return;
@@ -350,6 +396,7 @@ export const useBattle = (playerName: string) => {
       count,
       gameType: type,
       userId: userId ?? null,
+      character: character ?? null,
     });
   };
 
