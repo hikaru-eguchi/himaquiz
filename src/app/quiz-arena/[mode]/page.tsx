@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import QuizQuestion from "../../components/QuizQuestion";
 import { QuizData } from "@/lib/articles";
@@ -852,6 +852,13 @@ export default function QuizArenaModePage() {
     battleCharacter ??
     selectedCharacter ??
     DEFAULT_CHARACTER;
+  
+  const finishStartedRef = useRef(false);
+  const [finishOverlay, setFinishOverlay] = useState<{
+    type: "ko" | "timeup";
+    message: string;
+    defeatedId?: "me" | "opponent";
+  } | null>(null);
 
   const [sharedEffect, setSharedEffect] = useState<{
     fromId: string;
@@ -936,6 +943,53 @@ export default function QuizArenaModePage() {
       cost: 1,
       specialCost: 6,
     };
+  };
+
+  const startFinishSequence = ({
+    type,
+    defeatedId,
+    message,
+  }: {
+    type: "ko" | "timeup";
+    defeatedId?: "me" | "opponent";
+    message: string;
+  }) => {
+    if (finishStartedRef.current) return;
+    finishStartedRef.current = true;
+
+    if (type === "timeup") {
+      setFinishOverlay({
+        type: "timeup",
+        message: "TIME UP!",
+      });
+
+      setTimeout(() => {
+        setFinished(true);
+      }, 3000);
+
+      return;
+    }
+
+    // まずキャラだけ消す
+    setFinishOverlay({
+      type: "ko",
+      defeatedId,
+      message: "",
+    });
+
+    // 1.5秒後にK.O.表示
+    setTimeout(() => {
+      setFinishOverlay({
+        type: "ko",
+        defeatedId,
+        message,
+      });
+    }, 1500);
+
+    // K.O.を3秒表示してリザルト
+    setTimeout(() => {
+      setFinished(true);
+    }, 4500);
   };
 
   const myDamage = me?.score ?? 0;
@@ -1144,20 +1198,51 @@ export default function QuizArenaModePage() {
       const left = Math.max(0, Math.ceil((serverEndAt - Date.now()) / 1000));
       setTimeLeft(left);
 
+      // if (left <= 0) {
+      //   clearInterval(timer);
+      //   setFinished(true);
+      // }
       if (left <= 0) {
         clearInterval(timer);
-        setFinished(true);
+
+        if (finishStartedRef.current) return;
+        if (myHp <= 0 || opponentHp <= 0) return;
+
+        startFinishSequence({
+          type: "timeup",
+          message: "TIME UP!",
+        });
       }
     }, 250);
 
     return () => clearInterval(timer);
-  }, [readyToStart, finished, serverEndAt]);
+  }, [readyToStart, finished, serverEndAt, myHp, opponentHp]);
 
+  // useEffect(() => {
+  //   if (myHp <= 0 || opponentHp <= 0) {
+  //     setFinished(true);
+  //   }
+  // }, [myHp, opponentHp]);
   useEffect(() => {
-    if (myHp <= 0 || opponentHp <= 0) {
-      setFinished(true);
+    if (finished || finishStartedRef.current) return;
+
+    if (myHp <= 0) {
+      startFinishSequence({
+        type: "ko",
+        defeatedId: "me",
+        message: `${opponentPlayerName}が${myPlayerName}を撃破！`,
+      });
+      return;
     }
-  }, [myHp, opponentHp]);
+
+    if (opponentHp <= 0) {
+      startFinishSequence({
+        type: "ko",
+        defeatedId: "opponent",
+        message: `${myPlayerName}が${opponentPlayerName}を撃破！`,
+      });
+    }
+  }, [myHp, opponentHp, finished, myPlayerName, opponentPlayerName]);
 
   useEffect(() => {
     if (!socket) return;
@@ -1191,9 +1276,19 @@ export default function QuizArenaModePage() {
       setCountdown(Math.ceil((startAt - Date.now()) / 1000));
     };
 
+    // const handleArenaTimeUp = () => {
+    //   setTimeLeft(0);
+    //   setFinished(true);
+    // };
     const handleArenaTimeUp = () => {
+      if (finished || finishStartedRef.current) return;
+
       setTimeLeft(0);
-      setFinished(true);
+
+      startFinishSequence({
+        type: "timeup",
+        message: "TIME UP!",
+      });
     };
 
     const handleBothRematchReady = () => {
@@ -1230,6 +1325,7 @@ export default function QuizArenaModePage() {
       specialCost: number;
     }) => {
       if (fromId === mySocketId) return;
+      if (finishStartedRef.current || finished) return;
 
       setOpponentAttackGauge(attackGauge);
       setOpponentSpecialGauge(specialGauge);
@@ -1249,6 +1345,7 @@ export default function QuizArenaModePage() {
       character: ArenaCharacter;
     }) => {
       if (fromId === mySocketId) return;
+      if (finishStartedRef.current || finished) return;
 
       setOpponentCardFlash("red");
 
@@ -1363,6 +1460,9 @@ export default function QuizArenaModePage() {
     setEffectCharacter(null);
     setServerStartAt(null);
     setServerEndAt(null);
+    setFinishOverlay(null);
+    finishStartedRef.current = false;
+    setFinishOverlay(null);
   };
 
   const handleEntry = () => {
@@ -1533,6 +1633,10 @@ export default function QuizArenaModePage() {
     setRematchAvailable(false);
     setMatchEnded(false);
 
+    setFinishOverlay(null);
+    finishStartedRef.current = false;
+    setFinishOverlay(null);
+
     setServerStartAt(null);
     setServerEndAt(null);
     setServerQuestionIds([]);
@@ -1598,6 +1702,7 @@ export default function QuizArenaModePage() {
     damage: number,
     type: "attack" | "special" | "critical"
   ) => {
+    if (finishStartedRef.current || finished) return;
     const character = activeCharacter;
     setEffectCharacter(character);
 
@@ -1650,6 +1755,7 @@ export default function QuizArenaModePage() {
 
   const checkAnswer = () => {
     if (!questions[currentIndex]?.quiz || !selectedCharacter) return;
+    if (finishStartedRef.current || finished) return;
 
     const correct = Number(questions[currentIndex].quiz.answer) === Number(userAnswer);
     const displayAnswer = questions[currentIndex].quiz.displayAnswer ?? questions[currentIndex].quiz.answer;
@@ -1788,6 +1894,42 @@ export default function QuizArenaModePage() {
 
   return (
     <>
+      <AnimatePresence>
+        {finishOverlay && (finishOverlay.type === "timeup" || finishOverlay.message) && (
+          <motion.div
+            className="fixed inset-0 z-[300] flex items-center justify-center bg-black/60 px-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              initial={{ scale: 0.7, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              className="rounded-[2rem] border-4 border-yellow-300 bg-stone-950 px-8 py-6 text-center shadow-[0_0_40px_rgba(250,204,21,0.9)]"
+            >
+              {finishOverlay.type === "timeup" ? (
+                <>
+                  <p className="text-5xl font-black text-yellow-300 md:text-8xl">
+                    TIME UP!
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-4xl font-black text-yellow-300 md:text-7xl">
+                    K.O.!
+                  </p>
+
+                  <p className="mt-4 text-2xl font-black text-white md:text-4xl">
+                    {finishOverlay.message}
+                  </p>
+                </>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <AnimatePresence>
         {effect === "special" && selectedCharacter && (
           <motion.div
@@ -2028,7 +2170,11 @@ export default function QuizArenaModePage() {
                             src={myCharacterImage}
                             alt={myCharacterName}
                             // className="h-24 object-contain drop-shadow-2xl md:h-32"
-                            className="h-20 object-contain drop-shadow-2xl md:h-32"
+                            // className="h-20 object-contain drop-shadow-2xl md:h-32"
+                            className={`
+                              h-20 object-contain drop-shadow-2xl transition-all duration-1000 md:h-32
+                              ${finishOverlay?.defeatedId === "me" ? "opacity-0 scale-75 blur-sm" : ""}
+                            `}
                           />
 
                           {myHitEffect && <CharacterHitEffect type={myHitEffect} />}
@@ -2099,7 +2245,11 @@ export default function QuizArenaModePage() {
                               src={opponentBattleCharacter.image}
                               alt={opponentBattleCharacter.name}
                               // className="h-24 object-contain drop-shadow-2xl md:h-32"
-                              className="h-20 object-contain drop-shadow-2xl md:h-32"
+                              // className="h-20 object-contain drop-shadow-2xl md:h-32"
+                              className={`
+                                h-20 object-contain drop-shadow-2xl transition-all duration-1000 md:h-32
+                                ${finishOverlay?.defeatedId === "opponent" ? "opacity-0 scale-75 blur-sm" : ""}
+                              `}
                             />
                           ) : (
                             <div className="text-5xl">❓</div>
