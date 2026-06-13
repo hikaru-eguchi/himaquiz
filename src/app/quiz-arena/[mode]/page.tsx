@@ -765,11 +765,17 @@ const QuizResult = ({
                 Xで結果をシェア
               </button>
 
-              <button
+              {/* <button
                 onClick={isCodeMatch ? onRematch : onNewMatch}
                 className="w-full rounded-full border-2 border-black bg-gradient-to-r from-blue-500 to-violet-600 px-7 py-3 text-xl font-black text-white shadow hover:scale-105 md:w-auto"
               >
                 {isCodeMatch ? "もう一回対戦する" : "もう一戦いく！"}
+              </button> */}
+              <button
+                onClick={onRematch}
+                className="w-full rounded-full border-2 border-black bg-gradient-to-r from-blue-500 to-violet-600 px-7 py-3 text-xl font-black text-white shadow hover:scale-105 md:w-auto"
+              >
+                もう一回対戦する
               </button>
             </div>
           )}
@@ -1028,8 +1034,20 @@ export default function QuizArenaModePage() {
             })
           : [DEFAULT_CHARACTER];
 
+      // setOwnedCharacters(list);
+      // setSelectedCharacter(list[0]);
+      // setCharacterLoading(false);
       setOwnedCharacters(list);
-      setSelectedCharacter(list[0]);
+
+      setSelectedCharacter((prev) => {
+        if (prev) {
+          const same = list.find((c) => c.id === prev.id);
+          return same ?? prev;
+        }
+
+        return list[0];
+      });
+
       setCharacterLoading(false);
     };
 
@@ -1457,17 +1475,68 @@ export default function QuizArenaModePage() {
     });
   };
 
+  // const handleRematch = () => {
+  //   if (!socket) return;
+
+  //   setRematchRequested(true);
+
+  //   if (roomCode) {
+  //     socket.emit("send_ready", { roomCode });
+  //     return;
+  //   }
+
+  //   sendReady();
+  // };
+
   const handleRematch = () => {
-    if (!socket) return;
+    const keepCharacter = battleCharacter ?? selectedCharacter ?? DEFAULT_CHARACTER;
 
-    setRematchRequested(true);
+    // useBattle側の matched / players / startAt を消す
+    resetMatch();
 
-    if (roomCode) {
-      socket.emit("send_ready", { roomCode });
-      return;
-    }
+    // キャラと名前は維持
+    setSelectedCharacter(keepCharacter);
+    setBattleCharacter(keepCharacter);
 
-    sendReady();
+    // 画面を「マッチに参加する」に戻す
+    setEntryDone(true);
+    setJoined(false);
+    setRoomReady(false);
+    setReadyClicked(false);
+    setReadyToStart(false);
+    setFinished(false);
+
+    // 前回バトル状態を全部リセット
+    setTimeLeft(totalTime);
+    setCountdown(null);
+    setCurrentIndex(0);
+    setUserAnswer(null);
+    setAttackGauge(0);
+    setSpecialGauge(0);
+    setOpponentAttackGauge(0);
+    setOpponentSpecialGauge(0);
+    setCombo(0);
+    setCorrectCount(0);
+
+    setShowCorrectMessage(false);
+    setIncorrectMessage(null);
+    setBattleMessage(null);
+    setEffect(null);
+    setSharedEffect(null);
+    setMyHitEffect(null);
+    setOpponentHitEffect(null);
+    setMyCardFlash(null);
+    setOpponentCardFlash(null);
+    setEffectCharacter(null);
+
+    setRematchRequested(false);
+    setRematchAvailable(false);
+    setMatchEnded(false);
+
+    setServerStartAt(null);
+    setServerEndAt(null);
+    setServerQuestionIds([]);
+    setQuestions([]);
   };
 
   const handleNewMatch = () => {
