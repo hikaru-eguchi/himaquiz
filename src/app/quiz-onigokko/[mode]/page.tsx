@@ -100,6 +100,7 @@ type WordGameResult = {
   finalRanks: RankRow[];
   eliminationGroups: string[][];
   winnerSocketIds: string[];
+  reason?: "timeout";
 };
 
 type WordGameState = {
@@ -170,8 +171,10 @@ const bannedWords = [
   "asshole",
 ];
 
-const QUIZ_WORLD_WIDTH = 1800;
-const QUIZ_WORLD_HEIGHT = 1300;
+// const QUIZ_WORLD_WIDTH = 1800;
+// const QUIZ_WORLD_HEIGHT = 1300;
+const QUIZ_WORLD_WIDTH = 1400;
+const QUIZ_WORLD_HEIGHT = 950;
 const QUIZ_ANSWER_X = QUIZ_WORLD_WIDTH / 2;
 const QUIZ_ANSWER_Y = QUIZ_WORLD_HEIGHT / 2;
 const QUIZ_ANSWER_RADIUS = 90;
@@ -806,6 +809,7 @@ export default function QuizOnigokkoModePage() {
     string | null
   >(null);
   const [showGameSetText, setShowGameSetText] = useState(false);
+  const [showTimeUpText, setShowTimeUpText] = useState(false);
 
   const {
     joinRandom,
@@ -1135,6 +1139,7 @@ export default function QuizOnigokkoModePage() {
     setBookResultMessage(null);
     setAnswerSuccessMessage(null);
     setShowGameSetText(false);
+    setShowTimeUpText(false);
   };
 
   const handleJoin = () => {
@@ -1274,16 +1279,80 @@ export default function QuizOnigokkoModePage() {
     socket.on("onigokko_state", (state: WordGameState) => {
       setGameState(state);
 
-      if (state.phase === "gameOver") {
-        setFinished(true);
-      } else {
+      // if (state.phase === "gameOver") {
+      //   setFinished(true);
+      // } else {
+      //   setFinished(false);
+      //   setRematchRequested(false);
+      //   setRematchAvailable(false);
+      // }
+      if (state.phase !== "gameOver") {
         setFinished(false);
         setRematchRequested(false);
         setRematchAvailable(false);
       }
     });
 
+    // socket.on("onigokko_game_result", (result: WordGameResult) => {
+    //   setGameState((prev) =>
+    //     prev
+    //       ? {
+    //           ...prev,
+    //           phase: "gameOver",
+    //           gameResult: result,
+    //         }
+    //       : {
+    //           roomCode,
+    //           phase: "gameOver",
+    //           timeLeft: 0,
+    //           question: {
+    //             question: "",
+    //             choices: [],
+    //             correctIndex: 0,
+    //           },
+    //           players: [],
+    //           items: [],
+    //           gameResult: result,
+    //         }
+    //   );
+
+    //   setFinished(true);
+    // });
     socket.on("onigokko_game_result", (result: WordGameResult) => {
+      if (result.reason === "timeout") {
+        setShowTimeUpText(true);
+
+        window.setTimeout(() => {
+          setShowTimeUpText(false);
+
+          setGameState((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  phase: "gameOver",
+                  gameResult: result,
+                }
+              : {
+                  roomCode,
+                  phase: "gameOver",
+                  timeLeft: 0,
+                  question: {
+                    question: "",
+                    choices: [],
+                    correctIndex: 0,
+                  },
+                  players: [],
+                  items: [],
+                  gameResult: result,
+                }
+          );
+
+          setFinished(true);
+        }, 1800);
+
+        return;
+      }
+
       setGameState((prev) =>
         prev
           ? {
@@ -1963,6 +2032,27 @@ export default function QuizOnigokkoModePage() {
                           className="text-6xl font-black text-yellow-200 drop-shadow-[0_0_35px_rgba(250,204,21,0.9)] md:text-8xl"
                         >
                           GAME SET!
+                        </motion.p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  <AnimatePresence>
+                    {showTimeUpText && (
+                      <motion.div
+                        className="absolute inset-0 z-[100] flex items-center justify-center bg-black/90 text-center backdrop-blur-sm"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                      >
+                        <motion.p
+                          initial={{ scale: 0.55, opacity: 0 }}
+                          animate={{ scale: [1.25, 1], opacity: 1 }}
+                          exit={{ scale: 0.9, opacity: 0 }}
+                          transition={{ duration: 0.45 }}
+                          className="text-6xl font-black text-white drop-shadow-[0_0_35px_rgba(255,255,255,0.75)] md:text-8xl"
+                        >
+                          TIME UP!
                         </motion.p>
                       </motion.div>
                     )}

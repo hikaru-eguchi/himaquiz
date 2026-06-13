@@ -11,6 +11,7 @@ import { useSupabaseUser } from "../../../hooks/useSupabaseUser";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
 import RecommendedMultiplayerGames from "@/app/components/RecommendedMultiplayerGames";
 import OnlineGameNotice from "@/app/components/OnlineGameNotice";
+import Image from "next/image";
 
 type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
 
@@ -377,7 +378,7 @@ const CharacterSelect = ({
             </p>
           </div>
         ) : loading ? (
-          <div className="mx-auto mt-8 h-48 max-w-xl animate-pulse rounded-3xl bg-white/70" />
+          <div className="mx-auto mt-8 h-48 max-w-xl rounded-3xl bg-white/70" />
         ) : (
           <div className="mt-2 md:mt-6 rounded-[2rem] border-3 border-white/40 bg-white/15 p-3 shadow-[0_8px_0_rgba(17,24,39,1)] backdrop-blur">
             <div className="mb-2 flex items-center justify-between px-2">
@@ -408,15 +409,24 @@ const CharacterSelect = ({
                       `}
                     >
                       <div className="grid h-24 w-24 shrink-0 place-items-center rounded-2xl bg-gradient-to-b from-stone-100 to-amber-100 p-2 md:h-auto md:w-full">
-                        <img
+                        {/* <img
                           src={chara.image}
                           alt={chara.name}
                           className="h-20 w-full object-contain md:h-36"
+                        /> */}
+                        <Image
+                          src={chara.image}
+                          alt={chara.name}
+                          width={160}
+                          height={160}
+                          className="h-20 w-full object-contain md:h-36"
+                          loading="lazy"
                         />
                       </div>
 
                       <div className="min-w-0 flex-1 md:mt-2">
-                        <p className="truncate text-base font-black text-stone-900 md:text-center md:text-base">
+                        {/* <p className="truncate text-base font-black text-stone-900 md:text-center md:text-base"> */}
+                        <p className="break-words text-base font-black leading-tight text-stone-900 md:text-center md:text-base">
                           {chara.name}
                         </p>
 
@@ -447,7 +457,8 @@ const CharacterSelect = ({
           {isLoggedIn && (
             <>
               <p className="text-xs font-black text-white/70">選択中のキャラ</p>
-              <p className="truncate text-lg font-black text-white md:text-xl">
+              {/* <p className="truncate text-lg font-black text-white md:text-xl"> */}
+              <p className="break-words text-lg font-black leading-tight text-white md:text-xl">
                 {selected?.name ?? "未選択"}
               </p>
 
@@ -1924,13 +1935,14 @@ export default function QuizArenaModePage() {
                   )}
 
                   {/* キャラ部分 */}
-                  <div className="grid gap-3 md:grid-cols-[1fr_auto_1fr] md:items-center">
+                  {/* <div className="grid gap-3 md:grid-cols-[1fr_auto_1fr] md:items-center"> */}
+                  <div className="grid w-full min-w-0 gap-3 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:items-center">
 
                     {/* 自分 */}
                     {/* <div className="rounded-[1.5rem] border-3 border-emerald-700 bg-gradient-to-b from-emerald-100 via-white to-white p-3 shadow-xl"> */}
                     <div
                       className={`
-                        rounded-[1.5rem] border-3 border-emerald-700 bg-gradient-to-b from-cyan-100 via-white to-blue-50 p-3 shadow-xl transition-all duration-300
+                        w-full min-w-0 rounded-[1.5rem] border-3 border-emerald-700 bg-gradient-to-b from-cyan-100 via-white to-blue-50 p-3 shadow-xl transition-all duration-300
                         ${
                           myCardFlash === "gold"
                             ? "scale-[1.03] ring-4 ring-yellow-300 shadow-[0_0_35px_rgba(250,204,21,0.95)]"
@@ -1938,24 +1950,29 @@ export default function QuizArenaModePage() {
                         }
                       `}
                     >
-                      <div className="flex items-center gap-3">
+                      {/* <div className="flex items-center gap-3"> */}
+                      <div className="flex min-w-0 items-center gap-2 md:gap-3">
 
-                        <div className="relative grid h-24 w-24 shrink-0 place-items-center overflow-hidden bg-emerald-50 shadow-[0_0_20px_rgba(16,185,129,0.5)] md:h-32 md:w-32">
+                        {/* <div className="relative grid h-24 w-24 shrink-0 place-items-center overflow-hidden bg-emerald-50 shadow-[0_0_20px_rgba(16,185,129,0.5)] md:h-32 md:w-32"> */}
+                        <div className="relative grid h-20 w-20 shrink-0 place-items-center overflow-hidden bg-emerald-50 shadow-[0_0_20px_rgba(16,185,129,0.5)] md:h-32 md:w-32">
                           <img
                             src={myCharacterImage}
                             alt={myCharacterName}
-                            className="h-24 object-contain drop-shadow-2xl md:h-32"
+                            // className="h-24 object-contain drop-shadow-2xl md:h-32"
+                            className="h-20 object-contain drop-shadow-2xl md:h-32"
                           />
 
                           {myHitEffect && <CharacterHitEffect type={myHitEffect} />}
                         </div>
 
-                        <div className="flex-1 text-left">
+                        {/* <div className="flex-1 text-left"> */}
+                        <div className="min-w-0 flex-1 text-left">
                           <p className="text-xs font-black text-emerald-700">
                             あなた：{myPlayerName}
                           </p>
 
-                          <p className="truncate text-lg font-black text-stone-950 md:text-2xl">
+                          {/* <p className="truncate text-lg font-black text-stone-950 md:text-2xl"> */}
+                          <p className="line-clamp-2 text-lg font-black text-stone-950 md:line-clamp-none md:text-2xl">
                             {myCharacterName}
                           </p>
 
@@ -1995,7 +2012,7 @@ export default function QuizArenaModePage() {
                     {/* <div className="rounded-[1.5rem] border-3 border-red-700 bg-gradient-to-b from-red-100 via-white to-white p-3 shadow-xl"> */}
                     <div
                       className={`
-                        rounded-[1.5rem] border-3 border-red-700 bg-gradient-to-b from-pink-100 via-white to-rose-50 p-3 shadow-xl transition-all duration-300
+                        w-full min-w-0 rounded-[1.5rem] border-3 border-red-700 bg-gradient-to-b from-pink-100 via-white to-rose-50 p-3 shadow-xl transition-all duration-300
                         ${
                           opponentCardFlash === "red"
                             ? "scale-[1.03] ring-4 ring-red-400 shadow-[0_0_35px_rgba(239,68,68,0.95)]"
@@ -2003,14 +2020,17 @@ export default function QuizArenaModePage() {
                         }
                       `}
                     >
-                      <div className="flex items-center gap-3 md:flex-row-reverse">
+                      {/* <div className="flex items-center gap-3 md:flex-row-reverse"> */}
+                      <div className="flex min-w-0 items-center gap-2 md:flex-row-reverse md:gap-3">
 
-                        <div className="relative grid h-24 w-24 shrink-0 place-items-center overflow-hidden bg-red-50 shadow-[0_0_20px_rgba(239,68,68,0.5)] md:h-32 md:w-32">
+                        {/* <div className="relative grid h-24 w-24 shrink-0 place-items-center overflow-hidden bg-red-50 shadow-[0_0_20px_rgba(239,68,68,0.5)] md:h-32 md:w-32"> */}
+                        <div className="relative grid h-20 w-20 shrink-0 place-items-center overflow-hidden bg-red-50 shadow-[0_0_20px_rgba(239,68,68,0.5)] md:h-32 md:w-32">
                           {opponent?.characterImage ? (
                             <img
                               src={opponentBattleCharacter.image}
                               alt={opponentBattleCharacter.name}
-                              className="h-24 object-contain drop-shadow-2xl md:h-32"
+                              // className="h-24 object-contain drop-shadow-2xl md:h-32"
+                              className="h-20 object-contain drop-shadow-2xl md:h-32"
                             />
                           ) : (
                             <div className="text-5xl">❓</div>
@@ -2019,13 +2039,15 @@ export default function QuizArenaModePage() {
                           {opponentHitEffect && <CharacterHitEffect type={opponentHitEffect} />}
                         </div>
 
-                        <div className="flex-1 text-left md:text-right">
+                        {/* <div className="flex-1 text-left md:text-right"> */}
+                        <div className="min-w-0 flex-1 text-left md:text-right">
 
                           <p className="text-xs font-black text-red-700">
                             相手：{opponentPlayerName}
                           </p>
 
-                          <p className="truncate text-lg font-black text-stone-950 md:text-2xl">
+                          {/* <p className="truncate text-lg font-black text-stone-950 md:text-2xl"> */}
+                          <p className="line-clamp-2 text-lg font-black text-stone-950 md:line-clamp-none md:text-2xl">
                             {opponentBattleCharacter.name}
                           </p>
 
