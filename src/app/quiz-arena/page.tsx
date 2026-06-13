@@ -135,7 +135,7 @@ export default function QuizArenaPage() {
           ひまQのキャラで対戦！
         </p>
         <p className="mb-6 text-base font-bold text-white/95 md:text-2xl">
-          クイズに正解して攻撃ゲージをためろ！相手より先にHPを削りきれ！
+          クイズ正解で攻撃チャンス！相手より先にHPを削りきれ！
         </p>
 
         <div className="mb-6 flex justify-center gap-2 md:gap-5">

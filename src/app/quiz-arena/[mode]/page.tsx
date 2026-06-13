@@ -830,6 +830,11 @@ export default function QuizArenaModePage() {
   const [serverEndAt, setServerEndAt] = useState<number | null>(null);
   const [serverQuestionIds, setServerQuestionIds] = useState<string[]>([]);
   const [allQuestions, setAllQuestions] = useState<{ id: string; quiz: QuizData }[]>([]);
+  const [battleCharacter, setBattleCharacter] = useState<ArenaCharacter | null>(null);
+  const activeCharacter =
+    battleCharacter ??
+    selectedCharacter ??
+    DEFAULT_CHARACTER;
 
   const [sharedEffect, setSharedEffect] = useState<{
     fromId: string;
@@ -883,6 +888,17 @@ export default function QuizArenaModePage() {
 
   const opponentImage = opponent?.characterImage;
   const opponentName = opponent?.characterName ?? opponent?.name ?? "相手";
+
+  const opponentRarity = opponent?.characterRarity ?? "ノーマル";
+  const opponentStats = getArenaStatsByRarity(opponentRarity);
+
+  const opponentBattleCharacter: ArenaCharacter = {
+    id: opponent?.characterId ?? "opponent",
+    name: opponent?.characterName ?? opponent?.name ?? "相手",
+    image: opponent?.characterImage ?? DEFAULT_CHARACTER.image,
+    rarity: opponentRarity,
+    ...opponentStats,
+  };
 
   const myCharacterImage =
     me?.characterImage ?? selectedCharacter?.image ?? DEFAULT_CHARACTER.image;
@@ -1329,6 +1345,10 @@ export default function QuizArenaModePage() {
       return;
     }
 
+    const character = selectedCharacter ?? DEFAULT_CHARACTER;
+
+    setSelectedCharacter(character);
+    setBattleCharacter(character);
     setEntryDone(true);
   };
 
@@ -1498,9 +1518,7 @@ export default function QuizArenaModePage() {
     damage: number,
     type: "attack" | "special" | "critical"
   ) => {
-    if (!selectedCharacter) return;
-
-    const character = selectedCharacter;
+    const character = activeCharacter;
     setEffectCharacter(character);
 
     setMyCardFlash("gold");
@@ -1585,8 +1603,8 @@ export default function QuizArenaModePage() {
     setShowCorrectMessage(true);
     setIncorrectMessage(null);
 
-    const canSpecial = nextSpecialGauge >= selectedCharacter.specialCost;
-    const canAttack = nextAttackGauge >= selectedCharacter.cost;
+    const canSpecial = nextSpecialGauge >= activeCharacter.specialCost;
+    const canAttack = nextAttackGauge >= activeCharacter.cost;
 
     if (canSpecial) {
       const specialDamage = Math.floor(
@@ -1611,7 +1629,7 @@ export default function QuizArenaModePage() {
     if (canAttack) {
       const isCritical = nextCombo >= 3 && Math.random() < 0.2;
       const multiplier = getComboMultiplier(nextCombo) * (isCritical ? 1.5 : 1);
-      const damage = Math.floor(selectedCharacter.attack * multiplier);
+      const damage = Math.floor(activeCharacter.attack * multiplier);
 
       setAttackGauge(0);
 
@@ -1951,14 +1969,14 @@ export default function QuizArenaModePage() {
                             <Gauge
                               label="攻撃ゲージ"
                               current={attackGauge}
-                              max={selectedCharacter?.cost ?? 1}
+                              max={activeCharacter.cost}
                               colorClass="bg-orange-500"
                             />
 
                             <Gauge
                               label="必殺ゲージ"
                               current={specialGauge}
-                              max={selectedCharacter?.specialCost ?? 1}
+                              max={activeCharacter.specialCost}
                               colorClass="bg-violet-500"
                             />
                           </div>
@@ -1990,8 +2008,8 @@ export default function QuizArenaModePage() {
                         <div className="relative grid h-24 w-24 shrink-0 place-items-center overflow-hidden bg-red-50 shadow-[0_0_20px_rgba(239,68,68,0.5)] md:h-32 md:w-32">
                           {opponent?.characterImage ? (
                             <img
-                              src={opponent.characterImage}
-                              alt={opponent.characterName ?? opponent.name ?? "相手"}
+                              src={opponentBattleCharacter.image}
+                              alt={opponentBattleCharacter.name}
                               className="h-24 object-contain drop-shadow-2xl md:h-32"
                             />
                           ) : (
@@ -2008,7 +2026,7 @@ export default function QuizArenaModePage() {
                           </p>
 
                           <p className="truncate text-lg font-black text-stone-950 md:text-2xl">
-                            {opponent?.characterName ?? opponent?.name ?? "相手"}
+                            {opponentBattleCharacter.name}
                           </p>
 
                           <HpGauge
@@ -2021,14 +2039,14 @@ export default function QuizArenaModePage() {
                             <Gauge
                               label="攻撃ゲージ"
                               current={opponentAttackGauge}
-                              max={opponentCost}
+                              max={opponentBattleCharacter.cost}
                               colorClass="bg-orange-500"
                             />
 
                             <Gauge
                               label="必殺ゲージ"
                               current={opponentSpecialGauge}
-                              max={opponentSpecialCost}
+                              max={opponentBattleCharacter.specialCost}
                               colorClass="bg-violet-500"
                             />
                           </div>
