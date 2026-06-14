@@ -93,7 +93,8 @@ export default function TimeAttackRankingTop10({ rows }: { rows: Row[] }) {
               </p>
 
               <p className="mt-1 text-lg md:text-2xl font-black text-gray-900">
-                最速クリアランキング TOP20🏁
+                {/* 最速クリアランキング TOP20🏁 */}
+                🏁最速クリアランキング🏆
               </p>
 
               <p className="mt-2 text-xs md:text-sm text-gray-500 font-semibold">
@@ -101,7 +102,7 @@ export default function TimeAttackRankingTop10({ rows }: { rows: Row[] }) {
               </p>
             </div>
 
-            <div className="mt-5 space-y-3 max-h-[600px] overflow-y-auto pr-1">
+            <div className="mt-5 space-y-3 max-h-[380px] md:max-h-[420px] overflow-y-auto pr-1">
               {list.map((u, idx) => {
                 const rank = idx + 1;
                 const avatar = u.avatar_url ?? "/images/初期アイコン.png";

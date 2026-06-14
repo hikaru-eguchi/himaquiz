@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import UserProfileModal, { PublicProfile } from "@/app/components/UserProfileModal";
+import MyRivalRankingCard from "./MyRivalRankingCard";
 
 type Row = {
   user_id: string;
@@ -47,6 +48,14 @@ export default function StreakRankingTop10({ rows }: { rows: Row[] }) {
 
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
 
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setIsLoggedIn(!!data.user);
+    });
+  }, [supabase]);
+
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<PublicProfile | null>(null);
   const [loading, setLoading] = useState(false);
@@ -89,11 +98,19 @@ export default function StreakRankingTop10({ rows }: { rows: Row[] }) {
                 みんなの連続正解チャレンジ🔥
               </p>
               <p className="mt-1 text-lg md:text-2xl font-black text-gray-900">
-                連続正解ランキング TOP10🏆
+                {/* 連続正解ランキング TOP10🏆 */}
+                連続正解ランキング🏆
               </p>
             </div>
 
-            <div className="mt-5 space-y-3 max-h-[380px] md:max-h-[420px] overflow-y-auto pr-1">
+            {/* <div className="mt-5 space-y-3 max-h-[225px] md:max-h-[250px] overflow-y-auto pr-1"> */}
+            <div
+              className={`mt-5 space-y-3 overflow-y-auto pr-1 ${
+                isLoggedIn
+                  ? "max-h-[225px] md:max-h-[250px]"
+                  : "max-h-[380px] md:max-h-[420px]"
+              }`}
+            >
               {list.map((u, idx) => {
                 const rank = idx + 1;
                 const avatar = u.avatar_url ?? "/images/初期アイコン.png";
@@ -160,6 +177,14 @@ export default function StreakRankingTop10({ rows }: { rows: Row[] }) {
               <p className="mt-4 text-center text-gray-600 font-bold">
                 ランキングを読み込み中…
               </p>
+            )}
+
+            {isLoggedIn && (
+              <MyRivalRankingCard
+                title="🔥 あなたのライバル"
+                column="best_streak"
+                unit="問"
+              />
             )}
 
             {/* チャレンジ導線ボタン */}

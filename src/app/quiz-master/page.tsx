@@ -473,40 +473,41 @@ export default function QuizMasterPage() {
                 <span className="ml-2 text-yellow-500">✨</span>
               </h2>
 
-              <div className="mt-5 w-full max-w-[800px] rounded-[22px] border-2 border-[#efb8b8] bg-[#fff8f8] px-5 py-5 md:px-8 md:py-6">
-                <div className="flex items-center gap-4 md:gap-6">
-                  <div className="shrink-0 text-3xl md:text-5xl">🔒</div>
-
-                  <div className="text-left">
-                    <p className="text-lg md:text-2xl font-extrabold text-red-600 leading-tight">
-                      ランキングに載るにはログインが必要です
-                    </p>
-                    <p className="mt-2 text-sm md:text-lg font-bold text-gray-800 leading-relaxed">
-                      あなたの記録をランキングに残して、全国のユーザーと競い合おう！
-                    </p>
-                  </div>
-                </div>
-              </div>
-
               {!userLoading && !user && (
-                <div className="mt-5 w-full max-w-[800px] rounded-[22px] border border-[#d9d9d9] bg-[#fdfdfd] px-5 py-5 md:px-8 md:py-6 shadow-sm">
-                  <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                    <div className="text-left">
-                      <p className="text-xl md:text-2xl font-extrabold text-red-600 leading-tight">
-                        ログインしていません
-                      </p>
-                      <p className="mt-2 text-sm md:text-base font-bold text-gray-800">
-                        ログインするとランキングに参加できます！
-                      </p>
-                    </div>
+                <>
+                  <div className="mt-5 w-full max-w-[800px] rounded-[22px] border-2 border-[#efb8b8] bg-[#fff8f8] px-5 py-5 md:px-8 md:py-6">
+                    <div className="flex items-center gap-4 md:gap-6">
+                      <div className="shrink-0 text-3xl md:text-5xl">🔒</div>
 
-                    <Link href="/user/login" className="md:shrink-0">
-                      <button className="w-full md:w-auto min-w-[200px] px-6 py-2 md:px-8 md:py-3 bg-orange-400 hover:bg-orange-500 text-white rounded-[18px] font-extrabold text-lg md:text-2xl border-2 border-[#b85c00] shadow-[0_3px_0_#b85c00] transition-transform hover:scale-[1.02] cursor-pointer">
-                        ログインする
-                      </button>
-                    </Link>
+                      <div className="text-left">
+                        <p className="text-lg md:text-2xl font-extrabold text-red-600 leading-tight">
+                          ランキングに載るにはログインが必要です
+                        </p>
+                        <p className="mt-2 text-sm md:text-lg font-bold text-gray-800 leading-relaxed">
+                          あなたの記録をランキングに残して、全国のユーザーと競い合おう！
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                  <div className="mt-5 w-full max-w-[800px] rounded-[22px] border border-[#d9d9d9] bg-[#fdfdfd] px-5 py-5 md:px-8 md:py-6 shadow-sm">
+                    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                      <div className="text-left">
+                        <p className="text-xl md:text-2xl font-extrabold text-red-600 leading-tight">
+                          ログインしていません
+                        </p>
+                        <p className="mt-2 text-sm md:text-base font-bold text-gray-800">
+                          ログインするとランキングに参加できます！
+                        </p>
+                      </div>
+
+                      <Link href="/user/login" className="md:shrink-0">
+                        <button className="w-full md:w-auto min-w-[200px] px-6 py-2 md:px-8 md:py-3 bg-orange-400 hover:bg-orange-500 text-white rounded-[18px] font-extrabold text-lg md:text-2xl border-2 border-[#b85c00] shadow-[0_3px_0_#b85c00] transition-transform hover:scale-[1.02] cursor-pointer">
+                          ログインする
+                        </button>
+                      </Link>
+                    </div>
+                  </div>
+                </>
               )}
             </div>
             {rankLoading ? (

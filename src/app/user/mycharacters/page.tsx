@@ -182,6 +182,10 @@ export default function MyCharactersPage() {
         <p className="mt-2 md:mt-3 text-sm md:text-lg text-gray-700 drop-shadow-sm">
           ゲットしたキャラがここにコレクションされていくよ！
         </p>
+        <p className="mt-1 md:mt-2 text-xs md:text-sm text-gray-500">
+          <span className="font-bold text-gray-600">※</span>
+          「ひまキャラガチャ」「きまぐれクイズ」「クイズダンジョン（シークレットステージ）」で手に入れたキャラが図鑑に登録されます。
+        </p>
       </div>
 
       {/* エラー表示 */}

@@ -1,33 +1,20 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import MyRivalRankingCard from "./MyRivalRankingCard";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import UserProfileModal, { PublicProfile } from "@/app/components/UserProfileModal";
+import MyRivalRankingCard from "./MyRivalRankingCard";
 
 type Row = {
   user_id: string;
   username: string | null;
   avatar_url: string | null;
-  arena_wins: number;
+  character_count: number;
 };
 
-export default function ArenaWinRankingTop20({ rows }: { rows: Row[] }) {
-  const list = rows.slice(0, 20);
-
-  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
-
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setIsLoggedIn(!!data.user);
-    });
-  }, [supabase]);
-
-  const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<PublicProfile | null>(null);
-  const [loading, setLoading] = useState(false);
+export default function HimaCharacterRankingTop10({ rows }: { rows: Row[] }) {
+  const list = rows.slice(0, 10);
 
   const getRankLabel = (rank: number) => {
     if (rank === 1) return "👑";
@@ -46,36 +33,31 @@ export default function ArenaWinRankingTop20({ rows }: { rows: Row[] }) {
     if (rank === 3) {
       return "border-orange-300 bg-gradient-to-r from-orange-50 via-amber-50 to-orange-100 shadow-[0_6px_16px_rgba(251,146,60,0.15)]";
     }
-    if (rank <= 10) {
-      return "border-purple-200 bg-white";
-    }
-    return "border-gray-200 bg-white";
+    // return "border-pink-200 bg-white";
+    return "border-fuchsia-200 bg-gradient-to-r from-pink-50 via-yellow-50 to-cyan-50";
   };
 
   const getScoreStyle = (rank: number) => {
     if (rank === 1) return "text-yellow-600";
     if (rank === 2) return "text-slate-500";
     if (rank === 3) return "text-orange-500";
-    return "text-purple-500";
+    // return "text-pink-500";
+    return "text-fuchsia-500";
   };
 
-  const getArenaTitle = (wins: number) => {
-    if (wins >= 1000) return "神";
-    if (wins >= 500) return "超越者";
-    if (wins >= 400) return "覇王";
-    if (wins >= 300) return "神話";
-    if (wins >= 200) return "伝説";
-    if (wins >= 150) return "王者";
-    if (wins >= 100) return "英雄";
-    if (wins >= 70) return "達人";
-    if (wins >= 50) return "熟練闘士";
-    if (wins >= 40) return "上級闘士";
-    if (wins >= 30) return "ベテラン闘士";
-    if (wins >= 20) return "中級闘士";
-    if (wins >= 10) return "初級闘士";
-    if (wins >= 5) return "新人闘士";
-    return "見習い闘士";
-  };
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setIsLoggedIn(!!data.user);
+    });
+  }, [supabase]);
+
+  const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState<PublicProfile | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const openUserProfile = async (userId: string) => {
     setSelected(null);
@@ -109,36 +91,39 @@ export default function ArenaWinRankingTop20({ rows }: { rows: Row[] }) {
     <>
       <div className="mt-6">
         <div className="mx-auto w-full max-w-[760px]">
-          <div className="rounded-[28px] border border-purple-200 bg-[#fbf8ff] p-4 shadow-[0_12px_30px_rgba(0,0,0,0.08)] md:p-6">
+          <div className="rounded-[28px] border border-[#e6dccf] bg-[#f8f8f8] p-4 shadow-[0_12px_30px_rgba(0,0,0,0.08)] md:p-6">
             <div className="text-center">
-              <p className="text-sm font-black text-purple-500 drop-shadow-sm md:text-base">
-                クイズアリーナ⚔️
+              {/* <p className="text-sm font-black text-pink-500 drop-shadow-sm md:text-base"> */}
+              <p className="text-sm md:text-base font-black text-emerald-500 drop-shadow-sm">
+                {/* ひまキャラを集めよう🎨 */}
+                {/* ひまキャラ図鑑🌈 */}
+                ひまキャラコレクション🌈
               </p>
-
               <p className="mt-1 text-lg font-black text-gray-900 md:text-2xl">
-                {/* 勝利数ランキング TOP20🏆 */}
-                🔥勝利数ランキング🏆
-              </p>
-
-              <p className="mt-2 text-xs font-semibold text-gray-500 md:text-sm">
-                たくさん勝利してランキング入りを目指そう！
+                {/* ひまキャラ所持数ランキング TOP10🏆 */}
+                ひまキャラコレクターランキング🏆
               </p>
             </div>
 
-            <div className="mt-5 max-h-[380px] md:max-h-[420px] space-y-3 overflow-y-auto pr-1">
+            {/* <div className="mt-5 space-y-3 max-h-[225px] md:max-h-[250px] overflow-y-auto pr-1"> */}
+            <div
+              className={`mt-5 space-y-3 overflow-y-auto pr-1 ${
+                isLoggedIn
+                  ? "max-h-[225px] md:max-h-[250px]"
+                  : "max-h-[380px] md:max-h-[420px]"
+              }`}
+            >
               {list.map((u, idx) => {
                 const rank = idx + 1;
                 const avatar = u.avatar_url ?? "/images/初期アイコン.png";
                 const username = u.username ?? "名無し";
-                const wins = u.arena_wins ?? 0;
-                const title = getArenaTitle(wins);
 
                 return (
                   <button
                     type="button"
                     key={u.user_id}
                     onClick={() => openUserProfile(u.user_id)}
-                    className={`w-full rounded-2xl border px-3 py-3 text-left transition-transform duration-200 hover:scale-[1.01] md:px-4 md:py-3 ${getRowStyle(rank)}`}
+                    className={`w-full rounded-2xl border px-3 py-3 text-left transition-transform duration-200 hover:scale-[1.01] md:px-4 ${getRowStyle(rank)}`}
                   >
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex min-w-0 items-center gap-2 md:gap-4">
@@ -164,9 +149,9 @@ export default function ArenaWinRankingTop20({ rows }: { rows: Row[] }) {
                           <p className="truncate text-sm font-extrabold text-gray-900 md:text-base">
                             {username}
                           </p>
-                          <p className="mt-1 text-xs font-black text-purple-500">
-                            {title}
-                          </p>
+                          {/* <p className="text-[11px] font-semibold text-gray-500 md:text-xs">
+                            ひまキャラコレクター
+                          </p> */}
                         </div>
                       </div>
 
@@ -174,7 +159,10 @@ export default function ArenaWinRankingTop20({ rows }: { rows: Row[] }) {
                         <p
                           className={`text-xl font-black leading-none md:text-2xl ${getScoreStyle(rank)}`}
                         >
-                          {wins}勝
+                          {u.character_count ?? 0}
+                          <span className="ml-1 text-sm font-bold text-gray-600 md:text-md">
+                            体
+                          </span>
                         </p>
                       </div>
                     </div>
@@ -191,11 +179,24 @@ export default function ArenaWinRankingTop20({ rows }: { rows: Row[] }) {
 
             {isLoggedIn && (
               <MyRivalRankingCard
-                title="⚔️ あなたのライバル"
-                column="arena_wins"
-                unit="勝"
+                title="🌈 あなたのライバル"
+                column="character_count"
+                unit="体"
               />
             )}
+
+            <div className="mt-6 text-center">
+              <p className="mb-3 text-sm font-bold text-gray-700 md:text-base">
+                ガチャでひまキャラを集めてランキング入りを目指そう🌈
+              </p>
+
+              <Link href="/quiz-gacha" className="flex w-full justify-center md:w-auto">
+                {/* <button className="w-[240px] rounded-full border-2 border-black bg-gradient-to-r from-pink-500 to-fuchsia-400 px-4 py-3 text-xl font-black text-white shadow-xl transition-all hover:scale-110 active:scale-95 md:w-[280px] md:px-6 md:text-2xl"> */}
+                <button className="w-[240px] rounded-full border-2 border-black bg-[linear-gradient(90deg,#ff4d6d,#ffb703,#38b000,#00b4d8,#7b2cbf)] px-4 py-3 text-xl font-black text-white shadow-xl transition-all hover:scale-110 active:scale-95 md:w-[280px] md:px-6 md:text-2xl animate-pulse">
+                  🎰 ガチャを引く
+                </button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>

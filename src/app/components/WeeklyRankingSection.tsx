@@ -2,6 +2,7 @@ import MonthlyRankingCard from "./MonthlyRankingCard";
 import AllTimeStreakRankingCard from "./AllTimeStreakRankingCard";
 import StreakRankingTop10 from "./StreakRankingTop10_10";
 import DungeonRankingTop10 from "./DungeonRankingTop10_10";
+import HimaCharacterRankingTop10 from "./HimaCharacterRankingTop10";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import Link from "next/link";
 
@@ -19,10 +20,17 @@ type DungeonRankRow = {
   best_stage: number;
 };
 
+type CharacterRankRow = {
+  user_id: string;
+  username: string | null;
+  avatar_url: string | null;
+  character_count: number;
+};
+
 export default async function WeeklyRankingSection() {
   const supabase = await createSupabaseServerClient();
 
-  const [streakResult, dungeonResult] = await Promise.all([
+  const [streakResult, dungeonResult, characterResult] = await Promise.all([
     supabase
       .from("user_public_profiles")
       .select("user_id, username, avatar_url, best_streak")
@@ -36,10 +44,18 @@ export default async function WeeklyRankingSection() {
       .order("best_stage", { ascending: false })
       .order("updated_at", { ascending: true })
       .limit(10),
+
+    supabase
+      .from("user_public_profiles")
+      .select("user_id, username, avatar_url, character_count")
+      .order("character_count", { ascending: false })
+      .order("updated_at", { ascending: true })
+      .limit(10),
   ]);
 
   const rows = (streakResult.data ?? []) as StreakRankRow[];
   const rows_d = (dungeonResult.data ?? []) as DungeonRankRow[];
+  const rows_c = (characterResult.data ?? []) as CharacterRankRow[];
 
   return (
     <section className="max-w-[700px] mx-auto my-8">
@@ -97,6 +113,8 @@ export default async function WeeklyRankingSection() {
           <StreakRankingTop10 rows={rows.slice(0, 10)} />
 
           <DungeonRankingTop10 rows={rows_d.slice(0, 10)} />
+
+          <HimaCharacterRankingTop10 rows={rows_c.slice(0, 10)} />
 
           {/* <WeeklyRankingCard
             title="今週のスコア"

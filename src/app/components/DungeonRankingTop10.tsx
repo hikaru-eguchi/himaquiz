@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import MyRivalRankingCard from "./MyRivalRankingCard";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import UserProfileModal, { PublicProfile } from "@/app/components/UserProfileModal";
 
@@ -46,6 +47,14 @@ export default function DungeonRankingTop10({ rows }: { rows: Row[] }) {
 
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
 
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setIsLoggedIn(!!data.user);
+    });
+  }, [supabase]);
+
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<PublicProfile | null>(null);
   const [loading, setLoading] = useState(false);
@@ -90,7 +99,8 @@ export default function DungeonRankingTop10({ rows }: { rows: Row[] }) {
                 みんなのクイズダンジョン🏰
               </p>
               <p className="mt-1 text-lg md:text-2xl font-black text-gray-900">
-                最高到達ステージ TOP20🏆
+                {/* 最高到達ステージ TOP20🏆 */}
+                ダンジョン攻略ランキング🏆
               </p>
               <p className="mt-2 text-xs md:text-sm text-gray-500 font-semibold">
                 深く潜るほどランクアップ！
@@ -98,7 +108,7 @@ export default function DungeonRankingTop10({ rows }: { rows: Row[] }) {
             </div>
 
             {/* リスト */}
-            <div className="mt-5 space-y-3 max-h-[600px] overflow-y-auto pr-1">
+            <div className="mt-5 space-y-3 max-h-[380px] md:max-h-[420px] overflow-y-auto pr-1">
               {list.map((u, idx) => {
                 const rank = idx + 1;
                 const avatar = u.avatar_url ?? "/images/初期アイコン.png";
@@ -171,6 +181,14 @@ export default function DungeonRankingTop10({ rows }: { rows: Row[] }) {
               <p className="mt-4 text-center text-gray-600 font-bold">
                 ランキングを読み込み中…
               </p>
+            )}
+
+            {isLoggedIn && (
+              <MyRivalRankingCard
+                title="🏰 あなたのライバル"
+                column="best_stage"
+                unit="階"
+              />
             )}
           </div>
         </div>
