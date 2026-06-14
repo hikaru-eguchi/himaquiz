@@ -970,6 +970,8 @@ export default function QuizArenaModePage() {
     opponentDamage: number;
   } | null>(null);
 
+  const finishTypeRef = useRef<"ko" | "timeup" | null>(null);
+
   const [arenaTop10, setArenaTop10] = useState<ArenaRankRow[]>([]);
   const [rankLoading, setRankLoading] = useState(true);
 
@@ -1084,6 +1086,7 @@ export default function QuizArenaModePage() {
   }) => {
     if (finishStartedRef.current) return;
     finishStartedRef.current = true;
+    finishTypeRef.current = type;
 
     if (type === "timeup") {
       setFinishOverlay({
@@ -1330,10 +1333,25 @@ export default function QuizArenaModePage() {
       //   clearInterval(timer);
       //   setFinished(true);
       // }
+      // if (left <= 0) {
+      //   clearInterval(timer);
+
+      //   if (finishStartedRef.current) return;
+      //   if (myHp <= 0 || opponentHp <= 0) return;
+
+      //   lockArenaResult();
+
+      //   startFinishSequence({
+      //     type: "timeup",
+      //     message: "TIME UP!",
+      //   });
+      // }
       if (left <= 0) {
         clearInterval(timer);
 
         if (finishStartedRef.current) return;
+        if (finishTypeRef.current) return;
+        if (finalArenaResult) return;
         if (myHp <= 0 || opponentHp <= 0) return;
 
         lockArenaResult();
@@ -1380,6 +1398,14 @@ export default function QuizArenaModePage() {
 
     if (myHp <= 0) {
       lockArenaResult();
+
+      if (roomCode) {
+        socket?.emit("arena_match_end", {
+          roomCode,
+          reason: "ko",
+        });
+      }
+
       startFinishSequence({
         type: "ko",
         defeatedId: "me",
@@ -1390,6 +1416,14 @@ export default function QuizArenaModePage() {
 
     if (opponentHp <= 0) {
       lockArenaResult();
+
+      if (roomCode) {
+        socket?.emit("arena_match_end", {
+          roomCode,
+          reason: "ko",
+        });
+      }
+
       startFinishSequence({
         type: "ko",
         defeatedId: "opponent",
@@ -1434,12 +1468,27 @@ export default function QuizArenaModePage() {
     //   setTimeLeft(0);
     //   setFinished(true);
     // };
+    // const handleArenaTimeUp = () => {
+    //   if (finished || finishStartedRef.current) return;
+
+    //   setTimeLeft(0);
+
+    //   lockArenaResult();
+    //   startFinishSequence({
+    //     type: "timeup",
+    //     message: "TIME UP!",
+    //   });
+    // };
     const handleArenaTimeUp = () => {
-      if (finished || finishStartedRef.current) return;
+      if (finishStartedRef.current) return;
+      if (finishTypeRef.current) return;
+      if (finalArenaResult) return;
+      if (myHp <= 0 || opponentHp <= 0) return;
 
       setTimeLeft(0);
 
       lockArenaResult();
+
       startFinishSequence({
         type: "timeup",
         message: "TIME UP!",
@@ -1682,6 +1731,7 @@ export default function QuizArenaModePage() {
     setFinishOverlay(null);
     arenaResultSavedRef.current = false;
     setFinalArenaResult(null);
+    finishTypeRef.current = null;
   };
 
   const handleEntry = () => {
@@ -1857,6 +1907,7 @@ export default function QuizArenaModePage() {
     setFinishOverlay(null);
     arenaResultSavedRef.current = false;
     setFinalArenaResult(null);
+    finishTypeRef.current = null;
 
     setServerStartAt(null);
     setServerEndAt(null);
