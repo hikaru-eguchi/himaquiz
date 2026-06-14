@@ -12,8 +12,16 @@ import { openXShare, buildTopUrl } from "@/lib/shareX";
 import RecommendedMultiplayerGames from "@/app/components/RecommendedMultiplayerGames";
 import OnlineGameNotice from "@/app/components/OnlineGameNotice";
 import Image from "next/image";
+import ArenaRankingTop10 from "@/app/components/ArenaRankingTop10";
 
 type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
+
+type ArenaRankRow = {
+  user_id: string;
+  username: string | null;
+  avatar_url: string | null;
+  arena_wins: number;
+};
 
 interface ArticleData {
   id: string;
@@ -133,7 +141,12 @@ const calcEarnedPoints = ({
   correctCount: number;
 }) => {
   // 仮仕様：サーバー側レート導入前のクライアント表示用
-  return Math.max(0, Math.floor(damage / 10) + correctCount * 10 + (isWin ? 200 : 0));
+  // return Math.max(0, Math.floor(damage / 10) + correctCount * 10 + (isWin ? 200 : 0));
+  return (
+    (isWin ? 300 : 100) +
+    Math.floor(damage / 20) +
+    correctCount * 5
+  );
 };
 
 const calcEarnedExp = (correctCount: number) => {
@@ -599,6 +612,8 @@ const QuizResult = ({
   onShareX,
   onNewMatch,
   onRematch,
+  arenaTop10,
+  rankLoading,
 }: {
   correctCount: number;
   myDamage: number;
@@ -619,6 +634,8 @@ const QuizResult = ({
   onShareX: () => void;
   onNewMatch: () => void;
   onRematch: () => void;
+  arenaTop10: ArenaRankRow[];
+  rankLoading: boolean;
 }) => {
   const [showScore, setShowScore] = useState(false);
   const [showText, setShowText] = useState(false);
@@ -725,18 +742,76 @@ const QuizResult = ({
               <p className="text-2xl font-black">正解数：{correctCount}問</p>
 
               <div className="mt-3 grid grid-cols-2 gap-2">
-                <div className="rounded-2xl bg-green-100 p-3">
+                {/* <div className="rounded-2xl bg-green-100 p-3">
                   <p className="text-xs font-black text-green-700">獲得ポイント</p>
                   <p className="text-2xl font-black text-green-600">
                     {earnedPoints}P
                   </p>
+                </div> */}
+                <div className="rounded-2xl bg-green-100 p-3">
+                  <p className="text-sm font-black text-green-700">
+                    💰 獲得ポイント
+                  </p>
+
+                  <div className="mt-3 space-y-1 text-left text-sm font-black">
+                    <div className="flex justify-between">
+                      <span>{isWin ? "🏆 勝利ボーナス" : "💪 健闘ボーナス"}</span>
+                      <span>{isWin ? "+300P" : "+100P"}</span>
+                    </div>
+
+                    <div className="flex justify-between">
+                      <span>⚔️ ダメージボーナス</span>
+                      <span>+{Math.floor(myDamage / 20)}P</span>
+                    </div>
+
+                    <div className="flex justify-between">
+                      <span>✅ 正解数ボーナス</span>
+                      <span>+{correctCount * 5}P</span>
+                    </div>
+                  </div>
+
+                  <div className="my-3 border-t-2 border-green-300" />
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-lg font-black text-green-700">
+                      合計
+                    </span>
+
+                    <span className="text-3xl font-black text-green-600">
+                      {earnedPoints}P
+                    </span>
+                  </div>
                 </div>
 
-                <div className="rounded-2xl bg-purple-100 p-3">
+                {/* <div className="rounded-2xl bg-purple-100 p-3">
                   <p className="text-xs font-black text-purple-700">獲得経験値</p>
                   <p className="text-2xl font-black text-purple-600">
                     {earnedExp}EXP
                   </p>
+                </div> */}
+                <div className="rounded-2xl bg-purple-100 p-3">
+                  <p className="text-sm font-black text-purple-700">
+                    🌟 獲得経験値
+                  </p>
+
+                  <div className="mt-3 space-y-1 text-left text-sm font-black">
+                    <div className="flex justify-between">
+                      <span>📝 正解数ボーナス</span>
+                      <span>+{correctCount * 20}EXP</span>
+                    </div>
+                  </div>
+
+                  <div className="my-3 border-t-2 border-purple-300" />
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-lg font-black text-purple-700">
+                      合計
+                    </span>
+
+                    <span className="text-3xl font-black text-purple-600">
+                      {earnedExp}EXP
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -781,6 +856,22 @@ const QuizResult = ({
           )}
         </div>
       </motion.div>
+
+      {showButton && (
+        <div className="mx-auto mt-8 w-full max-w-[900px] rounded-[28px] border border-[#e5ddd3] bg-[#f8f8f8] px-2 py-5 shadow-[0_10px_30px_rgba(0,0,0,0.08)] md:px-8 md:py-7">
+          {rankLoading ? (
+            <p className="py-6 text-center text-base font-bold text-gray-600 md:text-lg">
+              ランキング読み込み中...
+            </p>
+          ) : arenaTop10.length > 0 ? (
+            <ArenaRankingTop10 rows={arenaTop10} />
+          ) : (
+            <p className="py-6 text-center text-base font-bold text-gray-600 md:text-lg">
+              まだランキングがありません
+            </p>
+          )}
+        </div>
+      )}
 
       {showButton && (
         <RecommendedMultiplayerGames
@@ -859,6 +950,19 @@ export default function QuizArenaModePage() {
     message: string;
     defeatedId?: "me" | "opponent";
   } | null>(null);
+
+  const arenaResultSavedRef = useRef(false);
+  const [finalArenaResult, setFinalArenaResult] = useState<{
+    isWin: boolean;
+    isDraw: boolean;
+    myHp: number;
+    opponentHp: number;
+    myDamage: number;
+    opponentDamage: number;
+  } | null>(null);
+
+  const [arenaTop10, setArenaTop10] = useState<ArenaRankRow[]>([]);
+  const [rankLoading, setRankLoading] = useState(true);
 
   const [sharedEffect, setSharedEffect] = useState<{
     fromId: string;
@@ -943,6 +1047,21 @@ export default function QuizArenaModePage() {
       cost: 1,
       specialCost: 6,
     };
+  };
+
+  const lockArenaResult = () => {
+    setFinalArenaResult((prev) => {
+      if (prev) return prev;
+
+      return {
+        isWin,
+        isDraw,
+        myHp,
+        opponentHp,
+        myDamage,
+        opponentDamage,
+      };
+    });
   };
 
   const startFinishSequence = ({
@@ -1208,6 +1327,8 @@ export default function QuizArenaModePage() {
         if (finishStartedRef.current) return;
         if (myHp <= 0 || opponentHp <= 0) return;
 
+        lockArenaResult();
+
         startFinishSequence({
           type: "timeup",
           message: "TIME UP!",
@@ -1218,6 +1339,28 @@ export default function QuizArenaModePage() {
     return () => clearInterval(timer);
   }, [readyToStart, finished, serverEndAt, myHp, opponentHp]);
 
+  useEffect(() => {
+    const fetchArenaRanking = async () => {
+      setRankLoading(true);
+
+      try {
+        const res = await fetch("/api/rankings/arena", {
+          cache: "no-store",
+        });
+
+        const data = (await res.json()) as ArenaRankRow[];
+        setArenaTop10(Array.isArray(data) ? data : []);
+      } catch (e) {
+        console.error("アリーナランキング取得失敗:", e);
+        setArenaTop10([]);
+      } finally {
+        setRankLoading(false);
+      }
+    };
+
+    fetchArenaRanking();
+  }, [finished]);
+
   // useEffect(() => {
   //   if (myHp <= 0 || opponentHp <= 0) {
   //     setFinished(true);
@@ -1227,6 +1370,7 @@ export default function QuizArenaModePage() {
     if (finished || finishStartedRef.current) return;
 
     if (myHp <= 0) {
+      lockArenaResult();
       startFinishSequence({
         type: "ko",
         defeatedId: "me",
@@ -1236,6 +1380,7 @@ export default function QuizArenaModePage() {
     }
 
     if (opponentHp <= 0) {
+      lockArenaResult();
       startFinishSequence({
         type: "ko",
         defeatedId: "opponent",
@@ -1285,6 +1430,7 @@ export default function QuizArenaModePage() {
 
       setTimeLeft(0);
 
+      lockArenaResult();
       startFinishSequence({
         type: "timeup",
         message: "TIME UP!",
@@ -1399,14 +1545,47 @@ export default function QuizArenaModePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socket, updateStartAt]);
 
+  // useEffect(() => {
+  //   if (!finished) return;
+
+  //   const points = calcEarnedPoints({
+  //     isWin,
+  //     damage: myDamage,
+  //     correctCount,
+  //   });
+  //   const exp = calcEarnedExp(correctCount);
+
+  //   setEarnedPoints(points);
+  //   setEarnedExp(exp);
+
+  //   if (!user) {
+  //     setAwardStatus("need_login");
+  //     return;
+  //   }
+
+  //   // サーバー側の正式実装前なので、ここでは表示だけ awarded にしています。
+  //   // add_points_and_exp を使いたい場合は、ここにRPC処理を追加してください。
+  //   setAwardStatus("awarded");
+  // }, [finished, isWin, myDamage, correctCount, user]);
+
   useEffect(() => {
     if (!finished) return;
 
-    const points = calcEarnedPoints({
+    const resultForSave = finalArenaResult ?? {
       isWin,
-      damage: myDamage,
+      isDraw,
+      myHp,
+      opponentHp,
+      myDamage,
+      opponentDamage,
+    };
+
+    const points = calcEarnedPoints({
+      isWin: resultForSave.isWin,
+      damage: resultForSave.myDamage,
       correctCount,
     });
+
     const exp = calcEarnedExp(correctCount);
 
     setEarnedPoints(points);
@@ -1417,10 +1596,39 @@ export default function QuizArenaModePage() {
       return;
     }
 
-    // サーバー側の正式実装前なので、ここでは表示だけ awarded にしています。
-    // add_points_and_exp を使いたい場合は、ここにRPC処理を追加してください。
-    setAwardStatus("awarded");
-  }, [finished, isWin, myDamage, correctCount, user]);
+    // あいことば対戦はランキング記録しない
+    if (isCodeMatch) {
+      setAwardStatus("awarded");
+      return;
+    }
+
+    if (resultForSave.isDraw) {
+      setAwardStatus("awarded");
+      return;
+    }
+
+    if (arenaResultSavedRef.current) return;
+    arenaResultSavedRef.current = true;
+
+    const saveArenaResult = async () => {
+      setAwardStatus("awarding");
+
+      const { error } = await supabase.rpc("update_arena_result", {
+        p_user_id: user.id,
+        p_is_win: resultForSave.isWin,
+      });
+
+      if (error) {
+        console.error("アリーナ結果保存失敗:", error);
+        setAwardStatus("error");
+        return;
+      }
+
+      setAwardStatus("awarded");
+    };
+
+    saveArenaResult();
+  }, [finished, finalArenaResult, isWin, isDraw, myHp, opponentHp, myDamage, opponentDamage, correctCount, user, supabase, isCodeMatch]);
 
   const resetArenaState = (resetSocket: boolean) => {
     if (resetSocket) resetMatch();
@@ -1463,6 +1671,8 @@ export default function QuizArenaModePage() {
     setFinishOverlay(null);
     finishStartedRef.current = false;
     setFinishOverlay(null);
+    arenaResultSavedRef.current = false;
+    setFinalArenaResult(null);
   };
 
   const handleEntry = () => {
@@ -1636,6 +1846,8 @@ export default function QuizArenaModePage() {
     setFinishOverlay(null);
     finishStartedRef.current = false;
     setFinishOverlay(null);
+    arenaResultSavedRef.current = false;
+    setFinalArenaResult(null);
 
     setServerStartAt(null);
     setServerEndAt(null);
@@ -1835,14 +2047,43 @@ export default function QuizArenaModePage() {
     setTimeout(nextQuestion, 900);
   };
 
+  // const handleShareX = () => {
+  //   const resultText = isDraw ? "引き分け🤝" : isWin ? "勝ち🏆" : "負け…";
+  //   const text = [
+  //     "【ひまQ｜クイズアリーナ⚔️】",
+  //     `勝敗：${resultText}`,
+  //     `正解数：${correctCount}問`,
+  //     `与えたダメージ：${myDamage}`,
+  //     `残りHP：${myHp}`,
+  //     "",
+  //     "👇ひまQ（みんなで遊べるクイズ）",
+  //     "#ひまQ #クイズ #クイズゲーム",
+  //   ].join("\n");
+
+  //   openXShare({ text, url: buildTopUrl() });
+  // };
   const handleShareX = () => {
-    const resultText = isDraw ? "引き分け🤝" : isWin ? "勝ち🏆" : "負け…";
+    const result = finalArenaResult ?? {
+      isWin,
+      isDraw,
+      myHp,
+      opponentHp,
+      myDamage,
+      opponentDamage,
+    };
+
+    const resultText = result.isDraw
+      ? "引き分け🤝"
+      : result.isWin
+      ? "勝ち🏆"
+      : "負け…";
+
     const text = [
       "【ひまQ｜クイズアリーナ⚔️】",
       `勝敗：${resultText}`,
       `正解数：${correctCount}問`,
-      `与えたダメージ：${myDamage}`,
-      `残りHP：${myHp}`,
+      `与えたダメージ：${result.myDamage}`,
+      `残りHP：${result.myHp}`,
       "",
       "👇ひまQ（みんなで遊べるクイズ）",
       "#ひまQ #クイズ #クイズゲーム",
@@ -1870,12 +2111,18 @@ export default function QuizArenaModePage() {
     return (
       <QuizResult
         correctCount={correctCount}
-        myDamage={myDamage}
-        opponentDamage={opponentDamage}
-        myHp={myHp}
-        opponentHp={opponentHp}
-        isWin={isWin}
-        isDraw={isDraw}
+        // myDamage={myDamage}
+        // opponentDamage={opponentDamage}
+        // myHp={myHp}
+        // opponentHp={opponentHp}
+        // isWin={isWin}
+        // isDraw={isDraw}
+        myDamage={finalArenaResult?.myDamage ?? myDamage}
+        opponentDamage={finalArenaResult?.opponentDamage ?? opponentDamage}
+        myHp={finalArenaResult?.myHp ?? myHp}
+        opponentHp={finalArenaResult?.opponentHp ?? opponentHp}
+        isWin={finalArenaResult?.isWin ?? isWin}
+        isDraw={finalArenaResult?.isDraw ?? isDraw}
         earnedPoints={earnedPoints}
         earnedExp={earnedExp}
         isLoggedIn={!!user}
@@ -1888,6 +2135,8 @@ export default function QuizArenaModePage() {
         onShareX={handleShareX}
         onNewMatch={handleNewMatch}
         onRematch={handleRematch}
+        arenaTop10={arenaTop10}
+        rankLoading={rankLoading}
       />
     );
   }

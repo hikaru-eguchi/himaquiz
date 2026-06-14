@@ -5,8 +5,16 @@ import Link from "next/link";
 import { Anton } from "next/font/google";
 import { useRouter } from "next/navigation";
 import { useSupabaseUser } from "@/hooks/useSupabaseUser";
+import ArenaRankingTop10 from "@/app/components/ArenaRankingTop10";
 
 const anton = Anton({ subsets: ["latin"], weight: "400" });
+
+type ArenaRankRow = {
+  user_id: string;
+  username: string | null;
+  avatar_url: string | null;
+  arena_wins: number;
+};
 
 type ArenaCharacter = {
   src: string;
@@ -16,12 +24,15 @@ type ArenaCharacter = {
 
 export default function QuizArenaPage() {
   const router = useRouter();
-  const { user } = useSupabaseUser();
+  const { user, loading: userLoading } = useSupabaseUser();
 
   const [showDescription, setShowDescription] = useState(false);
   const descriptionRef = useRef<HTMLDivElement>(null);
 
   const [limitTime] = useState<number | null>(1);
+
+  const [arenaTop10, setArenaTop10] = useState<ArenaRankRow[]>([]);
+  const [rankLoading, setRankLoading] = useState(true);
 
   const allCharacters: ArenaCharacter[] = [
     {
@@ -71,6 +82,29 @@ export default function QuizArenaPage() {
       }, index * 220);
     });
   }, [characters]);
+
+  useEffect(() => {
+    const fetchArenaRanking = async () => {
+      setRankLoading(true);
+
+      try {
+        const res = await fetch("/api/rankings/arena", {
+          cache: "no-store",
+        });
+
+        const data = (await res.json()) as ArenaRankRow[];
+
+        setArenaTop10(Array.isArray(data) ? data : []);
+      } catch (e) {
+        console.error("アリーナランキング取得失敗:", e);
+        setArenaTop10([]);
+      } finally {
+        setRankLoading(false);
+      }
+    };
+
+    fetchArenaRanking();
+  }, []);
 
   const handleOnlineStart = () => {
     router.push(`/quiz-arena/random?time=${limitTime}`);
@@ -293,6 +327,69 @@ export default function QuizArenaPage() {
             <p>
               ログイン中はガチャで手に入れたキャラを使用できます。ログインしていない場合は固定キャラでプレイできます。
             </p>
+          </div>
+        </div>
+
+        <div className="flex justify-center">
+          <div className="mx-auto mt-6 w-full max-w-[900px] rounded-[28px] border border-[#e5ddd3] bg-[#f8f8f8] px-2 py-5 shadow-[0_10px_30px_rgba(0,0,0,0.08)] md:px-8 md:py-7">
+            <div className="flex flex-col items-center text-center">
+              <h2 className="text-xl font-extrabold tracking-tight text-gray-800 md:text-3xl">
+                <span className="mr-2 text-purple-500">⚔️</span>
+                アリーナ勝利数ランキング
+                <span className="ml-2 text-yellow-500">🏆</span>
+              </h2>
+
+              <div className="mt-5 w-full max-w-[800px] rounded-[22px] border-2 border-[#efb8b8] bg-[#fff8f8] px-5 py-5 md:px-8 md:py-6">
+                <div className="flex items-center gap-4 md:gap-6">
+                  <div className="shrink-0 text-3xl md:text-5xl">🔒</div>
+
+                  <div className="text-left">
+                    <p className="text-lg font-extrabold leading-tight text-red-600 md:text-2xl">
+                      ランキングに載るにはログインが必要です
+                    </p>
+                    <p className="mt-2 text-sm font-bold leading-relaxed text-gray-800 md:text-lg">
+                      オンライン対戦で勝利して、勝利数ランキング上位を目指そう！
+                    </p>
+                    <p className="mt-2 text-xs font-black text-red-500 md:text-sm">
+                      ※オンライン対戦のみランキングに反映されます
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {!userLoading && !user && (
+                <div className="mt-5 w-full max-w-[800px] rounded-[22px] border border-[#d9d9d9] bg-[#fdfdfd] px-5 py-5 shadow-sm md:px-8 md:py-6">
+                  <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div className="text-left">
+                      <p className="text-xl font-extrabold leading-tight text-red-600 md:text-2xl">
+                        ログインしていません
+                      </p>
+                      <p className="mt-2 text-sm font-bold text-gray-800 md:text-base">
+                        ログインするとランキングに参加できます！
+                      </p>
+                    </div>
+
+                    <Link href="/user/login" className="md:shrink-0">
+                      <button className="w-full min-w-[200px] rounded-[18px] border-2 border-[#b85c00] bg-orange-400 px-6 py-2 text-lg font-extrabold text-white shadow-[0_3px_0_#b85c00] transition-transform hover:scale-[1.02] hover:bg-orange-500 md:w-auto md:px-8 md:py-3 md:text-2xl">
+                        ログインする
+                      </button>
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {rankLoading ? (
+              <p className="py-6 text-center text-base font-bold text-gray-600 md:text-lg">
+                ランキング読み込み中...
+              </p>
+            ) : arenaTop10.length > 0 ? (
+              <ArenaRankingTop10 rows={arenaTop10} />
+            ) : (
+              <p className="py-6 text-center text-base font-bold text-gray-600 md:text-lg">
+                まだランキングがありません
+              </p>
+            )}
           </div>
         </div>
 
