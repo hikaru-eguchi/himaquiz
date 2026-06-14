@@ -741,7 +741,8 @@ const QuizResult = ({
             <div className="mx-auto mt-5 max-w-xl rounded-3xl border-2 border-stone-950 bg-white p-4 text-stone-900 shadow">
               <p className="text-2xl font-black">正解数：{correctCount}問</p>
 
-              <div className="mt-3 grid grid-cols-2 gap-2">
+              {/* <div className="mt-3 grid grid-cols-2 gap-2"> */}
+              <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
                 {/* <div className="rounded-2xl bg-green-100 p-3">
                   <p className="text-xs font-black text-green-700">獲得ポイント</p>
                   <p className="text-2xl font-black text-green-600">
