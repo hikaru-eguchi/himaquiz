@@ -286,10 +286,18 @@ const AttackEffect = ({
         </>
       )}
 
-      <img
+      {/* <img
         src={character.image}
         alt={character.name}
         className="relative z-20 h-40 w-40 object-contain drop-shadow-2xl md:h-64 md:w-64 animate-enemy-slide-in"
+      /> */}
+      <Image
+        src={character.image}
+        alt={character.name}
+        width={256}
+        height={256}
+        className="relative z-20 h-40 w-40 object-contain drop-shadow-2xl md:h-64 md:w-64 animate-enemy-slide-in"
+        priority
       />
 
       <p className="relative z-20 mt-4 px-4 text-center text-4xl font-extrabold text-white drop-shadow-2xl md:text-7xl animate-enemy-swing">
@@ -2226,10 +2234,18 @@ export default function QuizArenaModePage() {
                 </div>
 
                 <div className="mx-auto grid h-46 md:h-52 w-46 md:w-52 place-items-center rounded-full bg-gradient-to-b from-yellow-100 via-orange-100 to-red-100 shadow-[0_0_35px_rgba(250,204,21,0.9)]">
-                  <img
+                  {/* <img
                     src={selectedCharacter?.image}
                     alt={selectedCharacter?.name}
                     className="h-46 object-contain drop-shadow-2xl md:h-52"
+                  /> */}
+                  <Image
+                    src={selectedCharacter?.image ?? DEFAULT_CHARACTER.image}
+                    alt={selectedCharacter?.name ?? "出陣キャラ"}
+                    width={220}
+                    height={220}
+                    className="h-46 w-auto object-contain drop-shadow-2xl md:h-52"
+                    priority
                   />
                 </div>
 
@@ -2305,10 +2321,18 @@ export default function QuizArenaModePage() {
                     <p className="mb-2 text-sm font-black text-emerald-700">あなた：{myPlayerName}</p>
 
                     <div className="mx-auto grid h-28 w-28 place-items-center rounded-full bg-emerald-50 shadow-[0_0_20px_rgba(16,185,129,0.55)] md:h-40 md:w-40">
-                      <img
+                      {/* <img
                         src={myCharacterImage}
                         alt={myCharacterName}
                         className="h-28 object-contain drop-shadow-2xl md:h-40"
+                      /> */}
+                      <Image
+                        src={myCharacterImage}
+                        alt={myCharacterName}
+                        width={160}
+                        height={160}
+                        className="h-28 w-auto object-contain drop-shadow-2xl md:h-40"
+                        priority
                       />
                     </div>
 
@@ -2328,10 +2352,18 @@ export default function QuizArenaModePage() {
 
                     <div className="mx-auto grid h-28 w-28 place-items-center rounded-full bg-red-50 shadow-[0_0_20px_rgba(239,68,68,0.55)] md:h-40 md:w-40">
                       {opponentImage ? (
-                        <img
+                        // <img
+                        //   src={opponentImage}
+                        //   alt={opponentName}
+                        //   className="h-28 object-contain drop-shadow-2xl md:h-40"
+                        // />
+                        <Image
                           src={opponentImage}
                           alt={opponentName}
-                          className="h-28 object-contain drop-shadow-2xl md:h-40"
+                          width={160}
+                          height={160}
+                          className="h-28 w-auto object-contain drop-shadow-2xl md:h-40"
+                          priority
                         />
                       ) : (
                         <div className="text-5xl md:text-7xl">❓</div>
@@ -2416,7 +2448,7 @@ export default function QuizArenaModePage() {
 
                         {/* <div className="relative grid h-24 w-24 shrink-0 place-items-center overflow-hidden bg-emerald-50 shadow-[0_0_20px_rgba(16,185,129,0.5)] md:h-32 md:w-32"> */}
                         <div className="relative grid h-20 w-20 shrink-0 place-items-center overflow-hidden bg-emerald-50 shadow-[0_0_20px_rgba(16,185,129,0.5)] md:h-32 md:w-32">
-                          <img
+                          {/* <img
                             src={myCharacterImage}
                             alt={myCharacterName}
                             // className="h-24 object-contain drop-shadow-2xl md:h-32"
@@ -2425,6 +2457,17 @@ export default function QuizArenaModePage() {
                               h-20 object-contain drop-shadow-2xl transition-all duration-1000 md:h-32
                               ${finishOverlay?.defeatedId === "me" ? "opacity-0 scale-75 blur-sm" : ""}
                             `}
+                          /> */}
+                          <Image
+                            src={myCharacterImage}
+                            alt={myCharacterName}
+                            width={128}
+                            height={128}
+                            className={`
+                              h-20 w-auto object-contain drop-shadow-2xl transition-all duration-1000 md:h-32
+                              ${finishOverlay?.defeatedId === "me" ? "opacity-0 scale-75 blur-sm" : ""}
+                            `}
+                            priority
                           />
 
                           {myHitEffect && <CharacterHitEffect type={myHitEffect} />}
@@ -2491,15 +2534,26 @@ export default function QuizArenaModePage() {
                         {/* <div className="relative grid h-24 w-24 shrink-0 place-items-center overflow-hidden bg-red-50 shadow-[0_0_20px_rgba(239,68,68,0.5)] md:h-32 md:w-32"> */}
                         <div className="relative grid h-20 w-20 shrink-0 place-items-center overflow-hidden bg-red-50 shadow-[0_0_20px_rgba(239,68,68,0.5)] md:h-32 md:w-32">
                           {opponent?.characterImage ? (
-                            <img
+                            // <img
+                            //   src={opponentBattleCharacter.image}
+                            //   alt={opponentBattleCharacter.name}
+                            //   // className="h-24 object-contain drop-shadow-2xl md:h-32"
+                            //   // className="h-20 object-contain drop-shadow-2xl md:h-32"
+                            //   className={`
+                            //     h-20 object-contain drop-shadow-2xl transition-all duration-1000 md:h-32
+                            //     ${finishOverlay?.defeatedId === "opponent" ? "opacity-0 scale-75 blur-sm" : ""}
+                            //   `}
+                            // />
+                            <Image
                               src={opponentBattleCharacter.image}
                               alt={opponentBattleCharacter.name}
-                              // className="h-24 object-contain drop-shadow-2xl md:h-32"
-                              // className="h-20 object-contain drop-shadow-2xl md:h-32"
+                              width={128}
+                              height={128}
                               className={`
-                                h-20 object-contain drop-shadow-2xl transition-all duration-1000 md:h-32
+                                h-20 w-auto object-contain drop-shadow-2xl transition-all duration-1000 md:h-32
                                 ${finishOverlay?.defeatedId === "opponent" ? "opacity-0 scale-75 blur-sm" : ""}
                               `}
+                              priority
                             />
                           ) : (
                             <div className="text-5xl">❓</div>
