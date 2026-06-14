@@ -1564,7 +1564,7 @@ export default function WordChaseModePage() {
 
           <WordGlassCard className="w-full max-w-md p-5">
             <p className="mb-3 text-xl font-black text-amber-100">
-              ニックネームを入力してください
+              あなたのニックネームを入力してください
             </p>
             <input
               type="text"
@@ -2329,7 +2329,8 @@ export default function WordChaseModePage() {
                         <div className="flex items-center justify-between gap-2">
                           <p className="truncate font-black">
                             {/* {PLAYER_EMOJIS[index % PLAYER_EMOJIS.length]}{" "} */}
-                            {isMe ? "あなた" : player.name}
+                            {/* {isMe ? "あなた" : player.name} */}
+                            {isMe ? playerName : player.name}
                           </p>
                           <p
                             className={`text-xs font-black ${

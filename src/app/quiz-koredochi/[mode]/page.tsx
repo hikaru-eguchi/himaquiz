@@ -452,7 +452,7 @@ export default function QuizKoredochiCodePage() {
 
           <div className="mt-6">
             <p className="text-xl md:text-2xl font-extrabold text-gray-800">
-              ニックネームを入力してください
+              あなたのニックネームを入力してください
             </p>
 
             <input
@@ -526,7 +526,8 @@ export default function QuizKoredochiCodePage() {
               >
                 <p className="truncate text-base md:text-lg font-extrabold">
                   {p.socketId === mySocketId
-                    ? "あなた"
+                    // ? "あなた"
+                    ? ellipsizeName(playerName)
                     : ellipsizeName(p.playerName)}
                 </p>
               </div>
@@ -556,7 +557,8 @@ export default function QuizKoredochiCodePage() {
               >
                 <p className="truncate text-lg md:text-xl font-extrabold">
                   {p.socketId === mySocketId
-                    ? "あなた"
+                    // ? "あなた"
+                    ? ellipsizeName(playerName)
                     : ellipsizeName(p.playerName)}
                 </p>
               </div>
@@ -647,7 +649,8 @@ export default function QuizKoredochiCodePage() {
                       }
                     `}
                   >
-                    {active ? "👑 あなた" : `🤝 ${ellipsizeName(p.playerName)}`}
+                    {/* {active ? "👑 あなた" : `🤝 ${ellipsizeName(p.playerName)}`} */}
+                    {active ? `👑 ${ellipsizeName(playerName)}` : `🤝 ${ellipsizeName(p.playerName)}`}
                   </div>
                 );
               })}
@@ -782,7 +785,8 @@ export default function QuizKoredochiCodePage() {
 
                       {isMine && (
                         <p className="mt-2 text-sm font-extrabold text-pink-600">
-                          あなたの回答
+                          {/* あなたの回答 */}
+                          {playerName}さんの回答
                         </p>
                       )}
 
@@ -798,7 +802,8 @@ export default function QuizKoredochiCodePage() {
 
               <div className="mt-5 rounded-2xl border-4 border-black bg-white px-4 py-4">
                 <p className="text-lg md:text-xl font-bold text-gray-700">
-                  あなたは「{myLastChoiceText || "未回答"}」を選びました
+                  {/* あなたは「{myLastChoiceText || "未回答"}」を選びました */}
+                  {playerName}さんは「{myLastChoiceText || "未回答"}」を選びました
                 </p>
 
                 {lastResult.majorityChoice && (

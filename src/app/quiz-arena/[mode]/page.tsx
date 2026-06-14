@@ -749,93 +749,105 @@ const QuizResult = ({
             <div className="mx-auto mt-5 max-w-xl rounded-3xl border-2 border-stone-950 bg-white p-4 text-stone-900 shadow">
               <p className="text-2xl font-black">正解数：{correctCount}問</p>
 
-              {/* <div className="mt-3 grid grid-cols-2 gap-2"> */}
-              <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
-                {/* <div className="rounded-2xl bg-green-100 p-3">
-                  <p className="text-xs font-black text-green-700">獲得ポイント</p>
-                  <p className="text-2xl font-black text-green-600">
-                    {earnedPoints}P
+              {isCodeMatch ? (
+                <div className="mt-3 rounded-2xl border-2 border-yellow-300 bg-yellow-50 px-4 py-3">
+                  <p className="font-black text-yellow-700">
+                    🔑 あいことばマッチのため、ポイント・経験値・ランキングには反映されません。
                   </p>
-                </div> */}
-                <div className="rounded-2xl bg-green-100 p-3">
-                  <p className="text-sm font-black text-green-700">
-                    💰 獲得ポイント
-                  </p>
-
-                  <div className="mt-3 space-y-1 text-left text-sm font-black">
-                    <div className="flex justify-between">
-                      <span>{isWin ? "🏆 勝利ボーナス" : "💪 健闘ボーナス"}</span>
-                      <span>{isWin ? "+300P" : "+100P"}</span>
-                    </div>
-
-                    <div className="flex justify-between">
-                      <span>⚔️ ダメージボーナス</span>
-                      <span>+{Math.floor(myDamage / 20)}P</span>
-                    </div>
-
-                    <div className="flex justify-between">
-                      <span>✅ 正解数ボーナス</span>
-                      <span>+{correctCount * 5}P</span>
-                    </div>
-                  </div>
-
-                  <div className="my-3 border-t-2 border-green-300" />
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-black text-green-700">
-                      合計
-                    </span>
-
-                    <span className="text-3xl font-black text-green-600">
-                      {earnedPoints}P
-                    </span>
-                  </div>
                 </div>
+              ) : (
+                <>
 
-                {/* <div className="rounded-2xl bg-purple-100 p-3">
-                  <p className="text-xs font-black text-purple-700">獲得経験値</p>
-                  <p className="text-2xl font-black text-purple-600">
-                    {earnedExp}EXP
-                  </p>
-                </div> */}
-                <div className="rounded-2xl bg-purple-100 p-3">
-                  <p className="text-sm font-black text-purple-700">
-                    🌟 獲得経験値
-                  </p>
+                  {/* <div className="mt-3 grid grid-cols-2 gap-2"> */}
+                  <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
+                    {/* <div className="rounded-2xl bg-green-100 p-3">
+                      <p className="text-xs font-black text-green-700">獲得ポイント</p>
+                      <p className="text-2xl font-black text-green-600">
+                        {earnedPoints}P
+                      </p>
+                    </div> */}
+                    <div className="rounded-2xl bg-green-100 p-3">
+                      <p className="text-sm font-black text-green-700">
+                        💰 獲得ポイント
+                      </p>
 
-                  <div className="mt-3 space-y-1 text-left text-sm font-black">
-                    <div className="flex justify-between">
-                      <span>📝 正解数ボーナス</span>
-                      <span>+{correctCount * 20}EXP</span>
+                      <div className="mt-3 space-y-1 text-left text-sm font-black">
+                        <div className="flex justify-between">
+                          <span>{isWin ? "🏆 勝利ボーナス" : "💪 健闘ボーナス"}</span>
+                          <span>{isWin ? "+300P" : "+100P"}</span>
+                        </div>
+
+                        <div className="flex justify-between">
+                          <span>⚔️ ダメージボーナス</span>
+                          <span>+{Math.floor(myDamage / 20)}P</span>
+                        </div>
+
+                        <div className="flex justify-between">
+                          <span>✅ 正解数ボーナス</span>
+                          <span>+{correctCount * 5}P</span>
+                        </div>
+                      </div>
+
+                      <div className="my-3 border-t-2 border-green-300" />
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-lg font-black text-green-700">
+                          合計
+                        </span>
+
+                        <span className="text-3xl font-black text-green-600">
+                          {earnedPoints}P
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* <div className="rounded-2xl bg-purple-100 p-3">
+                      <p className="text-xs font-black text-purple-700">獲得経験値</p>
+                      <p className="text-2xl font-black text-purple-600">
+                        {earnedExp}EXP
+                      </p>
+                    </div> */}
+                    <div className="rounded-2xl bg-purple-100 p-3">
+                      <p className="text-sm font-black text-purple-700">
+                        🌟 獲得経験値
+                      </p>
+
+                      <div className="mt-3 space-y-1 text-left text-sm font-black">
+                        <div className="flex justify-between">
+                          <span>📝 正解数ボーナス</span>
+                          <span>+{correctCount * 20}EXP</span>
+                        </div>
+                      </div>
+
+                      <div className="my-3 border-t-2 border-purple-300" />
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-lg font-black text-purple-700">
+                          合計
+                        </span>
+
+                        <span className="text-3xl font-black text-purple-600">
+                          {earnedExp}EXP
+                        </span>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="my-3 border-t-2 border-purple-300" />
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-black text-purple-700">
-                      合計
-                    </span>
-
-                    <span className="text-3xl font-black text-purple-600">
-                      {earnedExp}EXP
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {!isLoggedIn && (
-                <div className="mt-3">
-                  <p className="font-bold text-gray-700">
-                    ※未ログインのため、ポイントは受け取れません。
-                  </p>
-                  <button
-                    onClick={onGoLogin}
-                    className="mt-2 rounded-full bg-blue-500 px-5 py-2 font-black text-white hover:bg-blue-600"
-                  >
-                    ログインする
-                  </button>
-                </div>
+                  {!isLoggedIn && (
+                    <div className="mt-3">
+                      <p className="font-bold text-gray-700">
+                        ※未ログインのため、ポイントは受け取れません。
+                      </p>
+                      <button
+                        onClick={onGoLogin}
+                        className="mt-2 rounded-full bg-blue-500 px-5 py-2 font-black text-white hover:bg-blue-600"
+                      >
+                        ログインする
+                      </button>
+                    </div>
+                  )}
+             
+                </>
               )}
             </div>
           )}
@@ -1681,6 +1693,21 @@ export default function QuizArenaModePage() {
         setAwardStatus("error");
         return;
       }
+
+      const { error: pointError } = await supabase.rpc("add_points_and_exp", {
+        p_user_id: user.id,
+        p_points: points,
+        p_exp: exp,
+      });
+
+      if (pointError) {
+        console.error("アリーナポイント付与失敗:", pointError);
+        setAwardStatus("error");
+        return;
+      }
+
+      window.dispatchEvent(new Event("points:updated"));
+      window.dispatchEvent(new Event("profile:updated"));
 
       setAwardStatus("awarded");
     };

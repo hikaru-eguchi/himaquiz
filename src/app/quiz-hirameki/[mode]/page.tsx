@@ -580,7 +580,8 @@ export default function QuizHiramekiCodePage() {
               >
                 <p className="truncate text-base md:text-lg font-extrabold">
                   {p.socketId === mySocketId
-                    ? "あなた"
+                    // ? "あなた"
+                    ? ellipsizeName(playerName)
                     : ellipsizeName(p.playerName)}
                 </p>
               </div>
@@ -610,7 +611,8 @@ export default function QuizHiramekiCodePage() {
               >
                 <p className="truncate text-lg md:text-xl font-extrabold">
                   {p.socketId === mySocketId
-                    ? "あなた"
+                    // ? "あなた"
+                    ? ellipsizeName(playerName)
                     : ellipsizeName(p.playerName)}
                 </p>
               </div>
@@ -687,7 +689,10 @@ export default function QuizHiramekiCodePage() {
 
               <div className="mt-4 flex justify-center gap-2 md:mt-0 md:justify-end">
                 <div className="min-w-[120px] rounded-2xl border-4 border-black bg-orange-500 px-4 py-2 text-white shadow">
-                  <p className="text-xs font-black">あなた</p>
+                  {/* <p className="text-xs font-black">あなた</p> */}
+                  <p className="text-xs font-black">
+                    {ellipsizeName(playerName)}
+                  </p>
                   <p className="text-2xl font-black">{myScore}点</p>
                 </div>
 
@@ -715,7 +720,8 @@ export default function QuizHiramekiCodePage() {
                       }
                     `}
                   >
-                    {me ? "👑 あなた" : `💡 ${ellipsizeName(p.playerName)}`}
+                    {/* {me ? "👑 あなた" : `💡 ${ellipsizeName(p.playerName)}`} */}
+                    {me ? `👑 ${ellipsizeName(playerName)}` : `💡 ${ellipsizeName(p.playerName)}`}
                     <span className="ml-2 text-sm">({score}点)</span>
                   </div>
                 );

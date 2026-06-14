@@ -491,7 +491,7 @@ export default function QuizTimeTalkCodePage() {
 
           <div className="mt-6">
             <p className="text-xl md:text-2xl font-extrabold text-gray-800">
-              ニックネームを入力してください
+              あなたのニックネームを入力してください
             </p>
 
             <input
@@ -562,7 +562,8 @@ export default function QuizTimeTalkCodePage() {
               >
                 <p className="truncate text-base md:text-lg font-extrabold">
                   {p.socketId === mySocketId
-                    ? "あなた"
+                    // ? "あなた"
+                    ? ellipsizeName(playerName)
                     : ellipsizeName(p.playerName)}
                 </p>
               </div>
@@ -592,7 +593,8 @@ export default function QuizTimeTalkCodePage() {
               >
                 <p className="truncate text-lg md:text-xl font-extrabold">
                   {p.socketId === mySocketId
-                    ? "あなた"
+                    // ? "あなた"
+                    ? ellipsizeName(playerName)
                     : ellipsizeName(p.playerName)}
                 </p>
               </div>
@@ -676,7 +678,8 @@ export default function QuizTimeTalkCodePage() {
                         }
                       `}
                     >
-                      {index + 1}. {me ? "あなた" : ellipsizeName(p.playerName)}
+                      {/* {index + 1}. {me ? "あなた" : ellipsizeName(p.playerName)} */}
+                      {index + 1}. {me ? ellipsizeName(playerName) : ellipsizeName(p.playerName)}
                     </div>
                   );
                 }

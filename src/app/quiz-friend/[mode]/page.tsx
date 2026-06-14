@@ -635,7 +635,7 @@ export default function QuizFriendCodePage() {
         <div className="mx-auto max-w-xl rounded-3xl border-4 border-black bg-white/80 p-5 shadow-xl">
           <div className="mt-6">
             <p className="text-xl md:text-2xl font-extrabold text-gray-800">
-              ニックネームを入力してください
+              あなたのニックネームを入力してください
             </p>
 
             <input
@@ -914,7 +914,8 @@ export default function QuizFriendCodePage() {
                   `}
                 >
                   <p className="truncate text-lg md:text-xl font-extrabold">
-                    {active ? "あなた" : ellipsizeName(p.playerName)}
+                    {/* {active ? "あなた" : ellipsizeName(p.playerName)} */}
+                    {active ? ellipsizeName(playerName) : ellipsizeName(p.playerName)}
                   </p>
                   <p className="mt-1 text-sm md:text-base font-bold text-gray-600">
                     正解：{score}問
@@ -1077,7 +1078,8 @@ export default function QuizFriendCodePage() {
 
               <div className="mt-5 rounded-2xl border-4 border-black bg-white p-4">
                 <p className="text-xl md:text-2xl font-extrabold text-gray-800">
-                  あなたの正解数：{myScore} / {maxGuessCount}問
+                  {/* あなたの正解数：{myScore} / {maxGuessCount}問 */}
+                  {playerName}さんの正解数：{myScore} / {maxGuessCount}問
                 </p>
               </div>
 

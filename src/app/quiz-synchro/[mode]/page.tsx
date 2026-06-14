@@ -482,7 +482,7 @@ export default function QuizSynchroCodePage() {
 
           <div className="mt-6">
             <p className="text-xl md:text-2xl font-extrabold text-gray-800">
-              ニックネームを入力してください
+              あなたのニックネームを入力してください
             </p>
 
             <input
@@ -556,7 +556,8 @@ export default function QuizSynchroCodePage() {
               >
                 <p className="truncate text-base md:text-lg font-extrabold">
                   {p.socketId === mySocketId
-                    ? "あなた"
+                    // ? "あなた"
+                    ? ellipsizeName(playerName)
                     : ellipsizeName(p.playerName)}
                 </p>
               </div>
@@ -586,7 +587,8 @@ export default function QuizSynchroCodePage() {
               >
                 <p className="truncate text-lg md:text-xl font-extrabold">
                   {p.socketId === mySocketId
-                    ? "あなた"
+                    // ? "あなた"
+                    ? ellipsizeName(playerName)
                     : ellipsizeName(p.playerName)}
                 </p>
               </div>
@@ -676,7 +678,8 @@ export default function QuizSynchroCodePage() {
                       }
                     `}
                   >
-                    {active ? "👑 あなた" : `🤝 ${ellipsizeName(p.playerName)}`}
+                    {/* {active ? "👑 あなた" : `🤝 ${ellipsizeName(p.playerName)}`} */}
+                    {active ? `👑 ${ellipsizeName(playerName)}` : `🤝 ${ellipsizeName(p.playerName)}`}
                   </div>
                 );
               })}
@@ -853,7 +856,8 @@ export default function QuizSynchroCodePage() {
               {myLastRanking.length > 0 && (
                 <div className="mt-5 rounded-3xl border-4 border-black bg-white px-4 py-4">
                   <p className="text-xl md:text-2xl font-extrabold text-gray-900">
-                    あなたのランキング
+                    {/* あなたのランキング */}
+                    {playerName}さんのランキング
                   </p>
 
                   <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -884,7 +888,8 @@ export default function QuizSynchroCodePage() {
                     ([socketId, ranking]) => {
                       const name =
                         socketId === mySocketId
-                          ? "あなた"
+                          // ? "あなた"
+                          ? playerName
                           : lastResult.playerNames?.[socketId] ||
                             displayPlayers.find((p) => p.socketId === socketId)
                               ?.playerName ||

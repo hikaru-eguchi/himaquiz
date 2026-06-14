@@ -464,7 +464,7 @@ export default function QuizUsoHontoCodePage() {
 
           <div className="mt-6">
             <p className="text-xl md:text-2xl font-extrabold text-gray-800">
-              ニックネームを入力してください
+              あなたのニックネームを入力してください
             </p>
 
             <input
@@ -538,7 +538,8 @@ export default function QuizUsoHontoCodePage() {
               >
                 <p className="truncate text-base md:text-lg font-extrabold">
                   {p.socketId === mySocketId
-                    ? "あなた"
+                    // ? "あなた"
+                    ? ellipsizeName(playerName)
                     : ellipsizeName(p.playerName)}
                 </p>
               </div>
@@ -568,7 +569,8 @@ export default function QuizUsoHontoCodePage() {
               >
                 <p className="truncate text-lg md:text-xl font-extrabold">
                   {p.socketId === mySocketId
-                    ? "あなた"
+                    // ? "あなた"
+                    ? ellipsizeName(playerName)
                     : ellipsizeName(p.playerName)}
                 </p>
               </div>
@@ -640,7 +642,8 @@ export default function QuizUsoHontoCodePage() {
                 </div>
 
                 <div className="min-w-[120px] rounded-2xl border-4 border-black bg-rose-500 px-4 py-2 text-white shadow">
-                  <p className="text-xs font-black">あなた</p>
+                  {/* <p className="text-xs font-black">あなた</p> */}
+                  <p className="text-xs font-black">{ellipsizeName(playerName)}</p>
                   <p className="text-2xl font-black">{myScore}点</p>
                 </div>
               </div>
@@ -663,7 +666,8 @@ export default function QuizUsoHontoCodePage() {
                       }
                     `}
                   >
-                    {index + 1}. {me ? "あなた" : ellipsizeName(p.playerName)}
+                    {/* {index + 1}. {me ? "あなた" : ellipsizeName(p.playerName)} */}
+                    {index + 1}. {me ? ellipsizeName(playerName) : ellipsizeName(p.playerName)}
                   </div>
                 );
               })}
@@ -764,7 +768,8 @@ export default function QuizUsoHontoCodePage() {
                     `}
                   >
                     <p className="text-lg font-bold text-gray-500">
-                      あなたへの指示
+                      {/* あなたへの指示 */}
+                      今回の指示
                     </p>
 
                     <p className="mt-2 text-3xl md:text-5xl font-black">
@@ -961,7 +966,8 @@ export default function QuizUsoHontoCodePage() {
                   {Object.entries(lastResult.votes).map(([socketId, vote]) => {
                     const name =
                       socketId === mySocketId
-                        ? "あなた"
+                        // ? "あなた"
+                        ? playerName
                         : lastResult.playerNames?.[socketId] ||
                           displayPlayers.find((p) => p.socketId === socketId)
                             ?.playerName ||
