@@ -1,4 +1,5 @@
 "use client";
+import ProfileReactions from "@/app/components/ProfileReactions";
 
 export type PublicProfile = {
   user_id: string;
@@ -23,8 +24,12 @@ export default function UserProfileModal({
   if (!open) return null;
 
   return (
-    <button
-      type="button"
+    // <button
+    //   type="button"
+    //   onClick={onClose}
+    //   className="fixed inset-0 z-[999] grid place-items-center bg-slate-950/60 p-4"
+    // >
+    <div
       onClick={onClose}
       className="fixed inset-0 z-[999] grid place-items-center bg-slate-950/60 p-4"
     >
@@ -107,11 +112,18 @@ export default function UserProfileModal({
             </p>
           </div>
 
+          {/* リアクション */}
+          <ProfileReactions
+            targetUserId={selected?.user_id}
+            disabled={loading}
+          />
+
           <p className="mt-5 text-center text-xs font-bold text-slate-400">
             画面をタップすると閉じます
           </p>
         </div>
       </div>
-    </button>
+    {/* </button> */}
+    </div>
   );
 }

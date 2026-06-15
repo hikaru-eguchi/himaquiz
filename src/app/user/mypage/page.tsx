@@ -30,6 +30,7 @@ export default function MyPage() {
   const [isTitleChangeOpen, setIsTitleChangeOpen] = useState(false);
   const [skinUrl, setSkinUrl] = useState("/images/skin_chara1_ボード.png");
   const [skinName, setSkinName] = useState("ボードスタイル");
+  const [reactionCounts, setReactionCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
     if (userLoading) return;
@@ -38,6 +39,27 @@ export default function MyPage() {
       router.push("/user/login");
       return;
     }
+
+    const fetchReactionCounts = async (uid: string) => {
+      const { data, error } = await supabase
+        .from("profile_reactions")
+        .select("reaction_type")
+        .eq("target_user_id", uid);
+
+      if (error) {
+        console.error("fetchReactionCounts error:", error);
+        return;
+      }
+
+      const counts: Record<string, number> = {};
+
+      for (const row of data ?? []) {
+        counts[row.reaction_type] =
+          (counts[row.reaction_type] ?? 0) + 1;
+      }
+
+      setReactionCounts(counts);
+    };
 
     const fetchProfile = async () => {
       setLoading(true);
@@ -108,7 +130,13 @@ export default function MyPage() {
       }
     };
 
-    fetchProfile();
+    // fetchProfile();
+    const init = async () => {
+      await fetchProfile();
+      await fetchReactionCounts(user.id);
+    };
+
+    void init();
   }, [user, userLoading, supabase, router]);
 
   if (userLoading) {
@@ -202,6 +230,25 @@ export default function MyPage() {
                   <p className="break-all text-sm font-bold text-white">
                     {profile?.user_id ?? "(未設定)"}
                   </p>
+                </div>
+              </div>
+
+              <div className="mt-3">
+                <p className="mb-2 text-xs font-black text-white/80">
+                  💬 もらったリアクション
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <div className="rounded-full bg-white/20 px-3 py-1 text-sm font-black backdrop-blur">
+                    👍すごい！ {reactionCounts.sugoi ?? 0}
+                  </div>
+
+                  <div className="rounded-full bg-white/20 px-3 py-1 text-sm font-black backdrop-blur">
+                    🔥アツい！ {reactionCounts.atsui ?? 0}
+                  </div>
+
+                  <div className="rounded-full bg-white/20 px-3 py-1 text-sm font-black backdrop-blur">
+                    ❤️いいね！ {reactionCounts.iine ?? 0}
+                  </div>
                 </div>
               </div>
 

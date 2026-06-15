@@ -27,6 +27,8 @@ export default function HeaderMenu() {
   const [gachaOpen, setGachaOpen] = useState(false);
   const [collectionOpen, setCollectionOpen] = useState(false);
 
+  const [reactionCounts, setReactionCounts] = useState<Record<string, number>>({});
+
   const resetHeader = () => {
     setUser(null);
     setUsername(null);
@@ -75,6 +77,27 @@ export default function HeaderMenu() {
     }
   };
 
+  const fetchReactionCounts = async (uid: string) => {
+    const { data, error } = await supabase
+      .from("profile_reactions")
+      .select("reaction_type")
+      .eq("target_user_id", uid);
+
+    if (error) {
+      console.error("fetchReactionCounts error:", error);
+      setReactionCounts({});
+      return;
+    }
+
+    const counts: Record<string, number> = {};
+
+    for (const row of data ?? []) {
+      counts[row.reaction_type] = (counts[row.reaction_type] ?? 0) + 1;
+    }
+
+    setReactionCounts(counts);
+  };
+
   // ✅ 初回だけ getSession。イベントでは session 引数だけ使う
   useEffect(() => {
     let alive = true;
@@ -92,7 +115,11 @@ export default function HeaderMenu() {
 
       setUser(u);
       // プロフィール取得は別タスク（イベント内await回避）
-      setTimeout(() => void fetchProfile(u.id), 0);
+      // setTimeout(() => void fetchProfile(u.id), 0);
+      setTimeout(() => {
+        void fetchProfile(u.id);
+        void fetchReactionCounts(u.id);
+      }, 0);
     };
 
     init();
@@ -108,7 +135,11 @@ export default function HeaderMenu() {
         }
 
         setUser(u);
-        setTimeout(() => void fetchProfile(u.id), 0);
+        // setTimeout(() => void fetchProfile(u.id), 0);
+        setTimeout(() => {
+          void fetchProfile(u.id);
+          void fetchReactionCounts(u.id);
+        }, 0);
       }
     );
 
@@ -133,7 +164,11 @@ export default function HeaderMenu() {
       const u = data.session?.user ?? null;
 
       setUser(u);
-      if (u) await fetchProfile(u.id);
+      // if (u) await fetchProfile(u.id);
+      if (u) {
+        await fetchProfile(u.id);
+        await fetchReactionCounts(u.id);
+      }
     };
 
     const handler = () => void refreshPoints();
@@ -187,7 +222,7 @@ export default function HeaderMenu() {
 
           {/* ログイン済み：ユーザー名＆ポイント */}
           {user && (
-            <div className="pb-1 md:pb-3 border-b-3 border-black">
+            <div className="pb-1 md:pb-2 border-b-3 border-black">
               <div className="rounded-[22px] overflow-hidden bg-white">
                 <div className="p-3 md:p-4 grid place-items-center gap-2 md:gap-3">
                   {/* アバター（オーラ＋バッジ） */}
@@ -229,6 +264,35 @@ export default function HeaderMenu() {
                         {points ?? 0}
                         <span className="text-sm font-black ml-1">P</span>
                       </p>
+                    </div>
+                  </div>
+
+                  {/* もらったリアクション */}
+                  <div className="w-full rounded-2xl border-3 border-black bg-white p-3 pb-1 shadow-[0_6px_0_rgba(0,0,0,1)]">
+                    <p className="text-xs font-black text-gray-600 text-center">
+                      もらったリアクション💬
+                    </p>
+                    <div className="mt-2 grid grid-cols-3 gap-2 text-center">
+                      <div className="flex items-center justify-center gap-1 rounded-xl bg-gray-50 px-2 py-2">
+                        <span className="text-lg">👍</span>
+                        <span className="text-sm font-extrabold">
+                          {reactionCounts.sugoi ?? 0}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-center gap-1 rounded-xl bg-gray-50 px-2 py-2">
+                        <span className="text-lg">🔥</span>
+                        <span className="text-sm font-extrabold">
+                          {reactionCounts.atsui ?? 0}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-center gap-1 rounded-xl bg-gray-50 px-2 py-2">
+                        <span className="text-lg">❤️</span>
+                        <span className="text-sm font-extrabold">
+                          {reactionCounts.iine ?? 0}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
