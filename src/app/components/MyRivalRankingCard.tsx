@@ -115,7 +115,8 @@ export default function MyRivalRankingCard({ title, column, unit }: Props) {
     }
 
     if (row.kind === "above") {
-      const diff = Math.max(row.value - me.value, 0);
+      // const diff = Math.max(row.value - me.value, 0);
+      const diff = Math.max(row.value - me.value + 1, 1);
 
       return (
         <div className="flex items-center justify-center gap-1">
