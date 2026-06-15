@@ -27,7 +27,12 @@ export default function HeaderMenu() {
   const [gachaOpen, setGachaOpen] = useState(false);
   const [collectionOpen, setCollectionOpen] = useState(false);
 
-  const [reactionCounts, setReactionCounts] = useState<Record<string, number>>({});
+  const [reactionCounts, setReactionCounts] =
+    useState({
+      sugoi: 0,
+      atsui: 0,
+      iine: 0,
+    });
 
   const resetHeader = () => {
     setUser(null);
@@ -36,6 +41,11 @@ export default function HeaderMenu() {
     setLevel(null);
     setExp(null);
     setAvatarUrl("/images/初期アイコン.png");
+    setReactionCounts({
+      sugoi: 0,
+      atsui: 0,
+      iine: 0,
+    });
   };
 
   const fetchProfile = async (uid: string) => {
@@ -79,23 +89,28 @@ export default function HeaderMenu() {
 
   const fetchReactionCounts = async (uid: string) => {
     const { data, error } = await supabase
-      .from("profile_reactions")
-      .select("reaction_type")
-      .eq("target_user_id", uid);
+      .from("user_public_profiles")
+      .select("sugoi_count, atsui_count, iine_count")
+      .eq("user_id", uid)
+      .maybeSingle();
 
     if (error) {
       console.error("fetchReactionCounts error:", error);
-      setReactionCounts({});
+
+      setReactionCounts({
+        sugoi: 0,
+        atsui: 0,
+        iine: 0,
+      });
+
       return;
     }
 
-    const counts: Record<string, number> = {};
-
-    for (const row of data ?? []) {
-      counts[row.reaction_type] = (counts[row.reaction_type] ?? 0) + 1;
-    }
-
-    setReactionCounts(counts);
+    setReactionCounts({
+      sugoi: data?.sugoi_count ?? 0,
+      atsui: data?.atsui_count ?? 0,
+      iine: data?.iine_count ?? 0,
+    });
   };
 
   // ✅ 初回だけ getSession。イベントでは session 引数だけ使う
@@ -276,21 +291,21 @@ export default function HeaderMenu() {
                       <div className="flex items-center justify-center gap-1 rounded-xl bg-gray-50 px-2 py-2">
                         <span className="text-lg">👍</span>
                         <span className="text-sm font-extrabold">
-                          {reactionCounts.sugoi ?? 0}
+                          {reactionCounts.sugoi}
                         </span>
                       </div>
 
                       <div className="flex items-center justify-center gap-1 rounded-xl bg-gray-50 px-2 py-2">
                         <span className="text-lg">🔥</span>
                         <span className="text-sm font-extrabold">
-                          {reactionCounts.atsui ?? 0}
+                          {reactionCounts.atsui}
                         </span>
                       </div>
 
                       <div className="flex items-center justify-center gap-1 rounded-xl bg-gray-50 px-2 py-2">
                         <span className="text-lg">❤️</span>
                         <span className="text-sm font-extrabold">
-                          {reactionCounts.iine ?? 0}
+                          {reactionCounts.iine}
                         </span>
                       </div>
                     </div>

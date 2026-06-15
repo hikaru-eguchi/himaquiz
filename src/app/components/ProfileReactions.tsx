@@ -31,23 +31,27 @@ export default function ProfileReactions({
     let alive = true;
 
     const load = async () => {
+      setCounts({});
+      setSent({});
+
       const { data: sessionData } = await supabase.auth.getSession();
       const uid = sessionData.session?.user?.id ?? null;
       if (!alive) return;
       setMyUserId(uid);
 
-      const { data: countRows } = await supabase
-        .from("profile_reactions")
-        .select("reaction_type")
-        .eq("target_user_id", targetUserId);
+      const { data: publicProfile } = await supabase
+        .from("user_public_profiles")
+        .select("sugoi_count, atsui_count, iine_count")
+        .eq("user_id", targetUserId)
+        .maybeSingle();
 
       if (!alive) return;
 
-      const nextCounts: Record<string, number> = {};
-      for (const r of countRows ?? []) {
-        nextCounts[r.reaction_type] = (nextCounts[r.reaction_type] ?? 0) + 1;
-      }
-      setCounts(nextCounts);
+      setCounts({
+        sugoi: publicProfile?.sugoi_count ?? 0,
+        atsui: publicProfile?.atsui_count ?? 0,
+        iine: publicProfile?.iine_count ?? 0,
+      });
 
       if (!uid) return;
 

@@ -30,7 +30,11 @@ export default function MyPage() {
   const [isTitleChangeOpen, setIsTitleChangeOpen] = useState(false);
   const [skinUrl, setSkinUrl] = useState("/images/skin_chara1_ボード.png");
   const [skinName, setSkinName] = useState("ボードスタイル");
-  const [reactionCounts, setReactionCounts] = useState<Record<string, number>>({});
+  const [reactionCounts, setReactionCounts] = useState({
+    sugoi: 0,
+    atsui: 0,
+    iine: 0,
+  });
 
   useEffect(() => {
     if (userLoading) return;
@@ -42,23 +46,28 @@ export default function MyPage() {
 
     const fetchReactionCounts = async (uid: string) => {
       const { data, error } = await supabase
-        .from("profile_reactions")
-        .select("reaction_type")
-        .eq("target_user_id", uid);
+        .from("user_public_profiles")
+        .select("sugoi_count, atsui_count, iine_count")
+        .eq("user_id", uid)
+        .maybeSingle();
 
       if (error) {
         console.error("fetchReactionCounts error:", error);
+
+        setReactionCounts({
+          sugoi: 0,
+          atsui: 0,
+          iine: 0,
+        });
+
         return;
       }
 
-      const counts: Record<string, number> = {};
-
-      for (const row of data ?? []) {
-        counts[row.reaction_type] =
-          (counts[row.reaction_type] ?? 0) + 1;
-      }
-
-      setReactionCounts(counts);
+      setReactionCounts({
+        sugoi: data?.sugoi_count ?? 0,
+        atsui: data?.atsui_count ?? 0,
+        iine: data?.iine_count ?? 0,
+      });
     };
 
     const fetchProfile = async () => {
@@ -239,15 +248,15 @@ export default function MyPage() {
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <div className="rounded-full bg-white/20 px-3 py-1 text-sm font-black backdrop-blur">
-                    👍すごい！ {reactionCounts.sugoi ?? 0}
+                    👍すごい！ {reactionCounts.sugoi}
                   </div>
 
                   <div className="rounded-full bg-white/20 px-3 py-1 text-sm font-black backdrop-blur">
-                    🔥アツい！ {reactionCounts.atsui ?? 0}
+                    🔥アツい！ {reactionCounts.atsui}
                   </div>
 
                   <div className="rounded-full bg-white/20 px-3 py-1 text-sm font-black backdrop-blur">
-                    ❤️いいね！ {reactionCounts.iine ?? 0}
+                    ❤️いいね！ {reactionCounts.iine}
                   </div>
                 </div>
               </div>
