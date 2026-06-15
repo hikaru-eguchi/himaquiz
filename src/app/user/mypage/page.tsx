@@ -417,6 +417,7 @@ export default function MyPage() {
                 </p>
               </div>
 
+
               {/* <div className="rounded-2xl bg-gray-50 p-3">
                 <p className="text-xs font-black text-gray-500">アイコン</p>
                 <p className="text-base font-bold text-gray-900">
