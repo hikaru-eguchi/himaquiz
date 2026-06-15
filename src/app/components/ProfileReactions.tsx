@@ -25,6 +25,8 @@ export default function ProfileReactions({
   const [sent, setSent] = useState<Record<string, boolean>>({});
   const [savingKey, setSavingKey] = useState<string | null>(null);
 
+  const [showSentMessage, setShowSentMessage] = useState(false);
+
   useEffect(() => {
     if (!targetUserId) return;
 
@@ -33,6 +35,7 @@ export default function ProfileReactions({
     const load = async () => {
       setCounts({});
       setSent({});
+      setShowSentMessage(false);
 
       const { data: sessionData } = await supabase.auth.getSession();
       const uid = sessionData.session?.user?.id ?? null;
@@ -99,6 +102,12 @@ export default function ProfileReactions({
       ...prev,
       [reactionType]: (prev[reactionType] ?? 0) + 1,
     }));
+
+    setShowSentMessage(true);
+
+    setTimeout(() => {
+      setShowSentMessage(false);
+    }, 2000);
   };
 
   const isGuest = !myUserId;
@@ -141,9 +150,9 @@ export default function ProfileReactions({
                 "disabled:cursor-not-allowed disabled:opacity-60",
               ].join(" ")}
             >
-              <p className="text-xl">{r.emoji}</p>
+              <p className="text-xl">{alreadySent ? "✅" : r.emoji}</p>
               <p className="text-[11px] font-black text-slate-700">
-                {r.label}
+                {alreadySent ? "送信済み" : r.label}
               </p>
               <p className="mt-1 text-sm font-black text-slate-900">
                 {counts[r.key] ?? 0}
@@ -162,6 +171,12 @@ export default function ProfileReactions({
       {isMe && (
         <p className="mt-2 text-[11px] font-bold text-slate-400">
           自分には送れません
+        </p>
+      )}
+
+      {showSentMessage && (
+        <p className="mt-2 text-[11px] font-bold text-emerald-500 animate-pulse">
+          ✨ リアクションを送りました！
         </p>
       )}
     </div>
