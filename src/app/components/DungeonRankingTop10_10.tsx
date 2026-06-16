@@ -67,7 +67,7 @@ export default function DungeonRankingTop10({ rows }: { rows: Row[] }) {
 
     const { data, error } = await supabase
       .from("user_public_profiles")
-      .select("user_id, username, avatar_url, level, character_count, current_title")
+      .select("user_id, username, avatar_url, level, character_count, current_title, friend_code, friend_code_public")
       .eq("user_id", userId)
       .single();
 
@@ -81,6 +81,8 @@ export default function DungeonRankingTop10({ rows }: { rows: Row[] }) {
         level: null,
         character_count: null,
         current_title: null,
+        friend_code: null,
+        friend_code_public: false,
       });
       return;
     }

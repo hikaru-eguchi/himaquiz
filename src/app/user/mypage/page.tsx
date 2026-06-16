@@ -15,6 +15,7 @@ type Profile = {
   avatar_character_id: string | null;
   avatar_url: string | null;
   friend_code: string | null;
+  friend_code_public: boolean | null;
   current_title: string | null;
   current_skin_id: string | null;
 };
@@ -82,7 +83,7 @@ export default function MyPage() {
         const { data, error } = await supabase
           .from("profiles")
           .select(
-            "username, user_id, recovery_email, points, level, exp, avatar_character_id, avatar_url, friend_code, current_title, current_skin_id"
+            "username, user_id, recovery_email, points, level, exp, avatar_character_id, avatar_url, friend_code, friend_code_public, current_title, current_skin_id"
           )
           .eq("id", user.id)
           .single();
@@ -383,9 +384,58 @@ export default function MyPage() {
               </p>
             </div>
 
-            <p className="mt-2 text-xs font-bold text-gray-500">
+            <p className="mt-2 text-xs font-bold text-gray-500 text-center">
               友達追加画面でこのIDを入力してもらうとフレンド申請できます👥
             </p>
+
+            <div className="mt-4 flex items-center justify-between rounded-2xl bg-yellow-50 px-4 py-3">
+              <div>
+                <p className="text-sm font-black text-gray-800">
+                  フレンドIDを公開する
+                </p>
+                <p className="text-xs font-bold text-gray-500">
+                  ONにすると他の人のプロフィールに表示されます
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!user) return;
+
+                  const next = !(profile?.friend_code_public ?? false);
+
+                  setProfile((prev) =>
+                    prev ? { ...prev, friend_code_public: next } : prev
+                  );
+
+                  const { error } = await supabase
+                    .from("profiles")
+                    .update({ friend_code_public: next })
+                    .eq("id", user.id);
+
+                  if (error) {
+                    console.error(error);
+                    alert("設定の保存に失敗しました");
+
+                    setProfile((prev) =>
+                      prev ? { ...prev, friend_code_public: !next } : prev
+                    );
+                  }
+                }}
+                className={`
+                  relative h-8 w-14 rounded-full transition
+                  ${(profile?.friend_code_public ?? false) ? "bg-yellow-400" : "bg-gray-300"}
+                `}
+              >
+                <span
+                  className={`
+                    absolute top-1 h-6 w-6 rounded-full bg-white shadow transition
+                    ${(profile?.friend_code_public ?? false) ? "left-7" : "left-1"}
+                  `}
+                />
+              </button>
+            </div>
           </section>
 
           <section className="rounded-[2rem] bg-white p-4 shadow-sm">
@@ -476,13 +526,13 @@ export default function MyPage() {
               <span>🎮</span>
             </button>
 
-            <button
+            {/* <button
               onClick={() => router.push("/user/friends")}
               className="flex w-full items-center justify-between rounded-3xl bg-gradient-to-r from-sky-400 to-blue-500 px-5 py-4 font-black text-white shadow-md transition hover:scale-[1.01] active:scale-[0.99]"
             >
               <span>フレンド</span>
               <span>👥</span>
-            </button>
+            </button> */}
 
             <button
               onClick={() => router.push("/user/mypage/points-history")}

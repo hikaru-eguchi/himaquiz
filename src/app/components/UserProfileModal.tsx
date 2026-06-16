@@ -8,6 +8,8 @@ export type PublicProfile = {
   level: number | null;
   character_count: number | null;
   current_title: string | null;
+  friend_code: string | null;
+  friend_code_public: boolean | null;
 };
 
 export default function UserProfileModal({
@@ -82,7 +84,7 @@ export default function UserProfileModal({
           </div>
 
           {/* ステータス */}
-          <div className="mt-5 grid grid-cols-2 gap-3">
+          <div className="mt-3 md:mt-5 grid grid-cols-2 gap-3">
             <div className="rounded-3xl border border-sky-100 bg-gradient-to-br from-white to-sky-50 p-4 text-center shadow-sm">
               <p className="text-xs font-black text-sky-500">
                 🌟 レベル
@@ -103,12 +105,25 @@ export default function UserProfileModal({
           </div>
 
           {/* 称号 */}
-          <div className="mt-3 rounded-3xl border border-purple-100 bg-gradient-to-br from-white to-purple-50 px-4 py-4 text-center shadow-sm">
+          <div className="mt-1 md:mt-3 rounded-3xl border border-purple-100 bg-gradient-to-br from-white to-purple-50 px-4 py-4 text-center shadow-sm">
             <p className="text-xs font-black text-purple-500">
               🏅 マイ称号
             </p>
-            <p className="mt-2 text-xl md:text-2xl font-black text-slate-900 leading-tight">
+            <p className="mt-1 md:mt-2 text-xl md:text-2xl font-black text-slate-900 leading-tight">
               {loading ? "..." : selected?.current_title ?? "（未設定）"}
+            </p>
+          </div>
+
+          <div className="mt-1 md:mt-3 rounded-3xl border border-yellow-100 bg-gradient-to-br from-white to-yellow-50 px-4 py-3 text-center shadow-sm">
+            <p className="text-xs font-black text-yellow-600">
+              👥 フレンドID
+            </p>
+            <p className="mt-1 text-lg font-black text-slate-900">
+              {loading
+                ? "..."
+                : selected?.friend_code_public
+                  ? selected?.friend_code ?? "----"
+                  : "非公開"}
             </p>
           </div>
 
@@ -118,7 +133,7 @@ export default function UserProfileModal({
             disabled={loading}
           />
 
-          <p className="mt-5 text-center text-xs font-bold text-slate-400">
+          <p className="mt-2 md:mt-5 text-center text-xs font-bold text-slate-400">
             画面をタップすると閉じます
           </p>
         </div>

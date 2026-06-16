@@ -57,7 +57,7 @@ export default function WeeklyRankingListClient({
 
     const { data, error } = await supabase
       .from("user_public_profiles")
-      .select("user_id, username, avatar_url, level, character_count, current_title")
+      .select("user_id, username, avatar_url, level, character_count, current_title, friend_code, friend_code_public")
       .eq("user_id", userId)
       .single();
 

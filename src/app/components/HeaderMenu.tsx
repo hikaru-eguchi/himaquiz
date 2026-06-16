@@ -230,14 +230,16 @@ export default function HeaderMenu() {
 
       {/* メニュー本体 */}
       {open && (
-        <div className="fixed top-0 right-0 w-68 h-full bg-white shadow-xl z-40 p-5 flex flex-col space-y-2 md:space-y-3 text-lg">
+        // <div className="fixed top-0 right-0 w-68 h-full bg-white shadow-xl z-40 p-5 flex flex-col space-y-2 md:space-y-3 text-lg">
+        <div className="fixed top-0 right-0 w-68 h-dvh bg-white shadow-xl z-40 p-5 flex flex-col text-lg">
           <button className="self-end text-2xl" onClick={() => setOpen(false)}>
             ✕
           </button>
 
           {/* ログイン済み：ユーザー名＆ポイント */}
           {user && (
-            <div className="pb-1 md:pb-2 border-b-3 border-black">
+            // <div className="pb-1 md:pb-2 border-b-3 border-black">
+            <div className="-mt-6 md:-mt-8 pb-1 md:pb-2 border-b-3 border-black">
               <div className="rounded-[22px] overflow-hidden bg-white">
                 <div className="p-3 md:p-4 grid place-items-center gap-2 md:gap-3">
                   {/* アバター（オーラ＋バッジ） */}
@@ -317,17 +319,17 @@ export default function HeaderMenu() {
 
           {/* 未ログイン */}
           {!user && (
-            <>
+            <div className="flex-1 overflow-y-auto pt-3 space-y-2">
               <Link
                 href="/"
-                className="bg-gray-800 text-white py-2 px-4 rounded text-center hover:bg-gray-900"
+                className="block w-full bg-gray-800 text-white py-2 px-4 rounded text-center hover:bg-gray-900"
                 onClick={() => setOpen(false)}
               >
                 トップページへ
               </Link>
               <Link
                 href="/user/login"
-                className="bg-blue-500 text-white py-2 px-4 rounded text-center hover:bg-blue-600"
+                className="block w-full bg-blue-500 text-white py-2 px-4 rounded text-center hover:bg-blue-600"
                 onClick={() => setOpen(false)}
               >
                 ログイン
@@ -335,20 +337,31 @@ export default function HeaderMenu() {
 
               <Link
                 href="/user/signup"
-                className="bg-green-500 text-white py-2 px-4 rounded text-center hover:bg-green-600"
+                className="block w-full bg-green-500 text-white py-2 px-4 rounded text-center hover:bg-green-600"
                 onClick={() => setOpen(false)}
               >
                 新規ユーザー登録（無料）
               </Link>
-            </>
+
+              {/* ===== その他（共通） ===== */}
+              <button
+                type="button"
+                onClick={() => setInfoOpen(true)}
+                className="block w-full bg-gray-500 text-white py-2 px-4 rounded text-center hover:bg-gray-600 cursor-pointer"
+              >
+                その他
+              </button>
+            </div>
           )}
 
           {/* ログイン後メニュー */}
+          {/* {user && (
+            <> */}
           {user && (
-            <>
+            <div className="flex-1 overflow-y-auto pt-3 space-y-2">
               <Link
                 href="/"
-                className="bg-gray-800 text-white py-2 px-4 rounded text-center hover:bg-gray-900"
+                className="block w-full bg-gray-800 text-white py-2 px-4 rounded text-center hover:bg-gray-900"
                 onClick={() => setOpen(false)}
               >
                 トップページへ
@@ -356,10 +369,18 @@ export default function HeaderMenu() {
               
               <Link
                 href="/user/mypage"
-                className="bg-blue-500 text-white py-2 px-4 rounded text-center hover:bg-blue-600"
+                className="block w-full bg-blue-500 text-white py-2 px-4 rounded text-center hover:bg-blue-600"
                 onClick={() => setOpen(false)}
               >
                 マイプロフィール
+              </Link>
+
+              <Link
+                href="/user/friends"
+                className="block w-full bg-yellow-400 text-white py-2 px-4 rounded text-center hover:bg-yellow-500"
+                onClick={() => setOpen(false)}
+              >
+                フレンド👥
               </Link>
               
               {/* <Link
@@ -382,7 +403,7 @@ export default function HeaderMenu() {
                 type="button"
                 onClick={() => setGachaOpen(true)}
                 className="
-                  bg-gradient-to-r from-cyan-400 via-violet-500 to-pink-500
+                  block w-full bg-gradient-to-r from-cyan-400 via-violet-500 to-pink-500
                   text-white py-2 px-4 rounded text-center
                   hover:opacity-90 transition cursor-pointer shadow-md
                 "
@@ -406,7 +427,7 @@ export default function HeaderMenu() {
                 type="button"
                 onClick={() => setCollectionOpen(true)}
                 className="
-                  bg-gradient-to-r from-pink-500 via-purple-400 via-blue-300 to-green-400
+                  block w-full bg-gradient-to-r from-pink-500 via-purple-400 via-blue-300 to-green-400
                   text-white py-2 px-4 rounded text-center
                   hover:opacity-90 transition cursor-pointer shadow-md
                 "
@@ -416,21 +437,23 @@ export default function HeaderMenu() {
 
               <button
                 onClick={() => setConfirmOpen(true)}
-                className="bg-red-500 text-white py-2 px-4 rounded text-center hover:bg-red-600 cursor-pointer"
+                className="block w-full bg-red-500 text-white py-2 px-4 rounded text-center hover:bg-red-600 cursor-pointer"
               >
                 ログアウト
               </button>
-            </>
-          )}
+            {/* </>
+          )} */}
 
-          {/* ===== その他（共通） ===== */}
-          <button
-            type="button"
-            onClick={() => setInfoOpen(true)}
-            className="bg-gray-500 text-white py-2 px-4 rounded text-center hover:bg-gray-600 cursor-pointer"
-          >
-            その他
-          </button>
+              {/* ===== その他（共通） ===== */}
+              <button
+                type="button"
+                onClick={() => setInfoOpen(true)}
+                className="block w-full bg-gray-500 text-white py-2 px-4 rounded text-center hover:bg-gray-600 cursor-pointer"
+              >
+                その他
+              </button>
+            </div>
+          )}
         </div>
       )}
 

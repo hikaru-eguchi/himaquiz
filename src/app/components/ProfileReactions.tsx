@@ -117,11 +117,11 @@ export default function ProfileReactions({
     // <div className="mt-4 rounded-3xl border border-rose-100 bg-gradient-to-br from-white to-rose-50 px-4 py-4 text-center shadow-sm">
     <div
         onClick={(e) => e.stopPropagation()}
-        className="mt-4 rounded-3xl border border-rose-100 bg-gradient-to-br from-white to-rose-50 px-4 py-4 text-center shadow-sm"
+        className="mt-1 md:mt-4 rounded-3xl border border-rose-100 bg-gradient-to-br from-white to-rose-50 px-2 md:px-4 py-2 md:py-4 text-center shadow-sm"
     >
       <p className="text-xs font-black text-rose-500">💬 リアクション</p>
 
-      <div className="mt-3 grid grid-cols-3 gap-2">
+      <div className="mt-1 md:mt-3 grid grid-cols-3 gap-2">
         {REACTIONS.map((r) => {
           const alreadySent = !!sent[r.key];
           const isSaving = savingKey === r.key;
