@@ -630,7 +630,7 @@ export default function FriendsPage() {
               transition
             "
           >
-            🔥 ライバルを超えよう！
+            🔥 1位を奪え！
           </button>
 
           <div className="mt-4 rounded-2xl border border-purple-100 bg-gradient-to-br from-white to-purple-50 p-3">
@@ -640,7 +640,7 @@ export default function FriendsPage() {
               </h3>
 
               <p className="mt-1 text-xs font-bold text-gray-500">
-                🏰最高到達階🏰
+                🌟最高到達階🌟
               </p>
             </div>
 
@@ -697,7 +697,7 @@ export default function FriendsPage() {
               transition
             "
           >
-            🏰 ライバルを超えよう！
+            🏰 さらに上へ！
           </button>
 
           <div className="mt-4 rounded-2xl border border-fuchsia-100 bg-gradient-to-br from-white via-pink-50 to-cyan-50 p-3">
@@ -707,7 +707,7 @@ export default function FriendsPage() {
               </h3>
 
               <p className="mt-1 text-xs font-bold text-gray-500">
-                🌈所持キャラ数🌈
+                🌟所持キャラ数🌟
               </p>
             </div>
 
@@ -764,7 +764,7 @@ export default function FriendsPage() {
               transition
             "
           >
-            🌈 コツコツ集めよう！
+            🌈 新キャラをゲット！
           </button>
 
           <div className="mt-4 rounded-2xl border border-red-100 bg-gradient-to-br from-white to-red-50 p-3">
@@ -774,7 +774,7 @@ export default function FriendsPage() {
               </h3>
 
               <p className="mt-1 text-xs font-bold text-gray-500">
-                🏆総勝利数🏆
+                🌟総勝利数🌟
               </p>
             </div>
 
@@ -831,7 +831,7 @@ export default function FriendsPage() {
               transition
             "
           >
-            ⚔️ 順位アップ！
+            ⚔️ ライバルを撃破！
           </button>
         </section>
 
