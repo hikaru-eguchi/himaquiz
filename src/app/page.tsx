@@ -9,6 +9,7 @@ import RegisterPendingRanking from "@/app/components/RegisterPendingRanking";
 // import DailyFunGacha from "@/app/components/DailyFunGacha";
 import HimaQRoulette from "@/app/components/HimaQRoulette";
 import PopularMatomeSection from "@/app/components/PopularMatomeSection";
+import DailyHardChallengeCard from "@/app/components/DailyHardChallengeCard";
 
 export const metadata = {
   title: "無料で遊べる暇つぶしクイズ｜ひまQ",
@@ -211,6 +212,8 @@ export default async function HomePage({
           <QuizMDXWrapper quiz={randomQuizArticle.quiz} />
         )}
       </div>
+
+      <DailyHardChallengeCard />
 
       {/* <div className="
         max-w-[700px] 
