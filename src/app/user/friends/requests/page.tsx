@@ -137,11 +137,12 @@ export default function FriendRequestsPage() {
           <div className="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-2 shadow-sm ring-1 ring-black/5">
             <span className="text-lg">📩</span>
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
-              フレンド申請
+              {/* フレンド申請 */}
+              とどいたフレンド申請
             </h1>
           </div>
           <p className="text-md md:text-xl text-gray-600">
-            届いている申請を確認して、承認できます
+            とどいている申請を確認して、承認できます
           </p>
         </div>
 
@@ -240,7 +241,7 @@ export default function FriendRequestsPage() {
         )}
 
         {/* Footer */}
-        <div className="grid grid-cols-2 gap-3">
+        {/* <div className="grid grid-cols-2 gap-3">
           <button
             onClick={() => router.push("/user/friends")}
             className="rounded-xl bg-gray-100 py-3 font-bold hover:bg-gray-200"
@@ -253,6 +254,14 @@ export default function FriendRequestsPage() {
             className="rounded-xl bg-white py-3 font-bold ring-1 ring-black/10 hover:bg-gray-50"
           >
             申請を送る
+          </button>
+        </div> */}
+        <div className="flex justify-center">
+          <button
+            onClick={() => router.push("/user/friends")}
+            className="w-full rounded-xl bg-gray-100 py-3 font-bold hover:bg-gray-200"
+          >
+            戻る
           </button>
         </div>
       </div>

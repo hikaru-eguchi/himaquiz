@@ -234,9 +234,9 @@ export default function GiftSendPage() {
                     所持：{selectedChar?.count ?? 0}
                   </p>
                 </div>
-                <span className="text-xs rounded-full bg-amber-50 text-amber-700 px-3 py-1">
+                {/* <span className="text-xs rounded-full bg-amber-50 text-amber-700 px-3 py-1">
                   PICK
-                </span>
+                </span> */}
               </div>
             </div>
 

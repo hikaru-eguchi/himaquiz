@@ -84,7 +84,7 @@ export default function ArenaWinRankingTop20({ rows }: { rows: Row[] }) {
 
     const { data, error } = await supabase
       .from("user_public_profiles")
-      .select("user_id, username, avatar_url, level, character_count, current_title, friend_code, friend_code_public")
+      .select("user_id, username, avatar_url, level, character_count, current_title, friend_code, friend_code_public, friend_recruiting")
       .eq("user_id", userId)
       .single();
 
@@ -100,6 +100,7 @@ export default function ArenaWinRankingTop20({ rows }: { rows: Row[] }) {
         current_title: null,
         friend_code: null,
         friend_code_public: false,
+        friend_recruiting: null,
       });
       return;
     }

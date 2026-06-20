@@ -27,6 +27,25 @@ export default function HeaderMenu() {
   const [gachaOpen, setGachaOpen] = useState(false);
   const [collectionOpen, setCollectionOpen] = useState(false);
 
+  const [friendNoticeCount, setFriendNoticeCount] = useState(0);
+
+  const fetchFriendNoticeCount = async (uid: string) => {
+    const { count: reqCount } = await supabase
+      .from("friend_requests")
+      .select("id", { count: "exact", head: true })
+      .eq("to_user_id", uid)
+      .eq("status", "pending");
+
+    const { count: giftCount } = await supabase
+      .from("character_gifts")
+      .select("id", { count: "exact", head: true })
+      .eq("to_user_id", uid)
+      .is("claimed_at", null)
+      .eq("deleted_by_receiver", false);
+
+    setFriendNoticeCount((reqCount ?? 0) + (giftCount ?? 0));
+  };
+
   const [reactionCounts, setReactionCounts] =
     useState({
       sugoi: 0,
@@ -134,6 +153,7 @@ export default function HeaderMenu() {
       setTimeout(() => {
         void fetchProfile(u.id);
         void fetchReactionCounts(u.id);
+        void fetchFriendNoticeCount(u.id);
       }, 0);
     };
 
@@ -183,6 +203,7 @@ export default function HeaderMenu() {
       if (u) {
         await fetchProfile(u.id);
         await fetchReactionCounts(u.id);
+        void fetchFriendNoticeCount(u.id);
       }
     };
 
@@ -285,7 +306,7 @@ export default function HeaderMenu() {
                   </div>
 
                   {/* もらったリアクション */}
-                  <div className="w-full rounded-2xl border-3 border-black bg-white p-3 pb-1 shadow-[0_6px_0_rgba(0,0,0,1)]">
+                  {/* <div className="w-full rounded-2xl border-3 border-black bg-white p-3 pb-1 shadow-[0_6px_0_rgba(0,0,0,1)]">
                     <p className="text-xs font-black text-gray-600 text-center">
                       もらったリアクション💬
                     </p>
@@ -311,7 +332,7 @@ export default function HeaderMenu() {
                         </span>
                       </div>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>
@@ -375,12 +396,26 @@ export default function HeaderMenu() {
                 マイプロフィール
               </Link>
 
-              <Link
+              {/* <Link
                 href="/user/friends"
                 className="block w-full bg-yellow-400 text-white py-2 px-4 rounded text-center hover:bg-yellow-500"
                 onClick={() => setOpen(false)}
               >
                 フレンド👥
+              </Link> */}
+
+              <Link
+                href="/user/friends"
+                className="relative block w-full rounded bg-yellow-400 py-2 px-4 text-center text-white hover:bg-yellow-500"
+                onClick={() => setOpen(false)}
+              >
+                フレンド👥
+
+                {friendNoticeCount > 0 && (
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 grid h-7 min-w-7 place-items-center rounded-full border-2 border-white bg-red-500 px-1.5 text-sm font-black text-white shadow">
+                    {friendNoticeCount > 99 ? "99+" : friendNoticeCount}
+                  </span>
+                )}
               </Link>
               
               {/* <Link

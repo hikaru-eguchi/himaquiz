@@ -36,21 +36,21 @@ export default async function WeeklyRankingSection() {
       .select("user_id, username, avatar_url, best_streak")
       .order("best_streak", { ascending: false })
       .order("updated_at", { ascending: true })
-      .limit(10),
+      .limit(30),
 
     supabase
       .from("user_public_profiles")
       .select("user_id, username, avatar_url, best_stage")
       .order("best_stage", { ascending: false })
       .order("updated_at", { ascending: true })
-      .limit(10),
+      .limit(30),
 
     supabase
       .from("user_public_profiles")
       .select("user_id, username, avatar_url, character_count")
       .order("character_count", { ascending: false })
       .order("updated_at", { ascending: true })
-      .limit(10),
+      .limit(30),
   ]);
 
   const rows = (streakResult.data ?? []) as StreakRankRow[];
@@ -110,11 +110,11 @@ export default async function WeeklyRankingSection() {
             bgClass="from-yellow-200 via-amber-300 to-orange-300"
           />
 
-          <StreakRankingTop10 rows={rows.slice(0, 10)} />
+          <StreakRankingTop10 rows={rows.slice(0, 30)} />
 
-          <DungeonRankingTop10 rows={rows_d.slice(0, 10)} />
+          <DungeonRankingTop10 rows={rows_d.slice(0, 30)} />
 
-          <HimaCharacterRankingTop10 rows={rows_c.slice(0, 10)} />
+          <HimaCharacterRankingTop10 rows={rows_c.slice(0, 30)} />
 
           {/* <WeeklyRankingCard
             title="今週のスコア"

@@ -463,6 +463,9 @@ export default function QuizModePage() {
   const { user, loading: userLoading, supabase } = useSupabaseUser();
 
   const [questions, setQuestions] = useState<{ id: string; quiz: QuizData }[]>([]);
+  const [allQuestions, setAllQuestions] = useState<
+    { id: string; quiz: QuizData }[]
+  >([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userAnswer, setUserAnswer] = useState<number | null>(null);
   const [correctCount, setCorrectCount] = useState(0);
@@ -828,7 +831,83 @@ export default function QuizModePage() {
 
   const shuffleArray = <T,>(arr: T[]) => [...arr].sort(() => Math.random() - 0.5);
 
+  // const sortQuestionsForPlay = (list: { id: string; quiz: QuizData }[]) => {
+  //   const easyQuestions = shuffleArray(
+  //     list.filter((q) => q.quiz.level === "かんたん")
+  //   );
+
+  //   const normalQuestions = shuffleArray(
+  //     list.filter((q) => q.quiz.level === "ふつう")
+  //   );
+
+  //   const hardQuestions = shuffleArray(
+  //     list.filter((q) => q.quiz.level === "難しい")
+  //   );
+
+  //   const expertQuestions = shuffleArray(
+  //     list.filter((q) => q.quiz.level === "激ムズ")
+  //   );
+
+  //   // 1～3問
+  //   const first3Easy = easyQuestions.slice(0, 3);
+
+  //   // 4～10問
+  //   const next7Normal = normalQuestions.slice(0, 7);
+
+  //   // 11～15問
+  //   const next5Hard = hardQuestions.slice(0, 5);
+
+  //   // 16～20問：難しい + 激ムズ シャッフル
+  //   const next5HardExpert = shuffleArray([
+  //     ...hardQuestions.slice(5),
+  //     ...expertQuestions,
+  //   ]).slice(0, 5);
+
+  //   // 16～20問までに使った問題ID
+  //   const usedIds = new Set([
+  //     ...first3Easy,
+  //     ...next7Normal,
+  //     ...next5Hard,
+  //     ...next5HardExpert,
+  //   ].map((q) => q.id));
+
+  //   // 21～49問（29問分）：今まで通り、かんたん・ふつう・難しいランダム
+  //   const remainingRandom = shuffleArray([
+  //     ...easyQuestions.slice(3),
+  //     ...normalQuestions.slice(7),
+  //     ...hardQuestions.filter((q) => !usedIds.has(getQuestionKey(q))),
+  //   ]);
+
+  //   // 50問以降：16～20問で使っていない激ムズ
+  //   const remainingExpert = shuffleArray(
+  //     expertQuestions.filter((q) => !usedIds.has(getQuestionKey(q)))
+  //   );
+
+  //   return [
+  //     // 1～3問
+  //     ...first3Easy,
+
+  //     // 4～10問
+  //     ...next7Normal,
+
+  //     // 11～15問
+  //     ...next5Hard,
+
+  //     // 16～20問
+  //     ...next5HardExpert,
+
+  //     // 21～49問
+  //     ...remainingRandom.slice(0, 29),
+
+  //     // 50問以降
+  //     ...remainingExpert,
+  //   ];
+  // };
+
   const sortQuestionsForPlay = (list: { id: string; quiz: QuizData }[]) => {
+    const getQuestionKey = (q: { id: string; quiz: QuizData }) =>
+      q.id || q.quiz.question;
+
     const easyQuestions = shuffleArray(
       list.filter((q) => q.quiz.level === "かんたん")
     );
@@ -845,59 +924,57 @@ export default function QuizModePage() {
       list.filter((q) => q.quiz.level === "激ムズ")
     );
 
-    // 1～3問
+    // 1～3問：かんたん
     const first3Easy = easyQuestions.slice(0, 3);
 
-    // 4～10問
+    // 4～10問：ふつう
     const next7Normal = normalQuestions.slice(0, 7);
 
-    // 11～15問
+    // 11～15問：難しい
     const next5Hard = hardQuestions.slice(0, 5);
 
-    // 16～20問：難しい + 激ムズ シャッフル
-    const next5HardExpert = shuffleArray([
-      ...hardQuestions.slice(5),
-      ...expertQuestions,
-    ]).slice(0, 5);
+    const usedIds = new Set(
+      [...first3Easy, ...next7Normal, ...next5Hard].map((q) => getQuestionKey(q))
+    );
 
-    // 16～20問までに使った問題ID
-    const usedIds = new Set([
-      ...first3Easy,
-      ...next7Normal,
-      ...next5Hard,
-      ...next5HardExpert,
-    ].map((q) => q.id));
+    // 16～29問：ふつう・難しい
+    const stage16to29 = shuffleArray([
+      ...normalQuestions.filter((q) => !usedIds.has(getQuestionKey(q))),
+      ...hardQuestions.filter((q) => !usedIds.has(getQuestionKey(q))),
+    ]).slice(0, 14);
 
-    // 21～49問（29問分）：今まで通り、かんたん・ふつう・難しいランダム
-    const remainingRandom = shuffleArray([
-      ...easyQuestions.slice(3),
-      ...normalQuestions.slice(7),
-      ...hardQuestions.filter((q) => !usedIds.has(q.id)),
-    ]);
+    stage16to29.forEach((q) => usedIds.add(q.id));
 
-    // 50問以降：16～20問で使っていない激ムズ
-    const remainingExpert = shuffleArray(
-      expertQuestions.filter((q) => !usedIds.has(q.id))
+    // 30～49問：ふつう・難しい・激ムズ
+    const stage30to49 = shuffleArray([
+      ...normalQuestions.filter((q) => !usedIds.has(getQuestionKey(q))),
+      ...hardQuestions.filter((q) => !usedIds.has(getQuestionKey(q))),
+      ...expertQuestions.filter((q) => !usedIds.has(getQuestionKey(q))),
+    ]).slice(0, 20);
+
+    stage30to49.forEach((q) => usedIds.add(q.id));
+
+    // 50～79問：難しい・激ムズ
+    const stage50to79 = shuffleArray([
+      ...hardQuestions.filter((q) => !usedIds.has(getQuestionKey(q))),
+      ...expertQuestions.filter((q) => !usedIds.has(getQuestionKey(q))),
+    ]).slice(0, 30);
+
+    stage50to79.forEach((q) => usedIds.add(q.id));
+
+    // 80問以降：激ムズのみ
+    const stage80Plus = shuffleArray(
+      expertQuestions.filter((q) => !usedIds.has(getQuestionKey(q)))
     );
 
     return [
-      // 1～3問
       ...first3Easy,
-
-      // 4～10問
       ...next7Normal,
-
-      // 11～15問
       ...next5Hard,
-
-      // 16～20問
-      ...next5HardExpert,
-
-      // 21～49問
-      ...remainingRandom.slice(0, 29),
-
-      // 50問以降
-      ...remainingExpert,
+      ...stage16to29,
+      ...stage30to49,
+      ...stage50to79,
+      ...stage80Plus,
     ];
   };
 
@@ -934,8 +1011,10 @@ export default function QuizModePage() {
     // ✅ 次プレイに持ち越さない（任意：残したいなら消さなくてOK）
     clearPendingAward();
 
-    // 問題順もシャッフルし直す（任意だけどおすすめ）
-    setQuestions((prev) => sortQuestionsForPlay(prev));
+    // 問題順も全問題から選び直す
+    if (allQuestions.length > 0) {
+      setQuestions(sortQuestionsForPlay(allQuestions));
+    }
   };
 
   // useEffect(() => {
@@ -1043,6 +1122,7 @@ export default function QuizModePage() {
             },
           }));
 
+        setAllQuestions(quizQuestions);
         setQuestions(sortQuestionsForPlay(quizQuestions));
       } catch (error) {
         console.error("クイズ問題の取得に失敗しました:", error);
@@ -1114,30 +1194,18 @@ export default function QuizModePage() {
   const doSkip = () => {
     if (skipLeft <= 0) return;
 
-    // 残り回数を減らす
     setSkipLeft((v) => Math.max(0, v - 1));
 
-    // 表示状態リセット
     setShowCorrectMessage(false);
     setIncorrectMessage(null);
     setUserAnswer(null);
 
-    // ✅ 「第◯問」はそのまま、問題だけ差し替える
-    setQuestions((prev) => {
-      if (prev.length <= 1) return prev;
-
-      // 現在の問題を避けてランダムに1つ選ぶ（なるべく被りを防ぐ）
-      const pool = prev.filter((_, i) => i !== currentIndex);
-      const pick = pool[Math.floor(Math.random() * pool.length)];
-
-      // currentIndex の位置だけ差し替え
-      const next = [...prev];
-      next[currentIndex] = pick;
-      return next;
-    });
-
-    // ✅ タイマーはリセットしたいなら戻す（不要なら消してOK）
-    setTimeLeft(30);
+    if (currentIndex + 1 >= questions.length) {
+      setFinished(true);
+    } else {
+      setCurrentIndex((i) => i + 1);
+      setTimeLeft(30);
+    }
 
     setOpenSkipModal(false);
   };

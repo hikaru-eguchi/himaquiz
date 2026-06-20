@@ -16,6 +16,7 @@ type Profile = {
   avatar_url: string | null;
   friend_code: string | null;
   friend_code_public: boolean | null;
+  friend_recruiting: boolean | null;
   current_title: string | null;
   current_skin_id: string | null;
 };
@@ -83,7 +84,7 @@ export default function MyPage() {
         const { data, error } = await supabase
           .from("profiles")
           .select(
-            "username, user_id, recovery_email, points, level, exp, avatar_character_id, avatar_url, friend_code, friend_code_public, current_title, current_skin_id"
+            "username, user_id, recovery_email, points, level, exp, avatar_character_id, avatar_url, friend_code, friend_code_public, friend_recruiting, current_title, current_skin_id"
           )
           .eq("id", user.id)
           .single();
@@ -432,6 +433,54 @@ export default function MyPage() {
                   className={`
                     absolute top-1 h-6 w-6 rounded-full bg-white shadow transition
                     ${(profile?.friend_code_public ?? false) ? "left-7" : "left-1"}
+                  `}
+                />
+              </button>
+            </div>
+            <div className="mt-3 flex items-center justify-between rounded-2xl bg-green-50 px-4 py-3">
+              <div>
+                <p className="text-sm font-black text-gray-800">
+                  「🤝 フレンド募集中」マークを表示する
+                </p>
+
+                <p className="text-xs font-bold text-gray-500">
+                  ONにするとプロフィールに表示されます
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!user) return;
+
+                  const next = !(profile?.friend_recruiting ?? false);
+
+                  setProfile((prev) =>
+                    prev ? { ...prev, friend_recruiting: next } : prev
+                  );
+
+                  const { error } = await supabase
+                    .from("profiles")
+                    .update({ friend_recruiting: next })
+                    .eq("id", user.id);
+
+                  if (error) {
+                    alert("設定の保存に失敗しました");
+
+                    setProfile((prev) =>
+                      prev ? { ...prev, friend_recruiting: !next } : prev
+                    );
+                  }
+                }}
+                className={`
+                  relative h-8 w-14 rounded-full transition
+                  ${profile?.friend_recruiting ? "bg-green-400" : "bg-gray-300"}
+                `}
+              >
+                <span
+                  className={`
+                    absolute top-1 h-6 w-6 rounded-full bg-white shadow transition
+                    ${profile?.friend_recruiting ? "left-7" : "left-1"}
                   `}
                 />
               </button>

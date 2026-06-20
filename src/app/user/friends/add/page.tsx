@@ -15,6 +15,7 @@ export default function FriendAddPage() {
   const [result, setResult] = useState<PublicFriendProfile | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [successOpen, setSuccessOpen] = useState(false);
+  const [pendingRequests, setPendingRequests] = useState<PublicFriendProfile[]>([]);
 
   const normalized = input.replace(/\s+/g, "").toUpperCase();
   const canSearch = normalized.length > 0 && !searching;
@@ -28,6 +29,38 @@ export default function FriendAddPage() {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [successOpen]);
+
+  useEffect(() => {
+    const loadPendingRequests = async () => {
+      const { data: rows, error } = await supabase
+        .from("friend_requests")
+        .select("to_user_id")
+        .eq("status", "pending");
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      const ids = Array.from(
+        new Set((rows ?? []).map((r: any) => r.to_user_id))
+      );
+
+      if (ids.length === 0) {
+        setPendingRequests([]);
+        return;
+      }
+
+      const { data: users } = await supabase
+        .from("user_public_profiles")
+        .select("*")
+        .in("user_id", ids);
+
+      setPendingRequests((users ?? []) as PublicFriendProfile[]);
+    };
+
+    loadPendingRequests();
+  }, [supabase]);
 
   const onSearch = async () => {
     setError(null);
@@ -202,8 +235,49 @@ export default function FriendAddPage() {
           </div>
         )}
 
+        {pendingRequests.length > 0 && (
+          <section className="rounded-2xl border border-amber-100 bg-white p-4 shadow-sm">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-lg font-black text-gray-900">
+                📨 申請中
+              </h2>
+
+              <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-black text-amber-700">
+                {pendingRequests.length}人
+              </span>
+            </div>
+
+            <div className="max-h-[220px] space-y-3 overflow-y-auto">
+              {pendingRequests.map((p) => (
+                <div
+                  key={p.user_id}
+                  className="rounded-2xl border border-gray-200 bg-gray-50 p-3"
+                >
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={p.avatar_url ?? "/images/初期アイコン.png"}
+                      className="w-12 h-12 rounded-full border bg-white object-contain"
+                      alt="avatar"
+                    />
+
+                    <div className="flex-1 min-w-0">
+                      <p className="font-extrabold truncate">
+                        {p.username ?? "ユーザー"}
+                      </p>
+
+                      <p className="text-xs text-gray-500">
+                        承認待ち
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Footer Buttons */}
-        <div className="grid grid-cols-2 gap-3">
+        {/* <div className="grid grid-cols-2 gap-3">
           <button
             onClick={() => router.push("/user/friends")}
             className="rounded-xl bg-gray-100 py-3 font-bold hover:bg-gray-200"
@@ -216,6 +290,14 @@ export default function FriendAddPage() {
             className="rounded-xl bg-white py-3 font-bold ring-1 ring-black/10 hover:bg-gray-50"
           >
             申請一覧へ
+          </button>
+        </div> */}
+        <div className="flex justify-center">
+          <button
+            onClick={() => router.push("/user/friends")}
+            className="w-full rounded-xl bg-gray-100 py-3 font-bold hover:bg-gray-200"
+          >
+            戻る
           </button>
         </div>
       </div>

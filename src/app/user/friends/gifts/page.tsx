@@ -13,6 +13,14 @@ type GiftRow = {
   message: string | null;
   created_at: string;
   characters?: { name: string | null; image_url: string | null };
+  claimed_at: string | null;
+  deleted_by_receiver: boolean | null;
+};
+
+type SenderProfile = {
+  user_id: string;
+  username: string | null;
+  avatar_url: string | null;
 };
 
 export default function GiftInboxPage() {
@@ -31,6 +39,11 @@ export default function GiftInboxPage() {
   const [successOpen, setSuccessOpen] = useState(false);
   const [successName, setSuccessName] = useState<string>("");
 
+  const [senders, setSenders] = useState<Record<string, SenderProfile>>({});
+
+  const [giftHistories, setGiftHistories] = useState<GiftRow[]>([]);
+  const [deletingHistoryId, setDeletingHistoryId] = useState<string | null>(null);
+
   useEffect(() => {
     if (userLoading) return;
     if (!user) {
@@ -45,13 +58,43 @@ export default function GiftInboxPage() {
         const { data, error } = await supabase
           .from("character_gifts")
           .select(
-            "id, from_user_id, to_user_id, character_id, message, created_at, characters(name, image_url)"
+            "id, from_user_id, to_user_id, character_id, message, created_at, claimed_at, deleted_by_receiver, characters(name, image_url)"
           )
           .eq("to_user_id", user.id)
           .order("created_at", { ascending: false });
 
         if (error) throw error;
-        setGifts((data ?? []) as GiftRow[]);
+
+        const giftList = (data ?? []) as GiftRow[];
+        setGifts(
+          giftList.filter((g) => !g.claimed_at && !g.deleted_by_receiver)
+        );
+
+        setGiftHistories(
+          giftList.filter((g) => g.claimed_at && !g.deleted_by_receiver)
+        );
+
+        const senderIds = Array.from(
+          new Set(giftList.map((g) => g.from_user_id))
+        );
+
+        if (senderIds.length > 0) {
+          const { data: senderProfiles, error: senderErr } = await supabase
+            .from("user_public_profiles")
+            .select("user_id, username, avatar_url")
+            .in("user_id", senderIds);
+
+          if (senderErr) throw senderErr;
+
+          const map: Record<string, SenderProfile> = {};
+          (senderProfiles ?? []).forEach((p: any) => {
+            map[p.user_id] = p;
+          });
+
+          setSenders(map);
+        }
+
+        // setGifts((data ?? []) as GiftRow[]);
       } catch (e: any) {
         console.error(e);
         setError(e?.message ?? "取得に失敗しました");
@@ -85,9 +128,49 @@ export default function GiftInboxPage() {
       setSuccessName(charName ?? "キャラ");
       setSuccessOpen(true);
 
-      setGifts((prev) => prev.filter((g) => g.id !== giftId));
+      setGifts((prev) => {
+        const target = prev.find((g) => g.id === giftId);
+
+        if (target) {
+          setGiftHistories((histories) => {
+            if (histories.some((h) => h.id === target.id)) {
+              return histories;
+            }
+
+            return [
+              { ...target, claimed_at: new Date().toISOString() },
+              ...histories,
+            ];
+          });
+        }
+
+        return prev.filter((g) => g.id !== giftId);
+      });
     } catch (e: any) {
-      alert(e?.message ?? "受け取りに失敗しました");
+      const message = e?.message ?? "";
+
+      if (message.includes("not friends")) {
+        if (
+          confirm(
+            "このプレゼントは受け取れなくなりました。\n\nプレゼントBOXから削除しますか？"
+          )
+        ) {
+          const { error } = await supabase.rpc("delete_character_gift", {
+            p_gift_id: giftId,
+          });
+
+          if (error) {
+            alert("削除に失敗しました");
+            return;
+          }
+
+          setGifts((prev) => prev.filter((g) => g.id !== giftId));
+        }
+
+        return;
+      }
+
+      alert(message || "受け取りに失敗しました");
     } finally {
       setClaimingId((prev) => (prev === giftId ? null : prev));
     }
@@ -121,7 +204,8 @@ export default function GiftInboxPage() {
             </h1>
           </div>
           <p className="text-md md:text-xl text-gray-600">
-            受け取れるキャラをチェックしよう！
+            {/* 受け取れるキャラをチェックしよう！ */}
+            もらったプレゼントをチェックしよう！
           </p>
         </div>
 
@@ -140,7 +224,8 @@ export default function GiftInboxPage() {
               <span className="text-2xl">🫧</span>
             </div>
             <p className="font-extrabold text-gray-900">
-              受け取れるプレゼントはありません
+              {/* 受け取れるプレゼントはありません */}
+              もらったプレゼントはありません
             </p>
             <p className="text-sm text-gray-600">
               フレンドからプレゼントが届くとここに表示されます
@@ -156,41 +241,71 @@ export default function GiftInboxPage() {
                 : "/images/初期アイコン.png";
 
               const busy = claimingId === g.id;
+              const sender = senders[g.from_user_id];
 
               return (
                 <div
                   key={g.id}
-                  className="rounded-2xl bg-white shadow-sm ring-1 ring-black/5 p-4 space-y-3"
+                  className="rounded-2xl bg-white shadow-sm ring-1 ring-black/5 p-4 space-y-2"
                 >
                   {/* 上段：キャラ情報 */}
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={img}
-                      className="w-14 h-14 rounded-xl bg-white border object-contain"
-                      alt="char"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="font-extrabold truncate">
+                  {/* 誰から？ */}
+                  <div className="rounded-2xl border border-amber-100 bg-amber-50 p-3">
+                    <p className="mb-3 text-sm font-black text-amber-700">
+                      🎁 {sender?.username ?? "フレンド"}さんからのプレゼント
+                    </p>
+
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={sender?.avatar_url ?? "/images/初期アイコン.png"}
+                        className="h-12 w-12 rounded-full border bg-white object-contain"
+                        alt="sender"
+                      />
+
+                      <div>
+                        <p className="font-black text-gray-900">
+                          {sender?.username ?? "ユーザー"}
+                        </p>
+
+                        <p className="text-xs text-gray-500">
+                          {new Date(g.created_at).toLocaleString("ja-JP")}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* もらったキャラ */}
+                  <div className="rounded-2xl border border-gray-100 bg-white p-3">
+                    <p className="mb-2 text-xs font-black text-gray-500">
+                      もらったキャラ
+                    </p>
+
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={img}
+                        className="h-16 w-16 rounded-xl border bg-white object-contain"
+                        alt="char"
+                      />
+
+                      <p className="flex-1 text-lg font-extrabold text-gray-900">
                         {g.characters?.name ?? "キャラ"}
                       </p>
-                      <p className="text-xs text-gray-500">
-                        {new Date(g.created_at).toLocaleString("ja-JP")}
-                      </p>
                     </div>
-
-                    <span className="text-xs rounded-full bg-amber-50 text-amber-700 px-3 py-1">
-                      GIFT
-                    </span>
                   </div>
 
                   {/* メッセージ */}
                   {g.message && (
-                    <div className="rounded-2xl border border-gray-100 bg-gray-50 p-3 text-sm text-gray-800 whitespace-pre-wrap">
-                      {/* ✅ 改行があっても綺麗に見えるように */}
-                      <p className="text-xs text-gray-500 mb-1">メッセージ</p>
-                      {g.message}
+                    <div className="rounded-2xl border border-gray-100 bg-gray-50 p-3 whitespace-pre-wrap">
+                      <p className="mb-1 text-xs font-black text-gray-500">
+                        💬 メッセージ
+                      </p>
+
+                      <p className="text-sm text-gray-800">
+                        {g.message}
+                      </p>
                     </div>
                   )}
+                  
 
                   {/* 受け取りボタン */}
                   <button
@@ -214,8 +329,125 @@ export default function GiftInboxPage() {
           </div>
         )}
 
+        <section className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-lg font-black text-gray-900">
+              📜 プレゼント履歴
+            </h2>
+
+            <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-black text-amber-700">
+              {giftHistories.length}件
+            </span>
+          </div>
+
+          {giftHistories.length === 0 ? (
+            <div className="rounded-2xl border border-gray-100 bg-gray-50 p-5 text-center">
+              <div className="text-3xl">🫧</div>
+              <p className="mt-2 font-extrabold text-gray-800">
+                まだ履歴はありません
+              </p>
+            </div>
+          ) : (
+            <div className="max-h-[320px] space-y-3 overflow-y-auto pr-1">
+              {giftHistories.map((g) => {
+                const sender = senders[g.from_user_id];
+
+                const img = g.characters?.image_url
+                  ? g.characters.image_url.startsWith("/")
+                    ? g.characters.image_url
+                    : `/${g.characters.image_url}`
+                  : "/images/初期アイコン.png";
+
+                const deleting = deletingHistoryId === g.id;
+
+                return (
+                  <div
+                    key={g.id}
+                    className="rounded-2xl border border-gray-100 bg-gray-50 p-3"
+                  >
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={sender?.avatar_url ?? "/images/初期アイコン.png"}
+                        className="h-10 w-10 rounded-full border bg-white object-contain"
+                        alt="sender"
+                      />
+
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-black text-gray-900">
+                          {sender?.username ?? "フレンド"}さんから
+                        </p>
+
+                        <p className="text-xs text-gray-500">
+                          受け取り:{" "}
+                          {g.claimed_at
+                            ? new Date(g.claimed_at).toLocaleString("ja-JP")
+                            : "-"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 flex items-center gap-3 rounded-xl bg-white p-2">
+                      <img
+                        src={img}
+                        className="h-12 w-12 rounded-xl border bg-white object-contain"
+                        alt="char"
+                      />
+
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-black text-gray-500">
+                          もらったキャラ
+                        </p>
+                        <p className="truncate font-extrabold text-gray-900">
+                          {g.characters?.name ?? "キャラ"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {g.message && (
+                      <div className="mt-2 rounded-xl bg-white p-2 text-sm text-gray-700">
+                        <p className="mb-1 text-xs font-black text-gray-500">
+                          💬 メッセージ
+                        </p>
+                        {g.message}
+                      </div>
+                    )}
+
+                    <button
+                      disabled={deleting}
+                      onClick={async () => {
+                        if (!confirm("この履歴を削除しますか？")) return;
+
+                        setDeletingHistoryId(g.id);
+
+                        const { error } = await supabase.rpc(
+                          "delete_character_gift_history",
+                          { p_gift_id: g.id }
+                        );
+
+                        setDeletingHistoryId(null);
+
+                        if (error) {
+                          alert("履歴の削除に失敗しました");
+                          return;
+                        }
+
+                        setGiftHistories((prev) =>
+                          prev.filter((x) => x.id !== g.id)
+                        );
+                      }}
+                      className="mt-3 w-full rounded-xl bg-gray-200 py-2 text-sm font-black text-gray-700 hover:bg-gray-300"
+                    >
+                      {deleting ? "削除中..." : "履歴を削除"}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
         {/* Footer */}
-        <div className="grid grid-cols-2 gap-3">
+        {/* <div className="grid grid-cols-2 gap-3">
           <button
             onClick={() => router.push("/user/friends")}
             className="rounded-xl bg-gray-100 py-3 font-bold hover:bg-gray-200"
@@ -228,6 +460,14 @@ export default function GiftInboxPage() {
             className="rounded-xl bg-white py-3 font-bold ring-1 ring-black/10 hover:bg-gray-50"
           >
             フレンド追加へ
+          </button>
+        </div> */}
+        <div className="flex justify-center">
+          <button
+            onClick={() => router.push("/user/friends")}
+            className="w-full rounded-xl bg-gray-100 py-3 font-bold hover:bg-gray-200"
+          >
+            戻る
           </button>
         </div>
       </div>

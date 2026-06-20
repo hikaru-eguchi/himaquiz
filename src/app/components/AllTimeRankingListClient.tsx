@@ -27,6 +27,7 @@ type PublicProfile = {
   current_title: string | null;
   friend_code: string | null;
   friend_code_public: boolean | null;
+  friend_recruiting: boolean | null;
 };
 
 export default function AllTimeRankingListClient({
@@ -142,14 +143,14 @@ export default function AllTimeRankingListClient({
 
     const { data, error } = await supabase
       .from("user_public_profiles")
-      .select("user_id, username, avatar_url, level, character_count, current_title, friend_code, friend_code_public")
+      .select("user_id, username, avatar_url, level, character_count, current_title, friend_code, friend_code_public, friend_recruiting")
       .eq("user_id", userId)
       .single();
 
     setLoading(false);
 
     if (error) {
-      setSelected({ user_id: userId, username: null, avatar_url: null, level: null, character_count: null, current_title: null, friend_code: null, friend_code_public: null,});
+      setSelected({ user_id: userId, username: null, avatar_url: null, level: null, character_count: null, current_title: null, friend_code: null, friend_code_public: null, friend_recruiting: null,});
       return;
     }
 
@@ -486,9 +487,20 @@ export default function AllTimeRankingListClient({
               </div>
 
               <div className="mt-1 md:mt-3 rounded-3xl border border-yellow-100 bg-gradient-to-br from-white to-yellow-50 px-4 py-3 text-center shadow-sm">
-                <p className="text-xs font-black text-yellow-600">
+                {/* <p className="text-xs font-black text-yellow-600">
                   👥 フレンドID
-                </p>
+                </p> */}
+                <div className="relative">
+                  {selected?.friend_recruiting && (
+                    <div className="absolute left-0 top-0 rounded-full bg-green-100 px-3 py-1 text-[10px] font-black text-green-700">
+                      🤝 フレンド募集中
+                    </div>
+                  )}
+
+                  <p className="text-center text-xs font-black text-yellow-600">
+                    👥 フレンドID
+                  </p>
+                </div>
                 <p className="mt-1 text-lg font-black text-slate-900">
                   {loading
                     ? "..."
