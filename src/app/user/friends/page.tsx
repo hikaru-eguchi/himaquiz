@@ -46,6 +46,25 @@ type FriendArenaRankingRow = {
   arena_wins: number | null;
 };
 
+type FriendQuizRow = {
+  id: string;
+  creator_user_id: string;
+  creator_name: string | null;
+  creator_avatar_url: string | null;
+  question: string;
+  choice_1: string;
+  choice_2: string;
+  choice_3: string;
+  choice_4: string;
+  hint: string | null;
+  created_at: string;
+  like_count: number;
+  liked_by_me: boolean;
+  selected_choice: number | null;
+  is_correct: boolean | null;
+  correct_choice: number | null;
+};
+
 export default function FriendsPage() {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const { user, loading: userLoading } = useSupabaseUser();
@@ -64,6 +83,11 @@ export default function FriendsPage() {
   const [friendDungeonRows, setFriendDungeonRows] = useState<FriendDungeonRankingRow[]>([]);
   const [friendCharacterRows, setFriendCharacterRows] = useState<FriendCharacterRankingRow[]>([]);
   const [friendArenaRows, setFriendArenaRows] = useState<FriendArenaRankingRow[]>([]);
+
+  const [friendQuizzes, setFriendQuizzes] = useState<FriendQuizRow[]>([]);
+  const [answeringQuizId, setAnsweringQuizId] = useState<string | null>(null);
+  const [likingQuizId, setLikingQuizId] = useState<string | null>(null);
+  const [hasPostedQuizToday, setHasPostedQuizToday] = useState(false);
 
   useEffect(() => {
     if (userLoading) return;
@@ -168,6 +192,112 @@ export default function FriendsPage() {
 
         setFriendArenaRows(sortedArena);
 
+        const quizUserIds = Array.from(new Set([user.id, ...ids]));
+
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+
+        const tomorrowStart = new Date(todayStart);
+        tomorrowStart.setDate(tomorrowStart.getDate() + 1);
+
+        const { data: quizRows, error: quizErr } = await supabase
+          .from("friend_quizzes")
+          .select(`
+            id,
+            creator_user_id,
+            question,
+            choice_1,
+            choice_2,
+            choice_3,
+            choice_4,
+            hint,
+            created_at
+          `)
+          .in("creator_user_id", quizUserIds)
+          .gte("created_at", todayStart.toISOString())
+          .lt("created_at", tomorrowStart.toISOString())
+          .order("created_at", { ascending: false })
+          .limit(30);
+
+        if (quizErr) throw quizErr;
+
+        const quizIds = (quizRows ?? []).map((q: any) => q.id);
+        const creatorIds = Array.from(
+          new Set((quizRows ?? []).map((q: any) => q.creator_user_id))
+        );
+
+        let creatorMap: Record<string, any> = {};
+        if (creatorIds.length > 0) {
+          const { data: creators, error: creatorsErr } = await supabase
+            .from("user_public_profiles")
+            .select("user_id, username, avatar_url")
+            .in("user_id", creatorIds);
+
+          if (creatorsErr) throw creatorsErr;
+
+          creatorMap = Object.fromEntries(
+            (creators ?? []).map((p: any) => [p.user_id, p])
+          );
+        }
+
+        let likeCountMap: Record<string, number> = {};
+        let likedMap: Record<string, boolean> = {};
+        let answerMap: Record<string, any> = {};
+
+        if (quizIds.length > 0) {
+          const { data: likes, error: likesErr } = await supabase
+            .from("friend_quiz_likes")
+            .select("quiz_id, user_id")
+            .in("quiz_id", quizIds);
+
+          if (likesErr) throw likesErr;
+
+          for (const l of likes ?? []) {
+            likeCountMap[l.quiz_id] = (likeCountMap[l.quiz_id] ?? 0) + 1;
+            if (l.user_id === user.id) likedMap[l.quiz_id] = true;
+          }
+
+          const { data: answers, error: answersErr } = await supabase
+            .from("friend_quiz_answers")
+            .select("quiz_id, selected_choice, is_correct, correct_choice")
+            .eq("user_id", user.id)
+            .in("quiz_id", quizIds);
+
+          if (answersErr) throw answersErr;
+
+          answerMap = Object.fromEntries(
+            (answers ?? []).map((a: any) => [a.quiz_id, a])
+          );
+        }
+
+        setFriendQuizzes(
+          ((quizRows ?? []) as any[]).map((q) => ({
+            ...q,
+            creator_name: creatorMap[q.creator_user_id]?.username ?? null,
+            creator_avatar_url: creatorMap[q.creator_user_id]?.avatar_url ?? null,
+            like_count: likeCountMap[q.id] ?? 0,
+            liked_by_me: likedMap[q.id] ?? false,
+            selected_choice: answerMap[q.id]?.selected_choice ?? null,
+            is_correct: answerMap[q.id]?.is_correct ?? null,
+            correct_choice: answerMap[q.id]?.correct_choice ?? null,
+          }))
+        );
+
+        const today = new Date().toLocaleDateString("sv-SE", {
+          timeZone: "Asia/Tokyo",
+        });
+
+        const { data: myPostToday, error: myPostTodayErr } = await supabase
+          .from("friend_quiz_daily_posts")
+          .select("user_id")
+          .eq("user_id", user.id)
+          .eq("post_date", today)
+          .maybeSingle();
+
+        if (myPostTodayErr) throw myPostTodayErr;
+
+        setHasPostedQuizToday(!!myPostToday);
+
         if (ids.length === 0) {
           setFriends([]);
           return;
@@ -194,6 +324,86 @@ export default function FriendsPage() {
 
     run();
   }, [user, userLoading, supabase, router]);
+
+  const answerFriendQuiz = async (quizId: string, selected: number) => {
+    setAnsweringQuizId(quizId);
+
+    const { data, error } = await supabase.rpc("answer_friend_quiz", {
+      p_quiz_id: quizId,
+      p_selected_choice: selected,
+    });
+
+    setAnsweringQuizId(null);
+
+    if (error) {
+      if (error.message.includes("duplicate")) {
+        alert("このクイズには回答済みです");
+        return;
+      }
+
+      alert(error.message || "回答に失敗しました");
+      return;
+    }
+
+    const result = Array.isArray(data) ? data[0] : null;
+
+    setFriendQuizzes((prev) =>
+      prev.map((q) =>
+        q.id === quizId
+          ? {
+              ...q,
+              selected_choice: selected,
+              is_correct: result?.result_is_correct ?? false,
+              correct_choice: result?.result_correct_choice ?? null,
+            }
+          : q
+      )
+    );
+  };
+
+  const toggleQuizLike = async (quizId: string) => {
+    setLikingQuizId(quizId);
+
+    const { data, error } = await supabase.rpc("toggle_friend_quiz_like", {
+      p_quiz_id: quizId,
+    });
+
+    setLikingQuizId(null);
+
+    if (error) {
+      alert("いいねに失敗しました");
+      return;
+    }
+
+    const nextCount = typeof data === "number" ? data : 0;
+
+    setFriendQuizzes((prev) =>
+      prev.map((q) =>
+        q.id === quizId
+          ? {
+              ...q,
+              liked_by_me: !q.liked_by_me,
+              like_count: nextCount,
+            }
+          : q
+      )
+    );
+  };
+
+  const deleteFriendQuiz = async (quizId: string) => {
+    if (!confirm("このクイズを削除しますか？")) return;
+
+    const { error } = await supabase.rpc("delete_friend_quiz", {
+      p_quiz_id: quizId,
+    });
+
+    if (error) {
+      alert("クイズの削除に失敗しました");
+      return;
+    }
+
+    setFriendQuizzes((prev) => prev.filter((q) => q.id !== quizId));
+  };
 
   if (userLoading || loading) return <p className="p-4">読み込み中...</p>;
 
@@ -553,6 +763,163 @@ export default function FriendsPage() {
               ))}
             </div>
           )}
+        </section>
+
+        <section className="rounded-2xl border border-pink-100 bg-white p-4 shadow-sm">
+          <div className="text-center">
+            <h2 className="text-xl font-black text-gray-900">
+              🧠 みんなのクイズ
+            </h2>
+
+            <p className="mt-1 text-sm font-bold text-gray-500">
+              フレンドだけが見られる共有クイズ！自分だけのクイズを作っていいねをもらおう！
+            </p>
+          </div>
+
+          <div className="mt-4 space-y-3">
+            {friendQuizzes.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-pink-200 bg-pink-50 p-5 text-center">
+                <div className="text-3xl">🫧</div>
+
+                <p className="mt-2 font-black text-gray-900">
+                  まだクイズが作られてないよ！
+                </p>
+
+                <p className="mt-1 text-sm font-bold text-gray-500">
+                  最初のクイズを投稿してみよう！
+                </p>
+              </div>
+            ) : (
+              friendQuizzes.map((q) => {
+                const isMine = q.creator_user_id === user?.id;
+                const answered = q.selected_choice != null;
+                const choices = [q.choice_1, q.choice_2, q.choice_3, q.choice_4];
+
+                return (
+                  <div
+                    key={q.id}
+                    className="rounded-2xl border border-pink-100 bg-gradient-to-br from-white to-pink-50 p-3 shadow-sm"
+                  >
+                    <div className="mb-3 flex items-center gap-3">
+                      <img
+                        src={q.creator_avatar_url ?? "/images/初期アイコン.png"}
+                        className="h-10 w-10 rounded-full border bg-white object-contain"
+                        alt="creator"
+                      />
+
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-black text-gray-900">
+                          製作者：{q.creator_name ?? "ユーザー"}
+                        </p>
+
+                        <p className="text-xs font-bold text-gray-500">
+                          作成日：{new Date(q.created_at).toLocaleString("ja-JP")}
+                        </p>
+                      </div>
+
+                      <div className="shrink-0 rounded-full bg-pink-100 px-3 py-1 text-xs font-black text-pink-600">
+                        ❤️ {q.like_count}
+                      </div>
+                    </div>
+
+                    <p className="rounded-xl bg-white p-3 text-base font-black text-gray-900">
+                      {q.question}
+                    </p>
+
+                    {q.hint && (
+                      <p className="mt-2 rounded-xl bg-yellow-50 p-2 text-xs font-bold text-yellow-700">
+                        💡 ヒント：{q.hint}
+                      </p>
+                    )}
+
+                    <div className="mt-3 grid gap-2">
+                      {choices.map((choice, index) => {
+                        const choiceNo = index + 1;
+                        const selected = q.selected_choice === choiceNo;
+                        const correct = q.correct_choice === choiceNo;
+
+                        return (
+                          <button
+                            key={choiceNo}
+                            disabled={answered || isMine || answeringQuizId === q.id}
+                            onClick={() => answerFriendQuiz(q.id, choiceNo)}
+                            className={`
+                              rounded-xl border px-3 py-2 text-left font-black transition
+                              ${
+                                answered && correct
+                                  ? "border-green-300 bg-green-100 text-green-700"
+                                  : answered && selected && !q.is_correct
+                                    ? "border-rose-300 bg-rose-100 text-rose-700"
+                                    : "border-gray-200 bg-white text-gray-800 hover:bg-pink-50"
+                              }
+                              disabled:cursor-not-allowed
+                            `}
+                          >
+                            {choice}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {answered && (
+                      <p
+                        className={`mt-3 rounded-xl p-3 text-center font-black ${
+                          q.is_correct
+                            ? "bg-green-100 text-green-700"
+                            : "bg-rose-100 text-rose-700"
+                        }`}
+                      >
+                        {q.is_correct ? "🎉 正解！100Pゲット！" : "😢 不正解！"}
+                      </p>
+                    )}
+
+                    {isMine && (
+                      <div className="mt-3 rounded-xl bg-gray-100 p-2 text-center">
+                        <p className="text-xs font-bold text-gray-500">
+                          自分が作ったクイズです
+                        </p>
+
+                        <button
+                          onClick={() => deleteFriendQuiz(q.id)}
+                          className="mt-2 w-full rounded-xl bg-gray-200 py-2 text-sm font-black text-gray-700 hover:bg-gray-300"
+                        >
+                          🗑️ クイズを削除
+                        </button>
+                      </div>
+                    )}
+
+                    <button
+                      onClick={() => toggleQuizLike(q.id)}
+                      disabled={likingQuizId === q.id}
+                      className="mt-3 w-full rounded-xl bg-white py-2 text-sm font-black text-pink-600 ring-1 ring-pink-200 hover:bg-pink-50 disabled:opacity-50"
+                    >
+                      {q.liked_by_me ? "❤️ いいね済み" : "🤍 いいね"} {q.like_count}
+                    </button>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          <button
+            onClick={() => {
+              if (hasPostedQuizToday) return;
+              router.push("/user/friends/quizzes/new");
+            }}
+            disabled={hasPostedQuizToday}
+            className={`
+              mt-4 w-full rounded-xl py-3 font-black shadow-md transition
+              ${
+                hasPostedQuizToday
+                  ? "cursor-not-allowed bg-gray-200 text-gray-500"
+                  : "bg-gradient-to-r from-pink-500 to-orange-400 text-white hover:brightness-110 active:scale-95"
+              }
+            `}
+          >
+            {hasPostedQuizToday
+              ? "✅ 今日のクイズは投稿済み"
+              : "✏️ クイズを投稿する"}
+          </button>
         </section>
 
         <section className="rounded-2xl border border-amber-100 bg-white p-1 md:p-4 shadow-sm">
