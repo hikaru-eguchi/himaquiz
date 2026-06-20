@@ -705,7 +705,7 @@ export default function FriendsPage() {
 
         <section className="rounded-2xl border border-sky-100 bg-white p-4 shadow-sm">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-lg font-black text-gray-900">
+            <h2 className="text-xl font-black text-gray-900">
               👥 フレンド一覧
             </h2>
 
@@ -767,12 +767,15 @@ export default function FriendsPage() {
 
         <section className="rounded-2xl border border-pink-100 bg-white p-4 shadow-sm">
           <div className="text-center">
-            <h2 className="text-xl font-black text-gray-900">
-              🧠 みんなのクイズ
+            <h2 className="text-2xl font-black text-gray-900">
+              🎉 みんなのクイズ
             </h2>
 
             <p className="mt-1 text-sm font-bold text-gray-500">
-              フレンドだけが見られる共有クイズ！自分だけのクイズを作っていいねをもらおう！
+              {/* フレンドだけが見られる共有クイズ！自分だけのクイズを作っていいねをもらおう！ */}
+              {/* 自分だけのクイズを作ってフレンドに共有しよう！公開すると100Pゲット！ */}
+              {/* オリジナルクイズを作ってフレンドと楽しもう！公開すると100Pゲット！ */}
+              フレンドにクイズを出題しよう！いいねを集めて人気クイズを目指そう！出題すると100Pゲット！
             </p>
           </div>
 
@@ -924,7 +927,7 @@ export default function FriendsPage() {
 
         <section className="rounded-2xl border border-amber-100 bg-white p-1 md:p-4 shadow-sm">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-lg font-black text-gray-900">
+            <h2 className="text-xl font-black text-gray-900">
               🏆 フレンド内ランキング
             </h2>
 

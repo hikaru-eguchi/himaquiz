@@ -475,6 +475,7 @@ export default function QuizModePage() {
   const [timeLeft, setTimeLeft] = useState(30);
   const [incorrectMessage, setIncorrectMessage] = useState<string | null>(null);
   const [justUnlockedTitle, setJustUnlockedTitle] = useState<string | null>(null);
+  const [displayQuestionNo, setDisplayQuestionNo] = useState(1);
 
     // ✅ 出題開始ゲート（カウントダウンが終わるまで問題＆タイマーを止める）
   // const [ready, setReady] = useState(false);
@@ -991,6 +992,7 @@ export default function QuizModePage() {
     setIncorrectMessage(null);
     setSkipLeft(MAX_SKIP);
     setOpenSkipModal(false);
+    setDisplayQuestionNo(1);
 
     // タイマーリセット（各問30秒）
     setTimeLeft(30);
@@ -1187,6 +1189,7 @@ export default function QuizModePage() {
       setFinished(true);
     } else {
       setCurrentIndex((i) => i + 1);
+      setDisplayQuestionNo((n) => n + 1);
       setTimeLeft(30);
     }
   };
@@ -1532,7 +1535,8 @@ export default function QuizModePage() {
       {!finished ? (
         <>
           <h2 className="text-5xl md:text-6xl font-extrabold mb-6 text-yellow-500 drop-shadow-lg">
-            第 {currentIndex + 1} 問
+            {/* 第 {currentIndex + 1} 問 */}
+            第 {displayQuestionNo} 問
           </h2>
 
           {(() => {
