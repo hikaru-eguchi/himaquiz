@@ -18,6 +18,34 @@ type MyFriendInfo = {
   friend_recruiting: boolean | null;
 };
 
+type FriendStreakRankingRow = {
+  user_id: string;
+  username: string | null;
+  avatar_url: string | null;
+  best_streak: number | null;
+};
+
+type FriendDungeonRankingRow = {
+  user_id: string;
+  username: string | null;
+  avatar_url: string | null;
+  best_stage: number | null;
+};
+
+type FriendCharacterRankingRow = {
+  user_id: string;
+  username: string | null;
+  avatar_url: string | null;
+  character_count: number | null;
+};
+
+type FriendArenaRankingRow = {
+  user_id: string;
+  username: string | null;
+  avatar_url: string | null;
+  arena_wins: number | null;
+};
+
 export default function FriendsPage() {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const { user, loading: userLoading } = useSupabaseUser();
@@ -31,6 +59,11 @@ export default function FriendsPage() {
   const [friendSettingOpen, setFriendSettingOpen] = useState(false);
   const [requestCount, setRequestCount] = useState(0);
   const [giftCount, setGiftCount] = useState(0);
+
+  const [friendStreakRows, setFriendStreakRows] = useState<FriendStreakRankingRow[]>([]);
+  const [friendDungeonRows, setFriendDungeonRows] = useState<FriendDungeonRankingRow[]>([]);
+  const [friendCharacterRows, setFriendCharacterRows] = useState<FriendCharacterRankingRow[]>([]);
+  const [friendArenaRows, setFriendArenaRows] = useState<FriendArenaRankingRow[]>([]);
 
   useEffect(() => {
     if (userLoading) return;
@@ -84,6 +117,57 @@ export default function FriendsPage() {
         if (fErr) throw fErr;
 
         const ids = Array.from(new Set((frows ?? []).map((r: any) => r.friend_user_id)));
+
+        const rankingIds = Array.from(new Set([user.id, ...ids]));
+
+        const { data: rankingRows, error: rankingErr } = await supabase
+          .from("user_public_profiles")
+          .select("user_id, username, avatar_url, best_streak")
+          .in("user_id", rankingIds);
+
+        if (rankingErr) throw rankingErr;
+
+        const sortedRanking = ((rankingRows ?? []) as FriendStreakRankingRow[])
+          .sort((a, b) => (b.best_streak ?? 0) - (a.best_streak ?? 0));
+
+        setFriendStreakRows(sortedRanking);
+
+        const { data: dungeonRows, error: dungeonErr } = await supabase
+          .from("user_public_profiles")
+          .select("user_id, username, avatar_url, best_stage")
+          .in("user_id", rankingIds);
+
+        if (dungeonErr) throw dungeonErr;
+
+        const sortedDungeon = ((dungeonRows ?? []) as FriendDungeonRankingRow[])
+          .sort((a, b) => (b.best_stage ?? 0) - (a.best_stage ?? 0));
+
+        setFriendDungeonRows(sortedDungeon);
+
+        const { data: characterRows, error: characterErr } = await supabase
+          .from("user_public_profiles")
+          .select("user_id, username, avatar_url, character_count")
+          .in("user_id", rankingIds);
+
+        if (characterErr) throw characterErr;
+
+        const sortedCharacter = ((characterRows ?? []) as FriendCharacterRankingRow[])
+          .sort((a, b) => (b.character_count ?? 0) - (a.character_count ?? 0));
+
+        setFriendCharacterRows(sortedCharacter);
+
+        const { data: arenaRows, error: arenaErr } = await supabase
+          .from("user_public_profiles")
+          .select("user_id, username, avatar_url, arena_wins")
+          .in("user_id", rankingIds);
+
+        if (arenaErr) throw arenaErr;
+
+        const sortedArena = ((arenaRows ?? []) as FriendArenaRankingRow[])
+          .sort((a, b) => (b.arena_wins ?? 0) - (a.arena_wins ?? 0));
+
+        setFriendArenaRows(sortedArena);
+
         if (ids.length === 0) {
           setFriends([]);
           return;
@@ -115,7 +199,7 @@ export default function FriendsPage() {
 
   return (
     <div className="bg-gradient-to-b from-yellow-100 to-white">
-      <div className="max-w-md mx-auto p-4 space-y-4">
+      <div className="max-w-md mx-auto p-1 md:p-4 space-y-2 md:space-y-4">
         <h1 className="text-3xl md:text-4xl font-extrabold text-center tracking-wide">
         👥 フレンド
         </h1>
@@ -469,6 +553,286 @@ export default function FriendsPage() {
               ))}
             </div>
           )}
+        </section>
+
+        <section className="rounded-2xl border border-amber-100 bg-white p-1 md:p-4 shadow-sm">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-lg font-black text-gray-900">
+              🏆 フレンド内ランキング
+            </h2>
+
+            <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-black text-amber-700">
+              自分＋フレンド
+            </span>
+          </div>
+
+          <div className="rounded-2xl border border-orange-100 bg-gradient-to-br from-white to-orange-50 p-3">
+            <div className="mb-3 text-center">
+              <h3 className="font-black text-gray-900 text-xl">
+                🔥 連続正解ランキング
+              </h3>
+
+              <p className="mt-1 text-xs font-bold text-gray-500">
+                🌟最高連続正解数🌟
+              </p>
+            </div>
+
+            {friendStreakRows.length === 0 ? (
+              <p className="rounded-xl bg-white p-4 text-center text-sm font-bold text-gray-500">
+                まだランキングがありません
+              </p>
+            ) : (
+              <div className="max-h-[210px] space-y-1 overflow-y-auto pr-1">
+                {friendStreakRows.slice(0, 10).map((r, idx) => {
+                  const rank = idx + 1;
+
+                  return (
+                    <div
+                      key={r.user_id}
+                      className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-3"
+                    >
+                      <div className="w-8 text-center font-black text-gray-700">
+                        {rank === 1 ? "👑" : `${rank}位`}
+                      </div>
+
+                      <img
+                        src={r.avatar_url ?? "/images/初期アイコン.png"}
+                        className="h-10 w-10 rounded-full border bg-white object-contain"
+                        alt="avatar"
+                      />
+
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-black text-gray-900">
+                          {r.username ?? "ユーザー"}
+                          {r.user_id === user?.id ? "（自分）" : ""}
+                        </p>
+                      </div>
+
+                      <p className="text-lg font-black text-red-500">
+                        {r.best_streak ?? 0}
+                        <span className="ml-1 text-xs text-gray-500">問</span>
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={() => router.push("/streak-challenge")}
+            className="
+              mt-3 w-full rounded-xl py-2
+              font-black text-white text-sm
+              bg-gradient-to-r from-red-500 to-orange-400
+              shadow-md
+              hover:brightness-110 active:scale-95
+              transition
+            "
+          >
+            🔥 ライバルを超えよう！
+          </button>
+
+          <div className="mt-4 rounded-2xl border border-purple-100 bg-gradient-to-br from-white to-purple-50 p-3">
+            <div className="mb-3 text-center">
+              <h3 className="font-black text-gray-900 text-xl">
+                🏰 ダンジョン攻略ランキング
+              </h3>
+
+              <p className="mt-1 text-xs font-bold text-gray-500">
+                🏰最高到達階🏰
+              </p>
+            </div>
+
+            {friendDungeonRows.length === 0 ? (
+              <p className="rounded-xl bg-white p-4 text-center text-sm font-bold text-gray-500">
+                まだランキングがありません
+              </p>
+            ) : (
+              <div className="max-h-[210px] space-y-1 overflow-y-auto pr-1">
+                {friendDungeonRows.slice(0, 10).map((r, idx) => {
+                  const rank = idx + 1;
+
+                  return (
+                    <div
+                      key={r.user_id}
+                      className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-3"
+                    >
+                      <div className="w-8 text-center font-black text-gray-700">
+                        {rank === 1 ? "👑" : `${rank}位`}
+                      </div>
+
+                      <img
+                        src={r.avatar_url ?? "/images/初期アイコン.png"}
+                        className="h-10 w-10 rounded-full border bg-white object-contain"
+                        alt="avatar"
+                      />
+
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-black text-gray-900">
+                          {r.username ?? "ユーザー"}
+                          {r.user_id === user?.id ? "（自分）" : ""}
+                        </p>
+                      </div>
+
+                      <p className="text-lg font-black text-purple-600">
+                        {r.best_stage ?? 0}
+                        <span className="ml-1 text-xs text-gray-500">階</span>
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={() => router.push("/quiz-master")}
+            className="
+              mt-3 w-full rounded-xl py-2
+              font-black text-white text-sm
+              bg-gradient-to-r from-purple-500 to-indigo-400
+              shadow-md
+              hover:brightness-110 active:scale-95
+              transition
+            "
+          >
+            🏰 ライバルを超えよう！
+          </button>
+
+          <div className="mt-4 rounded-2xl border border-fuchsia-100 bg-gradient-to-br from-white via-pink-50 to-cyan-50 p-3">
+            <div className="mb-3 text-center">
+              <h3 className="font-black text-gray-900 text-xl">
+                🌈 ひまキャラコレクターランキング
+              </h3>
+
+              <p className="mt-1 text-xs font-bold text-gray-500">
+                🌈所持キャラ数🌈
+              </p>
+            </div>
+
+            {friendCharacterRows.length === 0 ? (
+              <p className="rounded-xl bg-white p-4 text-center text-sm font-bold text-gray-500">
+                まだランキングがありません
+              </p>
+            ) : (
+              <div className="max-h-[210px] space-y-1 overflow-y-auto pr-1">
+                {friendCharacterRows.slice(0, 10).map((r, idx) => {
+                  const rank = idx + 1;
+
+                  return (
+                    <div
+                      key={r.user_id}
+                      className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-3"
+                    >
+                      <div className="w-8 text-center font-black text-gray-700">
+                        {rank === 1 ? "👑" : `${rank}位`}
+                      </div>
+
+                      <img
+                        src={r.avatar_url ?? "/images/初期アイコン.png"}
+                        className="h-10 w-10 rounded-full border bg-white object-contain"
+                        alt="avatar"
+                      />
+
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-black text-gray-900">
+                          {r.username ?? "ユーザー"}
+                          {r.user_id === user?.id ? "（自分）" : ""}
+                        </p>
+                      </div>
+
+                      <p className="text-lg font-black text-fuchsia-500">
+                        {r.character_count ?? 0}
+                        <span className="ml-1 text-xs text-gray-500">体</span>
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={() => router.push("/quiz-gacha")}
+            className="
+              mt-3 w-full rounded-xl py-2
+              font-black text-white text-sm
+              bg-[linear-gradient(90deg,#ff4d6d,#ffb703,#38b000,#00b4d8,#7b2cbf)]
+              shadow-md
+              hover:brightness-110 active:scale-95
+              transition
+            "
+          >
+            🌈 コツコツ集めよう！
+          </button>
+
+          <div className="mt-4 rounded-2xl border border-red-100 bg-gradient-to-br from-white to-red-50 p-3">
+            <div className="mb-3 text-center">
+              <h3 className="font-black text-gray-900 text-xl">
+                ⚔️ アリーナ勝利数ランキング
+              </h3>
+
+              <p className="mt-1 text-xs font-bold text-gray-500">
+                🏆総勝利数🏆
+              </p>
+            </div>
+
+            {friendArenaRows.length === 0 ? (
+              <p className="rounded-xl bg-white p-4 text-center text-sm font-bold text-gray-500">
+                まだランキングがありません
+              </p>
+            ) : (
+              <div className="max-h-[210px] space-y-1 overflow-y-auto pr-1">
+                {friendArenaRows.slice(0, 10).map((r, idx) => {
+                  const rank = idx + 1;
+
+                  return (
+                    <div
+                      key={r.user_id}
+                      className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-3"
+                    >
+                      <div className="w-8 text-center font-black text-gray-700">
+                        {rank === 1 ? "👑" : `${rank}位`}
+                      </div>
+
+                      <img
+                        src={r.avatar_url ?? "/images/初期アイコン.png"}
+                        className="h-10 w-10 rounded-full border bg-white object-contain"
+                        alt="avatar"
+                      />
+
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-black text-gray-900">
+                          {r.username ?? "ユーザー"}
+                          {r.user_id === user?.id ? "（自分）" : ""}
+                        </p>
+                      </div>
+
+                      <p className="text-lg font-black text-purple-500">
+                        {r.arena_wins ?? 0}
+                        <span className="ml-1 text-xs text-gray-500">勝</span>
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={() => router.push("/quiz-arena")}
+            className="
+              mt-3 w-full rounded-xl py-2
+              font-black text-white text-sm
+              bg-gradient-to-r from-red-500 to-purple-500
+              shadow-md
+              hover:brightness-110 active:scale-95
+              transition
+            "
+          >
+            ⚔️ 順位アップ！
+          </button>
         </section>
 
         {/* <button
