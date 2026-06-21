@@ -413,8 +413,12 @@ export default function FriendsPage() {
         <h1 className="text-3xl md:text-4xl font-extrabold text-center tracking-wide">
         👥 フレンド
         </h1>
-        <p className="text-center text-md text-xl text-gray-600">
+        {/* <p className="text-center text-md text-xl text-gray-600">
         フレンドと一緒にひまQを楽しもう！
+        </p> */}
+        <p className="text-center text-gray-600 font-bold">
+          フレンドを作ると楽しさアップ！🎉<br />
+          キャラ交換や自作クイズ、フレンド内ランキングで盛り上がろう！
         </p>
 
         <section className="rounded-2xl border border-sky-100 bg-white p-3 shadow-sm">

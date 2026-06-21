@@ -9,6 +9,23 @@ const DEFAULT_ICONS = [
   { id: "default_1", name: "はてなマーク", url: "/images/hatena.png" },
   { id: "default_2", name: "スターマーク", url: "/images/hosi.png" },
   { id: "default_3", name: "ハートマーク", url: "/images/ha-to.png" },
+  { id: "default_4", name: "たいようマーク", url: "/images/taiyou.png" },
+  { id: "default_5", name: "つきマーク", url: "/images/tuki.png" },
+  { id: "default_6", name: "にじマーク", url: "/images/niji.png" },
+  { id: "default_7", name: "クローバーマーク", url: "/images/kuro-ba-.png" },
+  { id: "default_8", name: "おんぷマーク", url: "/images/onpu.png" },
+  { id: "default_9", name: "ほのおマーク", url: "/images/honoo.png" },
+  { id: "default_10", name: "ゆきマーク", url: "/images/yuki.png" },
+  { id: "default_11", name: "しずくマーク", url: "/images/sizuku.png" },
+  { id: "default_12", name: "いなずまマーク", url: "/images/inazuma.png" },
+  { id: "default_13", name: "くもマーク", url: "/images/kumo.png" },
+  { id: "default_14", name: "ふうせんマーク", url: "/images/fuusen.png" },
+  { id: "default_15", name: "リボンマーク", url: "/images/ribon.png" },
+  { id: "default_16", name: "はなマーク", url: "/images/hana.png" },
+  { id: "default_17", name: "ゲームマーク", url: "/images/ge-mu.png" },
+  { id: "default_18", name: "おうかんマーク", url: "/images/oukan.png" },
+  { id: "default_19", name: "ほうせきマーク", url: "/images/houseki.png" },
+  { id: "default_20", name: "あめマーク", url: "/images/ame.png" },
 ] as const;
 
 type DefaultIconId = (typeof DEFAULT_ICONS)[number]["id"];

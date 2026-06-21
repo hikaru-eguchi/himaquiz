@@ -1204,7 +1204,8 @@ def generate_article(theme: str):
 def main():
     ARTICLE_DIR.mkdir(parents=True, exist_ok=True)
 
-    selected_themes = choose_themes()
+    # selected_themes = choose_themes()
+    selected_themes = ["anime"]
     print("今回生成するテーマ:", selected_themes)
 
     for theme in selected_themes:

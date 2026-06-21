@@ -367,102 +367,104 @@ export default function QuizMasterPage() {
         </div>
 
         {/* ✅ シークレットステージ */}
-        <div className="mt-6 max-w-4xl mx-auto">
-          <div
-             className="relative overflow-hidden border-2 border-black rounded-2xl p-4 shadow
-             bg-gradient-to-br from-[#f6f1ff] via-[#efe7ff] to-[#fff4d6]"
->
-            <div className="relative">
-              <p className="text-2xl md:text-3xl font-extrabold text-gray-900">
-                🔒 シークレットステージ
-              </p>
+        {user && (
+          <div className="mt-6 max-w-4xl mx-auto">
+            <div
+              className="relative overflow-hidden border-2 border-black rounded-2xl p-4 shadow
+              bg-gradient-to-br from-[#f6f1ff] via-[#efe7ff] to-[#fff4d6]"
+  >
+              <div className="relative">
+                <p className="text-2xl md:text-3xl font-extrabold text-gray-900">
+                  🔒 シークレットステージ
+                </p>
 
-              {userLoading ? (
-                <p className="mt-2 text-gray-600 font-bold">判定中...</p>
-              ) : user ? (
-                <>
-                  <p className="text-md md:text-lg mt-2 text-gray-800 font-bold">
-                    挑戦するステージを選んでください
-                  </p>
+                {userLoading ? (
+                  <p className="mt-2 text-gray-600 font-bold">判定中...</p>
+                ) : user ? (
+                  <>
+                    <p className="text-md md:text-lg mt-2 text-gray-800 font-bold">
+                      挑戦するステージを選んでください
+                    </p>
 
-                  <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {showBosses.map((b) => {
-                      const isUnlocked = b.canSee;
+                    <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {showBosses.map((b) => {
+                        const isUnlocked = b.canSee;
 
-                      return (
-                        <div
-                          key={String(b.no)}
-                          className="relative overflow-hidden rounded-xl p-4 shadow flex flex-col gap-3
-                          bg-gradient-to-br from-[#fff7cc] via-[#f7d774] to-[#d4a017]"
-                        >
-                          {isUnlocked ? (
-                            <p className="text-sm md:text-md font-extrabold text-gray-700">
-                              {/* 条件：ユーザーレベル {b.requiredLevel} 以上 */}
+                        return (
+                          <div
+                            key={String(b.no)}
+                            className="relative overflow-hidden rounded-xl p-4 shadow flex flex-col gap-3
+                            bg-gradient-to-br from-[#fff7cc] via-[#f7d774] to-[#d4a017]"
+                          >
+                            {isUnlocked ? (
+                              <p className="text-sm md:text-md font-extrabold text-gray-700">
+                                {/* 条件：ユーザーレベル {b.requiredLevel} 以上 */}
+                              </p>
+                            ) : (
+                              <p className="text-sm md:text-md font-extrabold text-gray-700">
+                                🔒 ユーザーレベル {b.requiredLevel} 以上 {b.prevName ? ` + ${b.prevName}討伐` : ""} で解放
+                              </p>
+                            )}
+
+                            <p className="text-xl md:text-2xl font-extrabold text-gray-900">
+                              {isUnlocked ? `${b.name} の領域⚔` : "？？？ の領域⚔"}
                             </p>
-                          ) : (
-                            <p className="text-sm md:text-md font-extrabold text-gray-700">
-                              🔒 ユーザーレベル {b.requiredLevel} 以上 {b.prevName ? ` + ${b.prevName}討伐` : ""} で解放
-                            </p>
-                          )}
 
-                          <p className="text-xl md:text-2xl font-extrabold text-gray-900">
-                            {isUnlocked ? `${b.name} の領域⚔` : "？？？ の領域⚔"}
-                          </p>
+                            {isUnlocked ? (
+                              <div className="flex gap-2">
+                                <Link
+                                  href={`/quiz-master/random?course=secret&boss=${encodeURIComponent(
+                                    String(b.id)
+                                  )}&variant=normal`}
+                                  className="flex-1"
+                                >
+                                  <button className="w-full px-4 py-2 bg-white text-gray-900 rounded-lg border-2 border-black font-extrabold hover:bg-gray-100 cursor-pointer">
+                                    通常に挑戦🔥
+                                  </button>
+                                </Link>
 
-                          {isUnlocked ? (
-                            <div className="flex gap-2">
-                              <Link
-                                href={`/quiz-master/random?course=secret&boss=${encodeURIComponent(
-                                  String(b.id)
-                                )}&variant=normal`}
-                                className="flex-1"
+                                <Link
+                                  href={`/quiz-master/random?course=secret&boss=${encodeURIComponent(
+                                    String(b.id)
+                                  )}&variant=fairy`}
+                                  className="flex-1"
+                                >
+                                  <button className="w-full px-4 py-2 bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 text-white rounded-lg border-2 border-black font-extrabold hover:opacity-90 cursor-pointer">
+                                    フェアリーに挑戦🔥
+                                  </button>
+                                </Link>
+                              </div>
+                            ) : (
+                              <button
+                                disabled
+                                className="w-full px-4 py-2 rounded-lg border-2 border-black font-extrabold
+                                          bg-black/30 text-white/60 cursor-not-allowed"
                               >
-                                <button className="w-full px-4 py-2 bg-white text-gray-900 rounded-lg border-2 border-black font-extrabold hover:bg-gray-100 cursor-pointer">
-                                  通常に挑戦🔥
-                                </button>
-                              </Link>
-
-                              <Link
-                                href={`/quiz-master/random?course=secret&boss=${encodeURIComponent(
-                                  String(b.id)
-                                )}&variant=fairy`}
-                                className="flex-1"
-                              >
-                                <button className="w-full px-4 py-2 bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 text-white rounded-lg border-2 border-black font-extrabold hover:opacity-90 cursor-pointer">
-                                  フェアリーに挑戦🔥
-                                </button>
-                              </Link>
-                            </div>
-                          ) : (
-                            <button
-                              disabled
-                              className="w-full px-4 py-2 rounded-lg border-2 border-black font-extrabold
-                                        bg-black/30 text-white/60 cursor-not-allowed"
-                            >
-                              まだ挑戦できません
-                            </button>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </>
-              ) : (
-                <>
-                  <p className="mt-3 text-gray-800 font-bold">
-                    このステージはログイン（無料）すると遊べます！
-                  </p>
-                  <button
-                    onClick={() => router.push("/user/login")}
-                    className="mt-3 px-6 py-3 bg-blue-500 text-white rounded-xl font-extrabold hover:bg-blue-600 cursor-pointer"
-                  >
-                    ログインして遊ぶ
-                  </button>
-                </>
-              )}
+                                まだ挑戦できません
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p className="mt-3 text-gray-800 font-bold">
+                      このステージはログイン（無料）すると遊べます！
+                    </p>
+                    <button
+                      onClick={() => router.push("/user/login")}
+                      className="mt-3 px-6 py-3 bg-blue-500 text-white rounded-xl font-extrabold hover:bg-blue-600 cursor-pointer"
+                    >
+                      ログインして遊ぶ
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         <div className="flex justify-center">
           <div className="mt-3 w-full max-w-[900px] rounded-[28px] border border-[#e5ddd3] bg-[#f8f8f8] px-2 py-5 md:px-8 md:py-7 shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
