@@ -1059,6 +1059,24 @@ export default async function HomePage({
               </p>
             </div>
           </div>
+
+          {/* ひまキャラ錬成所 */}
+          <div className="text-center max-w-[280px]">
+            <Link href="/character-alchemy" className="w-full md:w-auto flex justify-center">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-br from-emerald-500 via-green-400 to-lime-300 text-white hover:scale-110 transition-all">
+                ひまキャラ錬成所🧪
+              </button>
+            </Link>
+
+            <div className="mt-2 rounded-2xl bg-white/65 px-4 py-3 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base font-bold text-gray-700 leading-tight">
+                ひまキャラ5〜10体で、新たなひまキャラ1体を錬成！
+              </p>
+              <p className="mt-1 text-sm md:text-base font-black text-cyan-700 leading-tight">
+                どんなキャラが誕生するかはお楽しみ！
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 

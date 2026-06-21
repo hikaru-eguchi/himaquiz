@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Anton } from "next/font/google";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Rarity } from "../../types/gacha";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -366,6 +367,60 @@ const QuizGacha = ({
             </div>
           </div>
         )}
+      </div>
+
+      <div className="mx-auto mt-8 max-w-3xl rounded-3xl border-3 border-emerald-950 bg-gradient-to-br from-emerald-500 via-white to-lime-300 p-4 shadow-[0_6px_0_rgba(6,78,59,1)] md:p-5">
+        <div className="text-center">
+          <p className="text-xl font-black text-emerald-950 drop-shadow md:text-3xl">
+            ひまキャラを錬成しよう！🧪
+          </p>
+
+          <p className="mt-2 text-sm font-bold leading-relaxed text-emerald-950/90 md:text-base">
+            ひまキャラ5〜10体で、新たなひまキャラ1体を錬成！
+            <br />
+            どんなキャラが誕生するかはお楽しみ！✨
+          </p>
+        </div>
+
+        <div className="mt-4 hidden items-center justify-center gap-3 md:flex">
+          <img src="/images/ゴブリン_1.png" className="h-20" />
+
+          <span className="text-3xl font-black text-emerald-900">+</span>
+
+          <img src="/images/スライム_1.png" className="h-20" />
+
+          <span className="text-3xl font-black text-emerald-900">+</span>
+
+          <img src="/images/ミミック_1.png" className="h-20" />
+
+          <span className="mx-2 text-4xl font-black text-emerald-900">
+            →
+          </span>
+
+          <div className="text-6xl animate-pulse">
+            ❓
+          </div>
+        </div>
+
+        <div className="mt-5 flex justify-center">
+          <Link href="/character-alchemy">
+            <button className="
+              rounded-full
+              border-2 border-black
+              bg-gradient-to-r
+              from-emerald-400
+              via-green-500
+              to-lime-500
+              px-8 py-3
+              text-xl font-black text-white
+              shadow-xl
+              transition-transform
+              hover:scale-110
+            ">
+              ひまキャラ錬成所へ🧪
+            </button>
+          </Link>
+        </div>
       </div>
 
       {/* 拡大モーダル */}

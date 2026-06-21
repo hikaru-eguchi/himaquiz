@@ -184,7 +184,7 @@ export default function MyCharactersPage() {
         </p>
         <p className="mt-1 md:mt-2 text-xs md:text-sm text-gray-500">
           <span className="font-bold text-gray-600">※</span>
-          「ひまキャラガチャ」「きまぐれクイズ」「クイズダンジョン（シークレットステージ）」で手に入れたキャラが図鑑に登録されます。
+          「ひまキャラガチャ」「クイズダンジョン」「きまぐれクイズ」で手に入れたキャラが図鑑に登録されます。
         </p>
       </div>
 

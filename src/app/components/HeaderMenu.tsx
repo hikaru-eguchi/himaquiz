@@ -673,6 +673,21 @@ export default function HeaderMenu() {
                     ゲームで使う自分の見た目をゲット！
                   </p>
                 </Link>
+
+                <Link
+                  href="/character-alchemy"
+                  onClick={closeAllMenu}
+                  className="
+                    rounded-2xl border-2 border-black
+                    bg-gradient-to-r from-emerald-500 via-green-400 to-lime-300
+                    px-4 py-3 text-white shadow-md hover:scale-[1.02] transition
+                  "
+                >
+                  <p className="text-lg font-black">ひまキャラ錬成所🧪</p>
+                  <p className="mt-1 text-xs font-bold text-white">
+                    新たなひまキャラ1体を錬成しよう！
+                  </p>
+                </Link>
               </div>
 
               <button
