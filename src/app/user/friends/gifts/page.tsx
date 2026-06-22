@@ -365,7 +365,7 @@ export default function GiftInboxPage() {
                     key={g.id}
                     className="rounded-2xl border border-gray-100 bg-gray-50 p-3"
                   >
-                    <div className="flex items-center gap-3">
+                    {/* <div className="flex items-center gap-3">
                       <img
                         src={sender?.avatar_url ?? "/images/初期アイコン.png"}
                         className="h-10 w-10 rounded-full border bg-white object-contain"
@@ -384,7 +384,35 @@ export default function GiftInboxPage() {
                             : "-"}
                         </p>
                       </div>
-                    </div>
+                    </div> */}
+                    <button
+                      type="button"
+                      onClick={() => router.push(`/user/friends/${g.from_user_id}`)}
+                      className="w-full rounded-2xl text-left hover:bg-amber-50 active:scale-[0.99] transition"
+                    >
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={sender?.avatar_url ?? "/images/初期アイコン.png"}
+                          className="h-10 w-10 rounded-full border bg-white object-contain"
+                          alt="sender"
+                        />
+
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-black text-gray-900">
+                            {sender?.username ?? "フレンド"}さんから
+                          </p>
+
+                          <p className="text-xs text-gray-500">
+                            受け取り:{" "}
+                            {g.claimed_at
+                              ? new Date(g.claimed_at).toLocaleString("ja-JP")
+                              : "-"}
+                          </p>
+                        </div>
+
+                        <span className="text-gray-300 text-xl font-black">›</span>
+                      </div>
+                    </button>
 
                     <div className="mt-3 flex items-center gap-3 rounded-xl bg-white p-2">
                       <img

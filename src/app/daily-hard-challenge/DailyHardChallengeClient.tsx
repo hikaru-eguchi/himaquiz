@@ -377,7 +377,7 @@ export default function DailyHardChallengeClient() {
                 🔥今日の激ムズチャレンジ
             </p>
             <p className="mt-3 text-lg md:text-xl font-black text-yellow-100">
-                3問連続正解でクリア！クリア者には1000Pプレゼント！
+                最難関の3問に挑め！全問正解で1000Pゲット！
             </p>
             <p className="mt-1 text-sm md:text-base font-bold text-white">
                 ※1日1回のみ挑戦できます

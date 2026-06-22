@@ -75,6 +75,46 @@ const getEnemyForStage = (stage: number) => {
   return enemies[22];
 };
 
+const stageExpMap: Record<number, number> = {
+  1: 20,
+  2: 30,
+  3: 40,
+  4: 50,
+  5: 70,
+
+  6: 100,
+  7: 150,
+  8: 200,
+  9: 250,
+  10: 300,
+
+  11: 400,
+  12: 500,
+  13: 600,
+  14: 700,
+  15: 800,
+
+  16: 900,
+  17: 1000,
+  18: 1200,
+  19: 1500,
+  20: 2000,
+
+  21: 3000,
+  22: 4000,
+  23: 5000,
+};
+
+function calcEarnedExpByClearedStage(clearedStage: number) {
+  let total = 0;
+
+  for (let stage = 1; stage <= clearedStage; stage++) {
+    total += stageExpMap[stage] ?? 0;
+  }
+
+  return total;
+}
+
 interface ArticleData {
   id: string;
   title: string;
@@ -1467,7 +1507,8 @@ export default function QuizModePage() {
     setStageBonusPoints(bonus);
     setEarnedPoints(earned);
 
-    const expEarned = correctCount * 20;
+    // const expEarned = correctCount * 20;
+    const expEarned = calcEarnedExpByClearedStage(clearedStage);
     setEarnedExp(expEarned);
 
     // pointsもexpも0ならDB処理なし

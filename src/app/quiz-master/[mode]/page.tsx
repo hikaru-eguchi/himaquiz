@@ -43,7 +43,7 @@ const stagePointMap: Record<number, number> = {
   20: 12000,
   21: 15000,
   22: 20000,
-  23: 20000,
+  23: 30000,
 };
 
 const RARITIES: Rarity[] = [
@@ -65,26 +65,26 @@ const secretRewardMap: Record<
   Record<string, { points: number; exp: number }>
 > = {
   normal: {
-    ancient_dragon: { points: 600, exp: 100 },
-    dark_knight:    { points: 1200, exp: 200 },
-    susanoo:        { points: 1800, exp: 300 },
-    takemikazuchi:  { points: 2400, exp: 400 },
-    ultimate_dragon:{ points: 3000, exp: 500 },
-    fujin:          { points: 3600, exp: 600 },
-    raijin:         { points: 3600, exp: 600 },
-    quiz_demon_king:{ points: 4800, exp: 800 },
-    quiz_emperor:   { points: 6000, exp: 1000 },
+    ancient_dragon: { points: 600, exp: 300 },
+    dark_knight:    { points: 1200, exp: 600 },
+    susanoo:        { points: 1800, exp: 1200 },
+    takemikazuchi:  { points: 2400, exp: 1200 },
+    ultimate_dragon:{ points: 3000, exp: 1500 },
+    fujin:          { points: 3600, exp: 1800 },
+    raijin:         { points: 3600, exp: 1800 },
+    quiz_demon_king:{ points: 4800, exp: 2400 },
+    quiz_emperor:   { points: 6000, exp: 3000 },
   },
   fairy: {
-    ancient_dragon: { points: 900, exp: 150 },
-    dark_knight:    { points: 1800, exp: 300 },
-    susanoo:        { points: 2700, exp: 450 },
-    takemikazuchi:  { points: 3600, exp: 600 },
-    ultimate_dragon:{ points: 4500, exp: 750 },
-    fujin:          { points: 5400, exp: 900 },
-    raijin:         { points: 5400, exp: 900 },
-    quiz_demon_king:{ points: 7200, exp: 1200 },
-    quiz_emperor:   { points: 9000, exp: 1500 },
+    ancient_dragon: { points: 900, exp: 4500 },
+    dark_knight:    { points: 1800, exp: 900 },
+    susanoo:        { points: 2700, exp: 1350 },
+    takemikazuchi:  { points: 3600, exp: 1800 },
+    ultimate_dragon:{ points: 4500, exp: 2250 },
+    fujin:          { points: 5400, exp: 2700 },
+    raijin:         { points: 5400, exp: 2700 },
+    quiz_demon_king:{ points: 7200, exp: 3600 },
+    quiz_emperor:   { points: 9000, exp: 4500 },
   },
 };
 
@@ -154,8 +154,48 @@ function calcEarnedPointsByClearedStage(clearedStage: number) {
   return stagePointMap[clearedStage] ?? 0;
 }
 
-function calcEarnedExpByCorrectCount(correctCount: number) {
-  return correctCount * 20;
+// function calcEarnedExpByCorrectCount(correctCount: number) {
+//   return correctCount * 20;
+// }
+
+const stageExpMap: Record<number, number> = {
+  1: 20,
+  2: 30,
+  3: 40,
+  4: 50,
+  5: 70,
+
+  6: 100,
+  7: 150,
+  8: 200,
+  9: 250,
+  10: 300,
+
+  11: 400,
+  12: 500,
+  13: 600,
+  14: 700,
+  15: 800,
+
+  16: 900,
+  17: 1000,
+  18: 1200,
+  19: 1500,
+  20: 2000,
+
+  21: 3000,
+  22: 4000,
+  23: 5000,
+};
+
+function calcEarnedExpByClearedStage(clearedStage: number) {
+  let total = 0;
+
+  for (let stage = 1; stage <= clearedStage; stage++) {
+    total += stageExpMap[stage] ?? 0;
+  }
+
+  return total;
 }
 
 type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
@@ -2332,7 +2372,8 @@ export default function QuizModePage() {
     if (userLoading) return; // ← userの揺れ対策（判定を安定させる）
 
     let points = calcEarnedPointsByClearedStage(correctCount);
-    let exp = calcEarnedExpByCorrectCount(quizCorrectCount);
+    // let exp = calcEarnedExpByCorrectCount(quizCorrectCount);
+    let exp = calcEarnedExpByClearedStage(correctCount);
 
     // ✅ シークレットボスを倒した時だけ特別報酬
     const isSecretBossCleared = course === "secret" && correctCount >= 1;

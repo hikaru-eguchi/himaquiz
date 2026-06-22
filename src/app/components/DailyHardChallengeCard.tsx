@@ -109,7 +109,7 @@ export default function DailyHardChallengeCard() {
             </p>
 
             <p className="text-lg md:text-xl font-extrabold text-center text-white leading-tight">
-                3問連続正解でクリア！クリア者には1000Pプレゼント！
+                最難関の3問に挑め！全問正解で1000Pゲット！
             </p>
 
             <p className="mt-1 mb-4 text-base md:text-lg font-bold text-center text-yellow-100">

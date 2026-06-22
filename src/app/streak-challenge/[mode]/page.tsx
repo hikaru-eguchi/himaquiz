@@ -43,8 +43,20 @@ function calcQuizEarnedPoints(correctCount: number) {
 }
 
 // EXPは「正解数 × 20」
+// function calcEarnedExp(correctCount: number) {
+//   return correctCount * 20;
+// }
 function calcEarnedExp(correctCount: number) {
-  return correctCount * 20;
+  let total = 0;
+
+  for (let i = 1; i <= correctCount; i++) {
+    const tier = Math.floor((i - 1) / 10);
+    const per = 20 + tier * 10;
+
+    total += per;
+  }
+
+  return total;
 }
 
 const titles = [
