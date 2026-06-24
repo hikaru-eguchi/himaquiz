@@ -261,6 +261,7 @@ export default function MyCharactersPage() {
                     <div className="w-full aspect-square flex items-center justify-center mb-1 md:mb-2">
                       <img
                         src={imgSrc}
+                        loading="lazy"
                         alt={isOwned ? ch.name : "？？？"}
                         className={`
                           w-full h-full object-contain

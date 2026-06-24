@@ -17,33 +17,38 @@ import { getMonthStartJST } from "@/lib/month";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
 import RecommendedMultiplayerGames from "@/app/components/RecommendedMultiplayerGames";
 import OnlineGameNotice from "@/app/components/OnlineGameNotice";
+import {
+  CharacterAcquireModal,
+  type CharacterItem,
+} from "../../components/CharacterAcquireModal";
+import type { Rarity } from "@/types/gacha";
 
 type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
 
 // 敵情報
 const enemies = [
-  { id: "slime", name: "スライム", image: "/images/スライム_2.png", hp: 100, attack: 50, description: "ぷるぷるして弱そうに見えるが油断は禁物。" },
-  { id: "goblin", name: "ゴブリン", image: "/images/ゴブリン_2.png", hp: 220, attack: 100, description: "素早く群れで襲いかかる小型のモンスター。" },
-  { id: "skeleton", name: "スケルトン", image: "/images/スケルトン_2.png", hp: 350, attack: 200, description: "朽ちた骨から生まれた剣と盾を操る不気味な戦士。" },
-  { id: "mimic", name: "ミミック", image: "/images/ミミック_2.png", hp: 500, attack: 400, description: "宝箱に化けるトリッキーな敵。油断すると噛まれる！" },
-  { id: "lizardman", name: "リザードマン", image: "/images/リザードマン_2.png", hp: 750, attack: 500, description: "鱗に覆われた戦士。高い身体能力と鋭い爪で攻撃してくる。" },
-  { id: "golem", name: "ゴーレム", image: "/images/ゴーレム_2.png", hp: 1000, attack: 650, description: "岩と魔力で作られた巨人。圧倒的な防御力を誇る。" },
-  { id: "cerberus", name: "ケルベロス", image: "/images/ケルベロス_2.png", hp: 1200, attack: 800, description: "冥界を守る三つ首の魔獣。素早い連続攻撃が脅威。" },
-  { id: "berserker", name: "バーサーカー", image: "/images/バーサーカー_2.png", hp: 1500, attack: 1000, description: "理性を失った狂戦士。攻撃力が非常に高い。" },
-  { id: "dragon", name: "ドラゴン", image: "/images/ドラゴン_2.png", hp: 1800, attack: 1200, description: "火を吹く巨大竜。圧倒的な力を誇る古代の王者。" },
-  { id: "fenikkusu", name: "フェニックス", image: "/images/フェニックス_2.png", hp: 2000, attack: 1500, description: "不死鳥の炎を操る神秘的な生物。燃え盛る翼で攻撃。" },
-  { id: "leviathan", name: "リヴァイアサン", image: "/images/リヴァイアサン_2.png", hp: 2500, attack: 1800, description: "海の深淵から現れる巨大モンスター。水流で圧倒する。" },
-  { id: "blackdragon", name: "ブラックドラゴン", image: "/images/ブラックドラゴン_2.png", hp: 3000, attack: 2000, description: "闇の力を宿す黒竜。魔法攻撃も強力。" },
-  { id: "kingdemon", name: "キングデーモン", image: "/images/キングデーモン_2.png", hp: 3500, attack: 2500, description: "魔界を統べる悪魔の王。圧倒的な魔力と威圧感を放つ。" },
-  { id: "kinghydra", name: "キングヒドラ", image: "/images/キングヒドラ_2.png", hp: 4000, attack: 3000, description: "複数の首を持つ巨大魔獣。倒しても再生する恐怖の存在。" },
-  { id: "ordin", name: "オーディン", image: "/images/オーディン_2.png", hp: 5000, attack: 4000, description: "知恵と戦の神。魔法と剣技を極めた伝説の戦士。" },
-  { id: "poseidon", name: "ポセイドン", image: "/images/ポセイドン_2.png", hp: 6000, attack: 5000, description: "海の神。雷と津波で敵を蹴散らす力を持つ。" },
-  { id: "hades", name: "ハデス", image: "/images/ハデス_2.png", hp: 7000, attack: 6000, description: "冥界の支配者。死者の力を操り、強大な攻撃を仕掛ける。" },
-  { id: "zeus", name: "ゼウス", image: "/images/ゼウス_2.png", hp: 8000, attack: 7000, description: "天空の王。雷霆を操る全知全能の神。" },
-  { id: "gundarimyouou", name: "軍荼利明王（ぐんだりみょうおう）", image: "/images/軍荼利明王_2.png", hp: 9000, attack: 8000, description: "仏教の怒りの守護神。恐怖の炎で全てを焼き尽くす。" },
-  { id: "maou", name: "魔王", image: "/images/魔王_2.png", hp: 10000, attack: 10000, description: "世界を闇に包もうとする存在。圧倒的な魔力を秘める。" },
-  { id: "yuusya_game", name: "クイズマスターの最強勇者", image: "/images/勇者_2_1.png", hp: 20000, attack: 20000, description: "全てのクイズと戦闘を制した伝説の勇者。前人未到の強さを誇る。" },
-  { id: "quizou", name: "クイズ王", image: "/images/王様_2.png", hp: 30000, attack: 30000, description: "クイズの王様。クイズ界の支配者。" },
+  { id: "slime", no: "5", shinyNo: "188", name: "スライム", image: "/images/スライム_2.png", hp: 100, attack: 50, description: "ぷるぷるして弱そうに見えるが油断は禁物。" },
+  { id: "goblin", no: "7", shinyNo: "190", name: "ゴブリン", image: "/images/ゴブリン_2.png", hp: 220, attack: 100, description: "素早く群れで襲いかかる小型のモンスター。" },
+  { id: "skeleton", no: "9", shinyNo: "192", name: "スケルトン", image: "/images/スケルトン_2.png", hp: 350, attack: 200, description: "朽ちた骨から生まれた剣と盾を操る不気味な戦士。" },
+  { id: "mimic", no: "11", shinyNo: "194", name: "ミミック", image: "/images/ミミック_2.png", hp: 500, attack: 400, description: "宝箱に化けるトリッキーな敵。油断すると噛まれる！" },
+  { id: "lizardman", no: "13", shinyNo: "196", name: "リザードマン", image: "/images/リザードマン_2.png", hp: 750, attack: 500, description: "鱗に覆われた戦士。高い身体能力と鋭い爪で攻撃してくる。" },
+  { id: "golem", no: "15", shinyNo: "198", name: "ゴーレム", image: "/images/ゴーレム_2.png", hp: 1000, attack: 650, description: "岩と魔力で作られた巨人。圧倒的な防御力を誇る。" },
+  { id: "cerberus", no: "17", shinyNo: "200", name: "ケルベロス", image: "/images/ケルベロス_2.png", hp: 1200, attack: 800, description: "冥界を守る三つ首の魔獣。素早い連続攻撃が脅威。" },
+  { id: "berserker", no: "19", shinyNo: "202", name: "バーサーカー", image: "/images/バーサーカー_2.png", hp: 1500, attack: 1000, description: "理性を失った狂戦士。攻撃力が非常に高い。" },
+  { id: "dragon", no: "23", shinyNo: "206", name: "ドラゴン", image: "/images/ドラゴン_2.png", hp: 1800, attack: 1200, description: "火を吹く巨大竜。圧倒的な力を誇る古代の王者。" },
+  { id: "fenikkusu", no: "25", shinyNo: "208", name: "フェニックス", image: "/images/フェニックス_2.png", hp: 2000, attack: 1500, description: "不死鳥の炎を操る神秘的な生物。燃え盛る翼で攻撃。" },
+  { id: "leviathan", no: "27", shinyNo: "210", name: "リヴァイアサン", image: "/images/リヴァイアサン_2.png", hp: 2500, attack: 1800, description: "海の深淵から現れる巨大モンスター。水流で圧倒する。" },
+  { id: "blackdragon", no: "29", shinyNo: "212", name: "ブラックドラゴン", image: "/images/ブラックドラゴン_2.png", hp: 3000, attack: 2000, description: "闇の力を宿す黒竜。魔法攻撃も強力。" },
+  { id: "kingdemon", no: "31", shinyNo: "214", name: "キングデーモン", image: "/images/キングデーモン_2.png", hp: 3500, attack: 2500, description: "魔界を統べる悪魔の王。圧倒的な魔力と威圧感を放つ。" },
+  { id: "kinghydra", no: "33", shinyNo: "216", name: "キングヒドラ", image: "/images/キングヒドラ_2.png", hp: 4000, attack: 3000, description: "複数の首を持つ巨大魔獣。倒しても再生する恐怖の存在。" },
+  { id: "ordin", no: "35", shinyNo: "218", name: "オーディン", image: "/images/オーディン_2.png", hp: 5000, attack: 4000, description: "知恵と戦の神。魔法と剣技を極めた伝説の戦士。" },
+  { id: "poseidon", no: "37", shinyNo: "220", name: "ポセイドン", image: "/images/ポセイドン_2.png", hp: 6000, attack: 5000, description: "海の神。雷と津波で敵を蹴散らす力を持つ。" },
+  { id: "hades", no: "39", shinyNo: "222", name: "ハデス", image: "/images/ハデス_2.png", hp: 7000, attack: 6000, description: "冥界の支配者。死者の力を操り、強大な攻撃を仕掛ける。" },
+  { id: "zeus", no: "41", shinyNo: "224", name: "ゼウス", image: "/images/ゼウス_2.png", hp: 8000, attack: 7000, description: "天空の王。雷霆を操る全知全能の神。" },
+  { id: "gundarimyouou", no: "43", shinyNo: "226", name: "軍荼利明王（ぐんだりみょうおう）", image: "/images/軍荼利明王_2.png", hp: 9000, attack: 8000, description: "仏教の怒りの守護神。恐怖の炎で全てを焼き尽くす。" },
+  { id: "maou", no: "45", shinyNo: "228", name: "魔王", image: "/images/魔王_2.png", hp: 10000, attack: 10000, description: "世界を闇に包もうとする存在。圧倒的な魔力を秘める。" },
+  { id: "yuusya_game", no: "47", shinyNo: "230", name: "クイズマスターの最強勇者", image: "/images/勇者_2_1.png", hp: 20000, attack: 20000, description: "全てのクイズと戦闘を制した伝説の勇者。前人未到の強さを誇る。" },
+  { id: "quizou", no: "50", shinyNo: "232", name: "クイズ王", image: "/images/王様_2.png", hp: 30000, attack: 30000, description: "クイズの王様。クイズ界の支配者。" },
 ];
 
 // ステージに応じて敵を取得する
@@ -73,6 +78,23 @@ const getEnemyForStage = (stage: number) => {
   if (stage < 23) return enemies[21];
   if (stage < 24) return enemies[22];
   return enemies[22];
+};
+
+const getDisplayEnemy = (stage: number, isShiny: boolean) => {
+  const enemy = getEnemyForStage(stage);
+
+  if (!isShiny) return enemy;
+
+  return {
+    ...enemy,
+    name: `${enemy.name}（色違い）`,
+    image: enemy.image.replace(".png", "_色違い.png"),
+  };
+};
+
+const getEnemyNo = (stage: number, isShiny: boolean) => {
+  const enemy = getEnemyForStage(stage);
+  return String(isShiny ? enemy.shinyNo : enemy.no);
 };
 
 const stageExpMap: Record<number, number> = {
@@ -114,6 +136,19 @@ function calcEarnedExpByClearedStage(clearedStage: number) {
 
   return total;
 }
+
+const RARITIES: Rarity[] = [
+  "ノーマル",
+  "レア",
+  "超レア",
+  "激レア",
+  "超激レア",
+  "神レア",
+  "シークレット",
+];
+
+const isRarity = (v: unknown): v is Rarity =>
+  typeof v === "string" && RARITIES.includes(v as Rarity);
 
 interface ArticleData {
   id: string;
@@ -658,6 +693,28 @@ export default function QuizModePage() {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const { user, loading: userLoading } = useSupabaseUser();
 
+  useEffect(() => {
+    if (!user) return;
+
+    const loadOwnedCharacters = async () => {
+      const { data, error } = await supabase
+        .from("user_characters")
+        .select("character_id")
+        .eq("user_id", user.id);
+
+      if (error) {
+        console.error("fetch owned characters error:", error);
+        return;
+      }
+
+      setOwnedCharacterIds(
+        new Set((data ?? []).map((r) => String(r.character_id)))
+      );
+    };
+
+    loadOwnedCharacters();
+  }, [user, supabase]);
+
   // =====================
   // ✅ pending（付与待ち）管理（battleと同じ）
   // =====================
@@ -812,6 +869,71 @@ export default function QuizModePage() {
     }
   };
 
+  const acquireEnemyCharacterByNo = async (no: string | number) => {
+    if (!user) return false;
+
+    const { data: characterData, error: fetchError } = await supabase
+      .from("characters")
+      .select("id, name, image_url, rarity, no")
+      .eq("no", String(no))
+      .maybeSingle();
+
+    if (fetchError || !characterData?.id) {
+      console.error("coop dungeon character fetch error:", fetchError, no);
+      return false;
+    }
+
+    if (
+      !characterData.name ||
+      !characterData.image_url ||
+      !characterData.rarity ||
+      !characterData.no
+    ) {
+      console.error("coop dungeon characterData has null fields:", characterData);
+      return false;
+    }
+
+    if (!isRarity(characterData.rarity)) {
+      console.error("invalid rarity:", characterData.rarity);
+      return false;
+    }
+
+    const isNew = !ownedCharacterIds.has(String(characterData.id));
+
+    const item: CharacterItem = {
+      name: characterData.name,
+      image: characterData.image_url,
+      rarity: characterData.rarity,
+      no: String(characterData.no),
+      characterId: String(characterData.id),
+      isNew,
+    };
+
+    setAcquired(item);
+    setAcquireOpen(true);
+
+    const { error: rpcError } = await supabase.rpc("increment_user_character", {
+      p_user_id: user.id,
+      p_character_id: characterData.id,
+    });
+
+    if (rpcError) {
+      console.error("coop dungeon increment_user_character rpc error:", rpcError);
+      return false;
+    }
+
+    if (isNew) {
+      setOwnedCharacterIds((prev) => {
+        const next = new Set(prev);
+        next.add(String(characterData.id));
+        return next;
+      });
+    }
+
+    window.dispatchEvent(new Event("profile:updated"));
+    return true;
+  };
+
 
   const [earnedPoints, setEarnedPoints] = useState(0);
   const [basePoints, setBasePoints] = useState(0);
@@ -819,6 +941,9 @@ export default function QuizModePage() {
   const [earnedExp, setEarnedExp] = useState(0);
   const [awardStatus, setAwardStatus] = useState<AwardStatus>("idle");
   const awardedOnceRef = useRef(false);
+  const acquiredOnceRef = useRef(false);
+  const [acquired, setAcquired] = useState<CharacterItem | null>(null);
+  const [acquireOpen, setAcquireOpen] = useState(false);
   const sentRef = useRef(false); // ★ 成績保存 二重送信防止
   const { pushModal } = useResultModal();
 
@@ -867,6 +992,12 @@ export default function QuizModePage() {
   const [allGameClear, setAllGameClear] = useState(false);
   const [battleKey, setBattleKey] = useState(0);
   const [clearedStageCount, setClearedStageCount] = useState(0);
+  const [currentEnemyIsShiny, setCurrentEnemyIsShiny] = useState(false);
+  const [lastDefeatedEnemy, setLastDefeatedEnemy] = useState<{
+    stage: number;
+    isShiny: boolean;
+  } | null>(null);
+  const [ownedCharacterIds, setOwnedCharacterIds] = useState<Set<string>>(new Set());
 
   const roomLockedRef = useRef(false);
   useEffect(() => {
@@ -1085,6 +1216,9 @@ export default function QuizModePage() {
     setEarnedExp(0);
     sentRef.current = false;
     clearPendingAward();
+    acquiredOnceRef.current = false;
+    setLastDefeatedEnemy(null);
+    setCurrentEnemyIsShiny(false);
   };
 
   const handleNewMatch = () => {
@@ -1120,6 +1254,9 @@ export default function QuizModePage() {
     sentRef.current = false;
     clearPendingAward();
     setAllPlayersDead(false);
+    acquiredOnceRef.current = false;
+    setLastDefeatedEnemy(null);
+    setCurrentEnemyIsShiny(false);
 
     setReadyToStart(false);
 
@@ -1147,21 +1284,43 @@ export default function QuizModePage() {
   const [showEndConfirm, setShowEndConfirm] = useState(false);
 
   // ✅ 途中終了（リザルトへ）
+  // const handleEndNow = () => {
+  //   // すでに終了状態なら何もしない
+  //   if (finished) return;
+
+  //   // もし正解発表中なら押せないようにしたい場合（任意）
+  //   // if (phase === "result") return;
+
+  //   // ルームから抜けたいなら（任意）
+  //   if (roomCode) leaveRoom(roomCode);
+
+  //   // タイムアップ演出が出てたら消す（任意）
+  //   setTimeUp(false);
+
+  //   // リザルトへ
+  //   setFinished(true);
+  // };
+
   const handleEndNow = () => {
-    // すでに終了状態なら何もしない
     if (finished) return;
 
-    // もし正解発表中なら押せないようにしたい場合（任意）
-    // if (phase === "result") return;
+    const clearedStage = isGameClear
+      ? stageCount
+      : Math.max(stageCount - 1, 0);
 
-    // ルームから抜けたいなら（任意）
-    if (roomCode) leaveRoom(roomCode);
+    if (!lastDefeatedEnemy && clearedStage > 0) {
+      setLastDefeatedEnemy({
+        stage: clearedStage,
+        isShiny: currentEnemyIsShiny,
+      });
+    }
 
-    // タイムアップ演出が出てたら消す（任意）
     setTimeUp(false);
-
-    // リザルトへ
     setFinished(true);
+
+    setTimeout(() => {
+      if (roomCode) leaveRoom(roomCode);
+    }, 1000);
   };
 
   /* ---------- クイズ取得 ---------- */
@@ -1656,6 +1815,26 @@ export default function QuizModePage() {
   ]);
 
   useEffect(() => {
+    if (!finished) return;
+    if (userLoading) return;
+    if (!user) return;
+    if (acquiredOnceRef.current) return;
+    if (!lastDefeatedEnemy) return;
+
+    const defeatedEnemy = getEnemyForStage(
+      lastDefeatedEnemy.stage
+    );
+
+    const no = lastDefeatedEnemy.isShiny
+      ? defeatedEnemy.shinyNo
+      : defeatedEnemy.no;
+
+    acquiredOnceRef.current = true;
+
+    acquireEnemyCharacterByNo(String(no));
+  }, [finished, userLoading, user, lastDefeatedEnemy]);
+
+  useEffect(() => {
     if (!socket) return;
 
     socket.on("both_rematch_ready", () => {
@@ -1711,12 +1890,36 @@ export default function QuizModePage() {
       setBothReadyState(true);     
     });
 
+    socket.on("question_start", ({ stage, isShiny }) => {
+      if (typeof isShiny === "boolean") {
+        setCurrentEnemyIsShiny(isShiny);
+      }
+    });
+
+    socket.on("stage_clear", ({ stage, isShiny }) => {
+      if (typeof isShiny === "boolean") {
+        setCurrentEnemyIsShiny(isShiny);
+      }
+    });
+
+    socket.on("answer_result", (payload) => {
+      const nextEnemyHP = payload.enemyHP;
+
+      if (nextEnemyHP <= 0 && payload.stage) {
+        setLastDefeatedEnemy({
+          stage: payload.stage,
+          isShiny: !!payload.isShiny,
+        });
+      }
+    });
+
     return () => {
       socket.off("both_rematch_ready");
       socket.off("rematch_start");
       socket.off("both_ready_start");
       socket.off("answer_result");
       socket.off("question_start");
+      socket.off("stage_clear");
     };
   }, [socket]);
 
@@ -1994,6 +2197,8 @@ export default function QuizModePage() {
     openXShare({ text, url: buildTopUrl() }); // ✅トップへ
   };
 
+  const displayEnemy = getDisplayEnemy(stageCount, currentEnemyIsShiny);
+
   return (
     // <div className="container mx-auto p-8 text-center bg-gradient-to-b from-indigo-300 via-slate-300 to-sky-300" key={battleKey}>
     // <div
@@ -2001,6 +2206,12 @@ export default function QuizModePage() {
     //   key={battleKey}
     // >  
     <>
+    <CharacterAcquireModal
+      open={acquireOpen}
+      item={acquired}
+      verb="手に入れた！"
+      onClose={() => setAcquireOpen(false)}
+    />
     <OnlineGameNotice />
     <div
       className={`container mx-auto p-8 text-center transition-all duration-700 ${
@@ -2070,8 +2281,10 @@ export default function QuizModePage() {
               >
                 <p className="text-xl md:text-2xl text-center font-bold">
                   {displayedEnemyHP == 0
-                    ? `${getEnemyForStage(stageCount).name}を倒した！🎉`
-                    : `${getEnemyForStage(stageCount).name}が現れた！`}
+                    // ? `${getEnemyForStage(stageCount).name}を倒した！🎉`
+                    // : `${getEnemyForStage(stageCount).name}が現れた！`}
+                    ? `${displayEnemy.name}を倒した！🎉`
+                    : `${displayEnemy.name}が現れた！`}
                 </p>
 
                 {/* 敵表示 */}
@@ -2097,12 +2310,14 @@ export default function QuizModePage() {
                             STAGE {stageCount} 
                           </p>
                           <img
-                            src={getEnemyForStage(stageCount).image}
-                            alt={getEnemyForStage(stageCount).name}
+                            // src={getEnemyForStage(stageCount).image}
+                            // alt={getEnemyForStage(stageCount).name}
+                            src={displayEnemy.image}
+                            alt={displayEnemy.name}
                             className="w-40 h-40 md:w-60 md:h-60 mx-auto"
                           />
                           <p className="text-3xl md:text-5xl font-extrabold text-white mt-4 drop-shadow-lg">
-                            {getEnemyForStage(stageCount).name} が現れた！
+                            {displayEnemy.name} が現れた！
                           </p>
                         </motion.div>
                       </motion.div>
@@ -2146,9 +2361,12 @@ export default function QuizModePage() {
                     {/* 敵画像（HP減少時に揺れる） */}
                     {displayedEnemyHP > 0 ? ( // HP 0でも showDefeatEffect を使ってフェードアウト
                       <motion.img
-                        key={getEnemyForStage(stageCount).id} // 敵ごとにユニークに
-                        src={getEnemyForStage(stageCount).image}
-                        alt={getEnemyForStage(stageCount).name}
+                        // key={getEnemyForStage(stageCount).id} // 敵ごとにユニークに
+                        // src={getEnemyForStage(stageCount).image}
+                        // alt={getEnemyForStage(stageCount).name}
+                        key={displayEnemy.id}
+                        src={displayEnemy.image}
+                        alt={displayEnemy.name}
                         className="w-40 h-40 md:w-60 md:h-60"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1, x: [0, -6, 6, -4, 4, 0] }} // HP減少時の揺れも反映
