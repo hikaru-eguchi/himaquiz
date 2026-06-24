@@ -535,6 +535,7 @@ export default function QuizModePage() {
   const [enemyVisible, setEnemyVisible] = useState(true);
   // ====== シークレット討伐：獲得モーダル用 ======
   const [ownedCharacterIds, setOwnedCharacterIds] = useState<Set<string>>(new Set());
+  const [ownedCharacterNos, setOwnedCharacterNos] = useState<Set<string>>(new Set());
   const [acquired, setAcquired] = useState<CharacterItem | null>(null);
   const [acquireOpen, setAcquireOpen] = useState(false);
   const [floatOnce, setFloatOnce] = useState(false);
@@ -696,7 +697,7 @@ export default function QuizModePage() {
     (async () => {
       const { data, error } = await supabase
         .from("user_characters")
-        .select("character_id")
+        .select("characters(id, no)")
         .eq("user_id", user.id);
 
       if (error) {
@@ -704,8 +705,18 @@ export default function QuizModePage() {
         return;
       }
 
-      const ids = new Set<string>((data ?? []).map((r: any) => r.character_id));
+      // const ids = new Set<string>((data ?? []).map((r: any) => r.character_id));
+      // setOwnedCharacterIds(ids);
+      const ids = new Set<string>();
+      const nos = new Set<string>();
+
+      (data ?? []).forEach((r: any) => {
+        if (r.characters?.id) ids.add(r.characters.id);
+        if (r.characters?.no) nos.add(String(r.characters.no));
+      });
+
       setOwnedCharacterIds(ids);
+      setOwnedCharacterNos(nos);
     })();
   }, [user, supabase]);
 
@@ -899,9 +910,22 @@ export default function QuizModePage() {
   const hintCooldown = lastHintUsedIndex !== null && currentIndex - lastHintUsedIndex < 3;
   const healCooldown = lastHealUsedIndex !== null && currentIndex - lastHealUsedIndex < 3;
 
-  const StageIntro = ({ enemy }: { enemy: typeof enemies[0] }) => {
+  const StageIntro = ({
+    enemy,
+    isUnowned,
+  }: {
+    enemy: typeof enemies[0];
+    isUnowned: boolean;
+  }) => {
     return (
       <div className="fixed inset-0 bg-yellow-50 bg-opacity-70 flex flex-col items-center justify-center z-50">
+        {isUnowned && (
+          <div className="mb-15 w-fit mx-auto rounded-full bg-sky-100 border-2 border-sky-300 px-3 py-1">
+            <span className="text-base md:text-lg font-extrabold text-sky-600">
+              📖 図鑑未登録
+            </span>
+          </div>
+        )}
         <img src={enemy.image} alt={enemy.name} className="w-40 h-40 md:w-60 md:h-60 mb-4 animate-bounce" />
         <p className="max-w-[340px] md:max-w-full text-4xl md:text-6xl font-extrabold text-yellow-500 drop-shadow-lg">
           {enemy.name} をみつけた！
@@ -1050,6 +1074,9 @@ export default function QuizModePage() {
     acquireBossCharacterByNo(enemy.no);
   }, [finished, user]);
 
+  const isCurrentEnemyUnowned =
+  !ownedCharacterNos.has(String(currentEnemy.no));
+
   if (!questionsReady) {
     return (
       <div className="container mx-auto p-8 text-center">
@@ -1143,7 +1170,12 @@ export default function QuizModePage() {
           setAcquired(null);
         }}
       />
-      {showStageIntro && <StageIntro enemy={currentEnemy} />}
+      {showStageIntro && (
+        <StageIntro
+          enemy={currentEnemy}
+          isUnowned={isCurrentEnemyUnowned}
+        />
+      )}
       <div className="container mx-auto p-8 text-center bg-yellow-50">
         {!finished ? (
           <>
@@ -1155,6 +1187,13 @@ export default function QuizModePage() {
                 <div className="flex flex-col items-center  gap-1 md:gap-2">
                   <div className="flex flex-col items-center gap-2 to-black p-3 rounded-xl">
                     <div className="flex flex-col">
+                      {isCurrentEnemyUnowned && !isFriendEnding && (
+                        <div className="mb-2 w-fit mx-auto rounded-full bg-sky-100 border-2 border-sky-300 px-3 py-1">
+                          <span className="text-base md:text-lg font-extrabold text-sky-600">
+                            📖 図鑑未登録
+                          </span>
+                        </div>
+                      )}
                       <p className="text-xl md:text-2xl font-bold text-yellow-500">
                         {escapeMessage
                           ? `${currentEnemy.name} は ${escapeMessage}`

@@ -5,7 +5,7 @@ description: "ゲーム"
 quiz:
   title: "APEXのジャンルは？"
   genre: "雑学系"
-  level: "難しい"
+  level: "激ムズ"
   question: "『APEX Legends』はどんなジャンルのゲームでしょう？"
   choices:
     - "シューティング"

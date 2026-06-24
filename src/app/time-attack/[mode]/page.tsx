@@ -38,7 +38,8 @@ type TimeAttackRankRow = {
   best_time: number;
 };
 
-const QUESTION_LIMIT = 5;
+// const QUESTION_LIMIT = 5;
+const QUESTION_LIMIT = 3;
 const MISS_LIMIT = 10;
 
 function calcQuizEarnedPoints(correctCount: number) {
@@ -49,22 +50,41 @@ function calcEarnedExp(correctCount: number) {
   return correctCount * 20;
 }
 
+// const timeTitles = [
+//   { maxTime: 4, title: "伝説級ひまQ覚醒者" },
+//   { maxTime: 5, title: "神速のひまQマスター" },
+//   { maxTime: 6, title: "超高速クイズ王" },
+//   { maxTime: 7, title: "ひまQスピードスター" },
+//   { maxTime: 8, title: "閃光のクイズランナー" },
+//   { maxTime: 9, title: "秒速クイズ王" },
+//   { maxTime: 10, title: "電光石火の挑戦者" },
+//   { maxTime: 12, title: "超速ひらめき人間" },
+//   { maxTime: 14, title: "閃光のクイズ職人" },
+//   { maxTime: 16, title: "超反応プレイヤー" },
+//   { maxTime: 18, title: "集中力の達人" },
+//   { maxTime: 20, title: "高速クリア勢" },
+//   { maxTime: 25, title: "クイズブースター" },
+//   { maxTime: 30, title: "ひまQタイムアタッカー" },
+//   { maxTime: 40, title: "タイムアタック挑戦者" },
+//   { maxTime: Infinity, title: "のんびりクイズ勢" },
+// ];
+
 const timeTitles = [
-  { maxTime: 4, title: "伝説級ひまQ覚醒者" },
-  { maxTime: 5, title: "神速のひまQマスター" },
-  { maxTime: 6, title: "超高速クイズ王" },
-  { maxTime: 7, title: "ひまQスピードスター" },
-  { maxTime: 8, title: "閃光のクイズランナー" },
-  { maxTime: 9, title: "秒速クイズ王" },
-  { maxTime: 10, title: "電光石火の挑戦者" },
-  { maxTime: 12, title: "超速ひらめき人間" },
-  { maxTime: 14, title: "閃光のクイズ職人" },
-  { maxTime: 16, title: "超反応プレイヤー" },
-  { maxTime: 18, title: "集中力の達人" },
-  { maxTime: 20, title: "高速クリア勢" },
-  { maxTime: 25, title: "クイズブースター" },
-  { maxTime: 30, title: "ひまQタイムアタッカー" },
-  { maxTime: 40, title: "タイムアタック挑戦者" },
+  { maxTime: 2.5, title: "伝説級ひまQ覚醒者" },
+  { maxTime: 3, title: "神速のひまQマスター" },
+  { maxTime: 3.5, title: "超高速クイズ王" },
+  { maxTime: 4, title: "ひまQスピードスター" },
+  { maxTime: 4.5, title: "閃光のクイズランナー" },
+  { maxTime: 5, title: "秒速クイズ王" },
+  { maxTime: 6, title: "電光石火の挑戦者" },
+  { maxTime: 7, title: "超速ひらめき人間" },
+  { maxTime: 8, title: "閃光のクイズ職人" },
+  { maxTime: 9, title: "超反応プレイヤー" },
+  { maxTime: 10, title: "集中力の達人" },
+  { maxTime: 12, title: "高速クリア勢" },
+  { maxTime: 15, title: "クイズブースター" },
+  { maxTime: 20, title: "ひまQタイムアタッカー" },
+  { maxTime: 30, title: "タイムアタック挑戦者" },
   { maxTime: Infinity, title: "のんびりクイズ勢" },
 ];
 
@@ -168,7 +188,8 @@ const QuizResult = ({
       {showScore && (
         <div className="mx-auto mb-8 max-w-[680px] rounded-[30px] border-4 border-sky-300 bg-gradient-to-br from-cyan-50 via-white to-blue-100 px-6 py-8 shadow-[0_16px_40px_rgba(0,0,0,0.12)]">
           <p className="text-lg md:text-2xl font-extrabold text-gray-700">
-            {noRecord ? "タイム記録なし" : "5問クリアタイム"}
+            {/* {noRecord ? "タイム記録なし" : "5問クリアタイム"} */}
+            {noRecord ? "タイム記録なし" : "3問クリアタイム"}
           </p>
 
           <p className="mt-3 text-5xl md:text-7xl font-black text-sky-500 drop-shadow-sm">
@@ -545,13 +566,15 @@ export default function TimeAttackQuizPage() {
       await supabase.from("user_point_logs").insert({
         user_id: uid,
         change: payload.points,
-        reason: `5問タイムアタックでポイント獲得（クリアタイム ${formatTime(clearTime)}秒）`,
+        // reason: `5問タイムアタックでポイント獲得（クリアタイム ${formatTime(clearTime)}秒）`,
+        reason: `3問タイムアタックでポイント獲得（クリアタイム ${formatTime(clearTime)}秒）`,
       });
 
       await supabase.from("user_exp_logs").insert({
         user_id: uid,
         change: payload.exp,
-        reason: `5問タイムアタックでEXP獲得（クリアタイム ${formatTime(clearTime)}秒）`,
+        // reason: `5問タイムアタックでEXP獲得（クリアタイム ${formatTime(clearTime)}秒）`,
+        reason: `3問タイムアタックでEXP獲得（クリアタイム ${formatTime(clearTime)}秒）`,
       });
 
       setAwardStatus("awarded");
@@ -649,12 +672,13 @@ export default function TimeAttackQuizPage() {
         const start = startTimeRef.current ?? now;
         const finalTime = (now - start) / 1000;
 
-        setFlashMessage("5問クリア！");
+        // setFlashMessage("5問クリア！");
+        setFlashMessage("3問クリア！");
         setTimeout(() => setFlashMessage(null), 900);
 
         setTimeout(() => {
           finishGame(finalTime);
-        }, 650);
+        }, 800);
       }
     } else {
       const nextIncorrectCount = incorrectCount + 1;
@@ -779,7 +803,8 @@ export default function TimeAttackQuizPage() {
 
   const handleShareX = () => {
     const text = [
-      "【ひまQ｜5問タイムアタック⚡】",
+      // "【ひまQ｜5問タイムアタック⚡】",
+      "【ひまQ｜3問タイムアタック⚡】",
       noRecord
         ? "クリアタイム：記録なし"
         : `クリアタイム：${formatTime(clearTime)}秒`,

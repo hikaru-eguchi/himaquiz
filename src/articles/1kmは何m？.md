@@ -5,7 +5,7 @@ description: "単位の知識"
 quiz:
   title: "1kmは何m？"
   genre: "知識系"
-  level: "ふつう"
+  level: "難しい"
   question: "1kmは何メートルでしょう？"
   choices:
     - "100m"

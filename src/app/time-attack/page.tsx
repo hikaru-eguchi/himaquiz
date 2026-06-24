@@ -113,12 +113,12 @@ export default function TimeAttackPage() {
       >
         {/* 📱スマホ（改行あり） */}
         <span className="block md:hidden leading-tight">
-          タイム<br />アタック
+          3問だけ！<br />タイムアタック
         </span>
 
         {/* 💻PC（1行） */}
         <span className="hidden md:block">
-          タイムアタック
+          3問だけ！タイムアタック
         </span>
       </h1>
 
@@ -127,7 +127,8 @@ export default function TimeAttackPage() {
           ＜1人で遊べるクイズゲーム＞
         </p>
         <p className="text-md md:text-2xl font-semibold text-gray-800 mb-8">
-          クイズ5問を何秒でクリアできる？集中力と反射力で最速タイムを目指そう！
+          {/* クイズ3問を何秒でクリアできる？集中力と反射力で最速タイムを目指そう！ */}
+          ⚡最速王を目指せ！3問だけの超高速タイムアタック！
         </p>
 
         {/* ★ スマホは2枚、PCは6枚を順番に登場 */}
@@ -176,9 +177,9 @@ export default function TimeAttackPage() {
             ref={descriptionRef}
             className="text-gray-700 text-md md:text-lg text-center px-4 py-2"
           >
-            「タイムアタック」は、5問クイズの最速クリアを目指すスピードクイズモードです。
+            「3問だけ！タイムアタック」は、3問正解の最速クリアを目指すスピードクイズモードです。
             <br />
-            5問すべてを、どれだけ速く正解できるかが勝負！
+            3問正解を、どれだけ速くだせるかが勝負！
             <br />
             簡単そうに見えて、焦ると意外と間違える…！？
             <br />

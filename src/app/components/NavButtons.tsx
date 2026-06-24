@@ -147,7 +147,9 @@ export default function NavButtons() {
                             activeUrl === "/time-attack" ? activeStyle : ""
                           }`}
                         >
-                          タイムアタック
+                          {/* タイムアタック */}
+                          {/* 3問だけ！タイムアタック */}
+                          3問タイムアタック
                         </button>
                       </Link>
 

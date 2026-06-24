@@ -141,6 +141,12 @@ export function CharacterAcquireModal({
               </div>
             )}
 
+            {item.isNew && (
+              <p className="mb-2 md:mb-3 text-lg md:text-xl font-extrabold text-yellow-200 drop-shadow animate-pulse">
+                📖 図鑑に登録されました！
+              </p>
+            )}
+
             <img
               src={item.image}
               className="w-50 h-50 md:w-70 md:h-70 mx-auto drop-shadow-lg"

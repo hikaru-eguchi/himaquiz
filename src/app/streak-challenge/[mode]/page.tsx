@@ -937,26 +937,40 @@ export default function QuizModePage() {
       list.filter((q) => q.quiz.level === "激ムズ")
     );
 
-    // 1～3問：かんたん
-    const first3Easy = easyQuestions.slice(0, 3);
+    // // 1～3問：かんたん
+    // const first3Easy = easyQuestions.slice(0, 3);
 
-    // 4～10問：ふつう
-    const next7Normal = normalQuestions.slice(0, 7);
+    // // 4～10問：ふつう
+    // const next7Normal = normalQuestions.slice(0, 7);
 
-    // 11～15問：難しい
-    const next5Hard = hardQuestions.slice(0, 5);
+    // // 11～15問：難しい
+    // const next5Hard = hardQuestions.slice(0, 5);
+    
+    // const usedIds = new Set(
+    //   [...first3Easy, ...next7Normal, ...next5Hard].map((q) => getQuestionKey(q))
+    // );
+
+    // 1～5問：かんたん
+    const first5Easy = easyQuestions.slice(0, 5);
+
+    // 6～15問：ふつう
+    const next10Normal = normalQuestions.slice(0, 10);
 
     const usedIds = new Set(
-      [...first3Easy, ...next7Normal, ...next5Hard].map((q) => getQuestionKey(q))
+      [...first5Easy, ...next10Normal].map((q) =>
+        getQuestionKey(q)
+      )
     );
 
     // 16～29問：ふつう・難しい
     const stage16to29 = shuffleArray([
-      ...normalQuestions.filter((q) => !usedIds.has(getQuestionKey(q))),
+      // ...normalQuestions.filter((q) => !usedIds.has(getQuestionKey(q))),
+      ...normalQuestions.slice(10).filter((q) => !usedIds.has(getQuestionKey(q))),
       ...hardQuestions.filter((q) => !usedIds.has(getQuestionKey(q))),
     ]).slice(0, 14);
 
-    stage16to29.forEach((q) => usedIds.add(q.id));
+    // stage16to29.forEach((q) => usedIds.add(q.id));
+    stage16to29.forEach((q) => usedIds.add(getQuestionKey(q)));
 
     // 30～49問：ふつう・難しい・激ムズ
     const stage30to49 = shuffleArray([
@@ -965,7 +979,8 @@ export default function QuizModePage() {
       ...expertQuestions.filter((q) => !usedIds.has(getQuestionKey(q))),
     ]).slice(0, 20);
 
-    stage30to49.forEach((q) => usedIds.add(q.id));
+    // stage30to49.forEach((q) => usedIds.add(q.id));
+    stage30to49.forEach((q) => usedIds.add(getQuestionKey(q)));
 
     // 50～79問：難しい・激ムズ
     const stage50to79 = shuffleArray([
@@ -973,7 +988,8 @@ export default function QuizModePage() {
       ...expertQuestions.filter((q) => !usedIds.has(getQuestionKey(q))),
     ]).slice(0, 30);
 
-    stage50to79.forEach((q) => usedIds.add(q.id));
+    // stage50to79.forEach((q) => usedIds.add(q.id));
+    stage50to79.forEach((q) => usedIds.add(getQuestionKey(q)));
 
     // 80問以降：激ムズのみ
     const stage80Plus = shuffleArray(
@@ -981,9 +997,11 @@ export default function QuizModePage() {
     );
 
     return [
-      ...first3Easy,
-      ...next7Normal,
-      ...next5Hard,
+      // ...first3Easy,
+      // ...next7Normal,
+      // ...next5Hard,
+      ...first5Easy,
+      ...next10Normal,
       ...stage16to29,
       ...stage30to49,
       ...stage50to79,

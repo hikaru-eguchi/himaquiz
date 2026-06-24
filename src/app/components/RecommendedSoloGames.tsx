@@ -25,9 +25,10 @@ const SOLO_GAMES: GameCard[] = [
   {
     key: "timeattack",
     href: "/time-attack",
-    label: "⚡タイムアタック",
-    desc1: "5問を何秒でクリアできる？",
-    desc2: "最速タイムを目指そう！",
+    // label: "⚡タイムアタック",
+    label: "⚡3問だけ！タイムアタック",
+    desc1: "最速王を目指せ！",
+    desc2: "3問だけの超高速タイムアタック！",
     buttonClassName:
       "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-sky-400 via-cyan-400 to-blue-400 text-white hover:scale-110 transition-all",
   },

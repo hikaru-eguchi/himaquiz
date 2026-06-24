@@ -101,7 +101,7 @@ export default function TimeAttackRankingTop10({ rows }: { rows: Row[] }) {
               </p>
 
               <p className="mt-2 text-xs md:text-sm text-gray-500 font-semibold">
-                5問クリアまでの最速タイムで勝負！
+                3問クリアまでの最速タイムで勝負！
               </p>
             </div>
 

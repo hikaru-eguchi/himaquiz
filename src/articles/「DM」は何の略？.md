@@ -5,7 +5,7 @@ description: "ネット用語の略語雑学"
 quiz:
   title: "DMの略"
   genre: "雑学系"
-  level: "ふつう"
+  level: "難しい"
   question: "SNSで使う「DM」は何の略？"
   choices:
     - "Data Mail"
