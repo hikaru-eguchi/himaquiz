@@ -377,7 +377,7 @@ export default function DailyHardChallengeClient() {
                 🔥今日の激ムズチャレンジ
             </p>
             <p className="mt-3 text-lg md:text-xl font-black text-yellow-100">
-                最難関の3問に挑め！全問正解で1000Pゲット！
+                最難関の3問に挑め！全問正解で500Pゲット！
             </p>
             <p className="mt-1 text-sm md:text-base font-bold text-white">
                 ※1日1回のみ挑戦できます
@@ -408,7 +408,7 @@ export default function DailyHardChallengeClient() {
                     </p>
 
                     <p className="mt-2 font-bold text-gray-700">
-                    3問連続正解で1000P！1問でも間違えたら終了です。
+                    3問連続正解で500P！1問でも間違えたら終了です。
                     </p>
 
                     <button
@@ -526,7 +526,7 @@ export default function DailyHardChallengeClient() {
                         報酬ゲット！
                         </p>
                         <p className="mt-1 text-4xl md:text-5xl font-black text-green-600">
-                        1000P
+                        500P
                         </p>
                     </div>
 
