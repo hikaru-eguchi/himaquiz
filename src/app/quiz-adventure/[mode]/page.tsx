@@ -97,20 +97,46 @@ const getEnemyNo = (stage: number, isShiny: boolean) => {
   return String(isShiny ? enemy.shinyNo : enemy.no);
 };
 
+const stagePointMap: Record<number, number> = {
+  1: 10,
+  2: 20,
+  3: 30,
+  4: 40,
+  5: 50,
+  6: 60,
+  7: 80,
+  8: 100,
+  9: 150,
+  10: 200,
+  11: 300,
+  12: 400,
+  13: 500,
+  14: 600,
+  15: 700,
+  16: 800,
+  17: 900,
+  18: 1000,
+  19: 1500,
+  20: 3000,
+  21: 5000,
+  22: 10000,
+  23: 20000,
+};
+
 const stageExpMap: Record<number, number> = {
   1: 10,
-  2: 15,
-  3: 20,
-  4: 25,
-  5: 30,
+  2: 20,
+  3: 30,
+  4: 40,
+  5: 50,
 
-  6: 40,
-  7: 50,
-  8: 60,
-  9: 70,
-  10: 80,
+  6: 60,
+  7: 70,
+  8: 80,
+  9: 90,
+  10: 100,
 
-  11: 100,
+  11: 120,
   12: 150,
   13: 200,
   14: 250,
@@ -135,6 +161,40 @@ function calcEarnedExpByClearedStage(clearedStage: number) {
   }
 
   return total;
+}
+
+function calcEarnedPointsByDefeatedStages(
+  defeatedStages: { stage: number; isShiny: boolean }[]
+) {
+  return defeatedStages.reduce((total, row) => {
+    const base = stagePointMap[row.stage] ?? 0;
+    return total + Math.floor(base * (row.isShiny ? 1.5 : 1));
+  }, 0);
+}
+
+function calcEarnedExpByDefeatedStages(
+  defeatedStages: { stage: number; isShiny: boolean }[]
+) {
+  return defeatedStages.reduce((total, row) => {
+    const base = stageExpMap[row.stage] ?? 0;
+    return total + Math.floor(base * (row.isShiny ? 1.5 : 1));
+  }, 0);
+}
+
+function calcBasePointsByDefeatedStages(
+  defeatedStages: { stage: number; isShiny: boolean }[]
+) {
+  return defeatedStages.reduce((total, row) => {
+    return total + (stagePointMap[row.stage] ?? 0);
+  }, 0);
+}
+
+function calcBaseExpByDefeatedStages(
+  defeatedStages: { stage: number; isShiny: boolean }[]
+) {
+  return defeatedStages.reduce((total, row) => {
+    return total + (stageExpMap[row.stage] ?? 0);
+  }, 0);
 }
 
 const RARITIES: Rarity[] = [
@@ -192,6 +252,8 @@ interface QuizResultProps {
   onGoLogin: () => void;
   isCodeMatch: boolean;
   onShareX: () => void;
+  shinyBonusPoints: number;
+  shinyBonusExp: number;
 }
 
 // 正解数に応じて出すコメント
@@ -234,6 +296,8 @@ const QuizResult = ({
   onGoLogin,
   isCodeMatch,
   onShareX,
+  shinyBonusPoints,
+  shinyBonusExp,
 }: QuizResultProps) => {
   const [showScore, setShowScore] = useState(false);
   const [showText, setShowText] = useState(false);
@@ -409,14 +473,20 @@ const QuizResult = ({
 
       {showButton && (
         <div className="mx-auto max-w-[560px] bg-white border-2 border-black rounded-2xl p-4 shadow-2xl mt-6">
-          <div className="mb-2 text-lg md:text-xl text-gray-700 font-bold">
+          {/* <div className="mb-2 text-lg md:text-xl text-gray-700 font-bold">
             <p className="text-blue-500">
               正解数ポイント：{basePoints}P（{correctCount}問 × 10P）
             </p>
             <p className="text-yellow-500">
               ステージクリアボーナス：{stageBonusPoints}P（STAGE {stageCount}）
             </p>
-          </div>
+          </div> */}
+
+          {(shinyBonusPoints > 0 || shinyBonusExp > 0) && (
+            <p className="text-lg md:text-xl font-black text-yellow-500 mb-2">
+              ✨色違いボーナス +{shinyBonusPoints}P / +{shinyBonusExp}EXP
+            </p>
+          )}
 
           <p className="text-xl md:text-2xl font-extrabold text-gray-800">
             今回の獲得ポイント： <span className="text-green-600">{earnedPoints} P</span>
@@ -998,6 +1068,12 @@ export default function QuizModePage() {
     isShiny: boolean;
   } | null>(null);
   const [ownedCharacterIds, setOwnedCharacterIds] = useState<Set<string>>(new Set());
+  const [defeatedStages, setDefeatedStages] = useState<
+    { stage: number; isShiny: boolean }[]
+  >([]);
+
+  const [shinyBonusPoints, setShinyBonusPoints] = useState(0);
+  const [shinyBonusExp, setShinyBonusExp] = useState(0);
 
   const roomLockedRef = useRef(false);
   useEffect(() => {
@@ -1028,34 +1104,34 @@ export default function QuizModePage() {
     return 2580;
   };
 
-  const calcStageBonus = (stage: number) => {
-    const table: Record<number, number> = {
-      1: 15,
-      2: 30,
-      3: 75,
-      4: 150,
-      5: 225,
-      6: 300,
-      7: 450,
-      8: 600,
-      9: 900,
-      10: 1200,
-      11: 1500,
-      12: 1800,
-      13: 2100,
-      14: 2400,
-      15: 2700,
-      16: 3600,
-      17: 4500,
-      18: 6000,
-      19: 9000,
-      20: 12000,
-      21: 15000,
-      22: 20000,
-      23: 20000,
-    };
-    return table[Math.min(stage, 23)] ?? 0;
-  };
+  // const calcStageBonus = (stage: number) => {
+  //   const table: Record<number, number> = {
+  //     1: 15,
+  //     2: 30,
+  //     3: 75,
+  //     4: 150,
+  //     5: 225,
+  //     6: 300,
+  //     7: 450,
+  //     8: 600,
+  //     9: 900,
+  //     10: 1200,
+  //     11: 1500,
+  //     12: 1800,
+  //     13: 2100,
+  //     14: 2400,
+  //     15: 2700,
+  //     16: 3600,
+  //     17: 4500,
+  //     18: 6000,
+  //     19: 9000,
+  //     20: 12000,
+  //     21: 15000,
+  //     22: 20000,
+  //     23: 20000,
+  //   };
+  //   return table[Math.min(stage, 23)] ?? 0;
+  // };
 
   const titles = [
     { threshold: 5, title: "クイズ戦士" },
@@ -1219,6 +1295,9 @@ export default function QuizModePage() {
     acquiredOnceRef.current = false;
     setLastDefeatedEnemy(null);
     setCurrentEnemyIsShiny(false);
+    setDefeatedStages([]);
+    setShinyBonusPoints(0);
+    setShinyBonusExp(0);
   };
 
   const handleNewMatch = () => {
@@ -1257,6 +1336,9 @@ export default function QuizModePage() {
     acquiredOnceRef.current = false;
     setLastDefeatedEnemy(null);
     setCurrentEnemyIsShiny(false);
+    setDefeatedStages([]);
+    setShinyBonusPoints(0);
+    setShinyBonusExp(0);
 
     setReadyToStart(false);
 
@@ -1308,10 +1390,23 @@ export default function QuizModePage() {
       ? stageCount
       : Math.max(stageCount - 1, 0);
 
+    // if (!lastDefeatedEnemy && clearedStage > 0) {
+    //   setLastDefeatedEnemy({
+    //     stage: clearedStage,
+    //     isShiny: currentEnemyIsShiny,
+    //   });
+    // }
     if (!lastDefeatedEnemy && clearedStage > 0) {
-      setLastDefeatedEnemy({
+      const defeated = {
         stage: clearedStage,
         isShiny: currentEnemyIsShiny,
+      };
+
+      setLastDefeatedEnemy(defeated);
+
+      setDefeatedStages((prev) => {
+        if (prev.some((row) => row.stage === defeated.stage)) return prev;
+        return [...prev, defeated];
       });
     }
 
@@ -1647,11 +1742,58 @@ export default function QuizModePage() {
     }
   }, [allPlayersReady, bothReady]);
 
+  // useEffect(() => {
+  //   if (!finished) return;
+
+  //   const base = correctCount * 10;             // ✅ 1問20P
+  //   // const bonus = calcStageBonus(stageCount);  // ✅ ステージボーナス
+  //   const clearedStage =
+  //     isGameClear
+  //       ? stageCount
+  //       : Math.max(stageCount - 1, 0);
+
+  //   setClearedStageCount(clearedStage);
+
+  //   const bonus = calcStageBonus(clearedStage);
+  //   const earned = base + bonus;
+
+  //   setBasePoints(base);
+  //   setStageBonusPoints(bonus);
+  //   setEarnedPoints(earned);
+
+  //   // const expEarned = correctCount * 20;
+  //   const expEarned = calcEarnedExpByClearedStage(clearedStage);
+  //   setEarnedExp(expEarned);
+
+  //   // pointsもexpも0ならDB処理なし
+  //   if (earned <= 0 && expEarned <= 0) {
+  //     setAwardStatus("idle");
+  //     clearPendingAward();
+  //     return;
+  //   }
+
+  //   const payload: PendingAward = {
+  //     points: earned,
+  //     exp: expEarned,
+  //     correctCount,
+  //     stageCount: clearedStage,
+  //     basePoints: base,
+  //     stageBonusPoints: bonus,
+  //     createdAt: Date.now(),
+  //   };
+
+  //   // ✅ まずpending保存（ここが重要）
+  //   savePendingAward(payload);
+
+  //   // ✅ その場で付与を試す（ログイン揺れでも ensureAuthedUserId が面倒みる）
+  //   awardPointsAndExp(payload);
+
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [finished, correctCount, stageCount]);
+
   useEffect(() => {
     if (!finished) return;
 
-    const base = correctCount * 10;             // ✅ 1問20P
-    // const bonus = calcStageBonus(stageCount);  // ✅ ステージボーナス
     const clearedStage =
       isGameClear
         ? stageCount
@@ -1659,42 +1801,44 @@ export default function QuizModePage() {
 
     setClearedStageCount(clearedStage);
 
-    const bonus = calcStageBonus(clearedStage);
-    const earned = base + bonus;
+    const stagePoints = calcEarnedPointsByDefeatedStages(defeatedStages);
+    const baseStagePoints = calcBasePointsByDefeatedStages(defeatedStages);
+
+    const exp = calcEarnedExpByDefeatedStages(defeatedStages);
+    const baseExp = calcBaseExpByDefeatedStages(defeatedStages);
+
+    const base = correctCount * 10;
+    const points = base + stagePoints;
 
     setBasePoints(base);
-    setStageBonusPoints(bonus);
-    setEarnedPoints(earned);
+    setStageBonusPoints(stagePoints);
+    setEarnedPoints(points);
+    setEarnedExp(exp);
 
-    // const expEarned = correctCount * 20;
-    const expEarned = calcEarnedExpByClearedStage(clearedStage);
-    setEarnedExp(expEarned);
+    setShinyBonusPoints(stagePoints - baseStagePoints);
+    setShinyBonusExp(exp - baseExp);
 
-    // pointsもexpも0ならDB処理なし
-    if (earned <= 0 && expEarned <= 0) {
+    if (points <= 0 && exp <= 0) {
       setAwardStatus("idle");
       clearPendingAward();
       return;
     }
 
     const payload: PendingAward = {
-      points: earned,
-      exp: expEarned,
+      points,
+      exp,
       correctCount,
       stageCount: clearedStage,
       basePoints: base,
-      stageBonusPoints: bonus,
+      stageBonusPoints: stagePoints,
       createdAt: Date.now(),
     };
 
-    // ✅ まずpending保存（ここが重要）
     savePendingAward(payload);
-
-    // ✅ その場で付与を試す（ログイン揺れでも ensureAuthedUserId が面倒みる）
     awardPointsAndExp(payload);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [finished, correctCount, stageCount]);
+  }, [finished, correctCount, stageCount, isGameClear, defeatedStages]);
 
   // ✅ 起動時に pending があれば拾う
   // useEffect(() => {
@@ -1902,13 +2046,30 @@ export default function QuizModePage() {
       }
     });
 
+    // socket.on("answer_result", (payload) => {
+    //   const nextEnemyHP = payload.enemyHP;
+
+    //   if (nextEnemyHP <= 0 && payload.stage) {
+    //     setLastDefeatedEnemy({
+    //       stage: payload.stage,
+    //       isShiny: !!payload.isShiny,
+    //     });
+    //   }
+    // });
     socket.on("answer_result", (payload) => {
       const nextEnemyHP = payload.enemyHP;
 
       if (nextEnemyHP <= 0 && payload.stage) {
-        setLastDefeatedEnemy({
-          stage: payload.stage,
+        const defeated = {
+          stage: Number(payload.stage),
           isShiny: !!payload.isShiny,
+        };
+
+        setLastDefeatedEnemy(defeated);
+
+        setDefeatedStages((prev) => {
+          if (prev.some((row) => row.stage === defeated.stage)) return prev;
+          return [...prev, defeated];
         });
       }
     });
@@ -2702,6 +2863,8 @@ export default function QuizModePage() {
           onGoLogin={() => router.push("/user/login")}
           isCodeMatch={mode === "code"}
           onShareX={handleShareX}
+          shinyBonusPoints={shinyBonusPoints}
+          shinyBonusExp={shinyBonusExp}
         />
       )}
     </div>

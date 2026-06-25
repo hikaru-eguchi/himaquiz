@@ -21,29 +21,33 @@ import RecommendedSoloGames from "@/app/components/RecommendedSoloGames";
 // ポイント仕様（ステージ到達に応じて付与）
 // =====================
 const stagePointMap: Record<number, number> = {
-  1: 15,
-  2: 30,
-  3: 75,
-  4: 150,
-  5: 225,
-  6: 300,
-  7: 450,
-  8: 600,
-  9: 900,
-  10: 1200,
-  11: 1500,
-  12: 1800,
-  13: 2100,
-  14: 2400,
-  15: 2700,
-  16: 3600,
-  17: 4500,
-  18: 6000,
-  19: 9000,
-  20: 12000,
-  21: 15000,
-  22: 20000,
-  23: 30000,
+  1: 10,
+  2: 20,
+  3: 30,
+  4: 40,
+  5: 50,
+
+  6: 60,
+  7: 80,
+  8: 100,
+  9: 150,
+  10: 200,
+
+  11: 300,
+  12: 400,
+  13: 500,
+  14: 600,
+  15: 700,
+
+  16: 800,
+  17: 900,
+  18: 1000,
+  19: 1500,
+  20: 3000,
+
+  21: 5000,
+  22: 10000,
+  23: 20000,
 };
 
 const RARITIES: Rarity[] = [
@@ -161,7 +165,7 @@ const makeShinySecretEnemy = (enemy: SecretEnemy): SecretEnemy => {
 };
 
 const rollShinySecretEnemy = (enemy: SecretEnemy): SecretEnemy => {
-  return Math.random() < 0.2
+  return Math.random() < 0.15
     ? makeShinySecretEnemy(enemy)
     : { ...enemy, isShiny: false };
 };
@@ -205,8 +209,51 @@ const getSecretResult = (bossId: string, variant: "normal" | "fairy") => {
 };
 
 
+// function calcEarnedPointsByClearedStage(clearedStage: number) {
+//   return stagePointMap[clearedStage] ?? 0;
+// }
 function calcEarnedPointsByClearedStage(clearedStage: number) {
-  return stagePointMap[clearedStage] ?? 0;
+  let total = 0;
+
+  for (let stage = 1; stage <= clearedStage; stage++) {
+    total += stagePointMap[stage] ?? 0;
+  }
+
+  return total;
+}
+
+function calcEarnedPointsByDefeatedStages(
+  defeatedStages: { stage: number; isShiny: boolean }[]
+) {
+  return defeatedStages.reduce((total, row) => {
+    const base = stagePointMap[row.stage] ?? 0;
+    return total + Math.floor(base * (row.isShiny ? 1.5 : 1));
+  }, 0);
+}
+
+function calcEarnedExpByDefeatedStages(
+  defeatedStages: { stage: number; isShiny: boolean }[]
+) {
+  return defeatedStages.reduce((total, row) => {
+    const base = stageExpMap[row.stage] ?? 0;
+    return total + Math.floor(base * (row.isShiny ? 1.5 : 1));
+  }, 0);
+}
+
+function calcBasePointsByDefeatedStages(
+  defeatedStages: { stage: number; isShiny: boolean }[]
+) {
+  return defeatedStages.reduce((total, row) => {
+    return total + (stagePointMap[row.stage] ?? 0);
+  }, 0);
+}
+
+function calcBaseExpByDefeatedStages(
+  defeatedStages: { stage: number; isShiny: boolean }[]
+) {
+  return defeatedStages.reduce((total, row) => {
+    return total + (stageExpMap[row.stage] ?? 0);
+  }, 0);
 }
 
 // function calcEarnedExpByCorrectCount(correctCount: number) {
@@ -215,18 +262,18 @@ function calcEarnedPointsByClearedStage(clearedStage: number) {
 
 const stageExpMap: Record<number, number> = {
   1: 10,
-  2: 15,
-  3: 20,
-  4: 25,
-  5: 30,
+  2: 20,
+  3: 30,
+  4: 40,
+  5: 50,
 
-  6: 40,
-  7: 50,
-  8: 60,
-  9: 70,
-  10: 80,
+  6: 60,
+  7: 70,
+  8: 80,
+  9: 90,
+  10: 100,
 
-  11: 100,
+  11: 120,
   12: 150,
   13: 200,
   14: 250,
@@ -528,9 +575,24 @@ const makeShinyEnemy = (enemy: Enemy): Enemy => {
   };
 };
 
-const rollShinyEnemy = (enemy: Enemy): Enemy => {
-  // 5分の1
-  if (Math.random() < 0.2) {
+// const rollShinyEnemy = (enemy: Enemy): Enemy => {
+//   // 5分の1
+//   if (Math.random() < 0.2) {
+//     return makeShinyEnemy(enemy);
+//   }
+
+//   return {
+//     ...enemy,
+//     isShiny: false,
+//   };
+// };
+const getShinyRateByStage = (stage: number) => {
+  if (stage <= 10) return 0.15;
+  return 0.2;
+};
+
+const rollShinyEnemy = (enemy: Enemy, stage: number): Enemy => {
+  if (Math.random() < getShinyRateByStage(stage)) {
     return makeShinyEnemy(enemy);
   }
 
@@ -635,6 +697,8 @@ const QuizResult = ({
   secretComment,
   secretCleared,
   rankingRows,
+  shinyBonusPoints,
+  shinyBonusExp,
 }: {
   correctCount: number;
   getTitle: () => string;
@@ -653,6 +717,8 @@ const QuizResult = ({
   secretComment?: string;
   secretCleared: boolean;
   rankingRows: { user_id: string; username: string | null; avatar_url: string | null; best_stage: number }[];
+  shinyBonusPoints: number;
+  shinyBonusExp: number;
 }) => {
   const [showScore, setShowScore] = useState(false);
   const [showText, setShowText] = useState(false);
@@ -797,6 +863,11 @@ const QuizResult = ({
 
           {/* ★ 追加：獲得ポイント表示 */}
           <div className="mx-auto max-w-[520px] bg-white border-2 border-black rounded-xl p-4 shadow mt-2">
+            {(shinyBonusPoints > 0 || shinyBonusExp > 0) && (
+              <p className="mt-2 text-lg md:text-2xl font-black text-yellow-500">
+                ✨色違いボーナス +{shinyBonusPoints}P / +{shinyBonusExp}EXP
+              </p>
+            )}
             <p className="text-xl md:text-2xl font-extrabold text-gray-800">
               今回の獲得ポイント： <span className="text-green-600">{earnedPoints} P</span>
             </p>
@@ -1160,6 +1231,11 @@ export default function QuizModePage() {
   };
   const [currentEnemy, setCurrentEnemy] = useState<CurrentEnemy | null>(null);
   const [lastDefeatedEnemy, setLastDefeatedEnemy] = useState<CurrentEnemy | null>(null);
+  const [defeatedStages, setDefeatedStages] = useState<
+    { stage: number; isShiny: boolean }[]
+  >([]);
+  const [shinyBonusPoints, setShinyBonusPoints] = useState(0);
+  const [shinyBonusExp, setShinyBonusExp] = useState(0);
   // ====== シークレット討伐：獲得モーダル用 ======
   const [ownedCharacterIds, setOwnedCharacterIds] = useState<Set<string>>(new Set());
   const [acquired, setAcquired] = useState<CharacterItem | null>(null);
@@ -1408,6 +1484,9 @@ export default function QuizModePage() {
     setEnemyVisible(true);
     setMiracleSeedMessage(null);
     setLastDefeatedEnemy(null);
+    setDefeatedStages([]);
+    setShinyBonusPoints(0);
+    setShinyBonusExp(0);
 
     // クールダウン系
     setLastHintUsedIndex(null);
@@ -1739,7 +1818,7 @@ export default function QuizModePage() {
     const rolledEnemy =
       course === "secret"
         ? rollShinySecretEnemy(baseEnemy as SecretEnemy)
-        : rollShinyEnemy(baseEnemy as Enemy);
+        : rollShinyEnemy(baseEnemy as Enemy, currentStage + 1);
 
     setCurrentEnemy(rolledEnemy);
     setEnemyHP(rolledEnemy.hp);
@@ -1856,6 +1935,13 @@ export default function QuizModePage() {
 
         if (remainingHP <= 0) {
           setLastDefeatedEnemy(enemy);
+          setDefeatedStages((prev) => [
+            ...prev,
+            {
+              stage: currentStage + 1,
+              isShiny: !!enemy.isShiny,
+            },
+          ]);
           setIsBlinkingEnemy(false);
 
           // フェードアウト開始
@@ -2573,21 +2659,57 @@ export default function QuizModePage() {
     if (!finished) return;
     if (userLoading) return; // ← userの揺れ対策（判定を安定させる）
 
-    let points = calcEarnedPointsByClearedStage(correctCount);
+    // let points = calcEarnedPointsByClearedStage(correctCount);
     // let exp = calcEarnedExpByCorrectCount(quizCorrectCount);
-    let exp = calcEarnedExpByClearedStage(correctCount);
+    // let exp = calcEarnedExpByClearedStage(correctCount);
+    // let points = calcEarnedPointsByDefeatedStages(defeatedStages);
+    // let exp = calcEarnedExpByDefeatedStages(defeatedStages);
 
-    // ✅ シークレットボスを倒した時だけ特別報酬
+    // // ✅ シークレットボスを倒した時だけ特別報酬
+    // const isSecretBossCleared = course === "secret" && correctCount >= 1;
+
+    // if (isSecretBossCleared) {
+    //   const r = calcSecretRewardByBoss(boss, variant);
+    //   points = r.points;
+    //   exp = r.exp;
+    // }
+
+    // setEarnedPoints(points);
+    // setEarnedExp(exp);
+
+    let points = calcEarnedPointsByDefeatedStages(defeatedStages);
+    let exp = calcEarnedExpByDefeatedStages(defeatedStages);
+
+    let basePoints = calcBasePointsByDefeatedStages(defeatedStages);
+    let baseExp = calcBaseExpByDefeatedStages(defeatedStages);
+
     const isSecretBossCleared = course === "secret" && correctCount >= 1;
 
+    // if (isSecretBossCleared) {
+    //   const r = calcSecretRewardByBoss(boss, variant);
+    //   points = r.points;
+    //   exp = r.exp;
+
+    //   basePoints = r.points;
+    //   baseExp = r.exp;
+    // }
     if (isSecretBossCleared) {
       const r = calcSecretRewardByBoss(boss, variant);
-      points = r.points;
-      exp = r.exp;
+
+      const isShinySecret = defeatedStages.some((row) => row.isShiny);
+      const bonusRate = isShinySecret ? 1.5 : 1;
+
+      basePoints = r.points;
+      baseExp = r.exp;
+
+      points = Math.floor(r.points * bonusRate);
+      exp = Math.floor(r.exp * bonusRate);
     }
 
     setEarnedPoints(points);
     setEarnedExp(exp);
+    setShinyBonusPoints(points - basePoints);
+    setShinyBonusExp(exp - baseExp);
 
     // ✅ finished になったら必ず “保留” を作る（取りこぼしゼロ）
     savePendingAward({ correctCount, points, exp });
@@ -2595,7 +2717,7 @@ export default function QuizModePage() {
     // ✅ そのまま付与を試す（ログインできてれば即付与、できなければ need_login）
     awardPointsAndExp({ correctCount, points, exp });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [finished, correctCount, quizCorrectCount, userLoading]);
+  }, [finished, correctCount, quizCorrectCount, userLoading, defeatedStages]);
 
   // ============================
   // ✅ 取りこぼし防止：マウント時に pending を拾う
@@ -3277,6 +3399,8 @@ export default function QuizModePage() {
             secretComment={secretRes?.comment}
             secretCleared={secretCleared}
             rankingRows={rankingRows}
+            shinyBonusPoints={shinyBonusPoints}
+            shinyBonusExp={shinyBonusExp}
           />
         )}
       </div>
