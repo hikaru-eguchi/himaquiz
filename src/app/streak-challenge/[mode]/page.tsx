@@ -36,7 +36,7 @@ function calcQuizEarnedPoints(correctCount: number) {
   let total = 0;
   for (let i = 1; i <= correctCount; i++) {
     const tier = Math.floor((i - 1) / 3); // 0,1,2...
-    const per = 30 * (tier + 1); // 5,10,15...
+    const per = 15 * (tier + 1); // 5,10,15...
     total += per;
   }
   return total;
@@ -198,11 +198,15 @@ const QuizResult = ({
 
   useEffect(() => {
     const timers: NodeJS.Timeout[] = [];
+    // timers.push(setTimeout(() => setShowScore(true), 500));
+    // timers.push(setTimeout(() => setShowText2(true), 1000));
+    // timers.push(setTimeout(() => setShowText(true), 1500));
+    // timers.push(setTimeout(() => setShowRank(true), 2000));
+    // timers.push(setTimeout(() => setShowButton(true), 2000));
     timers.push(setTimeout(() => setShowScore(true), 500));
-    timers.push(setTimeout(() => setShowText2(true), 1000));
-    timers.push(setTimeout(() => setShowText(true), 1500));
-    timers.push(setTimeout(() => setShowRank(true), 2000));
-    timers.push(setTimeout(() => setShowButton(true), 2000));
+    timers.push(setTimeout(() => setShowRank(true), 1000));
+    timers.push(setTimeout(() => setShowText2(true), 1800));
+    timers.push(setTimeout(() => setShowButton(true), 2200));
     return () => timers.forEach(clearTimeout);
   }, []);
 
@@ -232,11 +236,11 @@ const QuizResult = ({
         <p className="text-3xl md:text-5xl mb-4 md:mb-6">連続正解数： {correctCount}問</p>
       )}
 
-      {showText2 && (
+      {/* {showText2 && (
         <>
-          {/* <p className="mt-4 text-base md:text-lg font-bold text-gray-700">
+          <p className="mt-4 text-base md:text-lg font-bold text-gray-700">
             {getRetryMessage()}
-          </p> */}
+          </p>
           
           <div className="mx-auto my-8 max-w-[620px]">
             {percentLoading ? (
@@ -246,11 +250,11 @@ const QuizResult = ({
                 </p>
               </div>
             ) : topPercent !== null ? (
-              <div className="relative overflow-hidden rounded-[28px] border-4 border-yellow-300 bg-gradient-to-br from-yellow-100 via-white to-orange-100 px-6 py-8 shadow-[0_16px_40px_rgba(0,0,0,0.12)]">
+              <div className="relative overflow-hidden rounded-[28px] border-4 border-yellow-300 bg-gradient-to-br from-yellow-100 via-white to-orange-100 px-6 py-2 md:py-6 shadow-[0_16px_40px_rgba(0,0,0,0.12)]">
                 <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-yellow-300/40 blur-2xl" />
                 <div className="absolute -left-6 -bottom-6 h-24 w-24 rounded-full bg-pink-300/30 blur-2xl" />
 
-                <p className="mt-3 text-lg md:text-2xl font-bold text-gray-700">
+                <p className="mt-1 text-lg md:text-2xl font-bold text-gray-700">
                   あなたの今回の記録は…
                 </p>
 
@@ -262,9 +266,9 @@ const QuizResult = ({
                   かなりすごい記録です！
                 </p>
 
-                {/* <div className="mt-5 inline-flex items-center rounded-full bg-black px-4 py-2 text-sm md:text-base font-extrabold text-white">
+                <div className="mt-5 inline-flex items-center rounded-full bg-black px-4 py-2 text-sm md:text-base font-extrabold text-white">
                   🔥 もう1回でさらに上を狙える
-                </div> */}
+                </div>
 
                 <div className="mt-5 inline-flex items-center rounded-full bg-black px-4 py-2 text-sm md:text-base font-extrabold text-white">
                   🔥 {getRetryMessage()}
@@ -279,15 +283,15 @@ const QuizResult = ({
             )}
           </div>
         </>
-      )}
+      )} */}
 
-      {showText && (
+      {/* {showText && (
         <p className="text-xl md:text-2xl text-gray-600 mb-2 mt-10">あなたの称号は…</p>
-      )}
+      )} */}
 
       {showRank && (
         <>
-          <div className="flex flex-col md:flex-row items-center justify-center mb-10 gap-4 md:gap-10">
+          {/* <div className="flex flex-col md:flex-row items-center justify-center mb-10 gap-4 md:gap-10">
             <img src="/images/quiz.png" alt="クイズ" className="w-0 h-0 md:w-36 md:h-55 ml-15" />
             <p className="text-4xl md:text-6xl font-bold text-blue-600 drop-shadow-lg text-center animate-pulse">
               {getTitle()}
@@ -302,7 +306,32 @@ const QuizResult = ({
             <p className="text-lg md:text-2xl text-gray-800 mb-8 font-bold whitespace-pre-line">
               {getRankComment()}
             </p>
-          )}
+          )} */}
+
+          <div className="mx-auto my-3 md:my-8 max-w-[680px] relative overflow-hidden rounded-[32px] border-4 border-yellow-300 bg-gradient-to-br from-yellow-100 via-white to-orange-100 px-6 py-6 md:py-8 md:px-10 md:py-10 shadow-[0_18px_45px_rgba(0,0,0,0.14)]">
+            <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-yellow-300/40 blur-2xl" />
+            <div className="absolute -left-8 -bottom-8 h-28 w-28 rounded-full bg-pink-300/30 blur-2xl" />
+
+            <p className="relative text-xl md:text-3xl font-extrabold text-gray-700">
+              あなたの称号は…
+            </p>
+
+            <p className="relative mt-4 text-5xl md:text-7xl font-black text-yellow-600 drop-shadow-lg animate-pulse leading-tight">
+              {/* 👑 {getTitle()}！ */}
+              {getTitle()}
+            </p>
+
+            {getRankComment() && (
+              <p className="relative mt-6 text-lg md:text-2xl text-gray-800 font-bold whitespace-pre-line leading-relaxed">
+                {getRankComment()}
+              </p>
+            )}
+          </div>
+
+          <div className="flex flex-row items-center justify-center gap-8 mb-3 md:mb-6">
+            <img src="/images/quiz.png" alt="クイズ" className="w-20 h-30 md:w-28 md:h-42" />
+            <img src="/images/quiz_woman.png" alt="クイズ" className="w-20 h-30 md:w-28 md:h-42" />
+          </div>
 
           {showRank && (() => {
             const nextTitleInfo = getNextTitleResultInfo();
@@ -320,7 +349,7 @@ const QuizResult = ({
             }
 
             return (
-              <div className="mx-auto my-10 max-w-[560px] rounded-3xl bg-gradient-to-br from-yellow-50 via-white to-orange-50 px-6 py-6 shadow-[0_10px_30px_rgba(255,180,0,0.15)] border border-yellow-200">
+              <div className="mx-auto my-3 md:my-8 max-w-[560px] rounded-3xl bg-gradient-to-br from-yellow-50 via-white to-orange-50 px-6 py-6 shadow-[0_10px_30px_rgba(255,180,0,0.15)] border border-yellow-200">
 
                 {/* タイトル */}
                 {/* <div className="text-center">
@@ -373,6 +402,84 @@ const QuizResult = ({
               </div>
             );
           })()}
+        </>
+      )}
+
+      {showText2 && (
+        <>
+          {/* <p className="mt-4 text-base md:text-lg font-bold text-gray-700">
+            {getRetryMessage()}
+          </p> */}
+          
+          {/* <div className="mx-auto my-8 max-w-[620px]">
+            {percentLoading ? (
+              <div className="rounded-3xl border-4 border-gray-200 bg-white px-6 py-8 shadow-lg">
+                <p className="text-lg md:text-2xl font-extrabold text-gray-700 animate-pulse">
+                  📊 上位％を計算中...
+                </p>
+              </div>
+            ) : topPercent !== null ? (
+              <div className="relative overflow-hidden rounded-[28px] border-4 border-yellow-300 bg-gradient-to-br from-yellow-100 via-white to-orange-100 px-6 py-2 md:py-6 shadow-[0_16px_40px_rgba(0,0,0,0.12)]">
+                <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-yellow-300/40 blur-2xl" />
+                <div className="absolute -left-6 -bottom-6 h-24 w-24 rounded-full bg-pink-300/30 blur-2xl" />
+
+                <p className="mt-1 text-lg md:text-2xl font-bold text-gray-700">
+                  あなたの今回の記録は…
+                </p>
+
+                <p className="mt-3 text-4xl md:text-6xl font-extrabold leading-none text-red-500 drop-shadow-sm">
+                  上位{formatTopPercent(topPercent)}%
+                </p> */}
+
+                {/* <p className="mt-4 text-base md:text-xl font-bold text-gray-800">
+                  かなりすごい記録です！
+                </p> */}
+
+                {/* <div className="mt-5 inline-flex items-center rounded-full bg-black px-4 py-2 text-sm md:text-base font-extrabold text-white">
+                  🔥 もう1回でさらに上を狙える
+                </div> */}
+
+                {/* <div className="mt-5 inline-flex items-center rounded-full bg-black px-4 py-2 text-sm md:text-base font-extrabold text-white">
+                  🔥 {getRetryMessage()}
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-3xl border-4 border-gray-200 bg-white px-6 py-8 shadow-lg">
+                <p className="text-sm md:text-base font-bold text-gray-600">
+                  ※上位％の取得に失敗しました
+                </p>
+              </div>
+            )}
+          </div> */}
+          <div className="mx-auto my-4 max-w-[420px]">
+            {percentLoading ? (
+              <div className="rounded-2xl border-2 border-gray-200 bg-white px-4 py-3 shadow">
+                <p className="text-sm md:text-base font-bold text-gray-600 animate-pulse">
+                  📊 上位％を計算中...
+                </p>
+              </div>
+            ) : topPercent !== null ? (
+              <div className="rounded-2xl border-2 border-gray-200 bg-white px-4 py-3 shadow mb-4 md:mb-8">
+                <p className="text-sm md:text-base font-bold text-gray-600">
+                  今回の記録は
+                  <span className="mx-1 text-red-500 text-xl md:text-2xl font-black">
+                    上位{formatTopPercent(topPercent)}%
+                  </span>
+                  でした！
+                </p>
+
+                <p className="mt-1 text-xs md:text-sm font-bold text-gray-500">
+                  {getRetryMessage()}
+                </p>
+              </div>
+            ) : (
+              <div className="rounded-2xl border-2 border-gray-200 bg-white px-4 py-3 shadow">
+                <p className="text-xs md:text-sm font-bold text-gray-500">
+                  ※上位％の取得に失敗しました
+                </p>
+              </div>
+            )}
+          </div>
         </>
       )}
 
@@ -1564,7 +1671,7 @@ export default function QuizModePage() {
       )}
       {!finished ? (
         <>
-          <h2 className="text-5xl md:text-6xl font-extrabold mb-6 text-yellow-500 drop-shadow-lg">
+          <h2 className="text-5xl md:text-6xl font-extrabold mb-3 md:mb-6 text-yellow-500 drop-shadow-lg">
             {/* 第 {currentIndex + 1} 問 */}
             第 {displayQuestionNo} 問
           </h2>
@@ -1607,7 +1714,7 @@ export default function QuizModePage() {
             }
 
             return (
-              <div className="mx-auto mb-5 max-w-[560px] rounded-3xl border-4 border-blue-300 bg-white/95 px-5 py-5 shadow-[0_10px_30px_rgba(59,130,246,0.15)]">
+              <div className="mx-auto mb-2 md:mb-5 max-w-[560px] rounded-3xl border-4 border-blue-300 bg-white/95 px-5 py-2 md:py-5 shadow-[0_10px_30px_rgba(59,130,246,0.15)]">
                 {/* <div className="text-center">
                   <p className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-sm md:text-base font-black text-blue-600 border border-blue-200">
                     🌟次の称号チャレンジ🌟
@@ -1615,7 +1722,7 @@ export default function QuizModePage() {
                 </div> */}
                 <p
                   className={[
-                    "mt-4 inline-flex items-center justify-center rounded-full px-4 py-2",
+                    "mt-1 md:mt-4 inline-flex items-center justify-center rounded-full px-4 py-1 md:py-2",
                     "text-sm md:text-base font-extrabold shadow-md",
                     nextTitleInfo.remain === 1
                       ? "bg-gradient-to-r from-red-500 via-orange-400 to-yellow-400 text-white animate-pulse"
@@ -1627,7 +1734,7 @@ export default function QuizModePage() {
                     : `🎯 あと${nextTitleInfo.remain}問で称号UP！`}
                 </p>
 
-                <p className="mt-4 text-xl md:text-3xl font-extrabold text-gray-800 text-center leading-snug">
+                <p className="mt-1 md:mt-4 text-xl md:text-3xl font-extrabold text-gray-800 text-center leading-snug">
                   {/* 「{maskTitle(nextTitleInfo.title)}」まであと */}
                   「{nextTitleInfo.title}」まであと
                   <span className="mx-2 inline-block text-red-600 text-3xl md:text-5xl drop-shadow-sm">
@@ -1636,7 +1743,7 @@ export default function QuizModePage() {
                   問
                 </p>
 
-                <div className="mt-4">
+                <div className="mt-2 md:mt-4">
                   <div className="mb-2 text-center text-sm md:text-lg font-bold text-gray-500">
                     <span>今の称号：{getCurrentTitle()}</span>
                     {/* <span>達成率 {progressPercent}%</span> */}
@@ -1728,9 +1835,9 @@ export default function QuizModePage() {
                     userAnswer={userAnswer}
                     setUserAnswer={setUserAnswer}
                   />
-                  <div className="mt-4 flex flex-col items-center gap-3">
+                  <div className="md:mt-4 flex flex-col items-center gap-3">
                     <button
-                      className="px-5 py-3 md:px-6 md:py-3 bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-4 hover:bg-blue-600 cursor-pointer font-extrabold"
+                      className="px-5 py-3 md:px-6 md:py-3 bg-blue-500 text-white text-lg md:text-xl font-medium rounded mt-2 md:mt-4 hover:bg-blue-600 cursor-pointer font-extrabold"
                       onClick={checkAnswer}
                       disabled={userAnswer === null}
                     >
@@ -1740,7 +1847,7 @@ export default function QuizModePage() {
                     {/* ✅ スキップボタン（回答の下） */}
                     <button
                       className={[
-                        "mt-3 px-6 py-3 rounded-2xl font-extrabold text-lg md:text-xl",
+                        "mt-2 md:mt-3 px-6 py-3 rounded-2xl font-extrabold text-lg md:text-xl",
                         "border-4 border-black",
                         "bg-gradient-to-r from-yellow-300 via-amber-200 to-yellow-100",
                         "shadow-[0_10px_0_0_rgba(0,0,0,0.18)]",
