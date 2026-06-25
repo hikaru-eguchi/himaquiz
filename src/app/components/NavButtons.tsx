@@ -64,7 +64,7 @@ export default function NavButtons() {
     "px-3 md:px-5 py-1 md:py-2 border-2 border-black rounded-full font-bold shadow-sm transition-all cursor-pointer flex-none md:hover:scale-105";
 
   const groupBox =
-    "w-full rounded-2xl border-2 border-black p-3 md:p-4 shadow-sm";
+    "w-full rounded-2xl border-2 border-black p-2 md:p-2 shadow-sm";
 
   const groupLegend =
     "px-3 py-1 rounded-md border-2 border-black text-sm md:text-lg font-extrabold bg-white";
@@ -72,10 +72,15 @@ export default function NavButtons() {
   const rowWrap = "flex flex-wrap justify-center gap-2 md:gap-3 py-2";
 
   // ✅ クイズゲーム：スマホだけ横スクロール
+  // const gameScrollOuter =
+  //   "w-full overflow-x-auto overflow-y-hidden md:overflow-visible [-webkit-overflow-scrolling:touch]";
+  // const gameRow =
+  //   "flex flex-nowrap gap-2 py-2 px-2 whitespace-nowrap min-w-max md:flex-wrap md:justify-center md:gap-3 md:whitespace-normal md:min-w-0";
   const gameScrollOuter =
-    "w-full overflow-x-auto overflow-y-hidden md:overflow-visible [-webkit-overflow-scrolling:touch]";
+    "w-full overflow-x-auto overflow-y-hidden [-webkit-overflow-scrolling:touch]";
+
   const gameRow =
-    "flex flex-nowrap gap-2 py-2 px-2 whitespace-nowrap min-w-max md:flex-wrap md:justify-center md:gap-3 md:whitespace-normal md:min-w-0";
+    "flex flex-nowrap gap-2 py-2 px-2 whitespace-nowrap min-w-max";
 
   // ✅ 開閉アニメ
   const panel =
@@ -90,9 +95,9 @@ export default function NavButtons() {
   const bgGacha = "bg-gradient-to-br from-emerald-50 via-lime-50 to-yellow-50"; // ガチャ：キラッと系
 
   return (
-    <div className="w-full flex justify-center mt-2 mb-1 md:mt-5 md:mb-5">
+    <div className="w-full flex justify-center mt-2 mb-1 md:mt-3 md:mb-3">
       {/* ✅ PC時の最大幅を広げる（1200→1400） */}
-      <div className="w-[min(1400px,calc(100vw-24px))] rounded-2xl border-2 border-black bg-white p-2 md:p-3 shadow-md">
+      <div className="w-[min(1400px,calc(100vw-24px))] rounded-2xl border-2 border-black bg-white p-2 md:p-2 shadow-md">
         {/* ✅ 開閉ボタン（スマホだけ表示） */}
         <div className="flex md:hidden justify-center">
           <button
@@ -110,19 +115,19 @@ export default function NavButtons() {
           id="nav-panel"
           className={`md:mt-2 md:max-h-none md:opacity-100 md:overflow-visible ${panel}`}
         >
-          <div className="flex flex-col gap-3 md:gap-4">
+          <div className="flex flex-col gap-3 md:gap-3">
             {/* ①②：スマホ縦 / PC横 */}
 
             {/* ✅ ここがポイント：
                 スマホは縦 / PCは横並びで「1人」「みんな」「ガチャ」を並べる */}
-            <div className="flex flex-col md:flex-row gap-3 md:gap-4">
+            <div className="flex flex-col md:flex-row gap-3 md:gap-2">
               {/* 1人で遊べる */}
               <fieldset className={`${groupBox} ${bgSolo} md:flex-1`}>
                 <legend className={groupLegend}>🎮ひとりで遊べるクイズゲーム</legend>
                 <p className="text-xs md:text-sm text-black/70">
                   気軽に挑戦！ひとりクイズタイム！
                 </p>
-                <div className="mx-auto w-full max-w-[300px] md:max-w-none">
+                <div className="mx-auto w-full max-w-[300px] md:max-w-[640px]">
                   <div className={gameScrollOuter}>
                     <div className={gameRow}>
                       <Link
@@ -272,8 +277,11 @@ export default function NavButtons() {
                     </div>
                   </div>
 
-                  <p className="mt-1 text-xs text-black/60 text-center md:hidden">
+                  {/* <p className="mt-1 text-xs text-black/60 text-center md:hidden">
                     ← 横にスワイプできます →
+                  </p> */}
+                  <p className="mt-1 text-xs text-black/60 text-center">
+                    ← 横にスクロールできます →
                   </p>
                 </div>
               </fieldset>
@@ -288,7 +296,7 @@ export default function NavButtons() {
                   合言葉を作って、友達や恋人、家族だけで楽しもう！🤝
                 </p>
 
-                <div className="mx-auto w-full max-w-[300px] md:max-w-none">
+                <div className="mx-auto w-full max-w-[300px] md:max-w-[640px]">
                   <div className={gameScrollOuter}>
                     <div className={gameRow}>
                       <Link
@@ -384,8 +392,11 @@ export default function NavButtons() {
                     </div>
                   </div>
 
-                  <p className="mt-1 text-xs text-black/60 text-center md:hidden">
+                  {/* <p className="mt-1 text-xs text-black/60 text-center md:hidden">
                     ← 横にスワイプできます →
+                  </p> */}
+                  <p className="mt-1 text-xs text-black/60 text-center">
+                    ← 横にスクロールできます →
                   </p>
                 </div>
               </fieldset>
@@ -411,14 +422,14 @@ export default function NavButtons() {
               </fieldset> */}
             </div>
 
-            <div className="flex flex-col md:flex-row gap-3 md:gap-4">
+            <div className="flex flex-col md:flex-row gap-3 md:gap-2">
               {/* みんなで遊べる */}
               <fieldset className={`${groupBox} ${bgMulti} md:flex-1`}>
                 <legend className={groupLegend}>🌐みんなで遊べるクイズゲーム</legend>
                 <p className="text-xs md:text-sm text-black/70">
                   ネットの誰かと！友達や家族と！みんなでワイワイ遊ぼう🎉
                 </p>
-                <div className="mx-auto w-full max-w-[300px] md:max-w-none">
+                <div className="mx-auto w-full max-w-[300px] md:max-w-[640px]">
                   <div className={gameScrollOuter}>
                     <div className={gameRow}>
                       <Link
@@ -605,8 +616,11 @@ export default function NavButtons() {
                     </div>
                   </div>
 
-                  <p className="mt-1 text-xs text-black/60 text-center md:hidden">
+                  {/* <p className="mt-1 text-xs text-black/60 text-center md:hidden">
                     ← 横にスワイプできます →
+                  </p> */}
+                  <p className="mt-1 text-xs text-black/60 text-center">
+                    ← 横にスクロールできます →
                   </p>
                 </div>
               </fieldset>
@@ -619,7 +633,7 @@ export default function NavButtons() {
                 <p className="text-xs md:text-sm text-black/70">
                   いろんなクイズで遊び放題！気になるクイズに挑戦しよう！
                 </p>
-                <div className="mx-auto w-full max-w-[300px] md:max-w-none">
+                <div className="mx-auto w-full max-w-[300px] md:max-w-[640px]">
                   <div className={gameScrollOuter}>
                     <div className={gameRow}>
                       <Link
@@ -741,8 +755,11 @@ export default function NavButtons() {
                     </div>
                   </div>
 
-                  <p className="mt-1 text-xs text-black/60 text-center md:hidden">
+                  {/* <p className="mt-1 text-xs text-black/60 text-center md:hidden">
                     ← 横にスワイプできます →
+                  </p> */}
+                  <p className="mt-1 text-xs text-black/60 text-center">
+                    ← 横にスクロールできます →
                   </p>
                 </div>
               </fieldset>
@@ -822,8 +839,11 @@ export default function NavButtons() {
                     </div>
                   </div>
 
-                  <p className="mt-1 text-xs text-black/60 text-center md:hidden">
+                  {/* <p className="mt-1 text-xs text-black/60 text-center md:hidden">
                     ← 横にスワイプできます →
+                  </p> */}
+                  <p className="mt-1 text-xs text-black/60 text-center md:hidden">
+                    ← 横にスクロールできます →
                   </p>
                 </div>
               </fieldset>
