@@ -112,7 +112,8 @@ export default function HimaCharacterRankingTop10({ rows }: { rows: Row[] }) {
             <div
               className={`mt-5 space-y-3 overflow-y-auto pr-1 ${
                 isLoggedIn
-                  ? "max-h-[225px] md:max-h-[250px]"
+                  // ? "max-h-[225px] md:max-h-[250px]"
+                  ? "max-h-[380px] md:max-h-[420px]"
                   : "max-h-[380px] md:max-h-[420px]"
               }`}
             >

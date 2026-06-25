@@ -3,6 +3,7 @@ import AllTimeStreakRankingCard from "./AllTimeStreakRankingCard";
 import StreakRankingTop10 from "./StreakRankingTop10_10";
 import DungeonRankingTop10 from "./DungeonRankingTop10_10";
 import HimaCharacterRankingTop10 from "./HimaCharacterRankingTop10";
+import ArenaWinRankingTop20 from "./ArenaRankingTop10_10";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import Link from "next/link";
 
@@ -27,10 +28,17 @@ type CharacterRankRow = {
   character_count: number;
 };
 
+type ArenaRankRow = {
+  user_id: string;
+  username: string | null;
+  avatar_url: string | null;
+  arena_wins: number;
+};
+
 export default async function WeeklyRankingSection() {
   const supabase = await createSupabaseServerClient();
 
-  const [streakResult, dungeonResult, characterResult] = await Promise.all([
+  const [streakResult, dungeonResult, characterResult, arenaResult] = await Promise.all([
     supabase
       .from("user_public_profiles")
       .select("user_id, username, avatar_url, best_streak")
@@ -51,11 +59,19 @@ export default async function WeeklyRankingSection() {
       .order("character_count", { ascending: false })
       .order("updated_at", { ascending: true })
       .limit(30),
+
+    supabase
+      .from("user_public_profiles")
+      .select("user_id, username, avatar_url, arena_wins")
+      .order("arena_wins", { ascending: false })
+      .order("updated_at", { ascending: true })
+      .limit(30),
   ]);
 
   const rows = (streakResult.data ?? []) as StreakRankRow[];
   const rows_d = (dungeonResult.data ?? []) as DungeonRankRow[];
   const rows_c = (characterResult.data ?? []) as CharacterRankRow[];
+  const rows_a = (arenaResult.data ?? []) as ArenaRankRow[];
 
   return (
     <section className="max-w-[700px] mx-auto my-8">
@@ -64,7 +80,7 @@ export default async function WeeklyRankingSection() {
         border-2 border-gray-500 rounded-2xl
         bg-gradient-to-br from-yellow-100 via-pink-100 to-sky-100
         shadow-xl
-        p-4 md:p-6
+        p-1 md:p-6
         relative
         overflow-hidden
       ">
@@ -110,11 +126,35 @@ export default async function WeeklyRankingSection() {
             bgClass="from-yellow-200 via-amber-300 to-orange-300"
           />
 
-          <StreakRankingTop10 rows={rows.slice(0, 30)} />
+          {/* <StreakRankingTop10 rows={rows.slice(0, 30)} />
 
           <DungeonRankingTop10 rows={rows_d.slice(0, 30)} />
 
-          <HimaCharacterRankingTop10 rows={rows_c.slice(0, 30)} />
+          <HimaCharacterRankingTop10 rows={rows_c.slice(0, 30)} /> */}
+
+          <p className="text-center text-sm md:text-xl font-bold text-gray-600">
+            👈👉 横にスライドして人気ランキングを見よう！ ✨
+          </p>
+
+          <div className="mt-4 overflow-x-auto pb-3">
+            <div className="flex w-max gap-4 px-1">
+              <div className="w-[320px] md:w-[620px] shrink-0">
+                <StreakRankingTop10 rows={rows.slice(0, 30)} />
+              </div>
+
+              <div className="w-[320px] md:w-[620px] shrink-0">
+                <DungeonRankingTop10 rows={rows_d.slice(0, 30)} />
+              </div>
+
+              <div className="w-[320px] md:w-[620px] shrink-0">
+                <ArenaWinRankingTop20 rows={rows_a.slice(0, 30)} />
+              </div>
+
+              <div className="w-[320px] md:w-[620px] shrink-0">
+                <HimaCharacterRankingTop10 rows={rows_c.slice(0, 30)} />
+              </div>
+            </div>
+          </div>
 
           {/* <WeeklyRankingCard
             title="今週のスコア"

@@ -2,19 +2,33 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import MyRivalRankingCard from "./MyRivalRankingCard";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import UserProfileModal, { PublicProfile } from "@/app/components/UserProfileModal";
-import MyRivalRankingCard from "./MyRivalRankingCard";
 
 type Row = {
   user_id: string;
   username: string | null;
   avatar_url: string | null;
-  best_streak: number;
+  arena_wins: number;
 };
 
-export default function StreakRankingTop10({ rows }: { rows: Row[] }) {
+export default function ArenaWinRankingTop20({ rows }: { rows: Row[] }) {
   const list = rows.slice(0, 30);
+
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setIsLoggedIn(!!data.user);
+    });
+  }, [supabase]);
+
+  const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState<PublicProfile | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const getRankLabel = (rank: number) => {
     if (rank === 1) return "👑";
@@ -34,7 +48,7 @@ export default function StreakRankingTop10({ rows }: { rows: Row[] }) {
       return "border-orange-300 bg-gradient-to-r from-orange-50 via-amber-50 to-orange-100 shadow-[0_6px_16px_rgba(251,146,60,0.15)]";
     }
     if (rank <= 10) {
-      return "border-yellow-200 bg-white";
+      return "border-red-200 bg-white";
     }
     return "border-gray-200 bg-white";
   };
@@ -46,19 +60,23 @@ export default function StreakRankingTop10({ rows }: { rows: Row[] }) {
     return "text-red-500";
   };
 
-  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
-
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setIsLoggedIn(!!data.user);
-    });
-  }, [supabase]);
-
-  const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<PublicProfile | null>(null);
-  const [loading, setLoading] = useState(false);
+  const getArenaTitle = (wins: number) => {
+    if (wins >= 1000) return "神";
+    if (wins >= 500) return "超越者";
+    if (wins >= 400) return "覇王";
+    if (wins >= 300) return "神話";
+    if (wins >= 200) return "伝説";
+    if (wins >= 150) return "王者";
+    if (wins >= 100) return "英雄";
+    if (wins >= 70) return "達人";
+    if (wins >= 50) return "熟練闘士";
+    if (wins >= 40) return "上級闘士";
+    if (wins >= 30) return "ベテラン闘士";
+    if (wins >= 20) return "中級闘士";
+    if (wins >= 10) return "初級闘士";
+    if (wins >= 5) return "新人闘士";
+    return "見習い闘士";
+  };
 
   const openUserProfile = async (userId: string) => {
     setSelected(null);
@@ -95,42 +113,41 @@ export default function StreakRankingTop10({ rows }: { rows: Row[] }) {
     <>
       <div className="mt-6">
         <div className="mx-auto w-full max-w-[760px]">
-          <div className="rounded-[28px] border border-[#e6dccf] bg-[#f8f8f8] p-4 md:p-6 shadow-[0_12px_30px_rgba(0,0,0,0.08)]">
+          <div className="rounded-[28px] border border-red-200 bg-[#fbf8ff] p-4 shadow-[0_12px_30px_rgba(0,0,0,0.08)] md:p-6">
             <div className="text-center">
-              <p className="text-sm md:text-base font-black text-red-500 drop-shadow-sm">
-                みんなの連続正解チャレンジ🔥
+              <p className="text-sm font-black text-red-500 drop-shadow-sm md:text-base">
+                クイズアリーナ⚔️
               </p>
-              <p className="mt-1 text-lg md:text-2xl font-black text-gray-900">
-                {/* 連続正解ランキング TOP10🏆 */}
-                連続正解ランキング🏆
+
+              <p className="mt-1 text-lg font-black text-gray-900 md:text-2xl">
+                {/* 勝利数ランキング TOP20🏆 */}
+                🔥勝利数ランキング🏆
+              </p>
+
+              <p className="mt-2 text-xs font-semibold text-gray-500 md:text-sm">
+                たくさん勝利してランキング入りを目指そう！
               </p>
             </div>
 
-            {/* <div className="mt-5 space-y-3 max-h-[225px] md:max-h-[250px] overflow-y-auto pr-1"> */}
-            <div
-              className={`mt-5 space-y-3 overflow-y-auto pr-1 ${
-                isLoggedIn
-                  // ? "max-h-[225px] md:max-h-[250px]"
-                  ? "max-h-[380px] md:max-h-[420px]"
-                  : "max-h-[380px] md:max-h-[420px]"
-              }`}
-            >
+            <div className="mt-5 max-h-[380px] md:max-h-[420px] space-y-3 overflow-y-auto pr-1">
               {list.map((u, idx) => {
                 const rank = idx + 1;
                 const avatar = u.avatar_url ?? "/images/初期アイコン.png";
                 const username = u.username ?? "名無し";
+                const wins = u.arena_wins ?? 0;
+                const title = getArenaTitle(wins);
 
                 return (
                   <button
                     type="button"
                     key={u.user_id}
                     onClick={() => openUserProfile(u.user_id)}
-                    className={`w-full rounded-2xl border px-3 py-3 md:px-4 md:py-3 text-left transition-transform duration-200 hover:scale-[1.01] ${getRowStyle(rank)}`}
+                    className={`w-full rounded-2xl border px-3 py-3 text-left transition-transform duration-200 hover:scale-[1.01] md:px-4 md:py-3 ${getRowStyle(rank)}`}
                   >
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex min-w-0 items-center gap-2 md:gap-4">
                         <div
-                          className={`flex h-10 w-10 md:h-12 md:w-12 shrink-0 items-center justify-center rounded-full border-2 font-extrabold text-sm md:text-base ${
+                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 text-sm font-extrabold md:h-12 md:w-12 md:text-base ${
                             rank <= 3
                               ? "border-black bg-white shadow-[0_3px_0_rgba(0,0,0,1)]"
                               : "border-gray-300 bg-gray-50 text-gray-700"
@@ -139,7 +156,7 @@ export default function StreakRankingTop10({ rows }: { rows: Row[] }) {
                           {getRankLabel(rank)}
                         </div>
 
-                        <div className="relative h-10 w-10 md:h-12 md:w-12 shrink-0 overflow-hidden rounded-full border-2 border-black bg-white shadow-[0_3px_0_rgba(0,0,0,1)]">
+                        <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-black bg-white shadow-[0_3px_0_rgba(0,0,0,1)] md:h-12 md:w-12">
                           <img
                             src={avatar}
                             alt={username}
@@ -148,27 +165,20 @@ export default function StreakRankingTop10({ rows }: { rows: Row[] }) {
                         </div>
 
                         <div className="min-w-0 text-left">
-                          <p className="truncate text-sm md:text-base font-extrabold text-gray-900">
+                          <p className="truncate text-sm font-extrabold text-gray-900 md:text-base">
                             {username}
                           </p>
-                          {/* <p className="text-[11px] md:text-xs font-semibold text-gray-500">
-                            {rank <= 3
-                              ? "TOP3ランカー"
-                              : rank <= 10
-                              ? "TOP10入り"
-                              : "チャレンジャー"}
-                          </p> */}
+                          <p className="mt-1 text-xs font-black text-red-500">
+                            {title}
+                          </p>
                         </div>
                       </div>
 
                       <div className="shrink-0 text-right">
                         <p
-                          className={`text-xl md:text-2xl font-black leading-none ${getScoreStyle(rank)}`}
+                          className={`text-xl font-black leading-none md:text-2xl ${getScoreStyle(rank)}`}
                         >
-                          {u.best_streak ?? 0}
-                          <span className="ml-1 mt-1 text-sm md:text-md font-bold text-gray-600">
-                            問
-                          </span>
+                          {wins}勝
                         </p>
                       </div>
                     </div>
@@ -178,38 +188,38 @@ export default function StreakRankingTop10({ rows }: { rows: Row[] }) {
             </div>
 
             {rows.length === 0 && (
-              <p className="mt-4 text-center text-gray-600 font-bold">
+              <p className="mt-4 text-center font-bold text-gray-600">
                 ランキングを読み込み中…
               </p>
             )}
 
             {isLoggedIn && (
               <MyRivalRankingCard
-                title="🔥 あなたのライバル"
-                column="best_streak"
-                unit="問"
+                title="⚔️ あなたのライバル"
+                column="arena_wins"
+                unit="勝"
               />
             )}
 
             {/* チャレンジ導線ボタン */}
             <div className="mt-6 text-center">
-              <p className="mb-3 text-sm md:text-base font-bold text-gray-700">
-                連続正解でランキング入りを目指そう🔥
+              <p className="mb-3 text-sm md:text-base font-black text-purple-700">
+                上位を目指して挑戦しよう⚔️
               </p>
 
               <Link
-                href="/streak-challenge"
+                href="/quiz-arena"
                 className="w-full md:w-auto flex justify-center"
               >
-                <button className="w-[240px] md:w-[280px] px-4 md:px-6 py-3 text-xl md:text-2xl border-2 border-black rounded-full font-black shadow-xl bg-gradient-to-r from-red-500 to-orange-400 text-white hover:scale-110 active:scale-95 transition-all animate-pulse">
-                  {/* ✅連続正解チャレンジ */}
-                  🔥 今すぐ挑戦する
+                <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-[radial-gradient(circle_at_top,#fde68a_0%,#fb7185_28%,#7c3aed_62%,#111827_100%)] text-white hover:scale-110 active:scale-95 transition-all animate-pulse">
+                  ⚔ 今すぐ挑戦する
                 </button>
               </Link>
             </div>
           </div>
         </div>
       </div>
+
       <UserProfileModal
         open={open}
         loading={loading}

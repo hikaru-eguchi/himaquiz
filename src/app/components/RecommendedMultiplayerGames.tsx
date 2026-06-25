@@ -17,7 +17,7 @@ const MULTI_GAMES: GameCard[] = [
     key: "battle",
     href: "/quiz-battle",
     label: "🔥クイズバトル",
-    desc1: "2分間でどれだけ正解できるか勝負だ！",
+    desc1: "1分間でどれだけ正解できるか勝負だ！",
     desc2: "相手よりハイスコアを狙おう！",
     buttonClassName:
       "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-pink-500 via-yellow-400 to-green-500 text-white hover:scale-110 transition-all",
@@ -26,7 +26,7 @@ const MULTI_GAMES: GameCard[] = [
     key: "royal",
     href: "/quiz-royal",
     label: "👑クイズロワイヤル",
-    desc1: "みんなで2分間のクイズバトル！",
+    desc1: "みんなで1分間のクイズバトル！",
     desc2: "正解を積み上げて王冠をつかみ取れ！",
     buttonClassName:
       "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-yellow-500 via-amber-300 to-blue-500 text-white hover:scale-110 transition-all",

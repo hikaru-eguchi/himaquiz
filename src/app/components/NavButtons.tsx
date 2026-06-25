@@ -138,21 +138,6 @@ export default function NavButtons() {
                         </button>
                       </Link>
 
-                      <Link
-                        href="/time-attack"
-                        onClick={() => handleNavClick("/time-attack")}
-                      >
-                        <button
-                          className={`${baseStyle} bg-gradient-to-r from-sky-400 via-cyan-400 to-blue-400 text-white ring-2 ring-sky-400 md:hover:scale-110 ${
-                            activeUrl === "/time-attack" ? activeStyle : ""
-                          }`}
-                        >
-                          {/* タイムアタック */}
-                          {/* 3問だけ！タイムアタック */}
-                          3問タイムアタック
-                        </button>
-                      </Link>
-
                       {/* <Link
                         href="/time-quiz"
                         onClick={() => handleNavClick("/time-quiz")}
@@ -176,6 +161,21 @@ export default function NavButtons() {
                           }`}
                         >
                           クイズダンジョン
+                        </button>
+                      </Link>
+
+                      <Link
+                        href="/time-attack"
+                        onClick={() => handleNavClick("/time-attack")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-gradient-to-r from-sky-400 via-cyan-400 to-blue-400 text-white ring-2 ring-sky-400 md:hover:scale-110 ${
+                            activeUrl === "/time-attack" ? activeStyle : ""
+                          }`}
+                        >
+                          {/* タイムアタック */}
+                          {/* 3問だけ！タイムアタック */}
+                          3問タイムアタック
                         </button>
                       </Link>
 
@@ -292,19 +292,6 @@ export default function NavButtons() {
                   <div className={gameScrollOuter}>
                     <div className={gameRow}>
                       <Link
-                        href="/quiz-hirameki"
-                        onClick={() => handleNavClick("/quiz-hirameki")}
-                      >
-                        <button
-                          className={`${baseStyle} bg-gradient-to-r from-yellow-400 via-amber-300 to-orange-300 text-white ring-2 ring-yellow-500 md:hover:scale-110 ${
-                            activeUrl === "/quiz-hirameki" ? activeStyle : ""
-                          }`}
-                        >
-                          ひらめきクイズ
-                        </button>
-                      </Link>
-
-                      <Link
                         href="/quiz-mind"
                         onClick={() => handleNavClick("/quiz-mind")}
                       >
@@ -331,6 +318,19 @@ export default function NavButtons() {
                       </Link>
 
                       <Link
+                        href="/quiz-hirameki"
+                        onClick={() => handleNavClick("/quiz-hirameki")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-gradient-to-r from-yellow-400 via-amber-300 to-orange-300 text-white ring-2 ring-yellow-500 md:hover:scale-110 ${
+                            activeUrl === "/quiz-hirameki" ? activeStyle : ""
+                          }`}
+                        >
+                          ひらめきクイズ
+                        </button>
+                      </Link>
+
+                      <Link
                         href="/quiz-koredochi"
                         onClick={() => handleNavClick("/quiz-koredochi")}
                       >
@@ -343,7 +343,7 @@ export default function NavButtons() {
                         </button>
                       </Link>
 
-                      <Link
+                      {/* <Link
                         href="/quiz-synchro"
                         onClick={() => handleNavClick("/quiz-synchro")}
                       >
@@ -354,7 +354,7 @@ export default function NavButtons() {
                         >
                           シンクロランキング
                         </button>
-                      </Link>
+                      </Link> */}
                       
                       <Link
                         href="/quiz-usohonto"

@@ -49,6 +49,23 @@ export default function GuestRecommendQuizGames() {
 
         <div className="w-full max-w-[500px] mx-auto rounded-2xl border-2 border-yellow-300 bg-white/85 p-3 shadow-lg">
           <p className="text-sm md:text-base font-black text-yellow-600 text-center">
+            ⚔ やりこむならこれ！
+          </p>
+
+          <Link href="/quiz-master" className="flex justify-center">
+            <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-purple-500 to-indigo-400 text-white hover:scale-110 transition-all">
+              ⚔クイズダンジョン
+            </button>
+          </Link>
+
+          <p className="mt-2 text-center text-sm md:text-base font-bold text-gray-700 leading-tight">
+            モンスターを倒してキャラを集めよう！
+            ステージ攻略が楽しいやりこみモード！
+          </p>
+        </div>
+
+        {/* <div className="w-full max-w-[500px] mx-auto rounded-2xl border-2 border-yellow-300 bg-white/85 p-3 shadow-lg">
+          <p className="text-sm md:text-base font-black text-yellow-600 text-center">
             💡 友達とサクッとやるならこれ！
           </p>
           <Link href="/quiz-hirameki" className="flex justify-center">
@@ -59,7 +76,7 @@ export default function GuestRecommendQuizGames() {
           <p className="mt-2 text-center text-sm md:text-base font-bold text-gray-700 leading-tight">
             ヒントを見ながら答えを当てよう！友達や家族とワイワイ盛り上がれる！
           </p>
-        </div>
+        </div> */}
 
         <div className="w-full max-w-[500px] mx-auto rounded-2xl border-2 border-blue-300 bg-white/85 p-3 shadow-lg">
           <p className="text-sm md:text-base font-black text-blue-600 text-center">
