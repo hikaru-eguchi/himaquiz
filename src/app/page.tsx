@@ -10,6 +10,8 @@ import RegisterPendingRanking from "@/app/components/RegisterPendingRanking";
 import HimaQRoulette from "@/app/components/HimaQRoulette";
 import PopularMatomeSection from "@/app/components/PopularMatomeSection";
 import DailyHardChallengeCard from "@/app/components/DailyHardChallengeCard";
+import TodayChallengeQuizCard from "@/app/components/TodayChallengeQuizCard";
+import GuestRecommendQuizGames from "@/app/components/GuestRecommendQuizGames";
 
 export const metadata = {
   title: "無料で遊べる暇つぶしクイズ｜ひまQ",
@@ -190,29 +192,8 @@ export default async function HomePage({
       </p>
 
       {/* 今日のクイズ表示 */}
-      <div className='max-w-[700px] mx-auto border-2 border-black rounded-xl m-5 mt-2 p-5 bg-gradient-to-b from-red-0 via-red-100 to-red-200'>
-        <h2 className="
-          text-2xl md:text-4xl 
-          font-extrabold 
-          mb-3 
-          text-center 
-          bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 
-          text-transparent 
-          bg-clip-text 
-          drop-shadow-2xl
-          animate-bounce
-          animate-pulse
-        ">
-          🔥今日のチャレンジクイズ！
-        </h2>
-        <p className="text-lg md:text-xl mb-2 text-center leading-tight mb-4 underline">
-          まずはこの問題！あなたは解けるかな？
-        </p>
-        {randomQuizArticle?.quiz && (
-          <QuizMDXWrapper quiz={randomQuizArticle.quiz} />
-        )}
-      </div>
-
+      {/* <TodayChallengeQuizCard quiz={randomQuizArticle?.quiz} /> */}
+      <GuestRecommendQuizGames />
       <DailyHardChallengeCard />
 
       {/* <div className="
@@ -323,7 +304,8 @@ export default async function HomePage({
             <Link href="/time-attack" className="w-full md:w-auto flex justify-center">
               <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-sky-400 via-cyan-400 to-blue-400 text-white hover:scale-110 transition-all">
                 {/* ⚡タイムアタック */}
-                ⚡3問だけ！タイムアタック
+                {/* ⚡3問だけ！タイムアタック */}
+                ⚡3問タイムアタック
               </button>
             </Link>
             <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
@@ -341,7 +323,7 @@ export default async function HomePage({
             </div>
           </div>
           {/* 制限時間クイズ */}
-          <div className="text-center max-w-[280px]">
+          {/* <div className="text-center max-w-[280px]">
             <Link href="/time-quiz" className="w-full md:w-auto flex justify-center">
               <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-[#ec0101] via-[#FF6B6B] to-[#fb9797] text-white hover:scale-110 transition-all">
                 ⏱制限時間クイズ
@@ -355,7 +337,7 @@ export default async function HomePage({
                 友達や家族と対決してみよう！
               </p>
             </div>
-          </div>
+          </div> */}
           {/* クイズダンジョン */}
           <div className="text-center max-w-[280px]">
             <Link href="/quiz-master" className="w-full md:w-auto flex justify-center">
@@ -403,7 +385,7 @@ export default async function HomePage({
             </p>
           </div> */}
           {/* 運命のクイズ */}
-          <div className="text-center max-w-[280px]">
+          {/* <div className="text-center max-w-[280px]">
             <Link href="/quiz-luck" className="w-full md:w-auto flex justify-center">
               <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-emerald-500 to-teal-400 text-white hover:scale-110 transition-all">
                 🎲運命のクイズ
@@ -417,7 +399,7 @@ export default async function HomePage({
                 運命のクイズでどこまで挑む！？
               </p>
             </div>
-          </div>
+          </div> */}
           {/* クイズ迷路 */}
           <div className="text-center max-w-[280px]">
             <Link href="/quiz-maze" className="w-full md:w-auto flex justify-center">
@@ -593,7 +575,7 @@ export default async function HomePage({
             </div>
           </div>
           {/* タイムトーク */}
-          <div className="text-center max-w-[280px]">
+          {/* <div className="text-center max-w-[280px]">
             <Link href="/quiz-timetalk" className="w-full md:w-auto flex justify-center">
               <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-500 text-white hover:scale-110 transition-all">
                 🎙️タイムトーク
@@ -607,7 +589,7 @@ export default async function HomePage({
                 お題に沿って話す簡単トークゲーム！
               </p>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -687,7 +669,7 @@ export default async function HomePage({
             </div>
           </div>
           {/* 多数決クイズ */}
-          <div className="text-center max-w-[280px]">
+          {/* <div className="text-center max-w-[280px]">
             <Link href="/quiz-majority" className="w-full md:w-auto flex justify-center">
               <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-red-500 to-blue-500 text-white hover:scale-110 transition-all">
                 🗳️多数決クイズ
@@ -701,9 +683,9 @@ export default async function HomePage({
                 最後のステージまでたどり着けるか！？
               </p>
             </div>
-          </div>
+          </div> */}
           {/* 瞬発力クイズ */}
-          <div className="text-center max-w-[280px]">
+          {/* <div className="text-center max-w-[280px]">
             <Link href="/quiz-quick" className="w-full md:w-auto flex justify-center">
               <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-cyan-400 via-sky-300 to-sky-200 text-white hover:scale-110 transition-all">
                 ⚡瞬発力クイズ
@@ -717,7 +699,7 @@ export default async function HomePage({
                 君は2秒で正解できるか！？
               </p>
             </div>
-          </div>
+          </div> */}
           {/* サイコロクイズ */}
           <div className="text-center max-w-[280px]">
             <Link href="/quiz-dice" className="w-full md:w-auto flex justify-center">

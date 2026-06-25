@@ -26,21 +26,22 @@ const SOLO_GAMES: GameCard[] = [
     key: "timeattack",
     href: "/time-attack",
     // label: "⚡タイムアタック",
-    label: "⚡3問だけ！タイムアタック",
+    // label: "⚡3問だけ！タイムアタック",
+    label: "⚡3問タイムアタック",
     desc1: "最速王を目指せ！",
     desc2: "3問だけの超高速タイムアタック！",
     buttonClassName:
       "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-sky-400 via-cyan-400 to-blue-400 text-white hover:scale-110 transition-all",
   },
-  {
-    key: "time",
-    href: "/time-quiz",
-    label: "⏱制限時間クイズ",
-    desc1: "時間内に何問正解できるかな？",
-    desc2: "友達や家族と対決してみよう！",
-    buttonClassName:
-      "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-[#ec0101] via-[#FF6B6B] to-[#fb9797] text-white hover:scale-110 transition-all",
-  },
+  // {
+  //   key: "time",
+  //   href: "/time-quiz",
+  //   label: "⏱制限時間クイズ",
+  //   desc1: "時間内に何問正解できるかな？",
+  //   desc2: "友達や家族と対決してみよう！",
+  //   buttonClassName:
+  //     "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-[#ec0101] via-[#FF6B6B] to-[#fb9797] text-white hover:scale-110 transition-all",
+  // },
   {
     key: "dungeon",
     href: "/quiz-master",
@@ -59,15 +60,15 @@ const SOLO_GAMES: GameCard[] = [
     buttonClassName:
       "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-yellow-400 to-yellow-300 text-white hover:scale-110 transition-all",
   },
-  {
-    key: "luck",
-    href: "/quiz-luck",
-    label: "🎲運命のクイズ",
-    desc1: "チャレンジ成功で報酬アップ！",
-    desc2: "運命のクイズでどこまで挑む！？",
-    buttonClassName:
-      "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-emerald-500 to-teal-400 text-white hover:scale-110 transition-all",
-  },
+  // {
+  //   key: "luck",
+  //   href: "/quiz-luck",
+  //   label: "🎲運命のクイズ",
+  //   desc1: "チャレンジ成功で報酬アップ！",
+  //   desc2: "運命のクイズでどこまで挑む！？",
+  //   buttonClassName:
+  //     "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-emerald-500 to-teal-400 text-white hover:scale-110 transition-all",
+  // },
   {
     key: "maze",
     href: "/quiz-maze",

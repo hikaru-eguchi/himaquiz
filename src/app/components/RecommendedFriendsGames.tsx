@@ -67,15 +67,15 @@ const MULTI_GAMES: GameCard[] = [
     buttonClassName:
       "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-[linear-gradient(135deg,#2563eb_0%,#7c3aed_45%,#e11d48_55%,#fb7185_100%)] text-white hover:scale-110 transition-all",
   },
-  {
-    key: "timetalk",
-    href: "/quiz-timetalk",
-    label: "🎙️タイムトーク",
-    desc1: "目標タイムを狙え！",
-    desc2: "お題に沿って話す簡単トークゲーム！",
-    buttonClassName:
-      "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-500 text-white hover:scale-110 transition-all",
-  },
+  // {
+  //   key: "timetalk",
+  //   href: "/quiz-timetalk",
+  //   label: "🎙️タイムトーク",
+  //   desc1: "目標タイムを狙え！",
+  //   desc2: "お題に沿って話す簡単トークゲーム！",
+  //   buttonClassName:
+  //     "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-500 text-white hover:scale-110 transition-all",
+  // },
 ];
 
 // 重複なしランダム抽出

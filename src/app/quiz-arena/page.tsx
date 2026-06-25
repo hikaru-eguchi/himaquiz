@@ -205,7 +205,7 @@ export default function QuizArenaPage() {
           ))}
         </div>
 
-        <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+        {/* <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
           <div className="rounded-2xl border-2 border-white/70 bg-white/85 p-3 shadow-xl">
             <p className="text-2xl">⚡</p>
             <p className="font-black text-gray-900">正解で攻撃</p>
@@ -230,9 +230,9 @@ export default function QuizArenaPage() {
             <p className="font-black text-gray-900">必殺技</p>
             <p className="text-xs font-bold text-gray-600">ゲージMAXで発動</p>
           </div>
-        </div>
+        </div> */}
 
-        <div className="mx-auto flex max-w-4xl flex-col justify-center gap-3 md:flex-row md:gap-4">
+        <div className="mx-auto flex max-w-4xl flex-col justify-center gap-3 md:flex-row md:gap-4 mt-10">
           <div className="flex-1">
             <button
               onClick={handleOnlineStart}

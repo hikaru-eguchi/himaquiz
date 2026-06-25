@@ -140,10 +140,10 @@ export default function UserProfileModal({
           </div>
 
           {/* リアクション */}
-          <ProfileReactions
+          {/* <ProfileReactions
             targetUserId={selected?.user_id}
             disabled={loading}
-          />
+          /> */}
 
           <p className="mt-2 md:mt-5 text-center text-xs font-bold text-slate-400">
             画面をタップすると閉じます

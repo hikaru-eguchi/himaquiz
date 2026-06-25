@@ -113,12 +113,14 @@ export default function TimeAttackPage() {
       >
         {/* 📱スマホ（改行あり） */}
         <span className="block md:hidden leading-tight">
-          3問だけ！<br />タイムアタック
+          {/* 3問だけ！<br />タイムアタック */}
+          3問<br />タイムアタック
         </span>
 
         {/* 💻PC（1行） */}
         <span className="hidden md:block">
-          3問だけ！タイムアタック
+          {/* 3問だけ！タイムアタック */}
+          3問タイムアタック
         </span>
       </h1>
 
@@ -177,7 +179,7 @@ export default function TimeAttackPage() {
             ref={descriptionRef}
             className="text-gray-700 text-md md:text-lg text-center px-4 py-2"
           >
-            「3問だけ！タイムアタック」は、3問正解の最速クリアを目指すスピードクイズモードです。
+            「3問タイムアタック」は、3問正解の最速クリアを目指すスピードクイズモードです。
             <br />
             3問正解を、どれだけ速くだせるかが勝負！
             <br />

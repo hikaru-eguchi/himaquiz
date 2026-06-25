@@ -153,7 +153,7 @@ export default function NavButtons() {
                         </button>
                       </Link>
 
-                      <Link
+                      {/* <Link
                         href="/time-quiz"
                         onClick={() => handleNavClick("/time-quiz")}
                       >
@@ -164,7 +164,7 @@ export default function NavButtons() {
                         >
                           制限時間クイズ
                         </button>
-                      </Link>
+                      </Link> */}
 
                       <Link
                         href="/quiz-master"
@@ -205,7 +205,7 @@ export default function NavButtons() {
                         </button>
                       </Link> */}
 
-                      <Link
+                      {/* <Link
                         href="/quiz-luck"
                         onClick={() => handleNavClick("/quiz-luck")}
                       >
@@ -216,7 +216,7 @@ export default function NavButtons() {
                         >
                           運命のクイズ
                         </button>
-                      </Link>
+                      </Link> */}
 
                       <Link
                         href="/quiz-maze"
@@ -369,7 +369,7 @@ export default function NavButtons() {
                         </button>
                       </Link>
 
-                      <Link
+                      {/* <Link
                         href="/quiz-timetalk"
                         onClick={() => handleNavClick("/quiz-timetalk")}
                       >
@@ -380,7 +380,7 @@ export default function NavButtons() {
                         >
                           タイムトーク
                         </button>
-                      </Link>
+                      </Link> */}
                     </div>
                   </div>
 
@@ -473,7 +473,7 @@ export default function NavButtons() {
                         </button>
                       </Link>
 
-                      <Link
+                      {/* <Link
                         href="/quiz-majority"
                         onClick={() => handleNavClick("/quiz-majority")}
                       >
@@ -484,9 +484,9 @@ export default function NavButtons() {
                         >
                           多数決クイズ
                         </button>
-                      </Link>
+                      </Link> */}
 
-                      <Link
+                      {/* <Link
                         href="/quiz-quick"
                         onClick={() => handleNavClick("/quiz-quick")}
                       >
@@ -497,7 +497,7 @@ export default function NavButtons() {
                         >
                           瞬発力クイズ
                         </button>
-                      </Link>
+                      </Link> */}
 
                       <Link
                         href="/quiz-dice"

@@ -33,7 +33,7 @@ type DefaultIconId = (typeof DEFAULT_ICONS)[number]["id"];
 const GAME_LABEL: Record<string, { label: string; emoji: string }> = {
   level: { label: "レベル称号", emoji: "🌟" },
   streak: { label: "連続正解チャレンジ", emoji: "🔥" },
-  timed: { label: "制限時間クイズ", emoji: "⏱️" },
+  // timed: { label: "制限時間クイズ", emoji: "⏱️" },
   dungeon: { label: "クイズダンジョン", emoji: "🏰" },
   battle: { label: "クイズバトル", emoji: "⚔️" },
   coop_dungeon: { label: "協力ダンジョン", emoji: "🤝" },

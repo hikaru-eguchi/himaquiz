@@ -244,7 +244,7 @@ export default function MyPage() {
                 </div>
               </div>
 
-              <div className="mt-3">
+              {/* <div className="mt-3">
                 <p className="mb-2 text-xs font-black text-white/80">
                   💬 もらったリアクション
                 </p>
@@ -261,7 +261,7 @@ export default function MyPage() {
                     ❤️いいね！ {reactionCounts.iine}
                   </div>
                 </div>
-              </div>
+              </div> */}
 
               <button
                 type="button"

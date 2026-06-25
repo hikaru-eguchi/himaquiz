@@ -49,24 +49,24 @@ const MULTI_GAMES: GameCard[] = [
     buttonClassName:
       "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-emerald-700 via-amber-800 to-stone-800 text-white hover:scale-110 transition-all",
   },
-  {
-    key: "majority",
-    href: "/quiz-majority",
-    label: "🗳️多数決クイズ",
-    desc1: "多数決で運命が決まる！",
-    desc2: "最後のステージまでたどり着けるか！？",
-    buttonClassName:
-      "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-red-500 to-blue-500 text-white hover:scale-110 transition-all",
-  },
-  {
-    key: "quick",
-    href: "/quiz-quick",
-    label: "⚡瞬発力クイズ",
-    desc1: "迷ってるヒマはない！",
-    desc2: "君は2秒で正解できるか！？",
-    buttonClassName:
-      "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-cyan-400 via-sky-300 to-sky-200 text-white hover:scale-110 transition-all",
-  },
+  // {
+  //   key: "majority",
+  //   href: "/quiz-majority",
+  //   label: "🗳️多数決クイズ",
+  //   desc1: "多数決で運命が決まる！",
+  //   desc2: "最後のステージまでたどり着けるか！？",
+  //   buttonClassName:
+  //     "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-red-500 to-blue-500 text-white hover:scale-110 transition-all",
+  // },
+  // {
+  //   key: "quick",
+  //   href: "/quiz-quick",
+  //   label: "⚡瞬発力クイズ",
+  //   desc1: "迷ってるヒマはない！",
+  //   desc2: "君は2秒で正解できるか！？",
+  //   buttonClassName:
+  //     "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-cyan-400 via-sky-300 to-sky-200 text-white hover:scale-110 transition-all",
+  // },
   {
     key: "dice",
     href: "/quiz-dice",

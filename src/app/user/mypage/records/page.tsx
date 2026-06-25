@@ -44,14 +44,14 @@ const GAME_META: Record<
     primaryLabel: "最高連続正解",
     suffix: "問",
   },
-  timed: {
-    label: "制限時間クイズ",
-    emoji: "⏱️",
-    description: "時間内にどれだけ稼げるか！ハイスコアを狙え！",
-    primaryKind: "best_score",
-    primaryLabel: "歴代最高得点",
-    suffix: "点",
-  },
+  // timed: {
+  //   label: "制限時間クイズ",
+  //   emoji: "⏱️",
+  //   description: "時間内にどれだけ稼げるか！ハイスコアを狙え！",
+  //   primaryKind: "best_score",
+  //   primaryLabel: "歴代最高得点",
+  //   suffix: "点",
+  // },
   dungeon: {
     label: "クイズダンジョン",
     emoji: "🏰",
