@@ -411,6 +411,7 @@ export default function TimeAttackQuizPage() {
   const finishedRef = useRef(false);
   const awardedOnceRef = useRef(false);
   const sentRef = useRef(false);
+  const answeringRef = useRef(false);
 
   useEffect(() => {
     finishedRef.current = finished;
@@ -462,6 +463,7 @@ export default function TimeAttackQuizPage() {
     setAwardStatus("idle");
     awardedOnceRef.current = false;
     sentRef.current = false;
+    answeringRef.current = false;
 
     setQuestions((prev) => shuffleArray(prev));
   };
@@ -655,13 +657,65 @@ export default function TimeAttackQuizPage() {
     return () => window.clearInterval(timer);
   }, [finished, questions.length]);
 
-  const checkAnswer = () => {
+  // const checkAnswer = () => {
+  //   if (!questions[currentIndex]?.quiz) return;
+
+  //   const correctAnswer = questions[currentIndex].quiz.answer;
+  //   const displayAnswer = questions[currentIndex].quiz.displayAnswer;
+
+  //   if (userAnswer === correctAnswer) {
+  //     const nextCorrectCount = correctCount + 1;
+
+  //     setCorrectCount(nextCorrectCount);
+  //     setShowCorrectMessage(true);
+
+  //     if (nextCorrectCount >= QUESTION_LIMIT) {
+  //       const now = performance.now();
+  //       const start = startTimeRef.current ?? now;
+  //       const finalTime = (now - start) / 1000;
+
+  //       // setFlashMessage("5問クリア！");
+  //       setFlashMessage("3問クリア！");
+  //       setTimeout(() => setFlashMessage(null), 900);
+
+  //       setTimeout(() => {
+  //         finishGame(finalTime);
+  //       }, 800);
+  //     }
+  //   } else {
+  //     const nextIncorrectCount = incorrectCount + 1;
+  //     setIncorrectCount(nextIncorrectCount);
+
+  //     if (nextIncorrectCount >= MISS_LIMIT) {
+  //       setIncorrectMessage(
+  //         `ざんねん！\n答えは「${displayAnswer}」でした！\n不正解が${MISS_LIMIT}回になったため終了です。`
+  //       );
+
+  //       setTimeout(() => {
+  //         finishGame(undefined, { noRecord: true });
+  //       }, 900);
+  //     } else {
+  //       setIncorrectMessage(
+  //         `ざんねん！\n答えは「${displayAnswer}」でした！\n不正解 ${nextIncorrectCount} / ${MISS_LIMIT}`
+  //       );
+  //     }
+  //   }
+
+  //   setUserAnswer(null);
+  // };
+
+  const checkAnswer = (selectedAnswer: number) => {
+    if (answeringRef.current) return;
     if (!questions[currentIndex]?.quiz) return;
 
-    const correctAnswer = questions[currentIndex].quiz.answer;
-    const displayAnswer = questions[currentIndex].quiz.displayAnswer;
+    answeringRef.current = true;
+    setUserAnswer(selectedAnswer);
 
-    if (userAnswer === correctAnswer) {
+    const correctAnswer = questions[currentIndex].quiz.answer;
+    const displayAnswer =
+      questions[currentIndex].quiz.displayAnswer ?? String(correctAnswer);
+
+    if (selectedAnswer === correctAnswer) {
       const nextCorrectCount = correctCount + 1;
 
       setCorrectCount(nextCorrectCount);
@@ -672,39 +726,45 @@ export default function TimeAttackQuizPage() {
         const start = startTimeRef.current ?? now;
         const finalTime = (now - start) / 1000;
 
-        // setFlashMessage("5問クリア！");
         setFlashMessage("3問クリア！");
-        setTimeout(() => setFlashMessage(null), 900);
+        setTimeout(() => setFlashMessage(null), 700);
 
         setTimeout(() => {
           finishGame(finalTime);
-        }, 800);
+        }, 700);
+
+        return;
       }
+
+      answeringRef.current = false;
     } else {
       const nextIncorrectCount = incorrectCount + 1;
       setIncorrectCount(nextIncorrectCount);
 
       if (nextIncorrectCount >= MISS_LIMIT) {
         setIncorrectMessage(
-          `ざんねん！\n答えは「${displayAnswer}」でした！\n不正解が${MISS_LIMIT}回になったため終了です。`
+          `不正解！\n答えは「${displayAnswer}」！\n不正解が${MISS_LIMIT}回になったため終了です。`
         );
 
         setTimeout(() => {
           finishGame(undefined, { noRecord: true });
-        }, 900);
-      } else {
-        setIncorrectMessage(
-          `ざんねん！\n答えは「${displayAnswer}」でした！\n不正解 ${nextIncorrectCount} / ${MISS_LIMIT}`
-        );
-      }
-    }
+        }, 1500);
 
-    setUserAnswer(null);
+        return;
+      }
+
+      setIncorrectMessage(
+        `不正解！\n答えは「${displayAnswer}」！\n不正解 ${nextIncorrectCount} / ${MISS_LIMIT}`
+      );
+
+      answeringRef.current = false;
+    }
   };
 
   const nextQuestion = () => {
     setShowCorrectMessage(false);
     setIncorrectMessage(null);
+    setUserAnswer(null);
 
     if (correctCount >= QUESTION_LIMIT) {
       finishGame();
@@ -822,9 +882,16 @@ export default function TimeAttackQuizPage() {
     <div className="container mx-auto p-2 md:p-8 text-center bg-gradient-to-b from-cyan-50 via-sky-100 to-blue-200">
       {!finished ? (
         <>
-          <h2 className="text-5xl md:text-6xl font-extrabold mb-4 text-sky-500 drop-shadow-lg">
+          {/* <h2 className="text-5xl md:text-6xl font-extrabold mb-4 text-sky-500 drop-shadow-lg">
             第 {currentIndex + 1} 問
+          </h2> */}
+          <h2 className="text-4xl md:text-6xl font-black mb-2 text-sky-500 drop-shadow-lg">
+            {correctCount} / {QUESTION_LIMIT}
           </h2>
+
+          <p className="text-xl md:text-2xl font-bold text-gray-700 mb-2 md:mb-4">
+            問正解！
+          </p>
 
           <div className="mx-auto mb-5 max-w-[420px] rounded-3xl border-4 border-sky-300 bg-white px-5 py-4 shadow-lg">
             <p className="text-sm md:text-base font-extrabold text-gray-500">
@@ -836,9 +903,9 @@ export default function TimeAttackQuizPage() {
               <span className="ml-1 text-xl md:text-2xl text-gray-700">秒</span>
             </p>
 
-            <p className="mt-2 text-sm md:text-base font-bold text-gray-700">
+            {/* <p className="mt-2 text-sm md:text-base font-bold text-gray-700">
               {correctCount} / {QUESTION_LIMIT} 問正解
-            </p>
+            </p> */}
           </div>
 
           {questions[currentIndex].quiz && (
@@ -925,7 +992,7 @@ export default function TimeAttackQuizPage() {
 
               {!showCorrectMessage && !incorrectMessage && (
                 <>
-                  <QuizQuestion
+                  {/* <QuizQuestion
                     quiz={questions[currentIndex].quiz}
                     userAnswer={userAnswer}
                     setUserAnswer={setUserAnswer}
@@ -939,6 +1006,29 @@ export default function TimeAttackQuizPage() {
                     >
                       回答
                     </button>
+                  </div> */}
+                  <div className="mx-auto max-w-[760px]">
+                    <p className="mb-6 text-2xl md:text-3xl font-extrabold text-gray-900 whitespace-pre-line">
+                      {questions[currentIndex].quiz.question}
+                    </p>
+
+                    <div className="mx-auto grid w-full max-w-[420px] grid-cols-1 gap-2 md:gap-3">
+                      {questions[currentIndex].quiz.choices?.map((choice, index) => {
+                        const answerNo = index;
+
+                        return (
+                          <button
+                            key={`${choice}-${index}`}
+                            type="button"
+                            disabled={answeringRef.current}
+                            onClick={() => checkAnswer(answerNo)}
+                            className="w-full rounded-2xl border-3 border-black bg-white px-5 py-4 text-center text-lg md:text-2xl font-extrabold text-gray-800 shadow hover:bg-sky-50 active:scale-[0.98] disabled:opacity-70"
+                          >
+                            {choice}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </>
               )}
