@@ -70,7 +70,7 @@ type BattleMessage = {
 
 const DEFAULT_CHARACTER: ArenaCharacter = {
   id: "kimagure_white",
-  name: "きまぐれモンスター【白】",
+  name: "ひまもん【白】",
   image: "/images/きまぐれモンスター【白】.png",
   rarity: "ノーマル",
   attack: 80,
@@ -381,13 +381,13 @@ const CharacterSelect = ({
             <div className="mt-4 grid place-items-center rounded-3xl bg-gradient-to-b from-stone-100 to-amber-100 p-5">
               <img
                 src="/images/きまぐれモンスター【白】.png"
-                alt="きまぐれモンスター【白】"
+                alt="ひまもん【白】"
                 className="h-40 object-contain drop-shadow-xl md:h-52"
               />
             </div>
 
             <p className="mt-4 text-2xl font-black text-stone-900">
-              きまぐれモンスター【白】
+              ひまもん【白】
             </p>
 
             <p className="mt-1 text-sm font-black text-violet-700">
