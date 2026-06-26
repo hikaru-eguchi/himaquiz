@@ -167,7 +167,7 @@ const HpGauge = ({
 
   return (
     <div className="w-full">
-      <div className="mb-1 flex items-center justify-between text-xs font-black text-stone-900 md:text-sm">
+      <div className="md:mb-1 flex items-center justify-between text-xs font-black text-stone-900 md:text-sm">
         <span>{label}</span>
         <span>
           {current} / {max}
@@ -199,7 +199,7 @@ const Gauge = ({
 
   return (
     <div className="w-full">
-      <div className="mb-1 flex items-center justify-between text-xs font-black text-stone-900">
+      <div className="md:mb-1 flex items-center justify-between text-[10px] md:text-xs font-black text-stone-900">
         <span>{label}</span>
         <span>
           {current} / {max}
@@ -685,7 +685,7 @@ const QuizResult = ({
 
         <div
           className={`
-            relative rounded-[1.8rem] p-5 md:p-8
+            relative rounded-[1.8rem] p-2 md:p-8
             ${
               isWin
                 ? "bg-gradient-to-b from-yellow-200 via-white to-orange-50"
@@ -2483,13 +2483,13 @@ export default function QuizArenaModePage() {
             </div>
           ) : (
             <>
-              <div className="relative overflow-hidden rounded-[2rem] border-3 border-slate-950 bg-gradient-to-br from-slate-950 via-purple-950 to-fuchsia-900 p-2 shadow-[0_8px_0_rgba(28,25,23,1)]">
+              <div className="relative overflow-hidden rounded-[2rem] border-3 border-slate-950 bg-gradient-to-br from-slate-950 via-purple-950 to-fuchsia-900 p-1 md:p-2 md:shadow-[0_8px_0_rgba(28,25,23,1)]">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#facc15_0%,transparent_35%)] opacity-30" />
 
-                <div className="relative rounded-[1.7rem] bg-gradient-to-b from-white via-slate-50 to-purple-50 p-3 md:p-5">
+                <div className="relative rounded-[1.7rem] bg-gradient-to-b from-white via-slate-50 to-purple-50 p-1 md:p-3 md:p-5">
 
                   {/* 上部 */}
-                  <div className="mb-3 flex items-center justify-between gap-2">
+                  <div className="mb-1 md:mb-3 flex items-center justify-between gap-2">
                     <div className="rounded-full border-2 border-white/50 bg-gradient-to-r from-purple-700 via-fuchsia-600 to-pink-500 px-3 py-1 text-sm font-black text-white md:text-lg">
                       ⚔️ クイズアリーナ
                     </div>
@@ -2500,20 +2500,20 @@ export default function QuizArenaModePage() {
                   </div>
 
                   {battleMessage && (
-                    <p className="mb-3 rounded-2xl bg-gradient-to-r from-yellow-300 via-orange-300 to-pink-300 px-4 py-2 text-xl font-black text-stone-950 shadow animate-pulse md:text-3xl">
+                    <p className="mb-1 md:mb-3 rounded-2xl bg-gradient-to-r from-yellow-300 via-orange-300 to-pink-300 px-4 py-2 text-base font-black text-stone-950 shadow animate-pulse md:text-3xl">
                       {battleMessage}
                     </p>
                   )}
 
                   {/* キャラ部分 */}
                   {/* <div className="grid gap-3 md:grid-cols-[1fr_auto_1fr] md:items-center"> */}
-                  <div className="grid w-full min-w-0 gap-3 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:items-center">
+                  <div className="grid w-full min-w-0 gap-1 md:gap-3 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:items-center">
 
                     {/* 自分 */}
                     {/* <div className="rounded-[1.5rem] border-3 border-emerald-700 bg-gradient-to-b from-emerald-100 via-white to-white p-3 shadow-xl"> */}
                     <div
                       className={`
-                        w-full min-w-0 rounded-[1.5rem] border-3 border-emerald-700 bg-gradient-to-b from-cyan-100 via-white to-blue-50 p-3 shadow-xl transition-all duration-300
+                        w-full min-w-0 rounded-[1.5rem] border-3 border-emerald-700 bg-gradient-to-b from-cyan-100 via-white to-blue-50 p-1 md:p-3 shadow-xl transition-all duration-300
                         ${
                           myCardFlash === "gold"
                             ? "scale-[1.03] ring-4 ring-yellow-300 shadow-[0_0_35px_rgba(250,204,21,0.95)]"
@@ -2521,67 +2521,79 @@ export default function QuizArenaModePage() {
                         }
                       `}
                     >
-                      {/* <div className="flex items-center gap-3"> */}
-                      <div className="flex min-w-0 items-center gap-2 md:gap-3">
-
-                        {/* <div className="relative grid h-24 w-24 shrink-0 place-items-center overflow-hidden bg-emerald-50 shadow-[0_0_20px_rgba(16,185,129,0.5)] md:h-32 md:w-32"> */}
-                        <div className="relative grid h-20 w-20 shrink-0 place-items-center overflow-hidden bg-emerald-50 shadow-[0_0_20px_rgba(16,185,129,0.5)] md:h-32 md:w-32">
-                          {/* <img
-                            src={myCharacterImage}
-                            alt={myCharacterName}
-                            // className="h-24 object-contain drop-shadow-2xl md:h-32"
-                            // className="h-20 object-contain drop-shadow-2xl md:h-32"
-                            className={`
-                              h-20 object-contain drop-shadow-2xl transition-all duration-1000 md:h-32
-                              ${finishOverlay?.defeatedId === "me" ? "opacity-0 scale-75 blur-sm" : ""}
-                            `}
-                          /> */}
-                          <Image
-                            src={myCharacterImage}
-                            alt={myCharacterName}
-                            width={128}
-                            height={128}
-                            className={`
-                              h-20 w-auto object-contain drop-shadow-2xl transition-all duration-1000 md:h-32
-                              ${finishOverlay?.defeatedId === "me" ? "opacity-0 scale-75 blur-sm" : ""}
-                            `}
-                            priority
-                          />
-
-                          {myHitEffect && <CharacterHitEffect type={myHitEffect} />}
-                        </div>
-
-                        {/* <div className="flex-1 text-left"> */}
-                        <div className="min-w-0 flex-1 text-left">
-                          <p className="text-xs font-black text-emerald-700">
+                      <div className="min-w-0 md:space-y-2">
+                        <div className="min-w-0 pl-3 text-left">
+                          <p className="text-[10px] md:text-xs font-black text-emerald-700">
                             あなた：{myPlayerName}
                           </p>
 
-                          {/* <p className="truncate text-lg font-black text-stone-950 md:text-2xl"> */}
-                          <p className="line-clamp-2 text-lg font-black text-stone-950 md:line-clamp-none md:text-2xl">
+                          <p className="line-clamp-2 text-base font-black text-stone-950 md:line-clamp-none md:text-2xl">
                             {myCharacterName}
                           </p>
+                        </div>
 
-                          <HpGauge
-                            label="HP"
-                            current={myHp}
-                            max={MAX_HP}
-                          />
+                        {/* <div className="flex items-center gap-3"> */}
+                        <div className="flex min-w-0 items-center gap-1 md:gap-3">
 
-                          <div className="mt-2 grid gap-1">
-                            <Gauge
-                              label="攻撃ゲージ"
-                              current={attackGauge}
-                              max={activeCharacter.cost}
-                              colorClass="bg-orange-500"
+                          {/* <div className="relative grid h-24 w-24 shrink-0 place-items-center overflow-hidden bg-emerald-50 shadow-[0_0_20px_rgba(16,185,129,0.5)] md:h-32 md:w-32"> */}
+                          <div className="relative grid h-20 w-20 shrink-0 place-items-center overflow-hidden bg-emerald-50 shadow-[0_0_20px_rgba(16,185,129,0.5)] md:h-32 md:w-32">
+                            {/* <img
+                              src={myCharacterImage}
+                              alt={myCharacterName}
+                              // className="h-24 object-contain drop-shadow-2xl md:h-32"
+                              // className="h-20 object-contain drop-shadow-2xl md:h-32"
+                              className={`
+                                h-20 object-contain drop-shadow-2xl transition-all duration-1000 md:h-32
+                                ${finishOverlay?.defeatedId === "me" ? "opacity-0 scale-75 blur-sm" : ""}
+                              `}
+                            /> */}
+                            <Image
+                              src={myCharacterImage}
+                              alt={myCharacterName}
+                              width={128}
+                              height={128}
+                              className={`
+                                h-20 w-auto object-contain drop-shadow-2xl transition-all duration-1000 md:h-32
+                                ${finishOverlay?.defeatedId === "me" ? "opacity-0 scale-75 blur-sm" : ""}
+                              `}
+                              priority
                             />
 
-                            <Gauge
-                              label="必殺ゲージ"
-                              current={specialGauge}
-                              max={activeCharacter.specialCost}
-                              colorClass="bg-violet-500"
+                            {myHitEffect && <CharacterHitEffect type={myHitEffect} />}
+                          </div>
+
+                          {/* <div className="flex-1 text-left"> */}
+                          <div className="min-w-0 flex-1 text-left">
+                            {/* <p className="text-xs font-black text-emerald-700">
+                              あなた：{myPlayerName}
+                            </p> */}
+
+                            {/* <p className="truncate text-lg font-black text-stone-950 md:text-2xl"> */}
+                            {/* <p className="line-clamp-2 text-base md:text-lg font-black text-stone-950 md:line-clamp-none md:text-2xl">
+                              {myCharacterName}
+                            </p> */}
+
+                            <HpGauge
+                              label="HP"
+                              current={myHp}
+                              max={MAX_HP}
                             />
+
+                            <div className="mt-1 md:mt-2 grid gap-1">
+                              <Gauge
+                                label="攻撃ゲージ"
+                                current={attackGauge}
+                                max={activeCharacter.cost}
+                                colorClass="bg-orange-500"
+                              />
+
+                              <Gauge
+                                label="必殺ゲージ"
+                                current={specialGauge}
+                                max={activeCharacter.specialCost}
+                                colorClass="bg-violet-500"
+                              />
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -2598,7 +2610,7 @@ export default function QuizArenaModePage() {
                     {/* <div className="rounded-[1.5rem] border-3 border-red-700 bg-gradient-to-b from-red-100 via-white to-white p-3 shadow-xl"> */}
                     <div
                       className={`
-                        w-full min-w-0 rounded-[1.5rem] border-3 border-red-700 bg-gradient-to-b from-pink-100 via-white to-rose-50 p-3 shadow-xl transition-all duration-300
+                        w-full min-w-0 rounded-[1.5rem] border-3 border-red-700 bg-gradient-to-b from-pink-100 via-white to-rose-50 p-1 md:p-3 shadow-xl transition-all duration-300
                         ${
                           opponentCardFlash === "red"
                             ? "scale-[1.03] ring-4 ring-red-400 shadow-[0_0_35px_rgba(239,68,68,0.95)]"
@@ -2607,84 +2619,96 @@ export default function QuizArenaModePage() {
                       `}
                     >
                       {/* <div className="flex items-center gap-3 md:flex-row-reverse"> */}
-                      <div className="flex min-w-0 items-center gap-2 md:flex-row-reverse md:gap-3">
-
-                        {/* <div className="relative grid h-24 w-24 shrink-0 place-items-center overflow-hidden bg-red-50 shadow-[0_0_20px_rgba(239,68,68,0.5)] md:h-32 md:w-32"> */}
-                        <div className="relative grid h-20 w-20 shrink-0 place-items-center overflow-hidden bg-red-50 shadow-[0_0_20px_rgba(239,68,68,0.5)] md:h-32 md:w-32">
-                          {opponent?.characterImage ? (
-                            // <img
-                            //   src={opponentBattleCharacter.image}
-                            //   alt={opponentBattleCharacter.name}
-                            //   // className="h-24 object-contain drop-shadow-2xl md:h-32"
-                            //   // className="h-20 object-contain drop-shadow-2xl md:h-32"
-                            //   className={`
-                            //     h-20 object-contain drop-shadow-2xl transition-all duration-1000 md:h-32
-                            //     ${finishOverlay?.defeatedId === "opponent" ? "opacity-0 scale-75 blur-sm" : ""}
-                            //   `}
-                            // />
-                            <Image
-                              src={opponentBattleCharacter.image}
-                              alt={opponentBattleCharacter.name}
-                              width={128}
-                              height={128}
-                              className={`
-                                h-20 w-auto object-contain drop-shadow-2xl transition-all duration-1000 md:h-32
-                                ${finishOverlay?.defeatedId === "opponent" ? "opacity-0 scale-75 blur-sm" : ""}
-                              `}
-                              priority
-                            />
-                          ) : (
-                            <div className="text-5xl">❓</div>
-                          )}
-
-                          {opponentHitEffect && <CharacterHitEffect type={opponentHitEffect} />}
-                        </div>
-
-                        {/* <div className="flex-1 text-left md:text-right"> */}
-                        <div className="min-w-0 flex-1 text-left md:text-right">
-
-                          <p className="text-xs font-black text-red-700">
+                      {/* <div className="flex min-w-0 items-center gap-1 md:flex-row-reverse md:gap-3"> */}
+                      <div className="min-w-0 md:space-y-2">
+                        <div className="min-w-0 pl-3 text-left">
+                          <p className="text-[10px] md:text-xs font-black text-red-700">
                             相手：{opponentPlayerName}
                           </p>
 
-                          {/* <p className="truncate text-lg font-black text-stone-950 md:text-2xl"> */}
-                          <p className="line-clamp-2 text-lg font-black text-stone-950 md:line-clamp-none md:text-2xl">
+                          <p className="line-clamp-2 text-base font-black text-stone-950 md:line-clamp-none md:text-2xl">
                             {opponentBattleCharacter.name}
                           </p>
+                        </div>
 
-                          <HpGauge
-                            label="HP"
-                            current={opponentHp}
-                            max={MAX_HP}
-                          />
+                        <div className="flex min-w-0 items-center gap-2 md:gap-3">
+                          {/* <div className="relative grid h-24 w-24 shrink-0 place-items-center overflow-hidden bg-red-50 shadow-[0_0_20px_rgba(239,68,68,0.5)] md:h-32 md:w-32"> */}
+                          <div className="relative grid h-20 w-20 shrink-0 place-items-center overflow-hidden bg-red-50 shadow-[0_0_20px_rgba(239,68,68,0.5)] md:h-32 md:w-32">
+                            {opponent?.characterImage ? (
+                              // <img
+                              //   src={opponentBattleCharacter.image}
+                              //   alt={opponentBattleCharacter.name}
+                              //   // className="h-24 object-contain drop-shadow-2xl md:h-32"
+                              //   // className="h-20 object-contain drop-shadow-2xl md:h-32"
+                              //   className={`
+                              //     h-20 object-contain drop-shadow-2xl transition-all duration-1000 md:h-32
+                              //     ${finishOverlay?.defeatedId === "opponent" ? "opacity-0 scale-75 blur-sm" : ""}
+                              //   `}
+                              // />
+                              <Image
+                                src={opponentBattleCharacter.image}
+                                alt={opponentBattleCharacter.name}
+                                width={128}
+                                height={128}
+                                className={`
+                                  h-20 w-auto object-contain drop-shadow-2xl transition-all duration-1000 md:h-32
+                                  ${finishOverlay?.defeatedId === "opponent" ? "opacity-0 scale-75 blur-sm" : ""}
+                                `}
+                                priority
+                              />
+                            ) : (
+                              <div className="text-5xl">❓</div>
+                            )}
 
-                          <div className="mt-2 grid gap-1">
-                            <Gauge
-                              label="攻撃ゲージ"
-                              current={opponentAttackGauge}
-                              max={opponentBattleCharacter.cost}
-                              colorClass="bg-orange-500"
-                            />
-
-                            <Gauge
-                              label="必殺ゲージ"
-                              current={opponentSpecialGauge}
-                              max={opponentBattleCharacter.specialCost}
-                              colorClass="bg-violet-500"
-                            />
+                            {opponentHitEffect && <CharacterHitEffect type={opponentHitEffect} />}
                           </div>
 
-                          <p className="mt-2 rounded-full bg-red-100 px-3 py-1 text-sm font-black text-red-700">
-                            受けたダメージ：{opponentDamage}
-                          </p>
+                          {/* <div className="flex-1 text-left md:text-right"> */}
+                          <div className="min-w-0 flex-1 text-left md:text-right">
+{/* 
+                            <p className="text-[10px] md:text-xs font-black text-red-700">
+                              相手：{opponentPlayerName}
+                            </p> */}
 
+                            {/* <p className="truncate text-lg font-black text-stone-950 md:text-2xl"> */}
+                            {/* <p className="line-clamp-2 text-base md:text-lg font-black text-stone-950 md:line-clamp-none md:text-2xl">
+                              {opponentBattleCharacter.name}
+                            </p> */}
+
+                            <HpGauge
+                              label="HP"
+                              current={opponentHp}
+                              max={MAX_HP}
+                            />
+
+                            <div className="mt-1 md:mt-2 grid gap-1">
+                              <Gauge
+                                label="攻撃ゲージ"
+                                current={opponentAttackGauge}
+                                max={opponentBattleCharacter.cost}
+                                colorClass="bg-orange-500"
+                              />
+
+                              <Gauge
+                                label="必殺ゲージ"
+                                current={opponentSpecialGauge}
+                                max={opponentBattleCharacter.specialCost}
+                                colorClass="bg-violet-500"
+                              />
+                            </div>
+
+                            {/* <p className="mt-2 rounded-full bg-red-100 px-3 py-1 text-sm font-black text-red-700">
+                              受けたダメージ：{opponentDamage}
+                            </p> */}
+
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
 
                   {/* 下部ステータス */}
-                  <div className="mt-3 flex flex-wrap justify-center gap-2">
+                  {/* <div className="mt-3 flex flex-wrap justify-center gap-2">
 
                     <p className="rounded-full border-2 border-stone-900 bg-white px-4 py-1 text-sm font-black text-stone-900 shadow">
                       ✅ 正解数：{correctCount}
@@ -2698,7 +2722,7 @@ export default function QuizArenaModePage() {
                       ✨ 倍率：×{getComboMultiplier(combo)}
                     </p>
 
-                  </div>
+                  </div> */}
 
                 </div>
               </div>
@@ -2718,7 +2742,7 @@ export default function QuizArenaModePage() {
               )}
 
               {!showCorrectMessage && !incorrectMessage && (
-                <div className="mx-auto mt-4 max-w-3xl rounded-[2rem] border-3 border-stone-900 bg-white p-4 shadow-xl">
+                <div className="mx-auto md:mt-4 max-w-3xl rounded-[2rem] border-3 border-stone-900 bg-white p-1 md:p-4 shadow-xl">
                   <QuizQuestion
                     key={questions[currentIndex].id}
                     quiz={questions[currentIndex].quiz}
@@ -2729,7 +2753,7 @@ export default function QuizArenaModePage() {
                   <button
                     onClick={checkAnswer}
                     disabled={userAnswer === null}
-                    className="mt-4 rounded-full border-2 border-black bg-gradient-to-r from-blue-500 to-violet-600 px-8 py-3 text-xl font-black text-white shadow hover:scale-105 disabled:bg-gray-300 disabled:text-gray-500"
+                    className="md:mt-4 rounded-full border-2 border-black bg-gradient-to-r from-blue-500 to-violet-600 px-8 py-3 text-xl font-black text-white shadow hover:scale-105 disabled:bg-gray-300 disabled:text-gray-500"
                   >
                     回答する
                   </button>
