@@ -635,7 +635,7 @@ export default function NavButtons() {
                 </legend>
 
                 <p className="text-xs md:text-sm text-black/70">
-                  サクッと暇つぶし！気軽に占い＆診断を楽しもう！✨
+                  今日の運勢やあなたのタイプを診断しよう！✨
                 </p>
 
                 <div className="mx-auto w-full max-w-[300px] md:max-w-[640px]">

@@ -47,8 +47,8 @@ export default function GuestRecommendQuizGames() {
           </p>
         </div>
 
-        <div className="w-full max-w-[500px] mx-auto rounded-2xl border-2 border-yellow-300 bg-white/85 p-3 shadow-lg">
-          <p className="text-sm md:text-base font-black text-yellow-600 text-center">
+        <div className="w-full max-w-[500px] mx-auto rounded-2xl border-2 border-purple-300 bg-white/85 p-3 shadow-lg">
+          <p className="text-sm md:text-base font-black text-purple-600 text-center">
             ⚔ やりこむならこれ！
           </p>
 
@@ -78,8 +78,8 @@ export default function GuestRecommendQuizGames() {
           </p>
         </div> */}
 
-        <div className="w-full max-w-[500px] mx-auto rounded-2xl border-2 border-blue-300 bg-white/85 p-3 shadow-lg">
-          <p className="text-sm md:text-base font-black text-blue-600 text-center">
+        <div className="w-full max-w-[500px] mx-auto rounded-2xl border-2 border-yellow-300 bg-white/85 p-3 shadow-lg">
+          <p className="text-sm md:text-base font-black text-yellow-600 text-center">
             👑 熱いオンライン対戦ならこれ！
           </p>
           <Link href="/quiz-royal" className="flex justify-center">
