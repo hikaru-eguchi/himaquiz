@@ -132,24 +132,6 @@ export default function FriendGamesSection() {
               </div>
             </div> */}
 
-            {/* シンクロランキング */}
-            {/* <div className="text-center max-w-[280px]">
-              <Link href="/quiz-synchro" className="w-full md:w-auto flex justify-center">
-                <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 text-white hover:scale-110 transition-all">
-                  👑シンクロランキング
-                </button>
-              </Link>
-
-              <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
-                <p className="text-sm md:text-base text-gray-700 leading-tight">
-                  みんなのベスト3は同じ？
-                </p>
-                <p className="text-sm md:text-base text-gray-700 leading-tight">
-                  順位を選んでシンクロさせよう！
-                </p>
-              </div>
-            </div> */}
-
             {/* ウソ？ホント？ゲーム */}
             {/* <div className="text-center max-w-[280px]">
               <Link href="/quiz-usohonto" className="w-full md:w-auto flex justify-center">
@@ -203,6 +185,41 @@ export default function FriendGamesSection() {
                 </p>
             </div>
             </div>
+
+            {/* シンクロランキング */}
+            <div className="text-center max-w-[280px]">
+              <Link href="/quiz-synchro" className="w-full md:w-auto flex justify-center">
+                <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 text-white hover:scale-110 transition-all">
+                  👑シンクロランキング
+                </button>
+              </Link>
+
+              <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
+                <p className="text-sm md:text-base text-gray-700 leading-tight">
+                  みんなのベスト3は同じ？
+                </p>
+                <p className="text-sm md:text-base text-gray-700 leading-tight">
+                  順位を選んでシンクロさせよう！
+                </p>
+              </div>
+            </div>
+
+          {/* タイムトーク */}
+          <div className="text-center max-w-[280px]">
+            <Link href="/quiz-timetalk" className="w-full md:w-auto flex justify-center">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-500 text-white hover:scale-110 transition-all">
+                🎙️タイムトーク
+              </button>
+            </Link>
+            <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                目標タイムを狙え！
+              </p>
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+                お題に沿って話す簡単トークゲーム！
+              </p>
+            </div>
+          </div>
           </>
         )}
       </div>

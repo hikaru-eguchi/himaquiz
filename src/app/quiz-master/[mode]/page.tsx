@@ -159,7 +159,7 @@ const makeShinySecretEnemy = (enemy: SecretEnemy): SecretEnemy => {
     ...enemy,
     name: `${enemy.name}（色違い）`,
     image: enemy.image.replace(".png", "_色違い.png"),
-    description: `めったに現れない特別な色違いの${enemy.name}。能力は通常と同じだが、出会えたら超ラッキー！`,
+    description: `めったに現れない特別な色違いの${enemy.name}。出会えたら超ラッキー！`,
     isShiny: true,
   };
 };
@@ -570,7 +570,7 @@ const makeShinyEnemy = (enemy: Enemy): Enemy => {
     ...enemy,
     name: `${enemy.name}（色違い）`,
     image: enemy.image.replace(".png", "_色違い.png"),
-    description: `めったに出会えない特別な色違いの${enemy.name}。能力は通常と同じだが、見つけたらかなりラッキー！`,
+    description: `めったに出会えない特別な色違いの${enemy.name}。見つけたらかなりラッキー！`,
     isShiny: true,
   };
 };
