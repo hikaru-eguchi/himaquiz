@@ -6,7 +6,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from("user_public_profiles")
-    .select("user_id, username, avatar_url, arena_wins")
+    .select("user_id, username, avatar_url, arena_wins, arena_current_win_streak")
     .not("arena_wins", "is", null)
     .gt("arena_wins", 0)
     .order("arena_wins", { ascending: false })

@@ -21,6 +21,7 @@ type ArenaRankRow = {
   username: string | null;
   avatar_url: string | null;
   arena_wins: number;
+  arena_current_win_streak?: number | null;
 };
 
 interface ArticleData {

@@ -33,6 +33,7 @@ type ArenaRankRow = {
   username: string | null;
   avatar_url: string | null;
   arena_wins: number;
+  arena_current_win_streak?: number | null;
 };
 
 export default async function WeeklyRankingSection() {
@@ -62,7 +63,7 @@ export default async function WeeklyRankingSection() {
 
     supabase
       .from("user_public_profiles")
-      .select("user_id, username, avatar_url, arena_wins")
+      .select("user_id, username, avatar_url, arena_wins, arena_current_win_streak")
       .order("arena_wins", { ascending: false })
       .order("updated_at", { ascending: true })
       .limit(30),

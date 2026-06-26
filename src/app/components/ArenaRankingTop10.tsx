@@ -10,6 +10,7 @@ type Row = {
   username: string | null;
   avatar_url: string | null;
   arena_wins: number;
+  arena_current_win_streak?: number | null;
 };
 
 export default function ArenaWinRankingTop20({ rows }: { rows: Row[] }) {
@@ -112,7 +113,7 @@ export default function ArenaWinRankingTop20({ rows }: { rows: Row[] }) {
     <>
       <div className="mt-6">
         <div className="mx-auto w-full max-w-[760px]">
-          <div className="rounded-[28px] border border-purple-200 bg-[#fbf8ff] p-4 shadow-[0_12px_30px_rgba(0,0,0,0.08)] md:p-6">
+          <div className="rounded-[28px] border border-purple-200 bg-[#fbf8ff] p-1 md:p-4 shadow-[0_12px_30px_rgba(0,0,0,0.08)] md:p-6">
             <div className="text-center">
               <p className="text-sm font-black text-purple-500 drop-shadow-sm md:text-base">
                 クイズアリーナ⚔️
@@ -135,6 +136,7 @@ export default function ArenaWinRankingTop20({ rows }: { rows: Row[] }) {
                 const username = u.username ?? "名無し";
                 const wins = u.arena_wins ?? 0;
                 const title = getArenaTitle(wins);
+                const currentWinStreak = u.arena_current_win_streak ?? 0;
 
                 return (
                   <button
@@ -169,6 +171,11 @@ export default function ArenaWinRankingTop20({ rows }: { rows: Row[] }) {
                           </p>
                           <p className="mt-1 text-xs font-black text-purple-500">
                             {title}
+                            {currentWinStreak > 0 && (
+                              <span className="ml-1 inline-block rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-black text-red-600 md:text-xs">
+                                🔥 {currentWinStreak}連勝中
+                              </span>
+                            )}
                           </p>
                         </div>
                       </div>

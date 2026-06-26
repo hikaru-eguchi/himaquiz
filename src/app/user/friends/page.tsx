@@ -182,7 +182,7 @@ export default function FriendsPage() {
 
         const { data: arenaRows, error: arenaErr } = await supabase
           .from("user_public_profiles")
-          .select("user_id, username, avatar_url, arena_wins")
+          .select("user_id, username, avatar_url, arena_wins, arena_current_win_streak")
           .in("user_id", rankingIds);
 
         if (arenaErr) throw arenaErr;
