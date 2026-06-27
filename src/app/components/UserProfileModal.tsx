@@ -216,6 +216,12 @@ export default function UserProfileModal({
 
             {loading || friendStatusLoading ? (
               <p className="mt-2 text-lg font-black text-slate-900">...</p>
+            ) : !myUserId ? (
+              <div className="mt-3">
+                <p className="mt-1 text-xs font-bold text-slate-400">
+                  ログインするとフレンド申請できます
+                </p>
+              </div>
             ) : selected?.user_id === myUserId ? (
               <p className="mt-2 text-sm font-bold text-slate-500">
                 自分のプロフィールです
