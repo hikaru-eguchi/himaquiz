@@ -55,7 +55,7 @@ const SOLO_GAMES: GameCard[] = [
     key: "kimagure",
     href: "/quiz-kimagure",
     label: "☁きまぐれクイズ",
-    desc1: "きまぐれにモンスターが出現！",
+    desc1: "きまぐれにひまもんが出現！",
     desc2: "何種類みつけられる？",
     buttonClassName:
       "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-yellow-400 to-yellow-300 text-white hover:scale-110 transition-all",

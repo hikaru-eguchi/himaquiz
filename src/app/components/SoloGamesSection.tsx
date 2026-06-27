@@ -87,7 +87,7 @@ export default function SoloGamesSection() {
 
               <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
                 <p className="text-sm md:text-base text-gray-700 leading-tight">
-                  きまぐれにモンスターが出現！
+                  きまぐれにひまもんが出現！
                 </p>
                 <p className="text-sm md:text-base text-gray-700 leading-tight">
                   何種類みつけられる？
