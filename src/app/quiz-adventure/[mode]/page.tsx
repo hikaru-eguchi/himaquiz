@@ -2185,7 +2185,7 @@ export default function QuizModePage() {
     return (
       <>
       <OnlineGameNotice />
-      <div className="container p-8 text-center">
+      <div className="container p-1 md:p-8 text-center">
         <h2 className="text-3xl md:text-5xl mb-2 md:mb-4">あなたのニックネームを入力してください</h2>
         <p className="text-xl md:text-2xl text-gray-500 mb-4 md:mb-6">※最大10文字まで入力できます</p>
         <input
@@ -2251,7 +2251,7 @@ export default function QuizModePage() {
               <img
                 src={playerAvatarUrl || "/images/初期アイコン.png"}
                 alt={playerName}
-                className="w-10 h-10 md:w-14 md:h-14 rounded-full object-cover border-2 border-black bg-white"
+                className="w-12 h-12 md:w-14 md:h-14 rounded-full object-cover border-2 border-black bg-white"
               />
               <p className="text-xl md:text-3xl font-bold text-gray-700">
                 {playerName}
@@ -2272,7 +2272,7 @@ export default function QuizModePage() {
     return (
       <>
       <OnlineGameNotice />
-      <div className="container p-8 text-center">
+      <div className="container p-1 md:p-8 text-center">
         <div>
           <p className="text-3xl md:text-5xl font-extrabold text-yellow-400 mb-6 animate-pulse drop-shadow-[0_0_10px_yellow]">
             仲間が揃ったよ！
@@ -2287,11 +2287,11 @@ export default function QuizModePage() {
               >
                 {/* <p className="font-bold text-lg md:text-xl truncate">{p.playerName}</p> */}
                 <div className="w-full flex items-center">
-                  <div className="w-10 flex justify-start">
+                  <div className="w-12 flex justify-start">
                     <img
                       src={p.avatarUrl || "/images/初期アイコン.png"}
                       alt={p.playerName}
-                      className="w-8 h-8 rounded-full object-cover border border-black bg-white"
+                      className="w-12 h-12 md:w-12 md:h-12 rounded-full object-cover border border-black bg-white"
                     />
                   </div>
 
@@ -2480,7 +2480,7 @@ export default function QuizModePage() {
     />
     <OnlineGameNotice />
     <div
-      className={`container mx-auto p-8 text-center transition-all duration-700 ${
+      className={`container mx-auto p-1 md:p-8 text-center transition-all duration-700 ${
         finished
           ? "bg-gradient-to-b from-yellow-200 via-amber-100 to-yellow-50"
           : getCoopDungeonBgClass()
@@ -2716,7 +2716,7 @@ export default function QuizModePage() {
                       src={p.avatarUrl || "/images/初期アイコン.png"}
                       alt={p.playerName}
                       className={`
-                        w-7 h-7 md:w-9 md:h-9
+                        w-12 h-12 md:w-14 md:h-14
                         rounded-full object-cover
                         border-2
                         mb-0.5

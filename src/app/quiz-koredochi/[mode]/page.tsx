@@ -627,7 +627,7 @@ export default function QuizKoredochiCodePage() {
               <img
                 src={playerAvatarUrl || "/images/初期アイコン.png"}
                 alt={playerName}
-                className="w-10 h-10 md:w-14 md:h-14 rounded-full object-cover border-2 border-black bg-white"
+                className="w-12 h-12 md:w-14 md:h-14 rounded-full object-cover border-2 border-black bg-white"
               />
               <p className="text-xl md:text-3xl font-bold text-gray-700">
                 {playerName}
@@ -660,7 +660,7 @@ export default function QuizKoredochiCodePage() {
                   <img
                     src={p.avatarUrl || "/images/初期アイコン.png"}
                     alt={p.playerName}
-                    className="w-10 h-10 md:w-14 md:h-14 rounded-full object-cover border-2 border-black bg-white"
+                    className="w-12 h-12 md:w-14 md:h-14 rounded-full object-cover border-2 border-black bg-white"
                   />
 
                   <p className="truncate text-base md:text-lg font-extrabold">
@@ -713,7 +713,7 @@ export default function QuizKoredochiCodePage() {
                   <img
                     src={p.avatarUrl || "/images/初期アイコン.png"}
                     alt={p.playerName}
-                    className="w-10 h-10 md:w-14 md:h-14 rounded-full object-cover border-2 border-black bg-white"
+                    className="w-12 h-12 md:w-14 md:h-14 rounded-full object-cover border-2 border-black bg-white"
                   />
 
                   <p className="truncate text-lg md:text-xl font-extrabold">
@@ -836,7 +836,7 @@ export default function QuizKoredochiCodePage() {
                     <img
                       src={p.avatarUrl || "/images/初期アイコン.png"}
                       alt={p.playerName}
-                      className="w-8 h-8 rounded-full object-cover border-2 border-black bg-white"
+                      className="w-12 h-12 rounded-full object-cover border-2 border-black bg-white"
                     />
 
                     <span>

@@ -1180,7 +1180,7 @@ export default function QuizModePage() {
             <img
               src={playerAvatarUrl || "/images/初期アイコン.png"}
               alt={playerName}
-              className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover border-2 border-black bg-white"
+              className="w-12 h-12 md:w-14 md:h-14 rounded-full object-cover border-2 border-black bg-white"
             />
             <p className="text-xl md:text-3xl font-bold text-gray-700">
               {playerName}
@@ -1217,7 +1217,7 @@ export default function QuizModePage() {
     return (
       <>
       <OnlineGameNotice />
-      <div className="container p-8 text-center">
+      <div className="container p-1 md:p-8 text-center">
         <h2 className="text-3xl md:text-5xl mb-2 md:mb-4">あなたのニックネームを入力してください</h2>
         <p className="text-xl md:text-2xl text-gray-500 mb-4 md:mb-6">※最大10文字まで入力できます</p>
         <input
@@ -1287,7 +1287,7 @@ export default function QuizModePage() {
             <img
               src={playerAvatarUrl || "/images/初期アイコン.png"}
               alt={playerName}
-              className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover border-2 border-black bg-white"
+              className="w-12 h-12 md:w-14 md:h-14 rounded-full object-cover border-2 border-black bg-white"
             />
             <p className="text-xl md:text-3xl font-bold text-gray-700">
               {playerName}
@@ -1307,7 +1307,7 @@ export default function QuizModePage() {
     return (
       <>
       <OnlineGameNotice />
-      <div className="container p-8 text-center">
+      <div className="container p-1 md:p-8 text-center">
         {/* <h2 className="text-3xl md:text-5xl font-extrabold mb-4 md:mb-6"> */}
           {/* {opponent
             ? `${opponent.name} さんとマッチしました！`
@@ -1317,7 +1317,7 @@ export default function QuizModePage() {
               <img
                 src={opponent.avatarUrl || "/images/初期アイコン.png"}
                 alt={opponent.name}
-                className="w-10 h-10 md:w-14 md:h-14 rounded-full object-cover border-2 border-black bg-white"
+                className="w-12 h-12 md:w-14 md:h-14 rounded-full object-cover border-2 border-black bg-white"
               />
               <h2 className="text-3xl md:text-5xl font-extrabold">
                 {opponent.name} さんとマッチしました！
@@ -1417,7 +1417,7 @@ export default function QuizModePage() {
   return (
     <>
     <OnlineGameNotice />
-    <div className="container mx-auto p-8 text-center bg-gradient-to-b from-pink-200 via-yellow-200 to-green-200">
+    <div className="container mx-auto p-1 md:p-8 text-center bg-gradient-to-b from-pink-200 via-yellow-200 to-green-200">
       {countdown !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
           <motion.div
@@ -1515,7 +1515,7 @@ export default function QuizModePage() {
                         <img
                           src={p.avatarUrl || "/images/初期アイコン.png"}
                           alt={p.name}
-                          className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover border-2 border-black bg-white"
+                          className="w-12 h-12 md:w-14 md:h-14 rounded-full object-cover border-2 border-black bg-white"
                         />
                       </div>
 
