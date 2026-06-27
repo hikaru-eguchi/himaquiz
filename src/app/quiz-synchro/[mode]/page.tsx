@@ -21,6 +21,7 @@ type SynchroPhase =
 type Player = {
   socketId: string;
   playerName: string;
+  avatarUrl?: string | null;
 };
 
 type SynchroChoice = {
@@ -205,6 +206,7 @@ export default function QuizSynchroCodePage() {
 
   const [phase, setPhase] = useState<SynchroPhase>("name");
   const [playerName, setPlayerName] = useState("");
+  const [playerAvatarUrl, setPlayerAvatarUrl] = useState<string | null>(null);
   const [autoNameLoading, setAutoNameLoading] = useState(false);
   const autoJoinedRef = useRef(false);
   const [nameError, setNameError] = useState<string | null>(null);
@@ -243,7 +245,10 @@ export default function QuizSynchroCodePage() {
     players: rawPlayers,
     mySocketId,
     socket,
-  } = useBattle(playerName);
+  } = useBattle({
+    name: playerName,
+    avatarUrl: playerAvatarUrl,
+  });
 
   useEffect(() => {
     if (userLoading) return;
@@ -254,7 +259,7 @@ export default function QuizSynchroCodePage() {
 
       const { data } = await supabase
         .from("profiles")
-        .select("username")
+        .select("username, avatar_url")
         .eq("id", user.id)
         .maybeSingle();
 
@@ -264,6 +269,7 @@ export default function QuizSynchroCodePage() {
         "プレイヤー";
 
       setPlayerName(name.slice(0, 10));
+      setPlayerAvatarUrl(data?.avatar_url ?? null);
       setAutoNameLoading(false);
     };
 
@@ -306,6 +312,7 @@ export default function QuizSynchroCodePage() {
       rawPlayers.map((p) => ({
         socketId: p.socketId,
         playerName: p.name,
+        avatarUrl: p.avatarUrl ?? null,
       })),
     [rawPlayers]
   );
@@ -439,6 +446,23 @@ export default function QuizSynchroCodePage() {
   useEffect(() => {
     if (!socket) return;
 
+    // const onRoomCount = ({
+    //   players,
+    //   current,
+    //   max,
+    // }: {
+    //   players: Player[];
+    //   current: number;
+    //   max: number;
+    // }) => {
+    //   setRoomPlayers(players);
+    //   setPlayerCount(`${current}/${max}`);
+
+    //   if (current >= playerMaxCount && phase === "waiting") {
+    //     setPhase("ready");
+    //   }
+    // };
+
     const onRoomCount = ({
       players,
       current,
@@ -448,11 +472,20 @@ export default function QuizSynchroCodePage() {
       current: number;
       max: number;
     }) => {
-      setRoomPlayers(players);
+      const normalizedPlayers: Player[] = (players ?? []).map((p: any) => ({
+        socketId: p.socketId,
+        playerName: p.playerName ?? p.name ?? "プレイヤー",
+        avatarUrl: p.avatarUrl ?? null,
+      }));
+
+      setRoomPlayers(normalizedPlayers);
       setPlayerCount(`${current}/${max}`);
 
-      if (current >= playerMaxCount && phase === "waiting") {
-        setPhase("ready");
+      if (current >= playerMaxCount) {
+        setPhase((prev) => {
+          if (prev === "waiting") return "ready";
+          return prev;
+        });
       }
     };
 
@@ -525,7 +558,8 @@ export default function QuizSynchroCodePage() {
       socket.off("synchro_game_end", onGameEnd);
       socket.off("synchro_next_ready_update", onNextReadyUpdate);
     };
-  }, [socket, phase, playerMaxCount, questionCount]);
+  // }, [socket, phase, playerMaxCount, questionCount]);
+  }, [socket, playerMaxCount, questionCount]);
 
   if (userLoading || autoNameLoading) {
     return null;
@@ -613,12 +647,25 @@ export default function QuizSynchroCodePage() {
           </p>
 
           {playerName && (
-            <p className="mt-5 text-lg md:text-xl font-bold text-gray-700">
-              あなた：{playerName}
-            </p>
+            // <p className="mt-5 text-lg md:text-xl font-bold text-gray-700">
+            //   あなた：{playerName}
+            // </p>
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <p className="text-xl md:text-3xl font-bold text-gray-700">
+                あなた：
+              </p>
+              <img
+                src={playerAvatarUrl || "/images/初期アイコン.png"}
+                alt={playerName}
+                className="w-10 h-10 md:w-14 md:h-14 rounded-full object-cover border-2 border-black bg-white"
+              />
+              <p className="text-xl md:text-3xl font-bold text-gray-700">
+                {playerName}
+              </p>
+            </div>
           )}
 
-          <div className="mt-5 grid grid-cols-2 gap-3">
+          {/* <div className="mt-5 grid grid-cols-2 gap-3">
             {displayPlayers.map((p) => (
               <div
                 key={p.socketId}
@@ -630,6 +677,28 @@ export default function QuizSynchroCodePage() {
                     ? ellipsizeName(playerName)
                     : ellipsizeName(p.playerName)}
                 </p>
+              </div>
+            ))}
+          </div> */}
+          <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-3">
+            {displayPlayers.map((p) => (
+              <div
+                key={p.socketId}
+                className="rounded-2xl border-4 border-black bg-white px-3 py-3 shadow"
+              >
+                <div className="flex items-center gap-3">
+                  <img
+                    src={p.avatarUrl || "/images/初期アイコン.png"}
+                    alt={p.playerName}
+                    className="w-10 h-10 md:w-14 md:h-14 rounded-full object-cover border-2 border-black bg-white"
+                  />
+
+                  <p className="truncate text-base md:text-lg font-extrabold">
+                    {p.socketId === mySocketId
+                      ? ellipsizeName(playerName)
+                      : ellipsizeName(p.playerName)}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
@@ -649,7 +718,7 @@ export default function QuizSynchroCodePage() {
             全員そろったよ！
           </p>
 
-          <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
+          {/* <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
             {displayPlayers.map((p) => (
               <div
                 key={p.socketId}
@@ -661,6 +730,29 @@ export default function QuizSynchroCodePage() {
                     ? ellipsizeName(playerName)
                     : ellipsizeName(p.playerName)}
                 </p>
+              </div>
+            ))}
+          </div> */}
+
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-3">
+            {displayPlayers.map((p) => (
+              <div
+                key={p.socketId}
+                className="rounded-2xl border-4 border-black bg-white px-3 py-3 shadow"
+              >
+                <div className="flex items-center gap-3">
+                  <img
+                    src={p.avatarUrl || "/images/初期アイコン.png"}
+                    alt={p.playerName}
+                    className="w-10 h-10 md:w-14 md:h-14 rounded-full object-cover border-2 border-black bg-white"
+                  />
+
+                  <p className="truncate text-lg md:text-xl font-extrabold">
+                    {p.socketId === mySocketId
+                      ? ellipsizeName(playerName)
+                      : ellipsizeName(p.playerName)}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
@@ -737,10 +829,25 @@ export default function QuizSynchroCodePage() {
                 const active = p.socketId === mySocketId;
 
                 return (
+                  // <div
+                  //   key={p.socketId}
+                  //   className={`
+                  //     rounded-full border-4 px-4 py-2 font-black shadow-sm
+                  //     ${
+                  //       active
+                  //         ? "border-black bg-yellow-300 text-gray-900"
+                  //         : "border-black bg-white text-gray-800"
+                  //     }
+                  //   `}
+                  // >
+                  //   {/* {active ? "👑 あなた" : `🤝 ${ellipsizeName(p.playerName)}`} */}
+                  //   {active ? `👑 ${ellipsizeName(playerName)}` : `🤝 ${ellipsizeName(p.playerName)}`}
+                  // </div>
                   <div
                     key={p.socketId}
                     className={`
-                      rounded-full border-4 px-4 py-2 font-black shadow-sm
+                      flex items-center gap-2
+                      rounded-full border-4 px-3 py-2 font-black shadow-sm
                       ${
                         active
                           ? "border-black bg-yellow-300 text-gray-900"
@@ -748,8 +855,17 @@ export default function QuizSynchroCodePage() {
                       }
                     `}
                   >
-                    {/* {active ? "👑 あなた" : `🤝 ${ellipsizeName(p.playerName)}`} */}
-                    {active ? `👑 ${ellipsizeName(playerName)}` : `🤝 ${ellipsizeName(p.playerName)}`}
+                    <img
+                      src={p.avatarUrl || "/images/初期アイコン.png"}
+                      alt={p.playerName}
+                      className="w-8 h-8 rounded-full object-cover border-2 border-black bg-white"
+                    />
+
+                    <span>
+                      {active
+                        ? `${ellipsizeName(playerName)}`
+                        : `${ellipsizeName(p.playerName)}`}
+                    </span>
                   </div>
                 );
               })}
@@ -950,7 +1066,7 @@ export default function QuizSynchroCodePage() {
 
               <div className="mt-5 rounded-3xl border-4 border-black bg-white/95 p-4 text-left">
                 <p className="text-xl md:text-2xl font-extrabold text-gray-900 text-center">
-                  みんなのランキング
+                  👑みんなのランキング
                 </p>
 
                 <div className="mt-4 space-y-3">

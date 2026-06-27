@@ -55,6 +55,7 @@ interface ArticleData {
 interface Player {
   socketId: string;
   name: string;  // 表示用の名前
+  avatarUrl?: string | null;
   score: number;
 }
 
@@ -589,6 +590,7 @@ export default function QuizModePage() {
   const [scoreChanges, setScoreChanges] = useState<Record<string, number | null>>({});
   const [readyToStart, setReadyToStart] = useState(false);
   const [playerName, setPlayerName] = useState("");
+  const [playerAvatarUrl, setPlayerAvatarUrl] = useState<string | null>(null);
   const [autoNameLoading, setAutoNameLoading] = useState(false);
   const autoJoinedRef = useRef(false);
   const [joined, setJoined] = useState(false);
@@ -621,7 +623,11 @@ export default function QuizModePage() {
     startAt,
     mySocketId,
     socket,
-  } = useBattle(playerName);
+  // } = useBattle(playerName);
+  } = useBattle({
+    name: playerName,
+    avatarUrl: playerAvatarUrl,
+  });
 
   useEffect(() => {
     if (userLoading) return;
@@ -632,7 +638,7 @@ export default function QuizModePage() {
 
       const { data } = await supabase
         .from("profiles")
-        .select("username")
+        .select("username, avatar_url")
         .eq("id", user.id)
         .maybeSingle();
 
@@ -642,6 +648,7 @@ export default function QuizModePage() {
         "プレイヤー";
 
       setPlayerName(name.slice(0, 10));
+      setPlayerAvatarUrl(data?.avatar_url ?? null);
       setAutoNameLoading(false);
     };
 
@@ -700,6 +707,7 @@ export default function QuizModePage() {
   const players: Player[] = rawPlayers.map((p) => ({
     socketId: p.socketId,
     name: p.name,
+    avatarUrl: p.avatarUrl ?? null,
     score: p.score,
   }));
   
@@ -715,7 +723,12 @@ export default function QuizModePage() {
   const isWin = myRank === 1;                 // 1位なら勝ち
   const isDraw = myRank === 1 && ranks.filter(r => r.rank === 1).length > 1; // 同率1位なら引き分け演出用
   const isLose = myRank !== null && myRank > 1;
-  type RoomPlayer = { socketId: string; playerName: string };
+  // type RoomPlayer = { socketId: string; playerName: string };
+  type RoomPlayer = {
+    socketId: string;
+    playerName: string;
+    avatarUrl?: string | null;
+  };
 
   const [playerCount, setPlayerCount] = useState("0/4");  // 表示用
   const [roomPlayers, setRoomPlayers] = useState<RoomPlayer[]>([]);
@@ -749,6 +762,7 @@ export default function QuizModePage() {
       const roomPlayersNormalized: RoomPlayer[] = (players ?? []).map((p: any) => ({
         socketId: p.socketId,
         playerName: p.playerName ?? "", // 念のため
+        avatarUrl: p.avatarUrl ?? null,
       }));
       setRoomPlayers(roomPlayersNormalized);
       setPlayerCount(`${current}/${max}`);
@@ -1388,9 +1402,22 @@ export default function QuizModePage() {
         <OnlineGameNotice />
         <div className="text-center">
           {playerName && (
-            <p className="text-xl md:text-3xl mb-6 font-bold text-gray-700">
-              あなた：{playerName}
-            </p>
+            // <p className="text-xl md:text-3xl mb-6 font-bold text-gray-700">
+            //   あなた：{playerName}
+            // </p>
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <p className="text-xl md:text-3xl font-bold text-gray-700">
+                あなた：
+              </p>
+              <img
+                src={playerAvatarUrl || "/images/初期アイコン.png"}
+                alt={playerName}
+                className="w-10 h-10 md:w-14 md:h-14 rounded-full object-cover border-2 border-black bg-white"
+              />
+              <p className="text-xl md:text-3xl font-bold text-gray-700">
+                {playerName}
+              </p>
+            </div>
           )}
         </div>
 
@@ -1416,9 +1443,24 @@ export default function QuizModePage() {
           {roomPlayers.map((p) => (
             <div
               key={p.socketId}
-              className="w-32 md:w-36 p-2 bg-white rounded-lg shadow-md border-2 border-gray-300"
+              className="w-60 md:w-60 p-2 bg-white rounded-lg shadow-md border-2 border-gray-300"
             >
-              <p className="font-bold text-lg md:text-xl truncate">{p.playerName}</p>
+              {/* <p className="font-bold text-lg md:text-xl truncate">{p.playerName}</p> */}
+              <div className="w-full flex items-center">
+                <div className="w-10 flex justify-start">
+                  <img
+                    src={p.avatarUrl || "/images/初期アイコン.png"}
+                    alt={p.playerName}
+                    className="w-8 h-8 rounded-full object-cover border border-black bg-white"
+                  />
+                </div>
+
+                <div className="flex-1 text-center">
+                  <p className="font-bold text-lg md:text-xl truncate">
+                    {p.playerName}
+                  </p>
+                </div>
+              </div>
             </div>
           ))}
         </div>
@@ -1570,12 +1612,23 @@ export default function QuizModePage() {
                     </AnimatePresence>
 
                     {/* 名前 */}
-                    <p className="font-bold text-gray-800 text-sm md:text-xl text-center px-1">
+                    {/* <p className="font-bold text-gray-800 text-sm md:text-xl text-center px-1">
+                      {p.name.length > 6 ? p.name.slice(0, 6) + "…" : p.name}
+                    </p> */}
+                    {/* アイコン */}
+                    <img
+                      src={p.avatarUrl || "/images/初期アイコン.png"}
+                      alt={p.name}
+                      className="w-8 h-8 md:w-12 md:h-12 rounded-full object-cover border-2 border-black bg-white mb-1"
+                    />
+
+                    {/* 名前 */}
+                    <p className="font-bold text-gray-800 text-sm md:text-lg text-center px-1 leading-tight">
                       {p.name.length > 6 ? p.name.slice(0, 6) + "…" : p.name}
                     </p>
 
                     {/* 得点 */}
-                    <p className="mt-1 text-gray-700 text-sm md:text-xl md:text-base font-extrabold">
+                    <p className="mt-1 text-gray-700 text-sm md:text-lg font-extrabold">
                       {p.score}点
                     </p>
 

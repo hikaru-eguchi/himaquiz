@@ -23,6 +23,7 @@ type ChoiceKey = "A" | "B";
 type Player = {
   socketId: string;
   playerName: string;
+  avatarUrl?: string | null;
 };
 
 type KoredochiChoice = {
@@ -207,6 +208,7 @@ export default function QuizKoredochiCodePage() {
 
   const [phase, setPhase] = useState<KoredochiPhase>("name");
   const [playerName, setPlayerName] = useState("");
+  const [playerAvatarUrl, setPlayerAvatarUrl] = useState<string | null>(null);
   const [autoNameLoading, setAutoNameLoading] = useState(false);
   const autoJoinedRef = useRef(false);
   const [nameError, setNameError] = useState<string | null>(null);
@@ -241,7 +243,10 @@ export default function QuizKoredochiCodePage() {
     players: rawPlayers,
     mySocketId,
     socket,
-  } = useBattle(playerName);
+  } = useBattle({
+    name: playerName,
+    avatarUrl: playerAvatarUrl,
+  });
 
   useEffect(() => {
     if (userLoading) return;
@@ -252,7 +257,7 @@ export default function QuizKoredochiCodePage() {
 
       const { data } = await supabase
         .from("profiles")
-        .select("username")
+        .select("username, avatar_url")
         .eq("id", user.id)
         .maybeSingle();
 
@@ -262,6 +267,7 @@ export default function QuizKoredochiCodePage() {
         "プレイヤー";
 
       setPlayerName(name.slice(0, 10));
+      setPlayerAvatarUrl(data?.avatar_url ?? null);
       setAutoNameLoading(false);
     };
 
@@ -304,6 +310,7 @@ export default function QuizKoredochiCodePage() {
       rawPlayers.map((p) => ({
         socketId: p.socketId,
         playerName: p.name,
+        avatarUrl: p.avatarUrl ?? null,
       })),
     [rawPlayers]
   );
@@ -425,6 +432,23 @@ export default function QuizKoredochiCodePage() {
   useEffect(() => {
     if (!socket) return;
 
+    // const onRoomCount = ({
+    //   players,
+    //   current,
+    //   max,
+    // }: {
+    //   players: Player[];
+    //   current: number;
+    //   max: number;
+    // }) => {
+    //   setRoomPlayers(players);
+    //   setPlayerCount(`${current}/${max}`);
+
+    //   if (current >= playerMaxCount && phase === "waiting") {
+    //     setPhase("ready");
+    //   }
+    // };
+
     const onRoomCount = ({
       players,
       current,
@@ -434,11 +458,20 @@ export default function QuizKoredochiCodePage() {
       current: number;
       max: number;
     }) => {
-      setRoomPlayers(players);
+      const normalizedPlayers: Player[] = (players ?? []).map((p: any) => ({
+        socketId: p.socketId,
+        playerName: p.playerName ?? p.name ?? "プレイヤー",
+        avatarUrl: p.avatarUrl ?? null,
+      }));
+
+      setRoomPlayers(normalizedPlayers);
       setPlayerCount(`${current}/${max}`);
 
-      if (current >= playerMaxCount && phase === "waiting") {
-        setPhase("ready");
+      if (current >= playerMaxCount) {
+        setPhase((prev) => {
+          if (prev === "waiting") return "ready";
+          return prev;
+        });
       }
     };
 
@@ -495,7 +528,8 @@ export default function QuizKoredochiCodePage() {
       socket.off("koredochi_round_result", onRoundResult);
       socket.off("koredochi_game_end", onGameEnd);
     };
-  }, [socket, phase, playerMaxCount, questionCount]);
+  // }, [socket, phase, playerMaxCount, questionCount]);
+  }, [socket, playerMaxCount, questionCount]);
 
   if (userLoading || autoNameLoading) {
     return null;
@@ -583,12 +617,25 @@ export default function QuizKoredochiCodePage() {
           </p>
 
           {playerName && (
-            <p className="mt-5 text-lg md:text-xl font-bold text-gray-700">
-              あなた：{playerName}
-            </p>
+            // <p className="mt-5 text-lg md:text-xl font-bold text-gray-700">
+            //   あなた：{playerName}
+            // </p>
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <p className="text-xl md:text-3xl font-bold text-gray-700">
+                あなた：
+              </p>
+              <img
+                src={playerAvatarUrl || "/images/初期アイコン.png"}
+                alt={playerName}
+                className="w-10 h-10 md:w-14 md:h-14 rounded-full object-cover border-2 border-black bg-white"
+              />
+              <p className="text-xl md:text-3xl font-bold text-gray-700">
+                {playerName}
+              </p>
+            </div>
           )}
 
-          <div className="mt-5 grid grid-cols-2 gap-3">
+          {/* <div className="mt-5 grid grid-cols-2 gap-3">
             {displayPlayers.map((p) => (
               <div
                 key={p.socketId}
@@ -600,6 +647,28 @@ export default function QuizKoredochiCodePage() {
                     ? ellipsizeName(playerName)
                     : ellipsizeName(p.playerName)}
                 </p>
+              </div>
+            ))}
+          </div> */}
+          <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-3">
+            {displayPlayers.map((p) => (
+              <div
+                key={p.socketId}
+                className="rounded-2xl border-4 border-black bg-white px-3 py-3 shadow"
+              >
+                <div className="flex items-center gap-3">
+                  <img
+                    src={p.avatarUrl || "/images/初期アイコン.png"}
+                    alt={p.playerName}
+                    className="w-10 h-10 md:w-14 md:h-14 rounded-full object-cover border-2 border-black bg-white"
+                  />
+
+                  <p className="truncate text-base md:text-lg font-extrabold">
+                    {p.socketId === mySocketId
+                      ? ellipsizeName(playerName)
+                      : ellipsizeName(p.playerName)}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
@@ -619,7 +688,7 @@ export default function QuizKoredochiCodePage() {
             全員そろったよ！
           </p>
 
-          <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
+          {/* <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
             {displayPlayers.map((p) => (
               <div
                 key={p.socketId}
@@ -631,6 +700,28 @@ export default function QuizKoredochiCodePage() {
                     ? ellipsizeName(playerName)
                     : ellipsizeName(p.playerName)}
                 </p>
+              </div>
+            ))}
+          </div> */}
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-3">
+            {displayPlayers.map((p) => (
+              <div
+                key={p.socketId}
+                className="rounded-2xl border-4 border-black bg-white px-3 py-3 shadow"
+              >
+                <div className="flex items-center gap-3">
+                  <img
+                    src={p.avatarUrl || "/images/初期アイコン.png"}
+                    alt={p.playerName}
+                    className="w-10 h-10 md:w-14 md:h-14 rounded-full object-cover border-2 border-black bg-white"
+                  />
+
+                  <p className="truncate text-lg md:text-xl font-extrabold">
+                    {p.socketId === mySocketId
+                      ? ellipsizeName(playerName)
+                      : ellipsizeName(p.playerName)}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
@@ -703,7 +794,7 @@ export default function QuizKoredochiCodePage() {
               </div>
             </div>
 
-            <div className="mt-4 flex flex-wrap justify-center gap-2">
+            {/* <div className="mt-4 flex flex-wrap justify-center gap-2">
               {displayPlayers.map((p) => {
                 const active = p.socketId === mySocketId;
 
@@ -719,8 +810,39 @@ export default function QuizKoredochiCodePage() {
                       }
                     `}
                   >
-                    {/* {active ? "👑 あなた" : `🤝 ${ellipsizeName(p.playerName)}`} */}
+                    {active ? "👑 あなた" : `🤝 ${ellipsizeName(p.playerName)}`}
                     {active ? `👑 ${ellipsizeName(playerName)}` : `🤝 ${ellipsizeName(p.playerName)}`}
+                  </div>
+                );
+              })}
+            </div> */}
+            <div className="mt-4 flex flex-wrap justify-center gap-2">
+              {displayPlayers.map((p) => {
+                const active = p.socketId === mySocketId;
+
+                return (
+                  <div
+                    key={p.socketId}
+                    className={`
+                      flex items-center gap-2
+                      rounded-full border-4 px-3 py-2 font-black shadow-sm
+                      ${
+                        active
+                          ? "border-black bg-yellow-300 text-gray-900"
+                          : "border-black bg-white text-gray-800"
+                      }
+                    `}
+                  >
+                    <img
+                      src={p.avatarUrl || "/images/初期アイコン.png"}
+                      alt={p.playerName}
+                      className="w-8 h-8 rounded-full object-cover border-2 border-black bg-white"
+                    />
+
+                    <span>
+                      {/* {active ? `👑 ${ellipsizeName(playerName)}` : `🤝 ${ellipsizeName(p.playerName)}`} */}
+                      {active ? `${ellipsizeName(playerName)}` : `${ellipsizeName(p.playerName)}`}
+                    </span>
                   </div>
                 );
               })}

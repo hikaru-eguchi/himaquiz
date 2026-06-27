@@ -4,6 +4,7 @@ import { io, Socket } from "socket.io-client";
 export interface Player {
   socketId: string;
   name: string;
+  avatarUrl?: string | null;
   score: number;
   characterId?: string | null;
   characterName?: string | null;
@@ -18,7 +19,15 @@ export type ArenaCharacterPayload = {
   characterRarity: string;
 };
 
-export const useBattle = (playerName: string) => {
+type BattlePlayerProfile = {
+  name: string;
+  avatarUrl?: string | null;
+};
+
+// export const useBattle = (playerName: string) => {
+export const useBattle = (profile: BattlePlayerProfile) => {
+  const playerName = profile.name;
+  const avatarUrl = profile.avatarUrl ?? null;
   const [socket, setSocket] = useState<Socket | null>(null);
   const [roomCode, setRoomCode] = useState<string | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
@@ -183,6 +192,7 @@ export const useBattle = (playerName: string) => {
       players: {
         socketId: string;
         playerName: string;
+        avatarUrl?: string | null;
         characterId?: string | null;
         characterName?: string | null;
         characterImage?: string | null;
@@ -199,6 +209,7 @@ export const useBattle = (playerName: string) => {
         setPlayers(players.map(p => ({
           socketId: p.socketId,
           name: p.playerName,
+          avatarUrl: p.avatarUrl ?? null,
           score: 0,
           characterId: p.characterId ?? null,
           characterName: p.characterName ?? null,
@@ -365,6 +376,7 @@ export const useBattle = (playerName: string) => {
     // socket.emit("join_random", { playerName, maxPlayers, gameType: type, userId, });
     socket.emit("join_random", {
       playerName,
+      avatarUrl,
       maxPlayers,
       gameType: type,
       userId,
@@ -392,6 +404,7 @@ export const useBattle = (playerName: string) => {
     const roomKey = `${type}_${code}`;
     socket.emit("join_with_code", {
       playerName,
+      avatarUrl,
       code: roomKey,
       count,
       gameType: type,

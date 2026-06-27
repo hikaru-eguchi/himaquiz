@@ -45,6 +45,7 @@ interface ArticleData {
 interface Player {
   socketId: string;
   name: string;
+  avatarUrl?: string | null;
   score: number; // クイズアリーナでは「与えた総ダメージ」として使う
   characterId?: string | null;
   characterName?: string | null;
@@ -1034,6 +1035,8 @@ export default function QuizArenaModePage() {
   const [earnedExp, setEarnedExp] = useState(0);
   const [awardStatus, setAwardStatus] = useState<AwardStatus>("idle");
 
+  const [playerAvatarUrl, setPlayerAvatarUrl] = useState<string | null>(null);
+
   const playerName =
     playerDisplayName.trim() || "アリーナ参加者";
 
@@ -1051,7 +1054,10 @@ export default function QuizArenaModePage() {
     startAt,
     mySocketId,
     socket,
-  } = useBattle(playerName);
+  } = useBattle({
+    name: playerName,
+    avatarUrl: playerAvatarUrl,
+  });
 
   useEffect(() => {
     if (userLoading) return;
@@ -1060,7 +1066,7 @@ export default function QuizArenaModePage() {
     const run = async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("username")
+        .select("username, avatar_url")
         .eq("id", user.id)
         .maybeSingle();
 

@@ -156,6 +156,7 @@ export default function QuizTimeTalkCodePage() {
 
   const [phase, setPhase] = useState<TimeTalkPhase>("name");
   const [playerName, setPlayerName] = useState("");
+  const [playerAvatarUrl, setPlayerAvatarUrl] = useState<string | null>(null);
   const [autoNameLoading, setAutoNameLoading] = useState(false);
   const autoJoinedRef = useRef(false);
   const [nameError, setNameError] = useState<string | null>(null);
@@ -189,7 +190,10 @@ export default function QuizTimeTalkCodePage() {
     players: rawPlayers,
     mySocketId,
     socket,
-  } = useBattle(playerName);
+  } = useBattle({
+    name: playerName,
+    avatarUrl: playerAvatarUrl,
+  });
 
   useEffect(() => {
     if (userLoading) return;
@@ -200,7 +204,7 @@ export default function QuizTimeTalkCodePage() {
 
       const { data } = await supabase
         .from("profiles")
-        .select("username")
+        .select("username, avatar_url")
         .eq("id", user.id)
         .maybeSingle();
 
@@ -210,6 +214,7 @@ export default function QuizTimeTalkCodePage() {
         "プレイヤー";
 
       setPlayerName(name.slice(0, 10));
+      setPlayerAvatarUrl(data?.avatar_url ?? null);
       setAutoNameLoading(false);
     };
 
@@ -252,6 +257,7 @@ export default function QuizTimeTalkCodePage() {
       rawPlayers.map((p) => ({
         socketId: p.socketId,
         playerName: p.name,
+        avatarUrl: p.avatarUrl ?? null,
       })),
     [rawPlayers]
   );

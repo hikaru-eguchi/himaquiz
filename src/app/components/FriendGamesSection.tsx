@@ -187,7 +187,7 @@ export default function FriendGamesSection() {
             </div>
 
             {/* シンクロランキング */}
-            <div className="text-center max-w-[280px]">
+            {/* <div className="text-center max-w-[280px]">
               <Link href="/quiz-synchro" className="w-full md:w-auto flex justify-center">
                 <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 text-white hover:scale-110 transition-all">
                   👑シンクロランキング
@@ -202,7 +202,7 @@ export default function FriendGamesSection() {
                   順位を選んでシンクロさせよう！
                 </p>
               </div>
-            </div>
+            </div> */}
 
           {/* タイムトーク */}
           {/* <div className="text-center max-w-[280px]">

@@ -591,7 +591,7 @@ export default function NavButtons() {
                         </button>
                       </Link>
 
-                      <Link
+                      {/* <Link
                         href="/quiz-synchro"
                         onClick={() => handleNavClick("/quiz-synchro")}
                       >
@@ -602,7 +602,7 @@ export default function NavButtons() {
                         >
                           シンクロランキング
                         </button>
-                      </Link>
+                      </Link> */}
 
                       {/* <Link
                         href="/quiz-timetalk"

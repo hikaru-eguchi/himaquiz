@@ -39,6 +39,7 @@ interface ArticleData {
 interface Player {
   socketId: string;
   name: string;  // 表示用の名前
+  avatarUrl?: string | null;
   score: number;
 }
 
@@ -550,6 +551,7 @@ export default function QuizModePage() {
   const [scoreChanges, setScoreChanges] = useState<Record<string, number | null>>({});
   const [readyToStart, setReadyToStart] = useState(false);
   const [playerName, setPlayerName] = useState("");
+  const [playerAvatarUrl, setPlayerAvatarUrl] = useState<string | null>(null);
   const [autoNameLoading, setAutoNameLoading] = useState(false);
   const autoJoinedRef = useRef(false);
   const [joined, setJoined] = useState(false);
@@ -582,7 +584,11 @@ export default function QuizModePage() {
     startAt,
     mySocketId,
     socket,
-  } = useBattle(playerName);
+  // } = useBattle(playerName);
+  } = useBattle({
+    name: playerName,
+    avatarUrl: playerAvatarUrl,
+  });
 
   useEffect(() => {
     if (userLoading) return;
@@ -593,7 +599,7 @@ export default function QuizModePage() {
 
       const { data } = await supabase
         .from("profiles")
-        .select("username")
+        .select("username, avatar_url")
         .eq("id", user.id)
         .maybeSingle();
 
@@ -603,6 +609,7 @@ export default function QuizModePage() {
         "プレイヤー";
 
       setPlayerName(name.slice(0, 10));
+      setPlayerAvatarUrl(data?.avatar_url ?? null);
       setAutoNameLoading(false);
     };
 
@@ -640,6 +647,7 @@ export default function QuizModePage() {
   const players: Player[] = rawPlayers.map((p) => ({
     socketId: p.socketId,
     name: p.name,
+    avatarUrl: p.avatarUrl ?? null,
     score: p.score,
   }));
   
@@ -1162,9 +1170,22 @@ export default function QuizModePage() {
       <div className="text-center">
         {/* 自分のニックネーム */}
         {playerName && (
-          <p className="text-xl md:text-3xl mb-6 font-bold text-gray-700">
-            あなた：{playerName}
-          </p>
+          // <p className="text-xl md:text-3xl mb-6 font-bold text-gray-700">
+          //   あなた：{playerName}
+          // </p>
+          <div className="mb-6 flex items-center justify-center gap-3">
+            <p className="text-xl md:text-3xl font-bold text-gray-700">
+              あなた：
+            </p>
+            <img
+              src={playerAvatarUrl || "/images/初期アイコン.png"}
+              alt={playerName}
+              className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover border-2 border-black bg-white"
+            />
+            <p className="text-xl md:text-3xl font-bold text-gray-700">
+              {playerName}
+            </p>
+          </div>
         )}
 
         <p className="text-3xl md:text-5xl animate-pulse">
@@ -1248,9 +1269,35 @@ export default function QuizModePage() {
   if (!roomReady || !matched) {
     return (
       <>
-      <OnlineGameNotice />
+      {/* <OnlineGameNotice />
       <div className="container p-8 text-center">
         <p className="text-3xl md:text-5xl mt-35 text-center animate-pulse">対戦相手を探しています...</p>
+      </div> */}
+      <OnlineGameNotice />
+      <div className="text-center">
+        {/* 自分のニックネーム */}
+        {playerName && (
+          // <p className="text-xl md:text-3xl mb-6 font-bold text-gray-700">
+          //   あなた：{playerName}
+          // </p>
+          <div className="mb-6 flex items-center justify-center gap-3">
+            <p className="text-xl md:text-3xl font-bold text-gray-700">
+              あなた：
+            </p>
+            <img
+              src={playerAvatarUrl || "/images/初期アイコン.png"}
+              alt={playerName}
+              className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover border-2 border-black bg-white"
+            />
+            <p className="text-xl md:text-3xl font-bold text-gray-700">
+              {playerName}
+            </p>
+          </div>
+        )}
+
+        <p className="text-3xl md:text-5xl animate-pulse">
+          対戦相手を探しています...
+        </p>
       </div>
       </>
     );
@@ -1261,11 +1308,27 @@ export default function QuizModePage() {
       <>
       <OnlineGameNotice />
       <div className="container p-8 text-center">
-        <h2 className="text-3xl md:text-5xl font-extrabold mb-4 md:mb-6">
-          {opponent
+        {/* <h2 className="text-3xl md:text-5xl font-extrabold mb-4 md:mb-6"> */}
+          {/* {opponent
             ? `${opponent.name} さんとマッチしました！`
-            : "マッチしました！"}
-        </h2>
+            : "マッチしました！"} */}
+          {opponent ? (
+            <div className="mb-4 md:mb-6 flex items-center justify-center gap-3">
+              <img
+                src={opponent.avatarUrl || "/images/初期アイコン.png"}
+                alt={opponent.name}
+                className="w-10 h-10 md:w-14 md:h-14 rounded-full object-cover border-2 border-black bg-white"
+              />
+              <h2 className="text-3xl md:text-5xl font-extrabold">
+                {opponent.name} さんとマッチしました！
+              </h2>
+            </div>
+          ) : (
+            <h2 className="text-3xl md:text-5xl font-extrabold mb-4 md:mb-6">
+              マッチしました！
+            </h2>
+          )}
+        {/* </h2> */}
         <p className="text-lg md:text-2xl text-gray-500 mb-4">準備できたら「対戦スタート！」を押そう！お互い押すとクイズバトルが始まるよ！</p>
         {!readyToStart ? (
           <button
@@ -1428,15 +1491,41 @@ export default function QuizModePage() {
                       )}
                     </AnimatePresence>
 
-                    <p
+                    {/* <p
                       className={`font-extrabold text-lg md:text-xl ${
                         isMe ? "text-blue-600" : "text-red-600"
                       }`}
                     >
                       {isMe ? "自分" : "相手"}
-                    </p>
+                    </p> */}
 
-                    <p className="font-bold text-gray-800 text-lg md:text-2xl">{p.name}</p>
+                    {/* <div className="flex items-center justify-center gap-2">
+                      <img
+                        src={p.avatarUrl || "/images/初期アイコン.png"}
+                        alt={p.name}
+                        className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover border border-black bg-white"
+                      />
+                      <p className="font-bold text-gray-800 text-lg md:text-2xl">
+                        {p.name}
+                      </p>
+                    </div> */}
+                    <div className="w-full flex items-center">
+                      {/* アイコン領域 */}
+                      <div className="w-12 md:w-14 flex justify-start">
+                        <img
+                          src={p.avatarUrl || "/images/初期アイコン.png"}
+                          alt={p.name}
+                          className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover border-2 border-black bg-white"
+                        />
+                      </div>
+
+                      {/* 名前領域 */}
+                      <div className="flex-1 text-center">
+                        <p className="font-bold text-gray-800 text-lg md:text-2xl">
+                          {p.name}
+                        </p>
+                      </div>
+                    </div>
 
                     <p className="mt-1 text-gray-700 text-lg md:text-2xl">
                       得点： <span className="font-bold">{p.score}</span>

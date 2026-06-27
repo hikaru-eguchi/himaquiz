@@ -49,15 +49,15 @@ const MULTI_GAMES: GameCard[] = [
     buttonClassName:
       "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-cyan-400 via-violet-300 to-pink-400 text-white hover:scale-110 transition-all",
   },
-  {
-    key: "synchro",
-    href: "/quiz-synchro",
-    label: "👑シンクロランキング",
-    desc1: "みんなのベスト3は同じ？",
-    desc2: "順位を選んでシンクロさせよう！",
-    buttonClassName:
-      "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 text-white hover:scale-110 transition-all",
-  },
+  // {
+  //   key: "synchro",
+  //   href: "/quiz-synchro",
+  //   label: "👑シンクロランキング",
+  //   desc1: "みんなのベスト3は同じ？",
+  //   desc2: "順位を選んでシンクロさせよう！",
+  //   buttonClassName:
+  //     "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 text-white hover:scale-110 transition-all",
+  // },
   {
     key: "usohonto",
     href: "/quiz-usohonto",

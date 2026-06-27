@@ -90,6 +90,7 @@ interface ArticleData {
 interface Player {
   socketId: string;
   playerName: string;
+  avatarUrl?: string | null;
 }
 
 interface QuizResultProps {
@@ -624,6 +625,7 @@ export default function QuizModePage() {
   const [scoreChanges, setScoreChanges] = useState<Record<string, number | null>>({});
   const [readyToStart, setReadyToStart] = useState(false);
   const [playerName, setPlayerName] = useState("");
+  const [playerAvatarUrl, setPlayerAvatarUrl] = useState<string | null>(null);
   const [autoNameLoading, setAutoNameLoading] = useState(false);
   const autoJoinedRef = useRef(false);
   const [joined, setJoined] = useState(false);
@@ -700,7 +702,10 @@ export default function QuizModePage() {
     isGameOver,
     lastPlayerElimination,
     gameSetScheduled,
-  } = useBattle(playerName);
+  } = useBattle({
+    name: playerName,
+    avatarUrl: playerAvatarUrl,
+  });
 
   useEffect(() => {
     if (userLoading) return;
@@ -711,7 +716,7 @@ export default function QuizModePage() {
 
       const { data } = await supabase
         .from("profiles")
-        .select("username")
+        .select("username, avatar_url")
         .eq("id", user.id)
         .maybeSingle();
 
@@ -721,6 +726,7 @@ export default function QuizModePage() {
         "プレイヤー";
 
       setPlayerName(name.slice(0, 10));
+      setPlayerAvatarUrl(data?.avatar_url ?? null);
       setAutoNameLoading(false);
     };
 
@@ -783,6 +789,7 @@ export default function QuizModePage() {
   const players: Player[] = rawPlayers.map((p) => ({
     socketId: p.socketId,
     playerName: p.name,
+    avatarUrl: p.avatarUrl ?? null,
   }));
   
   const me = players.find(p => p.socketId === mySocketId);
@@ -1607,9 +1614,22 @@ export default function QuizModePage() {
         <div className="text-center">
           {/* 自分のニックネーム */}
           {playerName && (
-            <p className="text-xl md:text-3xl mb-6 font-bold text-gray-700">
-              あなた：{playerName}
-            </p>
+            // <p className="text-xl md:text-3xl mb-6 font-bold text-gray-700">
+            //   あなた：{playerName}
+            // </p>
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <p className="text-xl md:text-3xl font-bold text-gray-700">
+                あなた：
+              </p>
+              <img
+                src={playerAvatarUrl || "/images/初期アイコン.png"}
+                alt={playerName}
+                className="w-10 h-10 md:w-14 md:h-14 rounded-full object-cover border-2 border-black bg-white"
+              />
+              <p className="text-xl md:text-3xl font-bold text-gray-700">
+                {playerName}
+              </p>
+            </div>
           )}
         </div>
         <div className="text-center">
@@ -1636,9 +1656,24 @@ export default function QuizModePage() {
             {roomPlayers.map((p, i) => (
               <div
                 key={p.socketId}
-                className="w-32 md:w-32 p-2 bg-white rounded-lg shadow-md border-2 border-gray-300"
+                className="w-60 md:w-60 p-2 bg-white rounded-lg shadow-md border-2 border-gray-300"
               >
-                <p className="font-bold text-lg md:text-xl truncate">{p.playerName}</p>
+                {/* <p className="font-bold text-lg md:text-xl truncate">{p.playerName}</p> */}
+                <div className="w-full flex items-center">
+                  <div className="w-10 flex justify-start">
+                    <img
+                      src={p.avatarUrl || "/images/初期アイコン.png"}
+                      alt={p.playerName}
+                      className="w-8 h-8 rounded-full object-cover border border-black bg-white"
+                    />
+                  </div>
+
+                  <div className="flex-1 text-center">
+                    <p className="font-bold text-lg md:text-xl truncate">
+                      {p.playerName}
+                    </p>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -1790,7 +1825,7 @@ export default function QuizModePage() {
                     key={p.socketId}
                     className={`
                       relative
-                      w-17 md:w-22
+                      w-17 md:w-28
                       aspect-square
                       rounded-lg
                       shadow-md
@@ -1802,14 +1837,30 @@ export default function QuizModePage() {
                       }
                     `}
                   >
-                    <p className="font-bold text-gray-800 text-lg md:text-xl text-center">
+                    <img
+                      src={p.avatarUrl || "/images/初期アイコン.png"}
+                      alt={p.playerName}
+                      className={`
+                        w-7 h-7 md:w-9 md:h-9
+                        rounded-full
+                        object-cover
+                        border-2
+                        mb-1
+                        ${
+                          life <= 0
+                            ? "border-gray-200 grayscale opacity-70"
+                            : "border-black bg-white"
+                        }
+                      `}
+                    />
+                    <p className="font-bold text-gray-800 text-sm md:text-lg text-center">
                       {p.playerName.length > 5 ? p.playerName.slice(0, 5) + "..." : p.playerName}
                     </p>
 
                     {/* 結果表示 */}
                     <p
                       className={`
-                        text-lg md:text-xl font-bold mt-1
+                        text-lg md:text-xl font-bold
                         ${
                           life <= 0
                             ? "text-gray-100" // 脱落したら白文字

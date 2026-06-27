@@ -770,6 +770,7 @@ export default function QuizOnigokkoModePage() {
   const { pushModal } = useResultModal();
 
   const [playerName, setPlayerName] = useState("");
+  const [playerAvatarUrl, setPlayerAvatarUrl] = useState<string | null>(null);
   const [autoNameLoading, setAutoNameLoading] = useState(false);
   const autoJoinedRef = useRef(false);
   const [joined, setJoined] = useState(false);
@@ -821,7 +822,10 @@ export default function QuizOnigokkoModePage() {
     bothReady,
     mySocketId,
     socket,
-  } = useBattle(playerName);
+  } = useBattle({
+    name: playerName,
+    avatarUrl: playerAvatarUrl,
+  });
 
   useEffect(() => {
     if (userLoading) return;
@@ -832,7 +836,7 @@ export default function QuizOnigokkoModePage() {
 
       const { data } = await supabase
         .from("profiles")
-        .select("username")
+        .select("username, avatar_url")
         .eq("id", user.id)
         .maybeSingle();
 
@@ -842,6 +846,7 @@ export default function QuizOnigokkoModePage() {
         "プレイヤー";
 
       setPlayerName(name.slice(0, 10));
+      setPlayerAvatarUrl(data?.avatar_url ?? null);
       setAutoNameLoading(false);
     };
 
@@ -956,6 +961,7 @@ export default function QuizOnigokkoModePage() {
   const playersFromBattle: RoomPlayer[] = rawPlayers.map((p) => ({
     socketId: p.socketId,
     playerName: p.name,
+    avatarUrl: p.avatarUrl ?? null,
   }));
 
   const displayPlayers: WordPlayer[] = useMemo(() => {
@@ -1773,9 +1779,22 @@ export default function QuizOnigokkoModePage() {
           </h1>
 
           <WordGlassCard className="p-6">
-            <p className="mb-2 text-xl font-black text-amber-600">
+            {/* <p className="mb-2 text-xl font-black text-amber-600">
               あなた：{playerName}
-            </p>
+            </p> */}
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <p className="text-xl md:text-3xl font-bold text-gray-700">
+                あなた：
+              </p>
+              <img
+                src={playerAvatarUrl || "/images/初期アイコン.png"}
+                alt={playerName}
+                className="w-10 h-10 md:w-14 md:h-14 rounded-full object-cover border-2 border-black bg-white"
+              />
+              <p className="text-xl md:text-3xl font-bold text-gray-700">
+                {playerName}
+              </p>
+            </div>
             <p className="text-3xl font-black text-yellow-600 animate-pulse">
               {playerCount}
             </p>
