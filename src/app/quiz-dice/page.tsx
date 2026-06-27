@@ -64,7 +64,7 @@ export default function QuizMasterPage() {
   const [playerCount, setPlayerCount] = useState<number | null>(2);
 
   return (
-    <div className="container mx-auto px-4 py-8 text-center bg-gradient-to-b from-green-700 via-emerald-500 to-amber-300">
+    <div className="container mx-auto px-4 py-8 text-center bg-gradient-to-b from-green-600 via-emerald-400 to-amber-300">
       <h1
         className="text-5xl md:text-7xl font-extrabold mb-6 text-center"
         style={{
@@ -98,7 +98,7 @@ export default function QuizMasterPage() {
           ＜みんなで遊べるクイズゲーム＞
         </p>
         <p className="text-md md:text-2xl font-semibold text-white mb-8">
-          サイコロ次第でポイント爆増！？運も実力も試されるドキドキクイズ！
+          サイコロひとつで運命が変わる！一発逆転も狙えるスリル満点クイズ！
         </p>
 
         {/* ★ スマホは2枚、PCは3枚 */}

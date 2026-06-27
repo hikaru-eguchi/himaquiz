@@ -265,7 +265,7 @@ export default function UserProfileModal({
                   bg-gradient-to-r from-yellow-300 to-orange-300 text-slate-900 hover:opacity-90
                 "
               >
-                {requesting ? "申請中..." : "フレンド申請する 🤝"}
+                {requesting ? "申請中..." : "🤝 フレンドになる"}
               </button>
             ) : (
               <p className="mt-2 text-sm font-bold text-slate-500">

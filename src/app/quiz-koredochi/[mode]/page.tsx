@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useBattle } from "../../../hooks/useBattle";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
 import RecommendedFriendsGames from "@/app/components/RecommendedFriendsGames";
 import OnlineGameNotice from "@/app/components/OnlineGameNotice";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { useSupabaseUser } from "../../../hooks/useSupabaseUser";
 
 type KoredochiPhase =
   | "name"
@@ -180,6 +182,8 @@ const getResultStyle = (rate: number) => {
 
 export default function QuizKoredochiCodePage() {
   const router = useRouter();
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+  const { user, loading: userLoading } = useSupabaseUser();
   const searchParams = useSearchParams();
 
   const code = searchParams?.get("code") || "";
@@ -203,6 +207,8 @@ export default function QuizKoredochiCodePage() {
 
   const [phase, setPhase] = useState<KoredochiPhase>("name");
   const [playerName, setPlayerName] = useState("");
+  const [autoNameLoading, setAutoNameLoading] = useState(false);
+  const autoJoinedRef = useRef(false);
   const [nameError, setNameError] = useState<string | null>(null);
 
   const [roomCode, setRoomCode] = useState("");
@@ -236,6 +242,62 @@ export default function QuizKoredochiCodePage() {
     mySocketId,
     socket,
   } = useBattle(playerName);
+
+  useEffect(() => {
+    if (userLoading) return;
+    if (!user) return;
+
+    const run = async () => {
+      setAutoNameLoading(true);
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("username")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      const name =
+        data?.username?.trim() ||
+        user.email?.split("@")[0]?.slice(0, 10) ||
+        "プレイヤー";
+
+      setPlayerName(name.slice(0, 10));
+      setAutoNameLoading(false);
+    };
+
+    run();
+  }, [user, userLoading, supabase]);
+
+  useEffect(() => {
+    if (userLoading) return;
+    if (!user) return;
+    if (!playerName.trim()) return;
+    if (phase !== "name") return;
+    if (autoJoinedRef.current) return;
+
+    autoJoinedRef.current = true;
+    setNameError(null);
+
+    // ✅ ログイン自動参加時も部屋状態をリセット
+    setRoomPlayers([]);
+    setPlayerCount(`0/${playerMaxCount}`);
+    setReadyToStart(false);
+
+    const normalizedRoomCode = `koredochi_${code}`;
+
+    setRoomCode(normalizedRoomCode);
+    setPhase("waiting");
+
+    joinWithCode(code, String(playerMaxCount), "koredochi");
+  }, [
+    user,
+    userLoading,
+    playerName,
+    phase,
+    code,
+    playerMaxCount,
+    joinWithCode,
+  ]);
 
   const players: Player[] = useMemo(
     () =>
@@ -434,6 +496,14 @@ export default function QuizKoredochiCodePage() {
       socket.off("koredochi_game_end", onGameEnd);
     };
   }, [socket, phase, playerMaxCount, questionCount]);
+
+  if (userLoading || autoNameLoading) {
+    return null;
+  }
+
+  if (phase === "name" && user) {
+    return null;
+  }
 
   if (phase === "name") {
     return (

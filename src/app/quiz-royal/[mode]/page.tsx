@@ -589,6 +589,8 @@ export default function QuizModePage() {
   const [scoreChanges, setScoreChanges] = useState<Record<string, number | null>>({});
   const [readyToStart, setReadyToStart] = useState(false);
   const [playerName, setPlayerName] = useState("");
+  const [autoNameLoading, setAutoNameLoading] = useState(false);
+  const autoJoinedRef = useRef(false);
   const [joined, setJoined] = useState(false);
   const [nameError, setNameError] = useState<string | null>(null);
   const [countdown, setCountdown] = useState<number | null>(null);
@@ -620,6 +622,80 @@ export default function QuizModePage() {
     mySocketId,
     socket,
   } = useBattle(playerName);
+
+  useEffect(() => {
+    if (userLoading) return;
+    if (!user) return;
+
+    const run = async () => {
+      setAutoNameLoading(true);
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("username")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      const name =
+        data?.username?.trim() ||
+        user.email?.split("@")[0]?.slice(0, 10) ||
+        "プレイヤー";
+
+      setPlayerName(name.slice(0, 10));
+      setAutoNameLoading(false);
+    };
+
+    run();
+  }, [user, userLoading, supabase]);
+
+  useEffect(() => {
+    if (userLoading) return;
+    if (!user) return;
+    if (!playerName.trim()) return;
+    if (joined) return;
+    if (autoJoinedRef.current) return;
+
+    autoJoinedRef.current = true;
+    setNameError(null);
+    setJoined(true);
+
+    // ✅ ログイン自動参加時も、部屋状態をリセット
+    setRoomLocked(false);
+    roomLockedRef.current = false;
+    setRoomPlayers([]);
+
+    if (mode === "random") {
+      const maxP = 4;
+
+      setMaxPlayers(maxP);
+      setPlayerCount(`0/${maxP}`);
+
+      joinRandom({ maxPlayers: maxP, gameType: "royal" }, (code) => {
+        setRoomCode(code);
+      });
+    } else {
+      const maxP = Math.min(
+        8,
+        Math.max(2, Number(searchParams?.get("count") || "2"))
+      );
+
+      setMaxPlayers(maxP);
+      setPlayerCount(`0/${maxP}`);
+
+      joinWithCode(code, String(maxP), "royal");
+      setRoomCode("royal_" + code);
+    }
+  }, [
+    user,
+    userLoading,
+    playerName,
+    joined,
+    mode,
+    code,
+    searchParams,
+    joinRandom,
+    joinWithCode,
+  ]);
   
   const players: Player[] = rawPlayers.map((p) => ({
     socketId: p.socketId,
@@ -641,9 +717,9 @@ export default function QuizModePage() {
   const isLose = myRank !== null && myRank > 1;
   type RoomPlayer = { socketId: string; playerName: string };
 
-  const [playerCount, setPlayerCount] = useState("0/8");  // 表示用
+  const [playerCount, setPlayerCount] = useState("0/4");  // 表示用
   const [roomPlayers, setRoomPlayers] = useState<RoomPlayer[]>([]);
-  const [maxPlayers, setMaxPlayers] = useState(8);
+  const [maxPlayers, setMaxPlayers] = useState(4);
   const [roomLocked, setRoomLocked] = useState(false);
   const roomLockedRef = useRef(false);
 
@@ -1244,7 +1320,16 @@ export default function QuizModePage() {
     "fuck", "shit", "bastard", "idiot", "asshole",
   ]
 
-  if (!joined) {
+  if (userLoading || autoNameLoading) {
+    return null;
+  }
+
+  if (!joined && user) {
+    return null;
+  }
+
+  // if (!joined) {
+  if (!joined && !user) {
     return (
       <>
       <OnlineGameNotice />

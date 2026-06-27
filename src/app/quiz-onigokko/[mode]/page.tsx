@@ -770,6 +770,8 @@ export default function QuizOnigokkoModePage() {
   const { pushModal } = useResultModal();
 
   const [playerName, setPlayerName] = useState("");
+  const [autoNameLoading, setAutoNameLoading] = useState(false);
+  const autoJoinedRef = useRef(false);
   const [joined, setJoined] = useState(false);
   const [readyToStart, setReadyToStart] = useState(false);
   const [nameError, setNameError] = useState<string | null>(null);
@@ -820,6 +822,79 @@ export default function QuizOnigokkoModePage() {
     mySocketId,
     socket,
   } = useBattle(playerName);
+
+  useEffect(() => {
+    if (userLoading) return;
+    if (!user) return;
+
+    const run = async () => {
+      setAutoNameLoading(true);
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("username")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      const name =
+        data?.username?.trim() ||
+        user.email?.split("@")[0]?.slice(0, 10) ||
+        "プレイヤー";
+
+      setPlayerName(name.slice(0, 10));
+      setAutoNameLoading(false);
+    };
+
+    run();
+  }, [user, userLoading, supabase]);
+
+  useEffect(() => {
+    if (userLoading) return;
+    if (!user) return;
+    if (!playerName.trim()) return;
+    if (joined) return;
+    if (autoJoinedRef.current) return;
+
+    autoJoinedRef.current = true;
+    setNameError(null);
+    setJoined(true);
+
+    roomLockedRef.current = false;
+
+    if (mode === "random") {
+      joinRandom(
+        {
+          maxPlayers: 4,
+          gameType: "onigokko",
+          userId: user.id,
+        },
+        (createdCode) => {
+          setRoomCode(createdCode);
+        }
+      );
+    } else {
+      const roomKey = `onigokko_${code}`;
+
+      joinWithCode(
+        code,
+        count,
+        "onigokko",
+        user.id
+      );
+
+      setRoomCode(roomKey);
+    }
+  }, [
+    user,
+    userLoading,
+    playerName,
+    joined,
+    mode,
+    code,
+    count,
+    joinRandom,
+    joinWithCode,
+  ]);
 
   useEffect(() => {
     const el = mapViewportRef.current;
@@ -1623,7 +1698,16 @@ export default function QuizOnigokkoModePage() {
     pushModal,
   ]);
 
-  if (!joined) {
+  if (userLoading || autoNameLoading) {
+    return null;
+  }
+
+  if (!joined && user) {
+    return null;
+  }
+
+  // if (!joined) {
+  if (!joined && !user) {
     return (
       <main className="overflow-hidden bg-gradient-to-b from-red-500 via-orange-300 to-yellow-200 text-white">
         <OnlineGameNotice />

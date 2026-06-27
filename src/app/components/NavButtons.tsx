@@ -604,7 +604,7 @@ export default function NavButtons() {
                         </button>
                       </Link>
 
-                      <Link
+                      {/* <Link
                         href="/quiz-timetalk"
                         onClick={() => handleNavClick("/quiz-timetalk")}
                       >
@@ -615,7 +615,7 @@ export default function NavButtons() {
                         >
                           タイムトーク
                         </button>
-                      </Link>
+                      </Link> */}
                     </div>
                   </div>
 

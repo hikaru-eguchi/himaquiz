@@ -624,6 +624,8 @@ export default function QuizModePage() {
   const [scoreChanges, setScoreChanges] = useState<Record<string, number | null>>({});
   const [readyToStart, setReadyToStart] = useState(false);
   const [playerName, setPlayerName] = useState("");
+  const [autoNameLoading, setAutoNameLoading] = useState(false);
+  const autoJoinedRef = useRef(false);
   const [joined, setJoined] = useState(false);
   const [nameError, setNameError] = useState<string | null>(null);
   const [countdown, setCountdown] = useState<number | null>(null);
@@ -699,6 +701,65 @@ export default function QuizModePage() {
     lastPlayerElimination,
     gameSetScheduled,
   } = useBattle(playerName);
+
+  useEffect(() => {
+    if (userLoading) return;
+    if (!user) return;
+
+    const run = async () => {
+      setAutoNameLoading(true);
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("username")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      const name =
+        data?.username?.trim() ||
+        user.email?.split("@")[0]?.slice(0, 10) ||
+        "プレイヤー";
+
+      setPlayerName(name.slice(0, 10));
+      setAutoNameLoading(false);
+    };
+
+    run();
+  }, [user, userLoading, supabase]);
+
+  useEffect(() => {
+    if (userLoading) return;
+    if (!user) return;
+    if (!playerName.trim()) return;
+    if (joined) return;
+    if (autoJoinedRef.current) return;
+
+    autoJoinedRef.current = true;
+    setNameError(null);
+    setJoined(true);
+
+    setRoomLocked(false);
+    roomLockedRef.current = false;
+
+    if (mode === "random") {
+      joinRandom({ maxPlayers: 4, gameType: "dobon" }, (code) =>
+        setRoomCode(code)
+      );
+    } else {
+      joinWithCode(code, count, "dobon");
+      setRoomCode("dobon_" + code);
+    }
+  }, [
+    user,
+    userLoading,
+    playerName,
+    joined,
+    mode,
+    code,
+    count,
+    joinRandom,
+    joinWithCode,
+  ]);
 
   const questionPhase = useQuestionPhase(
     socket,
@@ -1477,7 +1538,16 @@ export default function QuizModePage() {
     "fuck", "shit", "bastard", "idiot", "asshole",
   ]
 
-  if (!joined) {
+  if (userLoading || autoNameLoading) {
+    return null;
+  }
+
+  if (!joined && user) {
+    return null;
+  }
+
+  // if (!joined) {
+  if (!joined && !user) {
     return (
       <>
       <OnlineGameNotice />

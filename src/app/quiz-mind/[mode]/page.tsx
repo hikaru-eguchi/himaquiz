@@ -669,6 +669,8 @@ export default function QuizModePage() {
   const [scoreChanges, setScoreChanges] = useState<Record<string, number | null>>({});
   const [readyToStart, setReadyToStart] = useState(false);
   const [playerName, setPlayerName] = useState("");
+  const [autoNameLoading, setAutoNameLoading] = useState(false);
+  const autoJoinedRef = useRef(false);
   const [joined, setJoined] = useState(false);
   const [nameError, setNameError] = useState<string | null>(null);
   const [timeUp, setTimeUp] = useState(false);
@@ -756,6 +758,80 @@ export default function QuizModePage() {
     lastPlayerElimination,
     gameSetScheduled,
   } = useBattle(playerName);
+
+  useEffect(() => {
+    if (userLoading) return;
+    if (!user) return;
+
+    const run = async () => {
+      setAutoNameLoading(true);
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("username")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      const name =
+        data?.username?.trim() ||
+        user.email?.split("@")[0]?.slice(0, 10) ||
+        "プレイヤー";
+
+      setPlayerName(name.slice(0, 10));
+      setAutoNameLoading(false);
+    };
+
+    run();
+  }, [user, userLoading, supabase]);
+
+  useEffect(() => {
+    if (userLoading) return;
+    if (!user) return;
+    if (!playerName.trim()) return;
+    if (joined) return;
+    if (autoJoinedRef.current) return;
+
+    autoJoinedRef.current = true;
+    setNameError(null);
+    setJoined(true);
+
+    // ✅ ログイン自動参加時も部屋状態をリセット
+    setRoomLocked(false);
+    roomLockedRef.current = false;
+    setRoomPlayers([]);
+
+    if (mode === "random") {
+      const maxP = 4;
+
+      setMaxPlayers(maxP);
+      setPlayerCount(`0/${maxP}`);
+
+      joinRandom(
+        { maxPlayers: maxP, gameType: "mind" },
+        (createdCode) => {
+          setRoomCode(createdCode);
+        }
+      );
+    } else {
+      const maxP = Math.min(8, Math.max(2, Number(count || "2")));
+
+      setMaxPlayers(maxP);
+      setPlayerCount(`0/${maxP}`);
+
+      joinWithCode(code, String(maxP), "mind");
+      setRoomCode("mind_" + code);
+    }
+  }, [
+    user,
+    userLoading,
+    playerName,
+    joined,
+    mode,
+    code,
+    count,
+    joinRandom,
+    joinWithCode,
+  ]);
 
   const groups = lastPlayerElimination?.eliminationGroups ?? [];
   const winnerGroup = groups.length ? groups[groups.length - 1] : [];

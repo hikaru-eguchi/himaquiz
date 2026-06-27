@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { useSearchParams, useRouter  } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useBattle } from "../../../hooks/useBattle";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
 import RecommendedFriendsGames from "@/app/components/RecommendedFriendsGames";
 import OnlineGameNotice from "@/app/components/OnlineGameNotice";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { useSupabaseUser } from "../../../hooks/useSupabaseUser";
 
 type FriendMode = "friend" | "lover";
 type FriendGenre = "daily" | "image" | "love" | "choice";
@@ -289,6 +291,8 @@ const getResultStyle = (rate: number, mode: FriendMode) => {
 
 export default function QuizFriendCodePage() {
   const router = useRouter();
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+  const { user, loading: userLoading } = useSupabaseUser();
 
   const searchParams = useSearchParams();
 
@@ -306,6 +310,8 @@ export default function QuizFriendCodePage() {
 
   const [phase, setPhase] = useState<FriendPhase>("name");
   const [playerName, setPlayerName] = useState("");
+  const [autoNameLoading, setAutoNameLoading] = useState(false);
+  const autoJoinedRef = useRef(false);
   const [nameError, setNameError] = useState<string | null>(null);
 
   const [roomCode, setRoomCode] = useState("");
@@ -342,6 +348,61 @@ export default function QuizFriendCodePage() {
     mySocketId,
     socket,
   } = useBattle(playerName);
+
+  useEffect(() => {
+    if (userLoading) return;
+    if (!user) return;
+
+    const run = async () => {
+      setAutoNameLoading(true);
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("username")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      const name =
+        data?.username?.trim() ||
+        user.email?.split("@")[0]?.slice(0, 10) ||
+        "プレイヤー";
+
+      setPlayerName(name.slice(0, 10));
+      setAutoNameLoading(false);
+    };
+
+    run();
+  }, [user, userLoading, supabase]);
+
+  useEffect(() => {
+    if (userLoading) return;
+    if (!user) return;
+    if (!playerName.trim()) return;
+    if (phase !== "name") return;
+    if (autoJoinedRef.current) return;
+
+    autoJoinedRef.current = true;
+    setNameError(null);
+
+    // ✅ ログイン自動参加時も部屋状態をリセット
+    setRoomPlayers([]);
+    setPlayerCount("0/2");
+    setReadyToStart(false);
+
+    const roomKey = `friend_${code}`;
+
+    setRoomCode(roomKey);
+    setPhase("waiting");
+
+    joinWithCode(code, "2", "friend");
+  }, [
+    user,
+    userLoading,
+    playerName,
+    phase,
+    code,
+    joinWithCode,
+  ]);
 
   const players: Player[] = useMemo(
     () =>
@@ -626,6 +687,14 @@ export default function QuizFriendCodePage() {
       socket.off("friend_game_end", onGameEnd);
     };
   }, [socket, phase]);
+
+  if (userLoading || autoNameLoading) {
+    return null;
+  }
+
+  if (phase === "name" && user) {
+    return null;
+  }
 
   if (phase === "name") {
     return (

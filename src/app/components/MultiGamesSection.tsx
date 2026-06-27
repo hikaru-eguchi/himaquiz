@@ -123,10 +123,12 @@ export default function MultiGamesSection() {
 
               <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
                 <p className="text-sm md:text-base text-gray-700 leading-tight">
-                  サイコロ次第でポイント爆増！？
+                  {/* サイコロ次第でポイント爆増！？ */}
+                  サイコロひとつで運命が変わる！
                 </p>
                 <p className="text-sm md:text-base text-gray-700 leading-tight">
-                  運も実力も試されるドキドキクイズ！
+                  {/* 運も実力も試されるドキドキクイズ！ */}
+                  一発逆転も狙えるスリル満点クイズ！
                 </p>
               </div>
             </div>

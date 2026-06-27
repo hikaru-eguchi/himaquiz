@@ -492,7 +492,7 @@ const CharacterSelect = ({
             </>
           )}
 
-          <div className="mb-4 text-left">
+          {/* <div className="mb-4 text-left">
             <p className="mb-1 text-sm font-black text-white/80">
               プレイヤー名
             </p>
@@ -509,8 +509,38 @@ const CharacterSelect = ({
                 outline-none focus:border-yellow-300
               "
             />
-          </div>
-          {playerDisplayName.trim() === "" && (
+          </div> */}
+          {!isLoggedIn ? (
+            <div className="mb-4 text-left">
+              <p className="mb-1 text-sm font-black text-white/80">
+                プレイヤー名
+              </p>
+
+              <input
+                value={playerDisplayName}
+                onChange={(e) => setPlayerDisplayName(e.target.value)}
+                maxLength={12}
+                placeholder="名前を入力"
+                className="
+                  w-full rounded-2xl border-2 border-white/60
+                  bg-white px-4 py-3
+                  text-center text-lg font-black text-stone-900
+                  outline-none focus:border-yellow-300
+                "
+              />
+            </div>
+          ) : (
+            <div className="mb-4 rounded-2xl border-2 border-white/40 bg-white/10 px-4 py-3 text-center">
+              <p className="text-xs font-black text-white/70">
+                プレイヤー名
+              </p>
+              <p className="text-lg font-black text-white">
+                {playerDisplayName || "読み込み中..."}
+              </p>
+            </div>
+          )}
+          {/* {playerDisplayName.trim() === "" && ( */}
+          {!isLoggedIn && playerDisplayName.trim() === "" && (
             <p className="mt-2 text-sm font-black text-red-300">
               プレイヤー名を入力してください
             </p>
@@ -1022,6 +1052,28 @@ export default function QuizArenaModePage() {
     mySocketId,
     socket,
   } = useBattle(playerName);
+
+  useEffect(() => {
+    if (userLoading) return;
+    if (!user) return;
+
+    const run = async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("username")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      const name =
+        data?.username?.trim() ||
+        user.email?.split("@")[0]?.slice(0, 12) ||
+        "アリーナ参加者";
+
+      setPlayerDisplayName(name.slice(0, 12));
+    };
+
+    run();
+  }, [user, userLoading, supabase]);
 
   const players: Player[] = rawPlayers.map((p) => ({
     socketId: p.socketId,

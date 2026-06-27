@@ -659,6 +659,8 @@ export default function SpaceSurviveModePage() {
   const { pushModal } = useResultModal();
 
   const [playerName, setPlayerName] = useState("");
+  const [autoNameLoading, setAutoNameLoading] = useState(false);
+  const autoJoinedRef = useRef(false);
   const [joined, setJoined] = useState(false);
   const [readyToStart, setReadyToStart] = useState(false);
   const [nameError, setNameError] = useState<string | null>(null);
@@ -697,6 +699,99 @@ export default function SpaceSurviveModePage() {
     mySocketId,
     socket,
   } = useBattle(playerName);
+
+  useEffect(() => {
+    if (userLoading) return;
+    if (!user) return;
+
+    const run = async () => {
+      setAutoNameLoading(true);
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("username")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      const name =
+        data?.username?.trim() ||
+        user.email?.split("@")[0]?.slice(0, 10) ||
+        "プレイヤー";
+
+      setPlayerName(name.slice(0, 10));
+      setAutoNameLoading(false);
+    };
+
+    run();
+  }, [user, userLoading, supabase]);
+
+  useEffect(() => {
+    if (userLoading) return;
+    if (!user) return;
+    if (!playerName.trim()) return;
+    if (joined) return;
+    if (autoJoinedRef.current) return;
+
+    const name = playerName.trim();
+
+    autoJoinedRef.current = true;
+    setNameError(null);
+    setJoined(true);
+
+    // ✅ ログイン自動参加時も部屋状態をリセット
+    roomLockedRef.current = false;
+    setRoomPlayers([]);
+
+    if (mode === "random") {
+      const maxP = 4;
+
+      setMaxPlayers(maxP);
+      setPlayerCount(`0/${maxP}`);
+
+      joinRandom(
+        { maxPlayers: maxP, gameType: "space", userId: user.id },
+        (createdCode) => {
+          setRoomCode(createdCode);
+
+          setTimeout(() => {
+            socket?.emit("space_join", {
+              roomCode: createdCode,
+              playerName: name,
+              userId: user.id,
+            });
+          }, 300);
+        }
+      );
+    } else {
+      const maxP = Math.min(4, Math.max(2, Number(count || "2")));
+      const roomKey = `space_${code}`;
+
+      setMaxPlayers(maxP);
+      setPlayerCount(`0/${maxP}`);
+
+      joinWithCode(code, String(maxP), "space", user.id);
+      setRoomCode(roomKey);
+
+      setTimeout(() => {
+        socket?.emit("space_join", {
+          roomCode: roomKey,
+          playerName: name,
+          userId: user.id,
+        });
+      }, 300);
+    }
+  }, [
+    user,
+    userLoading,
+    playerName,
+    joined,
+    mode,
+    code,
+    count,
+    socket,
+    joinRandom,
+    joinWithCode,
+  ]);
 
   const theme = STAGE_THEME[gameState?.stage ?? 1] ?? STAGE_THEME[1];
 
@@ -1275,7 +1370,16 @@ export default function SpaceSurviveModePage() {
     pushModal,
   ]);
 
-  if (!joined) {
+  if (userLoading || autoNameLoading) {
+    return null;
+  }
+
+  if (!joined && user) {
+    return null;
+  }
+
+  // if (!joined) {
+  if (!joined && !user) {
     return (
       <main className="overflow-hidden bg-gradient-to-b from-[#020617] via-[#0c1635] to-[#2a0b45] text-white">
         <OnlineGameNotice />
