@@ -1,5 +1,7 @@
 "use client";
 import ProfileReactions from "@/app/components/ProfileReactions";
+import { useMemo, useState, useEffect } from "react";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export type PublicProfile = {
   user_id: string;
@@ -24,6 +26,68 @@ export default function UserProfileModal({
   selected: PublicProfile | null;
   onClose: () => void;
 }) {
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+  const [myUserId, setMyUserId] = useState<string | null>(null);
+  const [requesting, setRequesting] = useState(false);
+  const [friendRequestSent, setFriendRequestSent] = useState(false);
+  const [isFriend, setIsFriend] = useState(false);
+  const [isPendingRequest, setIsPendingRequest] = useState(false);
+  const [friendStatusLoading, setFriendStatusLoading] = useState(false);
+
+  useEffect(() => {
+    const run = async () => {
+      const { data } = await supabase.auth.getSession();
+      setMyUserId(data.session?.user?.id ?? null);
+    };
+
+    run();
+  }, [supabase]);
+
+  useEffect(() => {
+    setFriendRequestSent(false);
+    setRequesting(false);
+  }, [selected?.user_id]);
+
+  useEffect(() => {
+    const run = async () => {
+      setFriendStatusLoading(true);
+
+      try {
+        setIsFriend(false);
+        setIsPendingRequest(false);
+        setFriendRequestSent(false);
+        setRequesting(false);
+
+        if (!myUserId || !selected?.user_id) return;
+        if (myUserId === selected.user_id) return;
+
+        const { data: friendship } = await supabase
+          .from("friendships")
+          .select("user_id")
+          .eq("user_id", myUserId)
+          .eq("friend_user_id", selected.user_id)
+          .maybeSingle();
+
+        setIsFriend(!!friendship);
+
+        const { data: pending } = await supabase
+          .from("friend_requests")
+          .select("id")
+          .eq("from_user_id", myUserId)
+          .eq("to_user_id", selected.user_id)
+          .eq("status", "pending")
+          .maybeSingle();
+
+        setIsPendingRequest(!!pending);
+        setFriendRequestSent(!!pending);
+      } finally {
+        setFriendStatusLoading(false);
+      }
+    };
+
+    run();
+  }, [supabase, myUserId, selected?.user_id]);
+
   if (!open) return null;
 
   return (
@@ -115,10 +179,10 @@ export default function UserProfileModal({
             </p>
           </div>
 
-          <div className="mt-1 md:mt-3 rounded-3xl border border-yellow-100 bg-gradient-to-br from-white to-yellow-50 px-4 py-3 text-center shadow-sm">
-            {/* <p className="text-xs font-black text-yellow-600">
+          {/* <div className="mt-1 md:mt-3 rounded-3xl border border-yellow-100 bg-gradient-to-br from-white to-yellow-50 px-4 py-3 text-center shadow-sm">
+            <p className="text-xs font-black text-yellow-600">
               👥 フレンドID
-            </p> */}
+            </p>
             <div className="relative">
               {selected?.friend_recruiting && (
                 <div className="absolute left-0 top-0 rounded-full bg-green-100 px-3 py-1 text-[10px] font-black text-green-700">
@@ -137,6 +201,71 @@ export default function UserProfileModal({
                   ? selected?.friend_code ?? "----"
                   : "非公開"}
             </p>
+          </div> */}
+
+          <div className="relative mt-1 md:mt-3 rounded-3xl border border-yellow-100 bg-gradient-to-br from-white to-yellow-50 px-4 py-4 text-center shadow-sm">
+            {selected?.friend_recruiting && (
+              <div className="absolute left-3 top-3 rounded-full bg-green-100 border border-green-300 px-3 py-1 text-[10px] font-black text-green-700 shadow-sm">
+                🤝 フレンド募集中
+              </div>
+            )}
+
+            <p className="text-xs font-black text-yellow-600">
+              👥 フレンド
+            </p>
+
+            {loading || friendStatusLoading ? (
+              <p className="mt-2 text-lg font-black text-slate-900">...</p>
+            ) : selected?.user_id === myUserId ? (
+              <p className="mt-2 text-sm font-bold text-slate-500">
+                自分のプロフィールです
+              </p>
+            ) : isFriend ? (
+              <p className="mt-3 text-lg font-black text-emerald-600">
+                🤝 フレンドです
+              </p>
+            ) : isPendingRequest || friendRequestSent ? (
+              <p className="mt-3 text-lg font-black text-amber-600">
+                📨 フレンド申請済み
+              </p>
+            ) : selected?.friend_code_public ? (
+              <button
+                type="button"
+                disabled={requesting}
+                onClick={async (e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+
+                  if (!selected?.user_id) return;
+
+                  setRequesting(true);
+
+                  const { error } = await supabase.rpc("send_friend_request", {
+                    p_to_user_id: selected.user_id,
+                  });
+
+                  setRequesting(false);
+
+                  if (error) {
+                    alert("フレンド申請に失敗しました");
+                    return;
+                  }
+
+                  setFriendRequestSent(true);
+                  setIsPendingRequest(true);
+                }}
+                className="
+                  mt-3 w-full rounded-2xl px-4 py-3 font-black shadow-sm
+                  bg-gradient-to-r from-yellow-300 to-orange-300 text-slate-900 hover:opacity-90
+                "
+              >
+                {requesting ? "申請中..." : "フレンド申請する 🤝"}
+              </button>
+            ) : (
+              <p className="mt-2 text-sm font-bold text-slate-500">
+                フレンドを受け付けていません
+              </p>
+            )}
           </div>
 
           {/* リアクション */}

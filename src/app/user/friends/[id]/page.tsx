@@ -23,6 +23,8 @@ export default function FriendDetailPage() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  const [totalSkinCount, setTotalSkinCount] = useState(0);
+
   useEffect(() => {
     if (userLoading) return;
     if (!user) {
@@ -69,6 +71,13 @@ export default function FriendDetailPage() {
             setSkinName(skin.name);
           }
         }
+
+        // 全スタイル数
+        const { count: total } = await supabase
+          .from("skins")
+          .select("*", { count: "exact", head: true });
+
+        setTotalSkinCount(total ?? 0);
 
         if (error) throw error;
         setP(data as any);
@@ -201,6 +210,10 @@ export default function FriendDetailPage() {
                     </p>
                   </div>
                 </div>
+
+                <p className="mt-1 md:mt-2 text-sm font-bold text-slate-500">
+                  スタイル所持数 {p.skin_count ?? 0}/{totalSkinCount}
+                </p>
               </div>
 
               {/* <div className="rounded-2xl border border-gray-100 bg-gray-50 p-3">

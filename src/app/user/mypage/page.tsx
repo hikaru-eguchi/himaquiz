@@ -392,10 +392,12 @@ export default function MyPage() {
             <div className="mt-4 flex items-center justify-between rounded-2xl bg-yellow-50 px-4 py-3">
               <div>
                 <p className="text-sm font-black text-gray-800">
-                  フレンドIDを公開する
+                  {/* フレンドIDを公開する */}
+                  プロフィールからのフレンド申請を受け付ける
                 </p>
                 <p className="text-xs font-bold text-gray-500">
-                  ONにすると他の人のプロフィールに表示されます
+                  {/* ONにすると他の人のプロフィールに表示されます */}
+                  ONにすると公開プロフィールからフレンド申請を受け付けます
                 </p>
               </div>
 
