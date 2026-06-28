@@ -196,6 +196,28 @@ const QuizResult = ({
     return p < 1 ? p.toFixed(1) : String(Math.round(p));
   };
 
+  const getCurrentTitleRank = () => {
+    let rank = 0;
+
+    titles.forEach((t, index) => {
+      if (correctCount >= t.threshold) {
+        rank = index + 1;
+      }
+    });
+
+    return rank;
+  };
+
+  const getTitleRankClass = (rank: number) => {
+    if (rank >= 26) return "text-yellow-600 bg-yellow-100 border-yellow-300";
+    if (rank >= 21) return "text-red-600 bg-red-100 border-red-300";
+    if (rank >= 16) return "text-orange-600 bg-orange-100 border-orange-300";
+    if (rank >= 11) return "text-purple-600 bg-purple-100 border-purple-300";
+    if (rank >= 6) return "text-blue-600 bg-blue-100 border-blue-300";
+    if (rank >= 1) return "text-green-600 bg-green-100 border-green-300";
+    return "text-gray-600 bg-gray-100 border-gray-300";
+  };
+
   useEffect(() => {
     const timers: NodeJS.Timeout[] = [];
     // timers.push(setTimeout(() => setShowScore(true), 500));
@@ -312,11 +334,23 @@ const QuizResult = ({
             <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-yellow-300/40 blur-2xl" />
             <div className="absolute -left-8 -bottom-8 h-28 w-28 rounded-full bg-pink-300/30 blur-2xl" />
 
-            <p className="relative text-xl md:text-3xl font-extrabold text-gray-700">
+            <p className="relative mb-4 text-xl md:text-3xl font-extrabold text-gray-700">
               あなたの称号は…
             </p>
 
-            <p className="relative mt-4 text-5xl md:text-7xl font-black text-yellow-600 drop-shadow-lg animate-pulse leading-tight">
+            {(() => {
+              const rank = getCurrentTitleRank();
+
+              return (
+                <p
+                  className={`relative mx-auto mb-1 inline-flex items-center justify-center rounded-full border px-4 py-1 text-xs md:text-sm font-black ${getTitleRankClass(rank)}`}
+                >
+                  🏅 称号ランク {rank}
+                </p>
+              );
+            })()}
+
+            <p className="relative text-5xl md:text-7xl font-black text-yellow-600 drop-shadow-lg animate-pulse leading-tight">
               {/* 👑 {getTitle()}！ */}
               {getTitle()}
             </p>
@@ -1362,6 +1396,28 @@ export default function QuizModePage() {
     return title;
   };
 
+  const getCurrentTitleRank = () => {
+    let rank = 0;
+
+    titles.forEach((t, index) => {
+      if (correctCount >= t.threshold) {
+        rank = index + 1;
+      }
+    });
+
+    return rank;
+  };
+
+  const getTitleRankClass = (rank: number) => {
+    if (rank >= 26) return "text-yellow-600 bg-yellow-100 border-yellow-300";
+    if (rank >= 21) return "text-red-600 bg-red-100 border-red-300";
+    if (rank >= 16) return "text-orange-600 bg-orange-100 border-orange-300";
+    if (rank >= 11) return "text-purple-600 bg-purple-100 border-purple-300";
+    if (rank >= 6) return "text-blue-600 bg-blue-100 border-blue-300";
+    if (rank >= 1) return "text-green-600 bg-green-100 border-green-300";
+    return "text-gray-600 bg-gray-100 border-gray-300";
+  };
+
   // ============================
   // ✅ 取りこぼし防止：マウント時に pending を拾う
   // ============================
@@ -1709,6 +1765,17 @@ export default function QuizModePage() {
                   <p className="mt-1 text-base md:text-lg font-bold text-gray-700">
                     今の称号：{getCurrentTitle()}
                   </p>
+                  {(() => {
+                    const rank = getCurrentTitleRank();
+
+                    return (
+                      <p
+                        className={`mb-2 inline-flex items-center rounded-full border px-2 md:px-3 text-[10px] md:text-sm font-black ${getTitleRankClass(rank)}`}
+                      >
+                        称号ランク {rank}
+                      </p>
+                    );
+                  })()}
                 </div>
               );
             }
@@ -1744,10 +1811,22 @@ export default function QuizModePage() {
                 </p>
 
                 <div className="mt-2 md:mt-4">
-                  <div className="mb-2 text-center text-sm md:text-lg font-bold text-gray-500">
+                  <div className="text-center text-sm md:text-lg font-bold text-gray-500">
                     <span>今の称号：{getCurrentTitle()}</span>
                     {/* <span>達成率 {progressPercent}%</span> */}
                   </div>
+
+                  {(() => {
+                    const rank = getCurrentTitleRank();
+
+                    return (
+                      <p
+                        className={`mb-2 inline-flex items-center rounded-full border px-2 md:px-3 text-[10px] md:text-sm font-black ${getTitleRankClass(rank)}`}
+                      >
+                        称号ランク {rank}
+                      </p>
+                    );
+                  })()}
 
                   <div className="h-5 w-full overflow-hidden rounded-full bg-gray-200 shadow-inner">
                     <div
