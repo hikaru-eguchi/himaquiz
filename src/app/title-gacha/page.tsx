@@ -34,18 +34,18 @@ const titleItems = [
   { no: "9", name: "ひらめき一点突破", emoji: "💡", flavor: "いつもなんか当たってる。" },
   { no: "10", name: "なんとなくで当てちゃう人", emoji: "🎯", flavor: "理由はないけど当たる。" },
   { no: "11", name: "起きる気ゼロ", emoji: "💤", flavor: "今日は無理。" },
-  { no: "12", name: "ログイン失敗（現実）", emoji: "🛌", flavor: "まだベッドから出られない。" },
-  { no: "13", name: "人生リスポーン待ち", emoji: "🛌", flavor: "まだ現実にログインできてない。" },
+  { no: "12", name: "現実ログイン待ち", emoji: "🛌", flavor: "まだベッドから出られない。" },
+  { no: "13", name: "やる気ロード中", emoji: "🛌", flavor: "接続が不安定です。" },
   { no: "14", name: "明日から本気出す", emoji: "😴", flavor: "今日はいいや。" },
-  { no: "15", name: "やるやる詐欺師", emoji: "🤥", flavor: "やる気だけはあるよ。" },
-  { no: "16", name: "人生の迷い子", emoji: "🧭", flavor: "方向性見失い中。" },
-  { no: "17", name: "いろいろ迷走中", emoji: "🌀", flavor: "いつも悩んでる。" },
+  { no: "15", name: "今日は勝てる気がする", emoji: "🔥", flavor: "根拠はない。" },
+  { no: "16", name: "今日も迷走中", emoji: "🌀", flavor: "とりあえず進もう。" },
+  { no: "17", name: "優柔不断マスター", emoji: "🤔", flavor: "どっちも選べない。" },
   { no: "18", name: "思考、置いてきた。", emoji: "😇", flavor: "考えるのをやめた。" },
-  { no: "19", name: "知識ゼロ", emoji: "🤯", flavor: "知らなくても当てる。" },
+  { no: "19", name: "勘だけ名人", emoji: "🎯", flavor: "理由はあとから考える。" },
   { no: "20", name: "連続ミス職人", emoji: "💀", flavor: "逆にすごい。" },
-  { no: "21", name: "夜行性", emoji: "🌙", flavor: "夜の方が冴えるタイプ。" },
-  { no: "22", name: "夜中に背徳飯", emoji: "🍜", flavor: "うまさ倍増中。" },
-  { no: "23", name: "ジャンクフード星人", emoji: "🍔", flavor: "心の栄養。" },
+  { no: "21", name: "夜しか勝たん", emoji: "🌙", flavor: "昼はおやすみ。" },
+  { no: "22", name: "今日もチートデイ", emoji: "🍕", flavor: "昨日もチートデイでした。" },
+  { no: "23", name: "カロリーは正義", emoji: "🍔", flavor: "細かいことは気にしない。" },
   { no: "24", name: "時間溶かし職人", emoji: "⏳", flavor: "気づいたら時間消えてる。" },
   { no: "25", name: "ゲームの住人", emoji: "🎮", flavor: "起きてから寝るまでゲーム。" },
   { no: "26", name: "ひまつぶしのプロ", emoji: "🧃", flavor: "時間の使い方が上手い。" },
@@ -54,10 +54,10 @@ const titleItems = [
   { no: "29", name: "全力ひまつぶし中", emoji: "🔥", flavor: "ひまつぶしに全力投球。" },
   { no: "30", name: "爆裂エンジョイ勢", emoji: "🎉", flavor: "楽しんだもん勝ち。" },
   { no: "31", name: "ワンチャン狙い", emoji: "🎲", flavor: "当たればOK。" },
-  { no: "32", name: "偶然の産物", emoji: "✨", flavor: "偶然で勝つ。" },
-  { no: "33", name: "超ラッキーマン", emoji: "🍀", flavor: "運がすべて。" },
+  { no: "32", name: "脳内会議中", emoji: "🧠", flavor: "議題は未定です。" },
+  { no: "33", name: "ラッキー体質", emoji: "✨", flavor: "なんかうまくいく。" },
   { no: "34", name: "強運の持ち主", emoji: "🎰", flavor: "運だけで勝つ。" },
-  { no: "35", name: "負けず嫌い", emoji: "🔥", flavor: "負けると燃える。" },
+  { no: "35", name: "逆転ねらい", emoji: "⚡", flavor: "最後まであきらめない。" },
   { no: "36", name: "気合いでなんとかするマン", emoji: "💪", flavor: "とりあえず押すスタイル。" },
   { no: "37", name: "努力・根性・気合", emoji: "🔥", flavor: "全部で押し切る。" },
   { no: "38", name: "あとはまかせろ", emoji: "😏", flavor: "根拠はないけど頼もしい。" },
@@ -138,6 +138,7 @@ const TitleGacha = ({
   setRollCount,
   onRoll,
   cost,
+  ownedCount,
 }: {
   points: number;
   rolling: boolean;
@@ -152,6 +153,7 @@ const TitleGacha = ({
   setRollCount: React.Dispatch<React.SetStateAction<RollCount>>;
   onRoll: () => void;
   cost: number;
+  ownedCount: number;
 }) => {
   const [showResult, setShowResult] = useState(false);
   const [selectedHistory, setSelectedHistory] = useState<null | GachaTitleResult>(null);
@@ -205,6 +207,19 @@ const TitleGacha = ({
             className="relative w-56 h-56 md:w-96 md:h-96 drop-shadow-2xl"
             alt="称号ガチャ"
           />
+        </div>
+
+        <div className="mx-auto max-w-[360px] rounded-2xl border-2 border-yellow-400 bg-white px-4 py-3 shadow">
+          <p className="text-sm md:text-base font-bold text-gray-600">
+            👑 あつめた称号
+          </p>
+
+          <p className="text-3xl md:text-4xl font-black text-yellow-600">
+            {ownedCount} / 50
+            <span className="ml-1 text-base md:text-lg font-bold text-gray-500">
+              種類
+            </span>
+          </p>
         </div>
 
         <div className="rounded-2xl border-2 border-yellow-500 bg-black/70 px-5 py-3 shadow-xl">
@@ -813,6 +828,7 @@ export default function TitleGachaPage() {
           setRollCount={setRollCount}
           onRoll={rollTitleGacha}
           cost={getCost(rollCount)}
+          ownedCount={ownedTitleNames.size}
         />
       </div>
     </div>

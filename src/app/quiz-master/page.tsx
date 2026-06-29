@@ -8,6 +8,7 @@ import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useSupabaseUser } from "../../hooks/useSupabaseUser"; 
+import DungeonProgressCard from "@/app/components/DungeonBestStageCard";
 
 const anton = Anton({ subsets: ["latin"], weight: "400" });
 
@@ -22,6 +23,7 @@ export default function QuizMasterPage() {
   const router = useRouter();
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const { user, loading: userLoading } = useSupabaseUser();
+  const [myBestStage, setMyBestStage] = useState<number | null>(null);
 
   const [showGenreButtons, setShowGenreButtons] = useState(false);
   const [showDescription, setShowDescription] = useState(false);
@@ -166,6 +168,33 @@ export default function QuizMasterPage() {
     fetchOwnedBosses();
   }, [user, supabase]);
 
+  useEffect(() => {
+    const fetchMyBestStage = async () => {
+      if (userLoading) return;
+
+      if (!user) {
+        setMyBestStage(null);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("user_public_profiles")
+        .select("best_stage")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error("failed to load best_stage:", error);
+        setMyBestStage(null);
+        return;
+      }
+
+      setMyBestStage(Number(data?.best_stage ?? 0));
+    };
+
+    fetchMyBestStage();
+  }, [user, userLoading, supabase]);
+
   const bossProgress = secretBosses.map((b, i) => {
     const prev = secretBosses[i - 1];
 
@@ -291,6 +320,13 @@ export default function QuizMasterPage() {
             />
           ))}
         </div>
+
+        {user && (
+          <DungeonProgressCard
+            bestStage={myBestStage}
+            totalStage={23}
+          />
+        )}
 
         <div className="flex flex-col md:flex-row justify-center gap-3 md:gap-4 max-w-4xl mx-auto">
           <Link href="/quiz-master/random" className="flex-1">

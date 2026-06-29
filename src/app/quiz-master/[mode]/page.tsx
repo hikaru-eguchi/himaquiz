@@ -16,6 +16,7 @@ import { openXShare, buildTopUrl } from "@/lib/shareX";
 import type { Rarity } from "@/types/gacha";
 import DungeonRankingTop10 from "../../components/DungeonRankingTop10";
 import RecommendedSoloGames from "@/app/components/RecommendedSoloGames";
+import DungeonResultProgressCard from "@/app/components/DungeonResultProgressCard";
 
 // =====================
 // ポイント仕様（ステージ到達に応じて付与）
@@ -699,6 +700,7 @@ const QuizResult = ({
   rankingRows,
   shinyBonusPoints,
   shinyBonusExp,
+  myBestStage,
 }: {
   correctCount: number;
   getTitle: () => string;
@@ -719,6 +721,7 @@ const QuizResult = ({
   rankingRows: { user_id: string; username: string | null; avatar_url: string | null; best_stage: number }[];
   shinyBonusPoints: number;
   shinyBonusExp: number;
+  myBestStage: number | null;
 }) => {
   const [showScore, setShowScore] = useState(false);
   const [showText, setShowText] = useState(false);
@@ -860,6 +863,14 @@ const QuizResult = ({
               />
             </div>
           </div>
+
+          {isLoggedIn && (
+            <DungeonResultProgressCard
+              currentStage={correctCount}
+              bestStage={myBestStage}
+              totalStage={23}
+            />
+          )}
 
           {/* ★ 追加：獲得ポイント表示 */}
           <div className="mx-auto max-w-[520px] bg-white border-2 border-black rounded-xl p-4 shadow mt-2">
@@ -1192,6 +1203,7 @@ export default function QuizModePage() {
   const [questions, setQuestions] = useState<{ id: string; quiz: QuizData }[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [currentStage, setCurrentStage] = useState(0);
+  const [myBestStage, setMyBestStage] = useState<number | null>(null);
   const [userAnswer, setUserAnswer] = useState<number | null>(null);
   const [correctCount, setCorrectCount] = useState(0);
   const [quizCorrectCount, setQuizCorrectCount] = useState(0);
@@ -1787,6 +1799,33 @@ export default function QuizModePage() {
 
     return () => clearInterval(timer);
   }, [character, currentIndex, questionsReady]); 
+
+  useEffect(() => {
+    const fetchMyBestStage = async () => {
+      if (userLoading) return;
+
+      if (!user) {
+        setMyBestStage(null);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("user_public_profiles")
+        .select("best_stage")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error("failed to load my best_stage:", error);
+        setMyBestStage(null);
+        return;
+      }
+
+      setMyBestStage(Number(data?.best_stage ?? 0));
+    };
+
+    fetchMyBestStage();
+  }, [user, userLoading, supabase]);
 
   // useEffect(() => {
   //   const baseEnemy = getEnemyForStage(currentStage + 1, course, boss, variant);
@@ -3401,6 +3440,7 @@ export default function QuizModePage() {
             rankingRows={rankingRows}
             shinyBonusPoints={shinyBonusPoints}
             shinyBonusExp={shinyBonusExp}
+            myBestStage={myBestStage}
           />
         )}
       </div>

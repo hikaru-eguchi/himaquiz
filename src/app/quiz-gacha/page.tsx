@@ -52,6 +52,7 @@ const QuizGacha = ({
   onRoll,
   cost,
   remain,
+  ownedCount,
 }: {
   points: number;
   rolling: boolean;
@@ -75,7 +76,8 @@ const QuizGacha = ({
 
   onRoll: () => void;
   cost: number;
-  remain: number
+  remain: number;
+  ownedCount: number;
 }) => {
   const [showOpen, setShowOpen] = useState(false);
   const [showResult, setShowResult] = useState(false);
@@ -208,7 +210,18 @@ const QuizGacha = ({
     <div className="text-center">
       <div className="flex flex-col items-center justify-center gap-3 mb-10">
         <img src="/images/gacha.png" className="w-60 h-60 md:w-100 md:h-100" />
-        <div className="flex flex-col items-center justify-between w-full mx-auto">
+        <div className="mx-auto mb-3 max-w-[360px] rounded-2xl border-2 border-blue-400 bg-white px-4 py-3 shadow">
+          <p className="text-sm md:text-base font-bold text-gray-600">
+            📖 あつめたキャラ
+          </p>
+          <p className="text-3xl md:text-4xl font-black text-blue-600">
+            {ownedCount} / 88
+            <span className="ml-1 text-base md:text-lg font-bold text-gray-500">
+              種類
+            </span>
+          </p>
+        </div>
+        <div className="mb-1 flex flex-col items-center justify-between w-full mx-auto">
           <div className="bg-white border border-black px-4 py-2 rounded shadow">
             <p className="text-xl md:text-2xl font-bold text-gray-800">
               所持ポイント：{points} P
@@ -217,9 +230,9 @@ const QuizGacha = ({
         </div>
         
         {/* サブ説明 */}
-        <p className="mt-2 text-md md:text-lg text-white font-bold drop-shadow">
+        {/* <p className="mt-2 text-md md:text-lg text-white font-bold drop-shadow">
           {gachaMode === "premium" ? "★4（激レア）以上が確定！" : "いろんなキャラが当たる！"}
-        </p>
+        </p> */}
         
         {/* タブ：通常 / ★4以上確定 */}
         <div className="flex items-center justify-center gap-2 bg-white/70 p-2 rounded-xl border-2 border-black">
@@ -245,7 +258,7 @@ const QuizGacha = ({
         </div>
 
         {/* トグル：1回 / 10連 */}
-        <div className="mt-2 flex items-center justify-center">
+        <div className="flex items-center justify-center">
           <div className="flex rounded-xl border-2 border-black overflow-hidden">
             <button
               className={`px-6 py-2 font-extrabold text-lg md:text-xl transition
@@ -1278,6 +1291,18 @@ export default function QuizMasterPage() {
     return null;
   }
 
+  const gachaNos = new Set(gachaCharacters.map((c) => c.no));
+
+  const ownedGachaCount = [...ownedCharacterIds].filter((id) => {
+    for (const [no, characterId] of noToId.entries()) {
+      if (characterId === id && gachaNos.has(no)) {
+        return true;
+      }
+    }
+
+    return false;
+  }).length;
+
   return (
     <div className="bg-gradient-to-b from-red-400 via-blue-200 to-green-200">
       <div className="container mx-auto px-4 py-6 text-center">
@@ -1400,6 +1425,8 @@ export default function QuizMasterPage() {
 
           // 表示用
           cost={getCost(gachaMode, rollCount)}
+
+          ownedCount={ownedGachaCount}
         />
       </div>
     </div>

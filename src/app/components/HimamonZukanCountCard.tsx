@@ -12,7 +12,10 @@ export default function HimamonZukanCountCard({ count, total = 80 }: Props) {
         📖 あつめたひまもん
       </p>
       <p className="text-3xl md:text-4xl font-black text-yellow-600">
-        {count}/{total}
+        {count} / {total}
+        <span className="ml-1 text-lg md:text-xl font-bold">
+          しゅるい
+        </span>
       </p>
     </div>
   );
