@@ -29,27 +29,36 @@ type StyleGachaItem = StyleSkin & {
 
 const GACHA_COST = 1500;
 
+const DIRECT_UNLOCK_PRICE_BY_RARITY: Record<StyleRarity, number | null> = {
+  ノーマル: 3000,
+  レア: 7000,
+  超レア: 15000,
+  激レア: 30000,
+  神レア: 60000,
+  シークレット: null,
+};
+
 const styleSkins: StyleSkin[] = [
-  { no: "1", name: "ボードスタイル", image: "/images/skin_chara1_ボード.png", rarity: "ノーマル", weight: 11 },
-  { no: "2", name: "レッドジェット", image: "/images/skin_chara2_ジェット（レッド）.png", rarity: "ノーマル", weight: 11 },
-  { no: "3", name: "ブルージェット", image: "/images/skin_chara3_ジェット（ブルー）.png", rarity: "ノーマル", weight: 11 },
-  { no: "4", name: "グリーンジェット", image: "/images/skin_chara4_ジェット（グリーン）.png", rarity: "ノーマル", weight: 11 },
-  { no: "5", name: "UFOスタイル", image: "/images/skin_chara5_UFO.png", rarity: "レア", weight: 5 },
-  { no: "6", name: "くもスタイル", image: "/images/skin_chara6_くも.png", rarity: "レア", weight: 5 },
-  { no: "7", name: "ドーナツスタイル", image: "/images/skin_chara7_ドーナツ.png", rarity: "レア", weight: 5 },
-  { no: "8", name: "波乗りスタイル", image: "/images/skin_chara8_波.png", rarity: "レア", weight: 5 },
-  { no: "9", name: "葉っぱスタイル", image: "/images/skin_chara9_葉っぱ.png", rarity: "レア", weight: 5 },
-  { no: "10", name: "じゅうたんスタイル", image: "/images/skin_chara10_じゅうたん.png", rarity: "レア", weight: 5 },
-  { no: "11", name: "ふうせんスタイル", image: "/images/skin_chara11_ふうせん.png", rarity: "超レア", weight: 3.75 },
-  { no: "12", name: "ききゅうスタイル", image: "/images/skin_chara12_ききゅう.png", rarity: "超レア", weight: 3.75 },
-  { no: "13", name: "ドローンスタイル", image: "/images/skin_chara13_ドローン.png", rarity: "超レア", weight: 3.75 },
-  { no: "14", name: "つえスタイル", image: "/images/skin_chara14_つえ.png", rarity: "超レア", weight: 3.75 },
-  { no: "15", name: "スタースタイル", image: "/images/skin_chara15_スター.png", rarity: "激レア", weight: 2.333 },
-  { no: "16", name: "ムーンスタイル", image: "/images/skin_chara16_ムーン.png", rarity: "激レア", weight: 2.333 },
-  { no: "17", name: "ようせいスタイル", image: "/images/skin_chara17_ようせい.png", rarity: "激レア", weight: 2.334 },
-  { no: "18", name: "ドラゴンスタイル", image: "/images/skin_chara18_ドラゴン.png", rarity: "神レア", weight: 1.5 },
-  { no: "19", name: "ダークドラゴン", image: "/images/skin_chara19_ダークドラゴン.png", rarity: "神レア", weight: 1.5 },
-  { no: "20", name: "ヒーロースタイル", image: "/images/skin_chara20_ヒーロー.png", rarity: "シークレット", weight: 1 },
+  { no: "1", name: "ボードスタイル", image: "/images/skin_chara1_ボード.png", rarity: "ノーマル", weight: 15 },
+  { no: "2", name: "レッドジェット", image: "/images/skin_chara2_ジェット（レッド）.png", rarity: "ノーマル", weight: 15 },
+  { no: "3", name: "ブルージェット", image: "/images/skin_chara3_ジェット（ブルー）.png", rarity: "ノーマル", weight: 15 },
+  { no: "4", name: "グリーンジェット", image: "/images/skin_chara4_ジェット（グリーン）.png", rarity: "ノーマル", weight: 15 },
+  { no: "5", name: "UFOスタイル", image: "/images/skin_chara5_UFO.png", rarity: "レア", weight: 4.167 },
+  { no: "6", name: "くもスタイル", image: "/images/skin_chara6_くも.png", rarity: "レア", weight: 4.167 },
+  { no: "7", name: "ドーナツスタイル", image: "/images/skin_chara7_ドーナツ.png", rarity: "レア", weight: 4.167 },
+  { no: "8", name: "波乗りスタイル", image: "/images/skin_chara8_波.png", rarity: "レア", weight: 4.167 },
+  { no: "9", name: "葉っぱスタイル", image: "/images/skin_chara9_葉っぱ.png", rarity: "レア", weight: 4.167 },
+  { no: "10", name: "じゅうたんスタイル", image: "/images/skin_chara10_じゅうたん.png", rarity: "レア", weight: 4.167 },
+  { no: "11", name: "ふうせんスタイル", image: "/images/skin_chara11_ふうせん.png", rarity: "超レア", weight: 2.5 },
+  { no: "12", name: "ききゅうスタイル", image: "/images/skin_chara12_ききゅう.png", rarity: "超レア", weight: 2.5 },
+  { no: "13", name: "ドローンスタイル", image: "/images/skin_chara13_ドローン.png", rarity: "超レア", weight: 2.5 },
+  { no: "14", name: "つえスタイル", image: "/images/skin_chara14_つえ.png", rarity: "超レア", weight: 2.5 },
+  { no: "15", name: "スタースタイル", image: "/images/skin_chara15_スター.png", rarity: "激レア", weight: 1 },
+  { no: "16", name: "ムーンスタイル", image: "/images/skin_chara16_ムーン.png", rarity: "激レア", weight: 1 },
+  { no: "17", name: "ようせいスタイル", image: "/images/skin_chara17_ようせい.png", rarity: "激レア", weight: 1 },
+  { no: "18", name: "ドラゴンスタイル", image: "/images/skin_chara18_ドラゴン.png", rarity: "神レア", weight: 0.75 },
+  { no: "19", name: "ダークドラゴン", image: "/images/skin_chara19_ダークドラゴン.png", rarity: "神レア", weight: 0.75 },
+  { no: "20", name: "ヒーロースタイル", image: "/images/skin_chara20_ヒーロー.png", rarity: "シークレット", weight: 0.5 },
 ];
 
 const rarityText: Record<StyleRarity, string> = {
@@ -125,6 +134,9 @@ export default function HimaStyleGachaPage() {
   const [selectedHistory, setSelectedHistory] = useState<StyleGachaItem | null>(null);
   const [ownedSkinIds, setOwnedSkinIds] = useState<Set<string>>(new Set());
   const [noToId, setNoToId] = useState<Map<string, string>>(new Map());
+  const [unlockTargetSkin, setUnlockTargetSkin] = useState<StyleSkin | null>(null);
+  const [notEnoughPointSkin, setNotEnoughPointSkin] = useState<StyleSkin | null>(null);
+  const [unlockingSkinNo, setUnlockingSkinNo] = useState<string | null>(null);
   const [showDescription, setShowDescription] = useState(false);
   const descriptionRef = useRef<HTMLDivElement>(null);
 
@@ -315,6 +327,47 @@ export default function HimaStyleGachaPage() {
     } finally {
       setTimeout(() => setRolling(false), 2800);
     }
+  };
+
+  const handleUnlockSkin = async () => {
+    if (!unlockTargetSkin) return;
+
+    const skinId = noToId.get(unlockTargetSkin.no);
+    const price = DIRECT_UNLOCK_PRICE_BY_RARITY[unlockTargetSkin.rarity];
+
+    if (!skinId || price === null) return;
+
+    if (points < price) {
+      setUnlockTargetSkin(null);
+      setNotEnoughPointSkin(unlockTargetSkin);
+      return;
+    }
+
+    setUnlockingSkinNo(unlockTargetSkin.no);
+
+    const { data, error } = await supabase.rpc("purchase_style_skin", {
+      p_skin_id: skinId,
+    });
+
+    setUnlockingSkinNo(null);
+
+    if (error) {
+      alert(error.message ?? "スタイルの解放に失敗しました。");
+      return;
+    }
+
+    const result = data as { remaining_points?: number } | null;
+
+    setPoints(
+      typeof result?.remaining_points === "number"
+        ? result.remaining_points
+        : Math.max(0, points - price)
+    );
+
+    setOwnedSkinIds((prev) => new Set(prev).add(skinId));
+    setUnlockTargetSkin(null);
+
+    window.dispatchEvent(new Event("points:updated"));
   };
 
   if (userLoading) {
@@ -561,7 +614,194 @@ export default function HimaStyleGachaPage() {
             )}
           </div>
         </section>
+
+        <section className="mt-6 rounded-[2rem] border-4 border-black bg-white/90 p-5 shadow-[0_8px_0_rgba(0,0,0,1)]">
+          <h2 className="text-center text-2xl font-black text-zinc-950">
+            このガチャで登場するスタイル
+          </h2>
+
+          <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+            {styleSkins.map((skin) => {
+              const skinId = noToId.get(skin.no);
+              const owned = skinId ? ownedSkinIds.has(skinId) : false;
+              const price = DIRECT_UNLOCK_PRICE_BY_RARITY[skin.rarity];
+              const canBuy = price !== null;
+              const unlocking = unlockingSkinNo === skin.no;
+
+              const isSecretHidden = !owned && skin.rarity === "シークレット";
+              const displayImage = isSecretHidden ? "/images/hatena_card.png" : skin.image;
+              const displayName = isSecretHidden ? "？？？？？？" : skin.name;
+
+              return (
+                // <button
+                //   key={skin.no}
+                //   type="button"
+                //   disabled={owned || !canBuy || unlocking}
+                //   onClick={() => {
+                //     if (owned || !canBuy) return;
+
+                //     if (points < price) {
+                //       setNotEnoughPointSkin(skin);
+                //       return;
+                //     }
+
+                //     setUnlockTargetSkin(skin);
+                //   }}
+                //   className="relative rounded-2xl border-3 border-black bg-white p-3 text-center shadow-[0_5px_0_rgba(0,0,0,1)] transition hover:scale-105 disabled:opacity-70"
+                // >
+                <div
+                  key={skin.no}
+                  className="relative rounded-2xl border-3 border-black bg-white p-3 text-center shadow-[0_5px_0_rgba(0,0,0,1)]"
+                >
+                  {owned && (
+                    <div className="absolute -left-2 -top-3 rounded-full bg-green-500 px-3 py-1 text-xs font-black text-white">
+                      所持
+                    </div>
+                  )}
+
+                  {/* {!owned && canBuy && (
+                    <div className="absolute -right-2 -top-3 rounded-full bg-yellow-400 px-3 py-1 text-xs font-black text-black">
+                      {price.toLocaleString()}P
+                    </div>
+                  )} */}
+
+                  {/* {!owned && !canBuy && (
+                    <div className="absolute -right-2 -top-3 rounded-full bg-zinc-900 px-3 py-1 text-xs font-black text-white">
+                      ガチャ限定
+                    </div>
+                  )} */}
+
+                  <img
+                    src={displayImage}
+                    alt={displayName}
+                    className={`mx-auto h-28 w-full object-contain ${
+                      !owned ? "grayscale opacity-70" : ""
+                    }`}
+                  />
+
+                  <p className="mt-2 text-sm font-black text-zinc-900">
+                    {displayName}
+                  </p>
+
+                  {!isSecretHidden && (
+                    <p className={`text-xs font-black ${rarityText[skin.rarity]}`}>
+                      {skin.rarity}
+                    </p>
+                  )}
+
+                  {/* {!owned && canBuy && (
+                    <p className="mt-2 text-xs font-black text-yellow-600">
+                      {unlocking ? "解放中..." : `${price.toLocaleString()}Pで解放`}
+                    </p>
+                  )} */}
+                {/* </button> */}
+                </div>
+              );
+            })}
+          </div>
+
+          <button
+            onClick={() => router.push("/user/mystyle")}
+            className="mt-6 w-full rounded-full border-4 border-black bg-gradient-to-r from-cyan-400 via-violet-500 to-pink-500 py-4 text-lg font-black text-white shadow-[0_6px_0_rgba(0,0,0,1)] hover:scale-[1.02]"
+          >
+            📖 ひまスタイル図鑑を見る
+          </button>
+        </section>
       </main>
+
+      {unlockTargetSkin && (
+        <div className="fixed inset-0 z-[70] grid place-items-center bg-black/60 p-4">
+          <div className="w-full max-w-sm rounded-[2rem] border-4 border-black bg-white p-5 text-center shadow-[0_8px_0_rgba(0,0,0,1)]">
+            <p className="text-xs font-black text-violet-500">STYLE UNLOCK</p>
+
+            <h2 className="mt-1 text-xl font-black text-zinc-950">
+              スタイルを解放する？
+            </h2>
+
+            <img
+              src={unlockTargetSkin.image}
+              alt={unlockTargetSkin.name}
+              className="mx-auto mt-4 h-40 w-full object-contain grayscale opacity-70"
+            />
+
+            <p className="mt-3 text-2xl font-black text-zinc-950">
+              {unlockTargetSkin.name}
+            </p>
+
+            <p className={`mt-1 text-sm font-black ${rarityText[unlockTargetSkin.rarity]}`}>
+              {unlockTargetSkin.rarity}
+            </p>
+
+            <div className="mt-4 rounded-3xl bg-yellow-50 p-4">
+              <p className="text-sm font-black text-zinc-700">
+                {DIRECT_UNLOCK_PRICE_BY_RARITY[unlockTargetSkin.rarity]?.toLocaleString()}Pで解放します。
+              </p>
+              <p className="mt-1 text-xs font-bold text-zinc-500">
+                解放後はプロフィールから使用できます。
+              </p>
+            </div>
+
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setUnlockTargetSkin(null)}
+                className="rounded-2xl bg-zinc-100 px-4 py-3 text-sm font-black text-zinc-700"
+              >
+                やめる
+              </button>
+
+              <button
+                type="button"
+                onClick={handleUnlockSkin}
+                className="rounded-2xl border-2 border-black bg-gradient-to-r from-yellow-300 to-orange-400 px-4 py-3 text-sm font-black text-black shadow-[0_4px_0_rgba(0,0,0,1)]"
+              >
+                解放する
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {notEnoughPointSkin && (
+        <div className="fixed inset-0 z-[70] grid place-items-center bg-black/60 p-4">
+          <div className="w-full max-w-sm rounded-[2rem] border-4 border-black bg-white p-5 text-center shadow-[0_8px_0_rgba(0,0,0,1)]">
+            <p className="text-xs font-black text-red-500">POINT SHORTAGE</p>
+
+            <h2 className="mt-1 text-xl font-black text-zinc-950">
+              ポイントが足りません
+            </h2>
+
+            <img
+              src={notEnoughPointSkin.image}
+              alt={notEnoughPointSkin.name}
+              className="mx-auto mt-4 h-36 w-full object-contain grayscale opacity-70"
+            />
+
+            <p className="mt-3 text-lg font-black text-zinc-950">
+              {notEnoughPointSkin.name}
+            </p>
+
+            <div className="mt-4 rounded-3xl bg-red-50 p-4">
+              <p className="text-sm font-black text-zinc-700">
+                このスタイルの解放には{" "}
+                {DIRECT_UNLOCK_PRICE_BY_RARITY[notEnoughPointSkin.rarity]?.toLocaleString()}P
+                必要です。
+              </p>
+              <p className="mt-1 text-xs font-bold text-zinc-500">
+                今の所持ポイントは {points.toLocaleString()}P です。
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setNotEnoughPointSkin(null)}
+              className="mt-5 w-full rounded-2xl border-2 border-black bg-gradient-to-r from-red-300 to-yellow-300 px-4 py-3 text-sm font-black text-black shadow-[0_4px_0_rgba(0,0,0,1)]"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
 
       <AnimatePresence>
         {result && (

@@ -56,6 +56,15 @@ const rarityText: Record<StyleRarity, string> = {
   シークレット: "text-zinc-900",
 };
 
+const DIRECT_UNLOCK_PRICE_BY_RARITY: Record<StyleRarity, number | null> = {
+  ノーマル: 3000,
+  レア: 7000,
+  超レア: 15000,
+  激レア: 30000,
+  神レア: 60000,
+  シークレット: null,
+};
+
 export default function MyStylePage() {
   const router = useRouter();
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
@@ -69,6 +78,11 @@ export default function MyStylePage() {
 
   const [settingSkin, setSettingSkin] = useState(false);
   const [currentSkinId, setCurrentSkinId] = useState<string | null>(null);
+
+  const [points, setPoints] = useState(0);
+  const [unlockingSkinId, setUnlockingSkinId] = useState<string | null>(null);
+  const [notEnoughPointStyle, setNotEnoughPointStyle] =
+    useState<StyleSkinWithOwned | null>(null);
 
   useEffect(() => {
     if (userLoading) return;
@@ -106,7 +120,7 @@ export default function MyStylePage() {
 
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
-          .select("current_skin_id")
+          .select("current_skin_id, points")
           .eq("id", user.id)
           .single();
 
@@ -114,6 +128,7 @@ export default function MyStylePage() {
           console.warn("current_skin_id fetch error:", profileError);
         } else {
           setCurrentSkinId(profile?.current_skin_id ?? null);
+          setPoints(profile?.points ?? 0);
         }
 
         const ownedSet = new Set(
@@ -175,6 +190,57 @@ export default function MyStylePage() {
     }
   };
 
+  const handleUnlockStyle = async (style: StyleSkinWithOwned) => {
+    if (!user) return;
+    if (!style.rarity) return;
+
+    const price = DIRECT_UNLOCK_PRICE_BY_RARITY[style.rarity];
+
+    if (price === null) {
+      return;
+    }
+
+    if (points < price) {
+      setNotEnoughPointStyle(style);
+      return;
+    }
+
+    setUnlockingSkinId(style.id);
+    setError(null);
+
+    const { data, error } = await supabase.rpc("purchase_style_skin", {
+      p_skin_id: style.id,
+    });
+
+    setUnlockingSkinId(null);
+
+    if (error) {
+      console.error("purchase_style_skin error:", error);
+      setError(error.message ?? "スタイルの解放に失敗しました。");
+      return;
+    }
+
+    const result = data as { remaining_points?: number } | null;
+
+    setPoints(
+      typeof result?.remaining_points === "number"
+        ? result.remaining_points
+        : Math.max(0, points - price)
+    );
+
+    setStyles((prev) =>
+      prev.map((s) =>
+        s.id === style.id ? { ...s, owned: true } : s
+      )
+    );
+
+    setSelectedStyle((prev) =>
+      prev && prev.id === style.id ? { ...prev, owned: true } : prev
+    );
+
+    window.dispatchEvent(new Event("points:updated"));
+  };
+
   if (userLoading) {
     return (
       <div className="grid place-items-center bg-gradient-to-br from-cyan-300 via-violet-500 to-pink-400">
@@ -194,6 +260,8 @@ export default function MyStylePage() {
 
   const isOwnedSelected = !!selectedStyle?.owned;
   const selectedRarity = selectedStyle?.rarity ?? "ノーマル";
+  const isSecretHiddenSelected =
+    !!selectedStyle && !selectedStyle.owned && selectedRarity === "シークレット";
 
   return (
     <div className="bg-gradient-to-br from-cyan-300 via-violet-500 to-pink-400 px-4 py-6 md:py-10">
@@ -262,15 +330,28 @@ export default function MyStylePage() {
             ) : (
               <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 md:gap-5">
                 {styles.map((style) => {
+                  // const isOwned = style.owned;
+                  // const imageSrc =
+                  //   isOwned && style.image_url
+                  //     ? style.image_url.startsWith("/")
+                  //       ? style.image_url
+                  //       : `/${style.image_url}`
+                  //     : HATENA_IMAGE;
+
+                  // const rarity = style.rarity ?? "ノーマル";
+                  // const starCount = rarityToStarCount[rarity] ?? 1;
+
                   const isOwned = style.owned;
+                  const rarity = style.rarity ?? "ノーマル";
+                  const isSecretHidden = !isOwned && rarity === "シークレット";
+
                   const imageSrc =
-                    isOwned && style.image_url
+                    !isSecretHidden && style.image_url
                       ? style.image_url.startsWith("/")
                         ? style.image_url
                         : `/${style.image_url}`
                       : HATENA_IMAGE;
 
-                  const rarity = style.rarity ?? "ノーマル";
                   const starCount = rarityToStarCount[rarity] ?? 1;
 
                   return (
@@ -298,20 +379,34 @@ export default function MyStylePage() {
                       <div className="mt-1 flex aspect-square w-full items-center justify-center">
                         <img
                           src={imageSrc}
-                          alt={isOwned ? style.name : "？？？"}
+                          // alt={isOwned ? style.name : "？？？"}
+                          alt={isSecretHidden ? "？？？" : style.name}
                           className={`
                             h-full w-full object-contain
-                            ${!isOwned ? "grayscale" : ""}
+                            ${!isOwned ? "grayscale opacity-70" : ""}
                           `}
                         />
                       </div>
 
                       <div className="mt-2 text-center">
                         <p className="max-w-[80px] truncate text-[10px] font-black text-zinc-900 md:max-w-[120px] md:text-sm">
-                          {isOwned ? style.name : "？？？？？？"}
+                          {/* {isOwned ? style.name : "？？？？？？"} */}
+                          {isSecretHidden ? "？？？？？？" : style.name}
                         </p>
 
-                        {isOwned && (
+                        {/* {isOwned && (
+                          <>
+                            <p
+                              className={`mt-0.5 text-[10px] font-black md:text-xs ${rarityText[rarity]}`}
+                            >
+                              {rarity}
+                            </p>
+                            <p className="text-[10px] font-black text-yellow-400 md:text-xs">
+                              {"★".repeat(starCount)}
+                            </p>
+                          </>
+                        )} */}
+                        {!isSecretHidden && (
                           <>
                             <p
                               className={`mt-0.5 text-[10px] font-black md:text-xs ${rarityText[rarity]}`}
@@ -381,14 +476,22 @@ export default function MyStylePage() {
               </p>
 
               <img
+                // src={
+                //   isOwnedSelected && selectedStyle.image_url
+                //     ? selectedStyle.image_url.startsWith("/")
+                //       ? selectedStyle.image_url
+                //       : `/${selectedStyle.image_url}`
+                //     : HATENA_IMAGE
+                // }
                 src={
-                  isOwnedSelected && selectedStyle.image_url
+                  !isSecretHiddenSelected && selectedStyle.image_url
                     ? selectedStyle.image_url.startsWith("/")
                       ? selectedStyle.image_url
                       : `/${selectedStyle.image_url}`
                     : HATENA_IMAGE
                 }
-                alt={isOwnedSelected ? selectedStyle.name : "？？？"}
+                // alt={isOwnedSelected ? selectedStyle.name : "？？？"}
+                alt={isSecretHiddenSelected ? "？？？" : selectedStyle.name}
                 className={`
                   mx-auto mt-3 h-64 w-full object-contain drop-shadow-2xl
                   ${!isOwnedSelected ? "grayscale" : ""}
@@ -400,7 +503,8 @@ export default function MyStylePage() {
                   isOwnedSelected ? "text-white [text-shadow:0_2px_0_rgba(0,0,0,1),0_4px_10px_rgba(0,0,0,0.9)]" : "text-zinc-900"
                 }`}
               >
-                {isOwnedSelected ? selectedStyle.name : "？？？？？？"}
+                {/* {isOwnedSelected ? selectedStyle.name : "？？？？？？"} */}
+                {isSecretHiddenSelected ? "？？？？？？" : selectedStyle.name}
               </p>
 
               {isOwnedSelected ? (
@@ -419,11 +523,39 @@ export default function MyStylePage() {
                   </p>
                 </>
               ) : (
-                <p className="mt-4 rounded-2xl bg-zinc-100 p-4 text-sm font-bold text-zinc-700">
-                  まだ手に入れていないスタイルです。
-                  <br />
-                  ひまスタイルガチャでゲットしよう！
-                </p>
+                // <p className="mt-4 rounded-2xl bg-zinc-100 p-4 text-sm font-bold text-zinc-700">
+                //   まだ手に入れていないスタイルです。
+                //   <br />
+                //   ひまスタイルガチャでゲットしよう！
+                // </p>
+                <div className="mt-4 rounded-2xl bg-zinc-100 p-4 text-sm font-bold text-zinc-700">
+                  {isSecretHiddenSelected ? (
+                    <>
+                      <p>まだ正体不明のシークレットスタイルです。</p>
+                      <p className="mt-2 font-black text-zinc-800">
+                        ひまスタイルガチャで見つけよう！
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p>まだ手に入れていないスタイルです。</p>
+
+                      {selectedStyle.rarity &&
+                      DIRECT_UNLOCK_PRICE_BY_RARITY[selectedStyle.rarity] !== null ? (
+                        <p className="mt-2 font-black text-yellow-600">
+                          {DIRECT_UNLOCK_PRICE_BY_RARITY[
+                            selectedStyle.rarity
+                          ]?.toLocaleString()}
+                          Pで解放できます。
+                        </p>
+                      ) : (
+                        <p className="mt-2 font-black text-zinc-800">
+                          このスタイルはガチャ限定です。
+                        </p>
+                      )}
+                    </>
+                  )}
+                </div>
               )}
 
               <div className="mt-5 grid gap-3">
@@ -445,13 +577,36 @@ export default function MyStylePage() {
                         : "✨ このスタイルを使用する"}
                   </button>
                 ) : (
-                  <button
-                    type="button"
-                    onClick={() => router.push("/style-gacha")}
-                    className="rounded-full border-3 border-black bg-gradient-to-r from-cyan-400 via-violet-500 to-pink-500 px-6 py-3 font-black text-white shadow-[0_5px_0_rgba(0,0,0,1)] transition hover:scale-[1.02]"
-                  >
-                    🎨 ガチャでゲットする
-                  </button>
+                  // <button
+                  //   type="button"
+                  //   onClick={() => router.push("/style-gacha")}
+                  //   className="rounded-full border-3 border-black bg-gradient-to-r from-cyan-400 via-violet-500 to-pink-500 px-6 py-3 font-black text-white shadow-[0_5px_0_rgba(0,0,0,1)] transition hover:scale-[1.02]"
+                  // >
+                  //   🎨 ガチャでゲットする
+                  // </button>
+                  <>
+                    {selectedStyle.rarity &&
+                    DIRECT_UNLOCK_PRICE_BY_RARITY[selectedStyle.rarity] !== null && (
+                      <button
+                        type="button"
+                        onClick={() => handleUnlockStyle(selectedStyle)}
+                        disabled={unlockingSkinId === selectedStyle.id}
+                        className="rounded-full border-3 border-black bg-gradient-to-r from-yellow-300 to-orange-400 px-6 py-3 font-black text-black shadow-[0_5px_0_rgba(0,0,0,1)] transition hover:scale-[1.02] active:translate-y-[2px] active:shadow-[0_2px_0_rgba(0,0,0,1)] disabled:opacity-60"
+                      >
+                        {unlockingSkinId === selectedStyle.id
+                          ? "解放中..."
+                          : `${DIRECT_UNLOCK_PRICE_BY_RARITY[selectedStyle.rarity]?.toLocaleString()}Pで解放`}
+                      </button>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => router.push("/style-gacha")}
+                      className="rounded-full border-3 border-black bg-gradient-to-r from-cyan-400 via-violet-500 to-pink-500 px-6 py-3 font-black text-white shadow-[0_5px_0_rgba(0,0,0,1)] transition hover:scale-[1.02]"
+                    >
+                      🎨 ガチャでゲットする
+                    </button>
+                  </>
                 )}
 
                 <button
@@ -462,6 +617,70 @@ export default function MyStylePage() {
                   閉じる
                 </button>
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {notEnoughPointStyle && (
+          <motion.div
+            className="fixed inset-0 z-[70] grid place-items-center bg-black/60 p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setNotEnoughPointStyle(null)}
+          >
+            <motion.div
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-sm rounded-[2rem] border-4 border-black bg-white p-5 text-center shadow-[0_8px_0_rgba(0,0,0,1)]"
+              initial={{ y: 50, scale: 0.85, opacity: 0 }}
+              animate={{ y: 0, scale: 1, opacity: 1 }}
+              exit={{ y: 50, scale: 0.85, opacity: 0 }}
+            >
+              <p className="text-xs font-black text-red-500">POINT SHORTAGE</p>
+
+              <h2 className="mt-1 text-xl font-black text-zinc-950">
+                ポイントが足りません
+              </h2>
+
+              <img
+                src={
+                  notEnoughPointStyle.image_url
+                    ? notEnoughPointStyle.image_url.startsWith("/")
+                      ? notEnoughPointStyle.image_url
+                      : `/${notEnoughPointStyle.image_url}`
+                    : HATENA_IMAGE
+                }
+                alt={notEnoughPointStyle.name}
+                className="mx-auto mt-4 h-36 w-full object-contain opacity-70"
+              />
+
+              <p className="mt-3 text-lg font-black text-zinc-950">
+                {notEnoughPointStyle.name}
+              </p>
+
+              <div className="mt-4 rounded-3xl bg-red-50 p-4">
+                <p className="text-sm font-black text-zinc-700">
+                  このスタイルの解放には{" "}
+                  {notEnoughPointStyle.rarity
+                    ? DIRECT_UNLOCK_PRICE_BY_RARITY[
+                        notEnoughPointStyle.rarity
+                      ]?.toLocaleString()
+                    : "-"}
+                  P 必要です。
+                </p>
+                <p className="mt-1 text-xs font-bold text-zinc-500">
+                  今の所持ポイントは {points.toLocaleString()}P です。
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setNotEnoughPointStyle(null)}
+                className="mt-5 w-full rounded-2xl border-2 border-black bg-gradient-to-r from-red-300 to-yellow-300 px-4 py-3 text-sm font-black text-black shadow-[0_4px_0_rgba(0,0,0,1)]"
+              >
+                OK
+              </button>
             </motion.div>
           </motion.div>
         )}

@@ -30,6 +30,14 @@ const DEFAULT_ICONS = [
 
 type DefaultIconId = (typeof DEFAULT_ICONS)[number]["id"];
 
+const FREE_DEFAULT_ICON_IDS: DefaultIconId[] = [
+  "default_1",
+  "default_2",
+  "default_3",
+];
+
+const DEFAULT_ICON_PRICE = 500;
+
 const GAME_LABEL: Record<string, { label: string; emoji: string }> = {
   level: { label: "レベル称号", emoji: "🌟" },
   streak: { label: "連続正解チャレンジ", emoji: "🔥" },
@@ -56,6 +64,13 @@ export default function ProfileEditPage() {
   const [avatarCharacterId, setAvatarCharacterId] = useState<string | null>(null);
   const [avatarDefaultId, setAvatarDefaultId] = useState<DefaultIconId | null>(null);
   const [currentTitle, setCurrentTitle] = useState<string>("");
+  const [points, setPoints] = useState(0);
+  const [ownedDefaultIconIds, setOwnedDefaultIconIds] = useState<DefaultIconId[]>([]);
+  const [buyingIconId, setBuyingIconId] = useState<DefaultIconId | null>(null);
+  const [unlockTargetIcon, setUnlockTargetIcon] =
+    useState<(typeof DEFAULT_ICONS)[number] | null>(null);
+  const [notEnoughPointIcon, setNotEnoughPointIcon] =
+    useState<(typeof DEFAULT_ICONS)[number] | null>(null);
 
   type OwnedTitle = { game: string; title: string; unlocked_at: string };
   const [ownedTitles, setOwnedTitles] = useState<OwnedTitle[]>([]);
@@ -89,7 +104,7 @@ export default function ProfileEditPage() {
     const fetchProfile = async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("username, user_id, recovery_email, avatar_character_id, avatar_url, current_title, current_skin_id")
+        .select("username, user_id, recovery_email, avatar_character_id, avatar_url, current_title, current_skin_id, points")
         .eq("id", user.id)
         .single();
 
@@ -100,6 +115,7 @@ export default function ProfileEditPage() {
         setRecoveryEmail(data.recovery_email ?? "");
         setCurrentTitle(data.current_title ?? "");
         setCurrentSkinId(data.current_skin_id ?? null);
+        setPoints(data.points ?? 0);
 
         const savedUrl = (data.avatar_url ?? "/images/初期アイコン.png").startsWith("/")
           ? (data.avatar_url ?? "/images/初期アイコン.png")
@@ -214,10 +230,101 @@ export default function ProfileEditPage() {
       setOwnedSkins((skins ?? []) as OwnedSkin[]);
     };
 
+    const fetchOwnedDefaultIcons = async () => {
+      const { data, error } = await supabase
+        .from("user_default_icons")
+        .select("icon_id")
+        .eq("user_id", user.id);
+
+      if (error) {
+        console.warn("fetchOwnedDefaultIcons error:", error);
+        setOwnedDefaultIconIds([]);
+        return;
+      }
+
+      setOwnedDefaultIconIds(
+        ((data ?? [])
+          .map((r) => r.icon_id)
+          .filter(Boolean)) as DefaultIconId[]
+      );
+    };
+
     fetchOwned();
     fetchTitles();
     fetchOwnedSkins();
+    fetchOwnedDefaultIcons();
   }, [user, userLoading, supabase]);
+
+  const handleDefaultIconClick = async (icon: (typeof DEFAULT_ICONS)[number]) => {
+    const isFree = FREE_DEFAULT_ICON_IDS.includes(icon.id);
+    const isOwned = ownedDefaultIconIds.includes(icon.id);
+
+    if (isFree || isOwned) {
+      setAvatarType("default");
+      setAvatarDefaultId(icon.id);
+      setAvatarCharacterId(null);
+      return;
+    }
+
+    if (points < DEFAULT_ICON_PRICE) {
+      setError(null);
+      setNotEnoughPointIcon(icon);
+      return;
+    }
+
+    setUnlockTargetIcon(icon);
+  };
+
+  const handleUnlockDefaultIcon = async () => {
+    if (!unlockTargetIcon) return;
+
+    const icon = unlockTargetIcon;
+
+    if (points < DEFAULT_ICON_PRICE) {
+      setError(null);
+      setNotEnoughPointIcon(icon);
+      return;
+    }
+
+    setBuyingIconId(icon.id);
+    setError(null);
+
+    const { data, error } = await supabase.rpc("purchase_default_icon", {
+      p_icon_id: icon.id,
+    });
+
+    setBuyingIconId(null);
+
+    if (error) {
+      console.error("purchase_default_icon error:", error);
+      setError(error.message ?? "アイコンの解放に失敗しました。");
+      return;
+    }
+
+    setOwnedDefaultIconIds((prev) =>
+      prev.includes(icon.id) ? prev : [...prev, icon.id]
+    );
+
+    const result = data as {
+      remaining_points?: number;
+    } | null;
+
+    const remainingPoints = result?.remaining_points;
+
+    if (typeof remainingPoints === "number") {
+      setPoints(remainingPoints);
+    } else {
+      setPoints((prev) => Math.max(0, prev - DEFAULT_ICON_PRICE));
+    }
+
+    setAvatarType("default");
+    setAvatarDefaultId(icon.id);
+    setAvatarCharacterId(null);
+
+    setUnlockTargetIcon(null);
+
+    window.dispatchEvent(new Event("points:updated"));
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -544,8 +651,11 @@ export default function ProfileEditPage() {
             <div className="mb-5">
               <div className="mb-2 flex items-center justify-between">
                 <p className="text-sm font-black text-gray-700">
-                  最初から選べるアイコン
+                  ベーシックアイコン
                 </p>
+                <span className="rounded-full bg-yellow-50 px-3 py-1 text-xs font-black text-yellow-600">
+                  所持 {points}P
+                </span>
                 <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-500">
                   {DEFAULT_ICONS.length}種類
                 </span>
@@ -554,33 +664,61 @@ export default function ProfileEditPage() {
               <div className="grid grid-cols-3 gap-3 md:grid-cols-4">
                 {DEFAULT_ICONS.map((ic) => {
                   const selected = avatarType === "default" && avatarDefaultId === ic.id;
+                  const isFree = FREE_DEFAULT_ICON_IDS.includes(ic.id);
+                  const isOwned = ownedDefaultIconIds.includes(ic.id);
+                  const canUse = isFree || isOwned;
+                  const isBuying = buyingIconId === ic.id;
 
                   return (
                     <button
                       key={ic.id}
                       type="button"
-                      onClick={() => {
-                        setAvatarType("default");
-                        setAvatarDefaultId(ic.id);
-                        setAvatarCharacterId(null);
-                      }}
-                      className={`group rounded-3xl border-2 bg-white p-2 shadow-sm transition active:scale-95 ${
+                      disabled={isBuying}
+                      onClick={() => handleDefaultIconClick(ic)}
+                      className={`group relative rounded-3xl border-2 bg-white p-2 shadow-sm transition active:scale-95 disabled:opacity-60 ${
                         selected
                           ? "border-blue-500 ring-4 ring-blue-100"
-                          : "border-gray-100 hover:border-blue-200 hover:bg-blue-50"
+                          : canUse
+                            ? "border-gray-100 hover:border-blue-200 hover:bg-blue-50"
+                            : "border-yellow-200 hover:border-yellow-400 hover:bg-yellow-50"
                       }`}
                       title={ic.name}
                     >
-                      <div className="rounded-2xl bg-gray-50 p-2">
+                      {!canUse && (
+                        <div className="absolute right-1 top-1 rounded-full bg-yellow-400 px-2 py-1 text-[10px] font-black text-black shadow-sm">
+                          ✨ {DEFAULT_ICON_PRICE}P
+                        </div>
+                      )}
+
+                      {canUse && !isFree && (
+                        <div className="absolute right-1 top-1 rounded-full bg-green-100 px-2 py-1 text-[10px] font-black text-green-600">
+                          所持
+                        </div>
+                      )}
+
+                      {isFree && (
+                        <div className="absolute right-1 top-1 rounded-full bg-blue-100 px-2 py-1 text-[10px] font-black text-blue-600">
+                          無料
+                        </div>
+                      )}
+
+                      <div className={`rounded-2xl bg-gray-50 p-2 ${!canUse ? "opacity-70" : ""}`}>
                         <img
                           src={ic.url}
                           alt={ic.name}
                           className="aspect-square w-full object-contain transition group-hover:scale-105"
                         />
                       </div>
+
                       <p className="mt-2 truncate text-xs font-black text-gray-700">
                         {ic.name}
                       </p>
+
+                      {!canUse && (
+                        <p className="mt-1 text-[10px] font-black text-yellow-600">
+                          {isBuying ? "解放中..." : "500Pで解放"}
+                        </p>
+                      )}
                     </button>
                   );
                 })}
@@ -768,6 +906,123 @@ export default function ProfileEditPage() {
             {saving ? "保存中..." : "保存する"}
           </button>
         </form>
+        {unlockTargetIcon && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+            <div className="w-full max-w-sm rounded-[2rem] border-4 border-black bg-white p-5 text-center shadow-[0_8px_0_rgba(0,0,0,1)]">
+              <p className="text-xs font-black text-yellow-500">
+                ICON UNLOCK
+              </p>
+
+              <h2 className="mt-1 text-xl font-black text-gray-900">
+                アイコンを解放する？
+              </h2>
+
+              <div className="mx-auto mt-4 flex h-32 w-32 items-center justify-center rounded-full border-4 border-yellow-300 bg-yellow-50 p-4 shadow-inner">
+                <img
+                  src={unlockTargetIcon.url}
+                  alt={unlockTargetIcon.name}
+                  className="h-full w-full object-contain"
+                />
+              </div>
+
+              <p className="mt-3 text-lg font-black text-gray-900">
+                {unlockTargetIcon.name}
+              </p>
+
+              <div className="mt-4 rounded-3xl bg-yellow-50 p-4">
+                <p className="text-sm font-black text-gray-700">
+                  {DEFAULT_ICON_PRICE}Pを使って、このアイコンを解放します。
+                </p>
+                <p className="mt-1 text-xs font-bold text-gray-500">
+                  解放後はいつでもプロフィールアイコンに設定できます。
+                </p>
+              </div>
+
+              <div className="mt-3 flex items-center justify-center gap-2 text-sm font-black">
+                <span className="rounded-full bg-gray-100 px-3 py-1 text-gray-700">
+                  所持 {points}P
+                </span>
+                <span className="text-gray-400">→</span>
+                <span className="rounded-full bg-yellow-100 px-3 py-1 text-yellow-700">
+                  残り {Math.max(0, points - DEFAULT_ICON_PRICE)}P
+                </span>
+              </div>
+
+              <div className="mt-5 grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setUnlockTargetIcon(null)}
+                  disabled={buyingIconId === unlockTargetIcon.id}
+                  className="rounded-2xl bg-gray-100 px-4 py-3 text-sm font-black text-gray-700 transition active:scale-95 disabled:opacity-60"
+                >
+                  やめる
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleUnlockDefaultIcon}
+                  disabled={buyingIconId === unlockTargetIcon.id}
+                  className="rounded-2xl border-2 border-black bg-gradient-to-r from-yellow-300 to-orange-400 px-4 py-3 text-sm font-black text-black shadow-[0_4px_0_rgba(0,0,0,1)] transition active:translate-y-[2px] active:shadow-[0_2px_0_rgba(0,0,0,1)] disabled:opacity-60"
+                >
+                  {buyingIconId === unlockTargetIcon.id
+                    ? "解放中..."
+                    : `${DEFAULT_ICON_PRICE}Pで解放`}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {notEnoughPointIcon && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+            <div className="w-full max-w-sm rounded-[2rem] border-4 border-black bg-white p-5 text-center shadow-[0_8px_0_rgba(0,0,0,1)]">
+              <p className="text-xs font-black text-red-500">
+                POINT SHORTAGE
+              </p>
+
+              <h2 className="mt-1 text-xl font-black text-gray-900">
+                ポイントが足りません
+              </h2>
+
+              <div className="mx-auto mt-4 flex h-28 w-28 items-center justify-center rounded-full border-4 border-red-200 bg-red-50 p-4">
+                <img
+                  src={notEnoughPointIcon.url}
+                  alt={notEnoughPointIcon.name}
+                  className="h-full w-full object-contain opacity-70"
+                />
+              </div>
+
+              <p className="mt-3 text-lg font-black text-gray-900">
+                {notEnoughPointIcon.name}
+              </p>
+
+              <div className="mt-4 rounded-3xl bg-red-50 p-4">
+                <p className="text-sm font-black text-gray-700">
+                  このアイコンの解放には {DEFAULT_ICON_PRICE}P 必要です。
+                </p>
+                <p className="mt-1 text-xs font-bold text-gray-500">
+                  今の所持ポイントは {points}P です。
+                </p>
+              </div>
+
+              <div className="mt-3 rounded-3xl bg-yellow-50 p-4">
+                <p className="text-sm font-black text-yellow-700">
+                  あと {Math.max(0, DEFAULT_ICON_PRICE - points)}P で解放できます！
+                </p>
+                <p className="mt-1 text-xs font-bold text-gray-500">
+                  クイズやゲームでポイントをためてから、もう一度試してください。
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setNotEnoughPointIcon(null)}
+                className="mt-5 w-full rounded-2xl border-2 border-black bg-gradient-to-r from-red-300 to-yellow-300 px-4 py-3 text-sm font-black text-black shadow-[0_4px_0_rgba(0,0,0,1)] transition active:translate-y-[2px] active:shadow-[0_2px_0_rgba(0,0,0,1)]"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );
