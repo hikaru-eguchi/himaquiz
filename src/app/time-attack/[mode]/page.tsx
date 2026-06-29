@@ -203,9 +203,9 @@ const QuizResult = ({
             )}
           </p>
 
-          <p className="mt-4 text-base md:text-xl font-bold text-gray-700">
+          {/* <p className="mt-4 text-base md:text-xl font-bold text-gray-700">
             正解数：{correctCount}問
-          </p>
+          </p> */}
         </div>
       )}
 

@@ -630,6 +630,9 @@ export default function QuizModePage() {
   const [repChoice, setRepChoice] = useState<MindChoice | null>(null);
   const [guessChoice, setGuessChoice] = useState<MindChoice | null>(null);
 
+  const guessChoiceRef = useRef<MindChoice | null>(null);
+  const countedRoundKeysRef = useRef<Set<string>>(new Set());
+
   const [scores, setScores] = useState<Record<string, number>>({});
   const [displayScores, setDisplayScores] = useState<Record<string, number>>({});
 
@@ -1100,6 +1103,8 @@ export default function QuizModePage() {
     sentRef.current = false;
     clearPendingAward();
     resetMindState();
+    guessChoiceRef.current = null;
+    countedRoundKeysRef.current.clear();
   };
 
   const handleNewMatch = () => {
@@ -1134,6 +1139,8 @@ export default function QuizModePage() {
     sentRef.current = false;
     clearPendingAward();
     resetMindState();
+    guessChoiceRef.current = null;
+    countedRoundKeysRef.current.clear();
 
     setReadyToStart(false);
 
@@ -1188,6 +1195,7 @@ export default function QuizModePage() {
 
       setRepChoice(null);
       setGuessChoice(null);
+      guessChoiceRef.current = null;
 
       setMindPhase("repIntro");
 
@@ -1437,6 +1445,8 @@ export default function QuizModePage() {
       setMindPhase("guess");
       setMindRepId(repId);
       setGuessChoice(null);
+      setGuessUserAnswer(null);
+      guessChoiceRef.current = null;
 
       setShowGuessStartModal(true);
 
@@ -1460,9 +1470,20 @@ export default function QuizModePage() {
       // =====================
       // ✅ 自分が正解したか判定
       // =====================
-      const myGuess = guesses?.[mySocketId];
+      // const myGuess = guesses?.[mySocketId];
 
-      if (myGuess && myGuess === repAnswer) {
+      // if (myGuess && myGuess === repAnswer) {
+      //   setCorrectCount(prev => prev + 1);
+      // }
+      const myGuess = guessChoiceRef.current;
+      const roundKey = `${roundIndex}-${repId}`;
+
+      if (
+        myGuess &&
+        myGuess === repAnswer &&
+        !countedRoundKeysRef.current.has(roundKey)
+      ) {
+        countedRoundKeysRef.current.add(roundKey);
         setCorrectCount(prev => prev + 1);
       }
 
@@ -2627,6 +2648,7 @@ export default function QuizModePage() {
 
                     const choice = (["A", "B", "C"] as const)[safeIdx];
                     setGuessChoice(choice);
+                    guessChoiceRef.current = choice;
                     socket?.emit("mind_guess_answer", { roomCode, choice });
 
                     // 送ったら待機フェーズへ
