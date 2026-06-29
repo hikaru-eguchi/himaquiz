@@ -16,6 +16,7 @@ import { openXShare, buildTopUrl } from "@/lib/shareX";
 import type { Rarity } from "@/types/gacha";
 import confetti from "canvas-confetti";
 import RecommendedSoloGames from "@/app/components/RecommendedSoloGames";
+import HimamonZukanCountCard from "@/app/components/HimamonZukanCountCard";
 
 const fireConfetti = () => {
   // 低負荷設定：粒数少なめ・短時間・一回だけ
@@ -77,102 +78,167 @@ type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
 
 // =====================
 
+const KIMAGURE_NO_START = 107;
+const KIMAGURE_NO_END = 186;
+const KIMAGURE_TOTAL = 80;
+
+type HimamonRarity = "激レア" | "超激レア" | "神レア" | "シークレット";
+
+type Enemy = {
+  no: string;
+  name: string;
+  image: string;
+  description: string;
+  rarity: HimamonRarity;
+};
+
+const RARITY_WEIGHTS: Record<HimamonRarity, number> = {
+  激レア: 40,
+  超激レア: 30,
+  神レア: 20,
+  シークレット: 10,
+};
+
+const RARITY_TO_QUIZ_LEVEL: Record<HimamonRarity, string> = {
+  激レア: "かんたん",
+  超激レア: "ふつう",
+  神レア: "難しい",
+  シークレット: "激ムズ",
+};
+
+const rarityStars: Record<HimamonRarity, string> = {
+  激レア: "★☆☆☆",
+  超激レア: "★★☆☆",
+  神レア: "★★★☆",
+  シークレット: "★★★★",
+};
+
+const rarityColors: Record<HimamonRarity, string> = {
+  激レア: "text-green-500",
+  超激レア: "text-blue-500",
+  神レア: "text-purple-500",
+  シークレット: "text-yellow-500",
+};
+
 // 敵情報
-const enemies = [
-  { no: "107", name: "ひまもん【いぬ】", image: "/images/きまぐれモンスター【いぬ】.png", description: "犬の姿をした気まぐれなモンスター。しっぽを振っているが、誰に向けているのかは不明。たまに走り回るが、戦う気はない。" },
-  { no: "108", name: "ひまもん【ねこ】", image: "/images/きまぐれモンスター【ねこ】.png", description: "猫の姿をした気まぐれなモンスター。気が向いたときだけ近づいてくるが、すぐにどこかへ行ってしまう。攻撃はしない。" },
-  { no: "109", name: "ひまもん【うし】", image: "/images/きまぐれモンスター【うし】.png", description: "牛の姿をした気まぐれなモンスター。のんびり草を眺めているだけで、特に何もしない。争いには興味がない。" },
-  { no: "110", name: "ひまもん【うま】", image: "/images/きまぐれモンスター【うま】.png", description: "馬の姿をした気まぐれなモンスター。遠くを見つめながらゆっくり歩いているが、目的地はない。戦うことはない。" },
-  { no: "111", name: "ひまもん【うさぎ】", image: "/images/きまぐれモンスター【うさぎ】.png", description: "うさぎの姿をした気まぐれなモンスター。ぴょんぴょん跳ねているが、本人は眠そう。戦いには興味がない。" },
-  { no: "112", name: "ひまもん【くま】", image: "/images/きまぐれモンスター【くま】.png", description: "くまの姿をした気まぐれなモンスター。強そうに見えるが、実際はぼーっとしているだけ。攻撃はしない。" },
-  { no: "113", name: "ひまもん【とら】", image: "/images/きまぐれモンスター【とら】.png", description: "虎の姿をした気まぐれなモンスター。鋭い目をしているが、実は何も考えていない。戦う気はない。" },
-  { no: "114", name: "ひまもん【ライオン】", image: "/images/きまぐれモンスター【ライオン】.png", description: "ライオンの姿をした気まぐれなモンスター。王者の風格を漂わせるが、ただ昼寝しているだけ。攻撃はしない。" },
-  { no: "115", name: "ひまもん【オオカミ】", image: "/images/きまぐれモンスター【オオカミ】.png", description: "オオカミの姿をした気まぐれなモンスター。遠吠えをすることもあるが、意味はない。戦いには興味がない。" },
-  { no: "116", name: "ひまもん【たつ】", image: "/images/きまぐれモンスター【たつ】.png", description: "竜の姿をした気まぐれなモンスター。伝説級の雰囲気を持つが、本人はただ浮かんでいるだけ。攻撃はしない。" },
-  { no: "117", name: "ひまもん【ペンギン】", image: "/images/きまぐれモンスター【ペンギン】.png", description: "ペンギンの姿をした気まぐれなモンスター。氷の上を歩いているが、どこへ行くかは不明。戦う気はない。" },
-  { no: "118", name: "ひまもん【アザラシ】", image: "/images/きまぐれモンスター【アザラシ】.png", description: "アザラシの姿をした気まぐれなモンスター。ごろごろ転がっているだけで、特に何もしない。攻撃はしない。" },
-  { no: "119", name: "ひまもん【イルカ】", image: "/images/きまぐれモンスター【イルカ】.png", description: "イルカの姿をした気まぐれなモンスター。楽しそうに跳ねているが、本人は深く考えていない。戦う気はない。" },
-  { no: "120", name: "ひまもん【サメ】", image: "/images/きまぐれモンスター【サメ】.png", description: "サメの姿をした気まぐれなモンスター。危険そうに見えるが、実はのんびり屋。攻撃はしない。" },
-  { no: "121", name: "ひまもん【カジキ】", image: "/images/きまぐれモンスター【カジキ】.png", description: "カジキの姿をした気まぐれなモンスター。高速で泳いでいるが、どこへ行くかは気分次第。戦わない。" },
+// const enemies = [
+const enemies: Enemy[] = [
+  { no: "107", rarity: "激レア", name: "ひまもん【いぬ】", image: "/images/きまぐれモンスター【いぬ】.png", description: "犬の姿をした気まぐれなモンスター。しっぽを振っているが、誰に向けているのかは不明。たまに走り回るが、戦う気はない。" },
+  { no: "108", rarity: "激レア", name: "ひまもん【ねこ】", image: "/images/きまぐれモンスター【ねこ】.png", description: "猫の姿をした気まぐれなモンスター。気が向いたときだけ近づいてくるが、すぐにどこかへ行ってしまう。攻撃はしない。" },
+  { no: "109", rarity: "激レア", name: "ひまもん【うし】", image: "/images/きまぐれモンスター【うし】.png", description: "牛の姿をした気まぐれなモンスター。のんびり草を眺めているだけで、特に何もしない。争いには興味がない。" },
+  { no: "110", rarity: "激レア", name: "ひまもん【うま】", image: "/images/きまぐれモンスター【うま】.png", description: "馬の姿をした気まぐれなモンスター。遠くを見つめながらゆっくり歩いているが、目的地はない。戦うことはない。" },
+  { no: "111", rarity: "激レア", name: "ひまもん【うさぎ】", image: "/images/きまぐれモンスター【うさぎ】.png", description: "うさぎの姿をした気まぐれなモンスター。ぴょんぴょん跳ねているが、本人は眠そう。戦いには興味がない。" },
+  { no: "112", rarity: "激レア", name: "ひまもん【くま】", image: "/images/きまぐれモンスター【くま】.png", description: "くまの姿をした気まぐれなモンスター。強そうに見えるが、実際はぼーっとしているだけ。攻撃はしない。" },
+  { no: "113", rarity: "激レア", name: "ひまもん【とら】", image: "/images/きまぐれモンスター【とら】.png", description: "虎の姿をした気まぐれなモンスター。鋭い目をしているが、実は何も考えていない。戦う気はない。" },
+  { no: "114", rarity: "激レア", name: "ひまもん【ライオン】", image: "/images/きまぐれモンスター【ライオン】.png", description: "ライオンの姿をした気まぐれなモンスター。王者の風格を漂わせるが、ただ昼寝しているだけ。攻撃はしない。" },
+  { no: "115", rarity: "激レア", name: "ひまもん【オオカミ】", image: "/images/きまぐれモンスター【オオカミ】.png", description: "オオカミの姿をした気まぐれなモンスター。遠吠えをすることもあるが、意味はない。戦いには興味がない。" },
+  { no: "116", rarity: "激レア", name: "ひまもん【たつ】", image: "/images/きまぐれモンスター【たつ】.png", description: "竜の姿をした気まぐれなモンスター。伝説級の雰囲気を持つが、本人はただ浮かんでいるだけ。攻撃はしない。" },
+  { no: "117", rarity: "激レア", name: "ひまもん【ペンギン】", image: "/images/きまぐれモンスター【ペンギン】.png", description: "ペンギンの姿をした気まぐれなモンスター。氷の上を歩いているが、どこへ行くかは不明。戦う気はない。" },
+  { no: "118", rarity: "激レア", name: "ひまもん【アザラシ】", image: "/images/きまぐれモンスター【アザラシ】.png", description: "アザラシの姿をした気まぐれなモンスター。ごろごろ転がっているだけで、特に何もしない。攻撃はしない。" },
+  { no: "119", rarity: "激レア", name: "ひまもん【イルカ】", image: "/images/きまぐれモンスター【イルカ】.png", description: "イルカの姿をした気まぐれなモンスター。楽しそうに跳ねているが、本人は深く考えていない。戦う気はない。" },
+  { no: "120", rarity: "激レア", name: "ひまもん【サメ】", image: "/images/きまぐれモンスター【サメ】.png", description: "サメの姿をした気まぐれなモンスター。危険そうに見えるが、実はのんびり屋。攻撃はしない。" },
+  { no: "121", rarity: "激レア", name: "ひまもん【カジキ】", image: "/images/きまぐれモンスター【カジキ】.png", description: "カジキの姿をした気まぐれなモンスター。高速で泳いでいるが、どこへ行くかは気分次第。戦わない。" },
 
-  { no: "122", name: "ひまもん【おにぎり】", image: "/images/きまぐれモンスター【おにぎり】.png", description: "おにぎりの姿をした気まぐれなモンスター。おいしそうに見えるが、自分では食べない。攻撃はしない。" },
-  { no: "123", name: "ひまもん【寿司】", image: "/images/きまぐれモンスター【寿司】.png", description: "寿司の姿をした気まぐれなモンスター。輝くネタを持つが、本人は無関心。戦う気はない。" },
-  { no: "124", name: "ひまもん【ラーメン】", image: "/images/きまぐれモンスター【ラーメン】.png", description: "ラーメンの姿をした気まぐれなモンスター。湯気を出しているが、ただぼーっとしているだけ。攻撃はしない。" },
-  { no: "125", name: "ひまもん【ハンバーガー】", image: "/images/きまぐれモンスター【ハンバーガー】.png", description: "ハンバーガーの姿をした気まぐれなモンスター。豪華に見えるが、本人は眠そう。戦いには興味がない。" },
-  { no: "126", name: "ひまもん【カレーライス】", image: "/images/きまぐれモンスター【カレーライス】.png", description: "カレーライスの姿をした気まぐれなモンスター。スパイスの香りを漂わせるが、本人は何もしない。攻撃はしない。" },
-  { no: "127", name: "ひまもん【フライドチキン】", image: "/images/きまぐれモンスター【フライドチキン】.png", description: "フライドチキンの姿をした気まぐれなモンスター。香ばしい見た目だが、本人は無気力。戦う気はない。" },
-  { no: "128", name: "ひまもん【ピザ】", image: "/images/きまぐれモンスター【ピザ】.png", description: "ピザの姿をした気まぐれなモンスター。色とりどりの具材を持つが、特に意味はない。攻撃はしない。" },
-  { no: "129", name: "ひまもん【たこ焼き】", image: "/images/きまぐれモンスター【たこ焼き】.png", description: "たこ焼きの姿をした気まぐれなモンスター。ころころ転がっているが、目的はない。戦う気はない。" },
-  { no: "130", name: "ひまもん【たい焼き】", image: "/images/きまぐれモンスター【たい焼き】.png", description: "たい焼きの姿をした気まぐれなモンスター。甘い香りを漂わせるが、本人は無関心。攻撃はしない。" },
-  { no: "131", name: "ひまもん【メロンパン】", image: "/images/きまぐれモンスター【メロンパン】.png", description: "メロンパンの姿をした気まぐれなモンスター。ふわふわ浮かんでいるが、特に何もしない。戦わない。" },
-  { no: "132", name: "ひまもん【パンケーキ】", image: "/images/きまぐれモンスター【パンケーキ】.png", description: "パンケーキの姿をした気まぐれなモンスター。甘い雰囲気をまとっているが、本人はぼーっとしているだけ。" },
-  { no: "133", name: "ひまもん【ショートケーキ】", image: "/images/きまぐれモンスター【ショートケーキ】.png", description: "ショートケーキの姿をした気まぐれなモンスター。華やかに見えるが、本人はやる気ゼロ。攻撃はしない。" },
-  { no: "134", name: "ひまもん【ドーナツ】", image: "/images/きまぐれモンスター【ドーナツ】.png", description: "ドーナツの姿をした気まぐれなモンスター。くるくる回っているが、意味はない。戦う気はない。" },
-  { no: "135", name: "ひまもん【マカロン】", image: "/images/きまぐれモンスター【マカロン】.png", description: "マカロンの姿をした気まぐれなモンスター。カラフルだが、本人は無気力。攻撃はしない。" },
-  { no: "136", name: "ひまもん【パフェ】", image: "/images/きまぐれモンスター【パフェ】.png", description: "パフェの姿をした気まぐれなモンスター。豪華に見えるが、本人はただ立っているだけ。戦う気はない。" },
+  { no: "122", rarity: "超激レア", name: "ひまもん【おにぎり】", image: "/images/きまぐれモンスター【おにぎり】.png", description: "おにぎりの姿をした気まぐれなモンスター。おいしそうに見えるが、自分では食べない。攻撃はしない。" },
+  { no: "123", rarity: "超激レア", name: "ひまもん【寿司】", image: "/images/きまぐれモンスター【寿司】.png", description: "寿司の姿をした気まぐれなモンスター。輝くネタを持つが、本人は無関心。戦う気はない。" },
+  { no: "124", rarity: "超激レア", name: "ひまもん【ラーメン】", image: "/images/きまぐれモンスター【ラーメン】.png", description: "ラーメンの姿をした気まぐれなモンスター。湯気を出しているが、ただぼーっとしているだけ。攻撃はしない。" },
+  { no: "125", rarity: "超激レア", name: "ひまもん【ハンバーガー】", image: "/images/きまぐれモンスター【ハンバーガー】.png", description: "ハンバーガーの姿をした気まぐれなモンスター。豪華に見えるが、本人は眠そう。戦いには興味がない。" },
+  { no: "126", rarity: "超激レア", name: "ひまもん【カレーライス】", image: "/images/きまぐれモンスター【カレーライス】.png", description: "カレーライスの姿をした気まぐれなモンスター。スパイスの香りを漂わせるが、本人は何もしない。攻撃はしない。" },
+  { no: "127", rarity: "超激レア", name: "ひまもん【フライドチキン】", image: "/images/きまぐれモンスター【フライドチキン】.png", description: "フライドチキンの姿をした気まぐれなモンスター。香ばしい見た目だが、本人は無気力。戦う気はない。" },
+  { no: "128", rarity: "超激レア", name: "ひまもん【ピザ】", image: "/images/きまぐれモンスター【ピザ】.png", description: "ピザの姿をした気まぐれなモンスター。色とりどりの具材を持つが、特に意味はない。攻撃はしない。" },
+  { no: "129", rarity: "超激レア", name: "ひまもん【たこ焼き】", image: "/images/きまぐれモンスター【たこ焼き】.png", description: "たこ焼きの姿をした気まぐれなモンスター。ころころ転がっているが、目的はない。戦う気はない。" },
+  { no: "130", rarity: "超激レア", name: "ひまもん【たい焼き】", image: "/images/きまぐれモンスター【たい焼き】.png", description: "たい焼きの姿をした気まぐれなモンスター。甘い香りを漂わせるが、本人は無関心。攻撃はしない。" },
+  { no: "131", rarity: "超激レア", name: "ひまもん【メロンパン】", image: "/images/きまぐれモンスター【メロンパン】.png", description: "メロンパンの姿をした気まぐれなモンスター。ふわふわ浮かんでいるが、特に何もしない。戦わない。" },
+  { no: "132", rarity: "超激レア", name: "ひまもん【パンケーキ】", image: "/images/きまぐれモンスター【パンケーキ】.png", description: "パンケーキの姿をした気まぐれなモンスター。甘い雰囲気をまとっているが、本人はぼーっとしているだけ。" },
+  { no: "133", rarity: "超激レア", name: "ひまもん【ショートケーキ】", image: "/images/きまぐれモンスター【ショートケーキ】.png", description: "ショートケーキの姿をした気まぐれなモンスター。華やかに見えるが、本人はやる気ゼロ。攻撃はしない。" },
+  { no: "134", rarity: "超激レア", name: "ひまもん【ドーナツ】", image: "/images/きまぐれモンスター【ドーナツ】.png", description: "ドーナツの姿をした気まぐれなモンスター。くるくる回っているが、意味はない。戦う気はない。" },
+  { no: "135", rarity: "超激レア", name: "ひまもん【マカロン】", image: "/images/きまぐれモンスター【マカロン】.png", description: "マカロンの姿をした気まぐれなモンスター。カラフルだが、本人は無気力。攻撃はしない。" },
+  { no: "136", rarity: "超激レア", name: "ひまもん【パフェ】", image: "/images/きまぐれモンスター【パフェ】.png", description: "パフェの姿をした気まぐれなモンスター。豪華に見えるが、本人はただ立っているだけ。戦う気はない。" },
 
-  { no: "137", name: "ひまもん【探偵】", image: "/images/きまぐれモンスター【探偵】.png", description: "探偵の姿をした気まぐれなモンスター。難事件を解けそうな雰囲気だが、実際は昼寝しているだけ。推理も戦いもしない。" },
-  { no: "138", name: "ひまもん【画家】", image: "/images/きまぐれモンスター【画家】.png", description: "画家の姿をした気まぐれなモンスター。名画を描けそうに見えるが、キャンバスを眺めているだけ。戦う気はない。" },
-  { no: "139", name: "ひまもん【ミュージシャン】", image: "/images/きまぐれモンスター【ミュージシャン】.png", description: "ミュージシャンの姿をした気まぐれなモンスター。世界を震わせる音を出しそうだが、実際は適当に音を鳴らしているだけ。攻撃はしない。" },
-  { no: "140", name: "ひまもん【宇宙飛行士】", image: "/images/きまぐれモンスター【宇宙飛行士】.png", description: "宇宙飛行士の姿をした気まぐれなモンスター。宇宙の謎を知っていそうだが、ただ漂っているだけ。戦う気はない。" },
-  { no: "141", name: "ひまもん【ハッカー】", image: "/images/きまぐれモンスター【ハッカー】.png", description: "ハッカーの姿をした気まぐれなモンスター。世界を操れそうな雰囲気だが、実際は画面を眺めているだけ。攻撃はしない。" },
-  { no: "142", name: "ひまもん【魔法使い】", image: "/images/きまぐれモンスター【魔法使い】.png", description: "魔法使いの姿をした気まぐれなモンスター。強力な魔法を使えそうだが、杖を持っているだけ。戦う気はない。" },
-  { no: "143", name: "ひまもん【忍者】", image: "/images/きまぐれモンスター【忍者】.png", description: "忍者の姿をした気まぐれなモンスター。影に溶け込んでいるが、特に何もしていない。攻撃はしない。" },
-  { no: "144", name: "ひまもん【戦国武将】", image: "/images/きまぐれモンスター【戦国武将】.png", description: "戦国武将の姿をした気まぐれなモンスター。天下を取れそうな風格だが、ただ座っているだけ。戦う気はない。" },
-  { no: "145", name: "ひまもん【海賊】", image: "/images/きまぐれモンスター【海賊】.png", description: "海賊の姿をした気まぐれなモンスター。宝を探していそうだが、実際は波を眺めているだけ。攻撃はしない。" },
-  { no: "146", name: "ひまもん【怪獣】", image: "/images/きまぐれモンスター【怪獣】.png", description: "怪獣の姿をした気まぐれなモンスター。都市を破壊できそうだが、ただ立っているだけ。戦う気はない。" },
-  { no: "147", name: "ひまもん【おばけ】", image: "/images/きまぐれモンスター【おばけ】.png", description: "おばけの姿をした気まぐれなモンスター。人を驚かせそうだが、本人は眠そう。攻撃はしない。" },
-  { no: "148", name: "ひまもん【ロボット】", image: "/images/きまぐれモンスター【ロボット】.png", description: "ロボットの姿をした気まぐれなモンスター。高性能に見えるが、ほとんど動かない。戦う気はない。" },
-  { no: "149", name: "ひまもん【フライドポテト】", image: "/images/きまぐれモンスター【フライドポテト】.png", description: "フライドポテトの姿をした気まぐれなモンスター。山盛りで豪華に見えるが、本人は無気力。攻撃はしない。" },
-  { no: "150", name: "ひまもん【プリンス】", image: "/images/きまぐれモンスター【プリンス】.png", description: "王子の姿をした気まぐれなモンスター。物語の主役のようだが、実際はぼーっとしているだけ。戦う気はない。" },
-  { no: "151", name: "ひまもん【プリンセス】", image: "/images/きまぐれモンスター【プリンセス】.png", description: "姫の姿をした気まぐれなモンスター。華やかに見えるが、本人は何も考えていない。攻撃はしない。" },
+  { no: "137", rarity: "神レア", name: "ひまもん【探偵】", image: "/images/きまぐれモンスター【探偵】.png", description: "探偵の姿をした気まぐれなモンスター。難事件を解けそうな雰囲気だが、実際は昼寝しているだけ。推理も戦いもしない。" },
+  { no: "138", rarity: "神レア", name: "ひまもん【画家】", image: "/images/きまぐれモンスター【画家】.png", description: "画家の姿をした気まぐれなモンスター。名画を描けそうに見えるが、キャンバスを眺めているだけ。戦う気はない。" },
+  { no: "139", rarity: "神レア", name: "ひまもん【ミュージシャン】", image: "/images/きまぐれモンスター【ミュージシャン】.png", description: "ミュージシャンの姿をした気まぐれなモンスター。世界を震わせる音を出しそうだが、実際は適当に音を鳴らしているだけ。攻撃はしない。" },
+  { no: "140", rarity: "神レア", name: "ひまもん【宇宙飛行士】", image: "/images/きまぐれモンスター【宇宙飛行士】.png", description: "宇宙飛行士の姿をした気まぐれなモンスター。宇宙の謎を知っていそうだが、ただ漂っているだけ。戦う気はない。" },
+  { no: "141", rarity: "神レア", name: "ひまもん【ハッカー】", image: "/images/きまぐれモンスター【ハッカー】.png", description: "ハッカーの姿をした気まぐれなモンスター。世界を操れそうな雰囲気だが、実際は画面を眺めているだけ。攻撃はしない。" },
+  { no: "142", rarity: "神レア", name: "ひまもん【魔法使い】", image: "/images/きまぐれモンスター【魔法使い】.png", description: "魔法使いの姿をした気まぐれなモンスター。強力な魔法を使えそうだが、杖を持っているだけ。戦う気はない。" },
+  { no: "143", rarity: "神レア", name: "ひまもん【忍者】", image: "/images/きまぐれモンスター【忍者】.png", description: "忍者の姿をした気まぐれなモンスター。影に溶け込んでいるが、特に何もしていない。攻撃はしない。" },
+  { no: "144", rarity: "神レア", name: "ひまもん【戦国武将】", image: "/images/きまぐれモンスター【戦国武将】.png", description: "戦国武将の姿をした気まぐれなモンスター。天下を取れそうな風格だが、ただ座っているだけ。戦う気はない。" },
+  { no: "145", rarity: "神レア", name: "ひまもん【海賊】", image: "/images/きまぐれモンスター【海賊】.png", description: "海賊の姿をした気まぐれなモンスター。宝を探していそうだが、実際は波を眺めているだけ。攻撃はしない。" },
+  { no: "146", rarity: "神レア", name: "ひまもん【怪獣】", image: "/images/きまぐれモンスター【怪獣】.png", description: "怪獣の姿をした気まぐれなモンスター。都市を破壊できそうだが、ただ立っているだけ。戦う気はない。" },
+  { no: "147", rarity: "神レア", name: "ひまもん【おばけ】", image: "/images/きまぐれモンスター【おばけ】.png", description: "おばけの姿をした気まぐれなモンスター。人を驚かせそうだが、本人は眠そう。攻撃はしない。" },
+  { no: "148", rarity: "神レア", name: "ひまもん【ロボット】", image: "/images/きまぐれモンスター【ロボット】.png", description: "ロボットの姿をした気まぐれなモンスター。高性能に見えるが、ほとんど動かない。戦う気はない。" },
+  { no: "149", rarity: "神レア", name: "ひまもん【フライドポテト】", image: "/images/きまぐれモンスター【フライドポテト】.png", description: "フライドポテトの姿をした気まぐれなモンスター。山盛りで豪華に見えるが、本人は無気力。攻撃はしない。" },
+  { no: "150", rarity: "神レア", name: "ひまもん【プリンス】", image: "/images/きまぐれモンスター【プリンス】.png", description: "王子の姿をした気まぐれなモンスター。物語の主役のようだが、実際はぼーっとしているだけ。戦う気はない。" },
+  { no: "151", rarity: "神レア", name: "ひまもん【プリンセス】", image: "/images/きまぐれモンスター【プリンセス】.png", description: "姫の姿をした気まぐれなモンスター。華やかに見えるが、本人は何も考えていない。攻撃はしない。" },
 
-  { no: "152", name: "ひまもん【まねき猫】", image: "/images/きまぐれモンスター【まねき猫】.png", description: "招き猫の姿をした気まぐれなモンスター。幸運を呼びそうだが、本人は適当に手を振っているだけ。世界の運命には興味がない。" },
-  { no: "153", name: "ひまもん【ヒーロー】", image: "/images/きまぐれモンスター【ヒーロー】.png", description: "ヒーローの姿をした気まぐれなモンスター。世界を救えそうだが、実際は休憩中。戦う気はほとんどない。" },
-  { no: "154", name: "ひまもん【妖精】", image: "/images/きまぐれモンスター【妖精】.png", description: "妖精の姿をした気まぐれなモンスター。奇跡を起こせそうだが、ただ空を漂っているだけ。戦う気はない。" },
-  { no: "155", name: "ひまもん【エイリアン】", image: "/images/きまぐれモンスター【エイリアン】.png", description: "宇宙人の姿をした気まぐれなモンスター。未知の力を持っていそうだが、地球観光をしているだけ。攻撃はしない。" },
-  { no: "156", name: "ひまもん【天使】", image: "/images/きまぐれモンスター【天使】.png", description: "天使の姿をした気まぐれなモンスター。世界を導けそうな雰囲気だが、実際は雲の上で寝ているだけ。戦う気はない。" },
+  { no: "152", rarity: "シークレット", name: "ひまもん【まねき猫】", image: "/images/きまぐれモンスター【まねき猫】.png", description: "招き猫の姿をした気まぐれなモンスター。幸運を呼びそうだが、本人は適当に手を振っているだけ。世界の運命には興味がない。" },
+  { no: "153", rarity: "シークレット", name: "ひまもん【ヒーロー】", image: "/images/きまぐれモンスター【ヒーロー】.png", description: "ヒーローの姿をした気まぐれなモンスター。世界を救えそうだが、実際は休憩中。戦う気はほとんどない。" },
+  { no: "154", rarity: "シークレット", name: "ひまもん【妖精】", image: "/images/きまぐれモンスター【妖精】.png", description: "妖精の姿をした気まぐれなモンスター。奇跡を起こせそうだが、ただ空を漂っているだけ。戦う気はない。" },
+  { no: "155", rarity: "シークレット", name: "ひまもん【エイリアン】", image: "/images/きまぐれモンスター【エイリアン】.png", description: "宇宙人の姿をした気まぐれなモンスター。未知の力を持っていそうだが、地球観光をしているだけ。攻撃はしない。" },
+  { no: "156", rarity: "シークレット", name: "ひまもん【天使】", image: "/images/きまぐれモンスター【天使】.png", description: "天使の姿をした気まぐれなモンスター。世界を導けそうな雰囲気だが、実際は雲の上で寝ているだけ。戦う気はない。" },
 
-  { no: "157", name: "ひまもん【トマト】", image: "/images/きまぐれモンスター【トマト】.png", description: "トマトの姿をした気まぐれなモンスター。つやつやしているが、特に何もしない。攻撃はしない。" },
-  { no: "158", name: "ひまもん【キャベツ】", image: "/images/きまぐれモンスター【キャベツ】.png", description: "キャベツの姿をした気まぐれなモンスター。何枚も重なっているが、本人は気にしていない。戦う気はない。" },
-  { no: "159", name: "ひまもん【レタス】", image: "/images/きまぐれモンスター【レタス】.png", description: "レタスの姿をした気まぐれなモンスター。ふわふわしているが、風に乗るだけ。攻撃はしない。" },
-  { no: "160", name: "ひまもん【はくさい】", image: "/images/きまぐれモンスター【はくさい】.png", description: "はくさいの姿をした気まぐれなモンスター。大きいが動きはゆっくり。戦いには興味がない。" },
-  { no: "161", name: "ひまもん【にんじん】", image: "/images/きまぐれモンスター【にんじん】.png", description: "にんじんの姿をした気まぐれなモンスター。土の匂いを漂わせるが、ただ立っているだけ。攻撃はしない。" },
-  { no: "162", name: "ひまもん【ナス】", image: "/images/きまぐれモンスター【ナス】.png", description: "ナスの姿をした気まぐれなモンスター。つやつや光っているが、本人は眠そう。戦う気はない。" },
-  { no: "163", name: "ひまもん【ピーマン】", image: "/images/きまぐれモンスター【ピーマン】.png", description: "ピーマンの姿をした気まぐれなモンスター。苦そうに見えるが、特に何も考えていない。攻撃はしない。" },
-  { no: "164", name: "ひまもん【たまねぎ】", image: "/images/きまぐれモンスター【たまねぎ】.png", description: "たまねぎの姿をした気まぐれなモンスター。近づくと目がしみそうだが、実際は何も起こらない。戦う気はない。" },
-  { no: "165", name: "ひまもん【じゃがいも】", image: "/images/きまぐれモンスター【じゃがいも】.png", description: "じゃがいもの姿をした気まぐれなモンスター。ごつごつしているが、とてもおだやか。攻撃はしない。" },
-  { no: "166", name: "ひまもん【さつまいも】", image: "/images/きまぐれモンスター【さつまいも】.png", description: "さつまいもの姿をした気まぐれなモンスター。甘い香りを漂わせるが、ぼーっとしているだけ。戦う気はない。" },
-  { no: "167", name: "ひまもん【ブロッコリー】", image: "/images/きまぐれモンスター【ブロッコリー】.png", description: "ブロッコリーの姿をした気まぐれなモンスター。頭がもこもこしているが、何も考えていない。攻撃はしない。" },
-  { no: "168", name: "ひまもん【だいこん】", image: "/images/きまぐれモンスター【だいこん】.png", description: "だいこんの姿をした気まぐれなモンスター。長い体をしているが、動く気配はない。戦う気はない。" },
-  { no: "169", name: "ひまもん【れんこん】", image: "/images/きまぐれモンスター【れんこん】.png", description: "れんこんの姿をした気まぐれなモンスター。穴から向こうを見ているが、特に意味はない。攻撃はしない。" },
-  { no: "170", name: "ひまもん【かぼちゃ】", image: "/images/きまぐれモンスター【かぼちゃ】.png", description: "かぼちゃの姿をした気まぐれなモンスター。ずっしりしているが、ほとんど動かない。戦う気はない。" },
-  { no: "171", name: "ひまもん【とうもろこし】", image: "/images/きまぐれモンスター【とうもろこし】.png", description: "とうもろこしの姿をした気まぐれなモンスター。粒がぎっしりだが、本人はのんびりしている。攻撃はしない。" },
+  { no: "157", rarity: "激レア", name: "ひまもん【トマト】", image: "/images/きまぐれモンスター【トマト】.png", description: "トマトの姿をした気まぐれなモンスター。つやつやしているが、特に何もしない。攻撃はしない。" },
+  { no: "158", rarity: "激レア", name: "ひまもん【キャベツ】", image: "/images/きまぐれモンスター【キャベツ】.png", description: "キャベツの姿をした気まぐれなモンスター。何枚も重なっているが、本人は気にしていない。戦う気はない。" },
+  { no: "159", rarity: "激レア", name: "ひまもん【レタス】", image: "/images/きまぐれモンスター【レタス】.png", description: "レタスの姿をした気まぐれなモンスター。ふわふわしているが、風に乗るだけ。攻撃はしない。" },
+  { no: "160", rarity: "激レア", name: "ひまもん【はくさい】", image: "/images/きまぐれモンスター【はくさい】.png", description: "はくさいの姿をした気まぐれなモンスター。大きいが動きはゆっくり。戦いには興味がない。" },
+  { no: "161", rarity: "激レア", name: "ひまもん【にんじん】", image: "/images/きまぐれモンスター【にんじん】.png", description: "にんじんの姿をした気まぐれなモンスター。土の匂いを漂わせるが、ただ立っているだけ。攻撃はしない。" },
+  { no: "162", rarity: "激レア", name: "ひまもん【ナス】", image: "/images/きまぐれモンスター【ナス】.png", description: "ナスの姿をした気まぐれなモンスター。つやつや光っているが、本人は眠そう。戦う気はない。" },
+  { no: "163", rarity: "激レア", name: "ひまもん【ピーマン】", image: "/images/きまぐれモンスター【ピーマン】.png", description: "ピーマンの姿をした気まぐれなモンスター。苦そうに見えるが、特に何も考えていない。攻撃はしない。" },
+  { no: "164", rarity: "激レア", name: "ひまもん【たまねぎ】", image: "/images/きまぐれモンスター【たまねぎ】.png", description: "たまねぎの姿をした気まぐれなモンスター。近づくと目がしみそうだが、実際は何も起こらない。戦う気はない。" },
+  { no: "165", rarity: "激レア", name: "ひまもん【じゃがいも】", image: "/images/きまぐれモンスター【じゃがいも】.png", description: "じゃがいもの姿をした気まぐれなモンスター。ごつごつしているが、とてもおだやか。攻撃はしない。" },
+  { no: "166", rarity: "激レア", name: "ひまもん【さつまいも】", image: "/images/きまぐれモンスター【さつまいも】.png", description: "さつまいもの姿をした気まぐれなモンスター。甘い香りを漂わせるが、ぼーっとしているだけ。戦う気はない。" },
+  { no: "167", rarity: "激レア", name: "ひまもん【ブロッコリー】", image: "/images/きまぐれモンスター【ブロッコリー】.png", description: "ブロッコリーの姿をした気まぐれなモンスター。頭がもこもこしているが、何も考えていない。攻撃はしない。" },
+  { no: "168", rarity: "激レア", name: "ひまもん【だいこん】", image: "/images/きまぐれモンスター【だいこん】.png", description: "だいこんの姿をした気まぐれなモンスター。長い体をしているが、動く気配はない。戦う気はない。" },
+  { no: "169", rarity: "激レア", name: "ひまもん【れんこん】", image: "/images/きまぐれモンスター【れんこん】.png", description: "れんこんの姿をした気まぐれなモンスター。穴から向こうを見ているが、特に意味はない。攻撃はしない。" },
+  { no: "170", rarity: "激レア", name: "ひまもん【かぼちゃ】", image: "/images/きまぐれモンスター【かぼちゃ】.png", description: "かぼちゃの姿をした気まぐれなモンスター。ずっしりしているが、ほとんど動かない。戦う気はない。" },
+  { no: "171", rarity: "激レア", name: "ひまもん【とうもろこし】", image: "/images/きまぐれモンスター【とうもろこし】.png", description: "とうもろこしの姿をした気まぐれなモンスター。粒がぎっしりだが、本人はのんびりしている。攻撃はしない。" },
 
-  { no: "172", name: "ひまもん【りんご】", image: "/images/きまぐれモンスター【りんご】.png", description: "りんごの姿をした気まぐれなモンスター。赤く輝いているが、ただ転がっているだけ。戦う気はない。" },
-  { no: "173", name: "ひまもん【みかん】", image: "/images/きまぐれモンスター【みかん】.png", description: "みかんの姿をした気まぐれなモンスター。いい香りを放つが、自分では気づいていない。攻撃はしない。" },
-  { no: "174", name: "ひまもん【オレンジ】", image: "/images/きまぐれモンスター【オレンジ】.png", description: "オレンジの姿をした気まぐれなモンスター。まんまるだが、どこにも行かない。戦う気はない。" },
-  { no: "175", name: "ひまもん【バナナ】", image: "/images/きまぐれモンスター【バナナ】.png", description: "バナナの姿をした気まぐれなモンスター。房になっていることもあるが、気分次第。攻撃はしない。" },
-  { no: "176", name: "ひまもん【ぶどう】", image: "/images/きまぐれモンスター【ぶどう】.png", description: "ぶどうの姿をした気まぐれなモンスター。粒が集まっているが、まとまりはない。戦う気はない。" },
-  { no: "177", name: "ひまもん【もも】", image: "/images/きまぐれモンスター【もも】.png", description: "ももの姿をした気まぐれなモンスター。つやつやしているが、ずっと眠そう。攻撃はしない。" },
-  { no: "178", name: "ひまもん【イチゴ】", image: "/images/きまぐれモンスター【イチゴ】.png", description: "イチゴの姿をした気まぐれなモンスター。種が多いが、数えたことはない。戦う気はない。" },
-  { no: "179", name: "ひまもん【パイナップル】", image: "/images/きまぐれモンスター【パイナップル】.png", description: "パイナップルの姿をした気まぐれなモンスター。トゲトゲしているが、とても温厚。攻撃はしない。" },
-  { no: "180", name: "ひまもん【スイカ】", image: "/images/きまぐれモンスター【スイカ】.png", description: "スイカの姿をした気まぐれなモンスター。重そうだが、自分では気にしていない。戦う気はない。" },
-  { no: "181", name: "ひまもん【メロン】", image: "/images/きまぐれモンスター【メロン】.png", description: "メロンの姿をした気まぐれなモンスター。網目を眺めているだけで満足している。攻撃はしない。" },
-  { no: "182", name: "ひまもん【キウイ】", image: "/images/きまぐれモンスター【キウイ】.png", description: "キウイの姿をした気まぐれなモンスター。外は地味だが中は気にしていない。戦う気はない。" },
-  { no: "183", name: "ひまもん【マンゴー】", image: "/images/きまぐれモンスター【マンゴー】.png", description: "マンゴーの姿をした気まぐれなモンスター。南国気分だが、どこにも行かない。攻撃はしない。" },
-  { no: "184", name: "ひまもん【レモン】", image: "/images/きまぐれモンスター【レモン】.png", description: "レモンの姿をした気まぐれなモンスター。すっぱそうだが、本人は無表情。戦う気はない。" },
-  { no: "185", name: "ひまもん【ブルーベリー】", image: "/images/きまぐれモンスター【ブルーベリー】.png", description: "ブルーベリーの姿をした気まぐれなモンスター。小さいが存在感はある。攻撃はしない。" },
-  { no: "186", name: "ひまもん【さくらんぼ】", image: "/images/きまぐれモンスター【さくらんぼ】.png", description: "さくらんぼの姿をした気まぐれなモンスター。二つ並んでいるが、会話はしていない。戦う気はない。" }
+  { no: "172", rarity: "超激レア", name: "ひまもん【りんご】", image: "/images/きまぐれモンスター【りんご】.png", description: "りんごの姿をした気まぐれなモンスター。赤く輝いているが、ただ転がっているだけ。戦う気はない。" },
+  { no: "173", rarity: "超激レア", name: "ひまもん【みかん】", image: "/images/きまぐれモンスター【みかん】.png", description: "みかんの姿をした気まぐれなモンスター。いい香りを放つが、自分では気づいていない。攻撃はしない。" },
+  { no: "174", rarity: "超激レア", name: "ひまもん【オレンジ】", image: "/images/きまぐれモンスター【オレンジ】.png", description: "オレンジの姿をした気まぐれなモンスター。まんまるだが、どこにも行かない。戦う気はない。" },
+  { no: "175", rarity: "超激レア", name: "ひまもん【バナナ】", image: "/images/きまぐれモンスター【バナナ】.png", description: "バナナの姿をした気まぐれなモンスター。房になっていることもあるが、気分次第。攻撃はしない。" },
+  { no: "176", rarity: "超激レア", name: "ひまもん【ぶどう】", image: "/images/きまぐれモンスター【ぶどう】.png", description: "ぶどうの姿をした気まぐれなモンスター。粒が集まっているが、まとまりはない。戦う気はない。" },
+  { no: "177", rarity: "超激レア", name: "ひまもん【もも】", image: "/images/きまぐれモンスター【もも】.png", description: "ももの姿をした気まぐれなモンスター。つやつやしているが、ずっと眠そう。攻撃はしない。" },
+  { no: "178", rarity: "超激レア", name: "ひまもん【イチゴ】", image: "/images/きまぐれモンスター【イチゴ】.png", description: "イチゴの姿をした気まぐれなモンスター。種が多いが、数えたことはない。戦う気はない。" },
+  { no: "179", rarity: "超激レア", name: "ひまもん【パイナップル】", image: "/images/きまぐれモンスター【パイナップル】.png", description: "パイナップルの姿をした気まぐれなモンスター。トゲトゲしているが、とても温厚。攻撃はしない。" },
+  { no: "180", rarity: "超激レア", name: "ひまもん【スイカ】", image: "/images/きまぐれモンスター【スイカ】.png", description: "スイカの姿をした気まぐれなモンスター。重そうだが、自分では気にしていない。戦う気はない。" },
+  { no: "181", rarity: "超激レア", name: "ひまもん【メロン】", image: "/images/きまぐれモンスター【メロン】.png", description: "メロンの姿をした気まぐれなモンスター。網目を眺めているだけで満足している。攻撃はしない。" },
+  { no: "182", rarity: "超激レア", name: "ひまもん【キウイ】", image: "/images/きまぐれモンスター【キウイ】.png", description: "キウイの姿をした気まぐれなモンスター。外は地味だが中は気にしていない。戦う気はない。" },
+  { no: "183", rarity: "超激レア", name: "ひまもん【マンゴー】", image: "/images/きまぐれモンスター【マンゴー】.png", description: "マンゴーの姿をした気まぐれなモンスター。南国気分だが、どこにも行かない。攻撃はしない。" },
+  { no: "184", rarity: "超激レア", name: "ひまもん【レモン】", image: "/images/きまぐれモンスター【レモン】.png", description: "レモンの姿をした気まぐれなモンスター。すっぱそうだが、本人は無表情。戦う気はない。" },
+  { no: "185", rarity: "超激レア", name: "ひまもん【ブルーベリー】", image: "/images/きまぐれモンスター【ブルーベリー】.png", description: "ブルーベリーの姿をした気まぐれなモンスター。小さいが存在感はある。攻撃はしない。" },
+  { no: "186", rarity: "超激レア", name: "ひまもん【さくらんぼ】", image: "/images/きまぐれモンスター【さくらんぼ】.png", description: "さくらんぼの姿をした気まぐれなモンスター。二つ並んでいるが、会話はしていない。戦う気はない。" }
 ]
 ;
 
 // ステージに応じて敵を取得する
-type Enemy = typeof enemies[number];
+// type Enemy = typeof enemies[number];
 
-const pickRandomEnemy = (excludeNo?: string): Enemy => {
-  const pool = excludeNo ? enemies.filter((e) => e.no !== excludeNo) : enemies;
-  return pool[Math.floor(Math.random() * pool.length)];
+// const pickRandomEnemy = (excludeNo?: string): Enemy => {
+//   const pool = excludeNo ? enemies.filter((e) => e.no !== excludeNo) : enemies;
+//   return pool[Math.floor(Math.random() * pool.length)];
+// };
+
+const pickWeightedRandomEnemy = (excludeNo?: string): Enemy => {
+  const pool = excludeNo
+    ? enemies.filter((e) => e.no !== excludeNo)
+    : enemies;
+
+  const totalWeight = pool.reduce((sum, enemy) => {
+    return sum + RARITY_WEIGHTS[enemy.rarity];
+  }, 0);
+
+  let random = Math.random() * totalWeight;
+
+  for (const enemy of pool) {
+    random -= RARITY_WEIGHTS[enemy.rarity];
+
+    if (random <= 0) {
+      return enemy;
+    }
+  }
+
+  return pool[0];
 };
 
 const shouldEscape = () => Math.random() < 1 / 3; // 1/3で逃げる
@@ -212,6 +278,7 @@ const QuizResult = ({
   onShareX,
   onRetry,
   resultEnemy,
+  ownedHimamonCount,
 }: {
   correctCount: number;
   getTitle: () => string;
@@ -225,6 +292,7 @@ const QuizResult = ({
   onShareX: () => void;
   onRetry: () => void;
   resultEnemy: Enemy | null;
+  ownedHimamonCount: number | null;
 }) => {
   const [showRank, setShowRank] = useState(false);
   const [showButton, setShowButton] = useState(false);
@@ -242,7 +310,7 @@ const QuizResult = ({
       {showRank && (
         <>
           <div className="flex flex-col md:flex-row items-center justify-center mb-10">
-            <img src="/images/きまぐれモンスター1.png" alt="きまぐれモンスター" className="w-0 h-0 md:w-48 md:h-48" />
+            {/* <img src="/images/きまぐれモンスター1.png" alt="きまぐれモンスター" className="w-0 h-0 md:w-48 md:h-48" /> */}
             <div>
               <p className="text-3xl md:text-5xl font-extrabold text-yellow-600 mb-2">
                 {resultEnemy ? `${resultEnemy.name}と` : ""}
@@ -253,11 +321,26 @@ const QuizResult = ({
                 ともだちになったよ！
               </p>
             </div>
-            <div className="flex flex-row md:flex-row items-center justify-center gap-4 md:gap-8">
+            {/* <div className="flex flex-row md:flex-row items-center justify-center gap-4 md:gap-8">
               <img src="/images/きまぐれモンスター1.png" alt="きまぐれモンスター" className="w-32 h-32 md:w-0 md:h-0" />
               <img src="/images/きまぐれモンスター4.png" alt="きまぐれモンスター" className="w-32 h-32 md:w-48 md:h-48" />
-            </div>
+            </div> */}
           </div>
+
+          <div className="mb-6">
+            <img
+              src={resultEnemy?.image}
+              alt={resultEnemy?.name}
+              className="mx-auto w-28 h-28 md:w-36 md:h-36 object-contain animate-bounce"
+            />
+          </div>
+
+          {isLoggedIn && (
+            <HimamonZukanCountCard
+              count={ownedHimamonCount}
+              total={KIMAGURE_TOTAL}
+            />
+          )}
 
           {/* ★ 正解数に応じたコメント */}
           {(() => {
@@ -539,7 +622,8 @@ export default function QuizModePage() {
   const [acquired, setAcquired] = useState<CharacterItem | null>(null);
   const [acquireOpen, setAcquireOpen] = useState(false);
   const [floatOnce, setFloatOnce] = useState(false);
-  const [currentEnemy, setCurrentEnemy] = useState<Enemy>(() => pickRandomEnemy());
+  // const [currentEnemy, setCurrentEnemy] = useState<Enemy>(() => pickRandomEnemy());
+  const [currentEnemy, setCurrentEnemy] = useState<Enemy>(() => pickWeightedRandomEnemy());
   const resultEnemyRef = useRef<Enemy | null>(null); // ✅ 正解時の敵を保持（リザルトで使う）
   const [resultEnemy, setResultEnemy] = useState<Enemy | null>(null);
   const [escapeMessage, setEscapeMessage] = useState<string | null>(null);
@@ -548,6 +632,7 @@ export default function QuizModePage() {
   const [showSearchButton, setShowSearchButton] = useState(false);
   const searchBtnTimerRef = useRef<number | null>(null);
   const [openSearchConfirm, setOpenSearchConfirm] = useState(false);
+  const [questionReloadKey, setQuestionReloadKey] = useState(0);
 
   useEffect(() => {
     return () => {
@@ -644,8 +729,20 @@ export default function QuizModePage() {
     searchBtnTimerRef.current = null;
 
     // 敵を新しく
-    const nextEnemy = pickRandomEnemy();
+    // const nextEnemy = pickRandomEnemy();
+    // const nextEnemy = pickWeightedRandomEnemy();
+    // setCurrentEnemy(nextEnemy);
+
+    // setQuestions([]);
+    // setCurrentIndex(0);
+    const nextEnemy = pickWeightedRandomEnemy(currentEnemy.no);
     setCurrentEnemy(nextEnemy);
+
+    setQuestions([]);
+    setCurrentIndex(0);
+    setUserAnswer(null);
+    setQuestionReloadKey((v) => v + 1);
+
     resultEnemyRef.current = null;
     setResultEnemy(null);
 
@@ -659,7 +756,7 @@ export default function QuizModePage() {
     startedRef.current = false;
 
     // ✅ 問題をシャッフルして先頭から
-    setQuestions((prev) => shuffleArray(prev));
+    // setQuestions((prev) => shuffleArray(prev));
 
     // ✅ イントロを出したいなら、ここで明示的に出してもOK
     showEnemyIntro();
@@ -733,8 +830,11 @@ export default function QuizModePage() {
           all = all.filter((a) => a.quiz?.genre === genre);
         }
 
+        const targetLevel = RARITY_TO_QUIZ_LEVEL[currentEnemy.rarity];
+
         const quizQuestions: { id: string; quiz: QuizData }[] = all
-          .filter((a) => a.quiz)
+          // .filter((a) => a.quiz)
+          .filter((a) => a.quiz?.level === targetLevel)
           .map((a) => ({
             id: a.id,
             quiz: {
@@ -760,7 +860,10 @@ export default function QuizModePage() {
 
     fetchArticles();
     return () => controller.abort(); // ✅ キャラ変更/アンマウント時に中断
-  }, [mode, genre]);
+  // }, [mode, genre]);
+  // }, [mode, genre, currentEnemy.rarity]);
+  // }, [mode, genre, currentEnemy.no]);
+  }, [mode, genre, currentEnemy.no, questionReloadKey]);
 
 
   const shuffleArray = <T,>(arr: T[]) => [...arr].sort(() => Math.random() - 0.5);
@@ -903,6 +1006,12 @@ export default function QuizModePage() {
         next.add(characterRow.id);
         return next;
       });
+
+      setOwnedCharacterNos((prev) => {
+        const next = new Set(prev);
+        next.add(String(characterRow.no));
+        return next;
+      });
     }
   };
 
@@ -914,7 +1023,8 @@ export default function QuizModePage() {
     enemy,
     isUnowned,
   }: {
-    enemy: typeof enemies[0];
+    // enemy: typeof enemies[0];
+    enemy: Enemy;
     isUnowned: boolean;
   }) => {
     return (
@@ -1091,7 +1201,8 @@ export default function QuizModePage() {
     setHideAfterButton(false);
 
     // 次の敵へ
-    const next = pickRandomEnemy(currentEnemy.no);
+    // const next = pickRandomEnemy(currentEnemy.no);
+    const next = pickWeightedRandomEnemy(currentEnemy.no);
     setCurrentEnemy(next);
     setEnemyVisible(true);
 
@@ -1206,13 +1317,19 @@ export default function QuizModePage() {
                       src={currentEnemy.image}
                       alt={currentEnemy.name}
                       className={[
-                        "w-40 h-40 md:w-48 md:h-48 mt-2",
+                        "w-40 h-40 md:w-48 md:h-48 mt-1",
                         floatOnce ? "float-once" : "",
                         "transition-all duration-700 ease-in-out",
                         enemyVisible ? "opacity-100 blur-0 scale-100" : "opacity-0 blur-sm scale-95",
                       ].join(" ")}
                       style={{ willChange: "transform, opacity, filter", transform: "translateZ(0)" }}
                     />
+                    <p
+                      className={`mt-1 md:mt-2 text-xs md:text-lg font-extrabold ${rarityColors[currentEnemy.rarity]}`}
+                    >
+                      🌟 めずらしさ {rarityStars[currentEnemy.rarity]}
+                      {/* <span className="ml-2">{currentEnemy.rarity}</span> */}
+                    </p>
                   </div>
                   <p className="text-lg md:text-xl font-semibold text-gray-600">
                     {currentEnemy.description}
@@ -1347,24 +1464,26 @@ export default function QuizModePage() {
                 {showSearchButton && escapeMessage && (
                   <button
                     className="mt-4 px-6 py-3 bg-yellow-500 text-white rounded-lg font-bold text-xl hover:bg-yellow-600 cursor-pointer"
-                    onClick={() => {
-                      setShowSearchButton(false);
-                      setHideAfterButton(false);
+                    // onClick={() => {
+                    //   setShowSearchButton(false);
+                    //   setHideAfterButton(false);
 
-                      // 次の敵へ
-                      const next = pickRandomEnemy(currentEnemy.no);
-                      setCurrentEnemy(next);
-                      setEnemyVisible(true);
+                    //   // 次の敵へ
+                    //   // const next = pickRandomEnemy(currentEnemy.no);
+                    //   const next = pickWeightedRandomEnemy(currentEnemy.no);
+                    //   setCurrentEnemy(next);
+                    //   setEnemyVisible(true);
 
-                      // 逃走状態リセット
-                      setEscapeMessage(null);
+                    //   // 逃走状態リセット
+                    //   setEscapeMessage(null);
 
-                      // 次の問題へ（あなたの仕様だと不正解でも次の問題に進む）
-                      setIncorrectMessage(null);
+                    //   // 次の問題へ（あなたの仕様だと不正解でも次の問題に進む）
+                    //   setIncorrectMessage(null);
 
-                      showEnemyIntro();
-                      nextQuestion();
-                    }}
+                    //   showEnemyIntro();
+                    //   nextQuestion();
+                    // }}
+                    onClick={searchAnotherMonster}
                   >
                     もういっかいさがす
                   </button>
@@ -1427,6 +1546,14 @@ export default function QuizModePage() {
             onShareX={handleShareX}
             onRetry={resetGame}
             resultEnemy={resultEnemy}
+            ownedHimamonCount={
+              user
+                ? [...ownedCharacterNos].filter((no) => {
+                    const n = Number(no);
+                    return n >= KIMAGURE_NO_START && n <= KIMAGURE_NO_END;
+                  }).length
+                : null
+            }
           />
         )}
       </div>

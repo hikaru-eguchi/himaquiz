@@ -7,6 +7,7 @@ import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useSupabaseUser } from "../../hooks/useSupabaseUser"; 
+import HimamonZukanCountCard from "@/app/components/HimamonZukanCountCard";
 
 const anton = Anton({ subsets: ["latin"], weight: "400" });
 
@@ -14,6 +15,47 @@ export default function QuizMasterPage() {
   const router = useRouter();
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const { user, loading: userLoading } = useSupabaseUser();
+
+  const KIMAGURE_NO_START = 107;
+  const KIMAGURE_NO_END = 186;
+  const KIMAGURE_TOTAL = 80;
+
+  const [ownedHimamonCount, setOwnedHimamonCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (userLoading) return;
+
+    if (!user) {
+      setOwnedHimamonCount(null);
+      return;
+    }
+
+    const fetchOwnedHimamonCount = async () => {
+      const { data, error } = await supabase
+        .from("user_characters")
+        .select("characters(no)")
+        .eq("user_id", user.id);
+
+      if (error) {
+        console.error("fetch owned himamon count error:", error);
+        return;
+      }
+
+      const nos = new Set<string>();
+
+      (data ?? []).forEach((row: any) => {
+        const no = Number(row.characters?.no);
+
+        if (no >= KIMAGURE_NO_START && no <= KIMAGURE_NO_END) {
+          nos.add(String(no));
+        }
+      });
+
+      setOwnedHimamonCount(nos.size);
+    };
+
+    fetchOwnedHimamonCount();
+  }, [user, userLoading, supabase]);
 
   const [showGenreButtons, setShowGenreButtons] = useState(false);
   const [showDescription, setShowDescription] = useState(false);
@@ -115,6 +157,13 @@ export default function QuizMasterPage() {
           />
         ))}
       </div>
+
+      {user && (
+        <HimamonZukanCountCard
+          count={ownedHimamonCount}
+          total={KIMAGURE_TOTAL}
+        />
+      )}
 
       <div className="flex flex-col md:flex-row justify-center gap-3 md:gap-4 max-w-4xl mx-auto">
         <Link href="/quiz-kimagure/random" className="flex-1">
