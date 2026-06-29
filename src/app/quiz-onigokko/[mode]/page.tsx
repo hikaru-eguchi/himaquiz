@@ -330,7 +330,18 @@ const buildRanksFromPlayers = (players: WordPlayer[]): RankRow[] => {
     }));
 };
 
+// const getPlayerFoundCount = (player: WordPlayer) => {
+//   if (Array.isArray(player.foundLetters)) {
+//     return player.foundLetters.length;
+//   }
+
+//   return player.foundLetters ?? 0;
+// };
 const getPlayerFoundCount = (player: WordPlayer) => {
+  if (typeof player.foundLetterCount === "number") {
+    return player.foundLetterCount;
+  }
+
   if (Array.isArray(player.foundLetters)) {
     return player.foundLetters.length;
   }
@@ -1017,9 +1028,16 @@ export default function QuizOnigokkoModePage() {
     : buildRanksFromPlayers(displayPlayers);
   const myRank =
     finalRanks.find((r) => r.socketId === mySocketId)?.rank ?? null;
-  const myOniTimeMs = me?.oniTimeMs ?? 0;
+  // const myOniTimeMs = me?.oniTimeMs ?? 0;
+  // const myOniTimeSec = Math.ceil(myOniTimeMs / 1000);
+  // const correctCount = me?.correctCount ?? 0;
+  const myResult = finalRanks.find((r) => r.socketId === mySocketId);
+
+  const myOniTimeMs = myResult?.oniTimeMs ?? me?.oniTimeMs ?? 0;
   const myOniTimeSec = Math.ceil(myOniTimeMs / 1000);
-  const correctCount = me?.correctCount ?? 0;
+
+  // このゲームでは correctCount を「鬼だった時間ms」として使っている
+  const correctCount = myOniTimeMs;
 
   const foundLetterList = Array.isArray(me?.foundLetters)
     ? me.foundLetters
@@ -2297,10 +2315,11 @@ export default function QuizOnigokkoModePage() {
                           </div>
                           <p className="mt-1 text-sm font-bold text-white">
                             使ったアイテム：
-                            {isMe
+                            {getPlayerFoundCount(player)}
+                            {/* {isMe
                               ? (player.foundLetters ?? 0)
-                              : getPlayerFoundCount(player)}
-                            / {targetLength}
+                              : getPlayerFoundCount(player)} */}
+                            {/* / {targetLength} */}
                           </p>
                         </div>
                       );
