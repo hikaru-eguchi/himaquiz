@@ -36,6 +36,165 @@ export default function ActivityFeedCard() {
     setLoading(false);
   };
 
+  const renderActivityText = (log: ActivityLog) => {
+    const username = (
+        <span className="font-black text-sky-600">
+            {log.username ?? "名無し"}
+        </span>
+    );
+    const value = log.value_number ?? 0;
+
+    if (log.type === "character_get") {
+        return (
+        <>
+            {username} が{" "}
+            <span className="font-black text-orange-600">
+            {log.target_rarity ?? "レア"}「{log.target_name ?? "キャラ"}」
+            </span>
+            をGET！
+        </>
+        );
+    }
+
+    if (log.type === "best_streak") {
+        return (
+        <>
+            {username} が{" "}
+            <span className="font-black text-red-500">
+            連続正解{value}問
+            </span>
+            を達成！
+        </>
+        );
+    }
+
+    if (log.type === "best_stage") {
+        return (
+        <>
+            {username} が{" "}
+            <span className="font-black text-purple-600">
+            ダンジョン{value}階
+            </span>
+            に到達！
+        </>
+        );
+    }
+
+    if (log.type === "arena_win_streak") {
+        return (
+        <>
+            {username} が{" "}
+            <span className="font-black text-blue-600">
+            アリーナ{value}連勝
+            </span>
+            を達成！
+        </>
+        );
+    }
+
+    if (log.type === "style_get") {
+        return (
+        <>
+            {username} が{" "}
+            <span className="font-black text-pink-600">
+            {log.target_rarity ?? "レア"}スタイル「{log.target_name ?? "スタイル"}」
+            </span>
+            をGET！
+        </>
+        );
+    }
+
+    if (log.type === "level_milestone") {
+        return (
+        <>
+            {username} が{" "}
+            <span className="font-black text-amber-600">
+            Lv.{value}
+            </span>
+            に到達！
+        </>
+        );
+    }
+
+    return (
+        <>
+        {username} が {log.message}
+        </>
+    );
+    };
+
+    const getTimeAgo = (createdAt: string) => {
+        const created = new Date(createdAt).getTime();
+        const now = Date.now();
+        const diffMs = now - created;
+
+        const diffSeconds = Math.floor(diffMs / 1000);
+        const diffMinutes = Math.floor(diffSeconds / 60);
+        const diffHours = Math.floor(diffMinutes / 60);
+        const diffDays = Math.floor(diffHours / 24);
+
+        if (diffSeconds < 60) return "たった今";
+        if (diffMinutes < 60) return `${diffMinutes}分前`;
+        if (diffHours < 24) return `${diffHours}時間前`;
+        if (diffDays < 7) return `${diffDays}日前`;
+
+        const year = new Date(createdAt).getFullYear();
+        const month = String(new Date(createdAt).getMonth() + 1).padStart(2, "0");
+        const day = String(new Date(createdAt).getDate()).padStart(2, "0");
+
+        return `${year}/${month}/${day}`;
+    };
+
+    const getActivityColor = (type: string) => {
+        if (type === "character_get") {
+            return {
+            border: "border-orange-200",
+            bg: "bg-orange-50",
+            iconBg: "bg-orange-100",
+            iconText: "text-orange-600",
+            nameText: "text-sky-600",
+            };
+        }
+
+        if (type === "best_streak") {
+            return {
+            border: "border-red-200",
+            bg: "bg-red-50",
+            iconBg: "bg-red-100",
+            iconText: "text-red-600",
+            nameText: "text-sky-600",
+            };
+        }
+
+        if (type === "best_stage") {
+            return {
+            border: "border-purple-200",
+            bg: "bg-purple-50",
+            iconBg: "bg-purple-100",
+            iconText: "text-purple-600",
+            nameText: "text-sky-600",
+            };
+        }
+
+        if (type === "arena_win_streak") {
+            return {
+            border: "border-blue-200",
+            bg: "bg-blue-50",
+            iconBg: "bg-blue-100",
+            iconText: "text-blue-600",
+            nameText: "text-sky-600",
+            };
+        }
+
+        return {
+            border: "border-orange-100",
+            bg: "bg-white",
+            iconBg: "bg-orange-100",
+            iconText: "text-orange-600",
+            nameText: "text-sky-600",
+        };
+    };
+
   useEffect(() => {
     fetchLogs();
   }, []);
@@ -75,37 +234,39 @@ export default function ActivityFeedCard() {
         )}
 
         {!loading &&
-          logs.map((log) => (
-            <div
-              key={log.id}
-              className="rounded-2xl border border-orange-100 bg-white px-3 py-2 shadow-sm"
-            >
-              {/* <p className="text-sm font-bold text-gray-800">
-                <span className="mr-1">{log.icon}</span>
-                {log.username ?? "名無し"} が {log.message}
-              </p> */}
-              <p className="text-sm font-bold text-gray-800">
-                <span className="mr-1">{log.icon}</span>
-                {log.username ?? "名無し"} が{" "}
-                {log.type === "character_get" && log.target_name ? (
-                    <>
-                    <span className="font-black text-orange-600">
-                        {log.target_rarity ?? "レア"}「{log.target_name}」
-                    </span>
-                    をGET！
-                    </>
-                ) : (
-                    log.message
-                )}
-            </p>
+            logs.map((log) => {
+                const color = getActivityColor(log.type);
 
-              {log.value_number !== null && (
-                <p className="mt-1 text-xs font-bold text-orange-600">
-                  記録：{log.value_number}
-                </p>
-              )}
-            </div>
-          ))}
+                return (
+                <div
+                    key={log.id}
+                    className={`rounded-2xl border ${color.border} ${color.bg} px-3 py-2 shadow-sm`}
+                >
+                    <div className="flex items-start gap-3">
+                    <img
+                        src={log.avatar_url ?? "/images/初期アイコン.png"}
+                        alt={log.username ?? "名無し"}
+                        className="h-10 w-10 shrink-0 rounded-full border-2 border-black bg-white object-cover"
+                    />
+
+                    <div className="min-w-0 flex-1">
+                        <p className="text-sm font-bold text-gray-800 leading-snug">
+                        <span
+                            className={`mr-1 inline-flex h-6 w-6 items-center justify-center rounded-full ${color.iconBg} ${color.iconText}`}
+                        >
+                            {log.icon}
+                        </span>
+                        {renderActivityText(log)}
+                        </p>
+
+                        <p className="mt-1 text-right text-[11px] font-bold text-gray-400">
+                        {getTimeAgo(log.created_at)}
+                        </p>
+                    </div>
+                    </div>
+                </div>
+                );
+        })}
       </div>
     </div>
   );

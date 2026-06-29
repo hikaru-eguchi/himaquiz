@@ -5,6 +5,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useSupabaseUser } from "../../../hooks/useSupabaseUser";
 import { useRouter } from "next/navigation";
 import type { PublicFriendProfile } from "@/types/friend";
+import FriendActivityFeedCard from "@/app/components/FriendActivityFeedCard";
 
 type FriendshipRow = {
   user_id: string;
@@ -771,6 +772,8 @@ export default function FriendsPage() {
           )}
         </section>
 
+        <FriendActivityFeedCard />
+
         <section className="rounded-2xl border border-pink-100 bg-white p-4 shadow-sm">
           <div className="text-center">
             <h2 className="text-2xl font-black text-gray-900">
@@ -781,7 +784,7 @@ export default function FriendsPage() {
               {/* フレンドだけが見られる共有クイズ！自分だけのクイズを作っていいねをもらおう！ */}
               {/* 自分だけのクイズを作ってフレンドに共有しよう！公開すると100Pゲット！ */}
               {/* オリジナルクイズを作ってフレンドと楽しもう！公開すると100Pゲット！ */}
-              フレンドにクイズを出題しよう！いいねを集めて人気クイズを目指そう！出題すると100Pゲット！
+              フレンドにクイズを出題しよう！出題すると100Pゲット！
             </p>
           </div>
 
