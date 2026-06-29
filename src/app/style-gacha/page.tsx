@@ -658,6 +658,12 @@ export default function HimaStyleGachaPage() {
                       所持
                     </div>
                   )}
+                  
+                  {!owned && (
+                    <div className="absolute -left-2 -top-3 rounded-full bg-zinc-500 px-3 py-1 text-xs font-black text-white">
+                      未所持
+                    </div>
+                  )}
 
                   {/* {!owned && canBuy && (
                     <div className="absolute -right-2 -top-3 rounded-full bg-yellow-400 px-3 py-1 text-xs font-black text-black">
