@@ -114,7 +114,7 @@ export default function SoloGamesSection() {
             </div>
 
             {/* ひまQ占い */}
-            <div className="text-center max-w-[280px]">
+            {/* <div className="text-center max-w-[280px]">
               <Link href="/quiz-fortune" className="w-full md:w-auto flex justify-center">
                 <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-purple-600 via-fuchsia-500 to-pink-500 text-white hover:scale-110 transition-all">
                   🔮ひまQ占い
@@ -129,10 +129,10 @@ export default function SoloGamesSection() {
                   今日の運勢は★いくつ？
                 </p>
               </div>
-            </div>
+            </div> */}
 
             {/* ひまQ診断 */}
-            <div className="text-center max-w-[280px]">
+            {/* <div className="text-center max-w-[280px]">
               <Link href="/quiz-personality" className="w-full md:w-auto flex justify-center">
                 <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-blue-500 to-cyan-400 text-white hover:scale-110 transition-all">
                   🔍ひまQ診断
@@ -147,10 +147,10 @@ export default function SoloGamesSection() {
                   あなたはどのタイプ？
                 </p>
               </div>
-            </div>
+            </div> */}
 
             {/* 心理テスト */}
-            <div className="text-center max-w-[280px]">
+            {/* <div className="text-center max-w-[280px]">
               <Link href="/quiz-psychologicaltest" className="w-full md:w-auto flex justify-center">
                 <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-pink-500 via-rose-500 to-fuchsia-500 text-white hover:scale-110 transition-all">
                   ❤心理テスト
@@ -165,7 +165,7 @@ export default function SoloGamesSection() {
                   あなたの本当のタイプは？
                 </p>
               </div>
-            </div>
+            </div> */}
           </>
         )}
       </div>

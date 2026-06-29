@@ -18,7 +18,11 @@ export default function MultiGamesSection() {
 
       <div className="flex justify-center gap-3 md:gap-5 flex-wrap">
         {/* クイズロワイヤル */}
-        <div className="text-center max-w-[280px]">
+        <div className="relative text-center max-w-[280px]">
+          <span className="absolute -top-3 -left-4 z-10 px-3 py-1 text-xs md:text-sm font-bold rounded-full border-2 border-white bg-red-500 text-white shadow-md rotate-[-8deg]">
+            🔥人気No.1
+          </span>
+
           <Link href="/quiz-royal" className="w-full md:w-auto flex justify-center">
             <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-yellow-500 via-amber-300 to-blue-500 text-white hover:scale-110 transition-all">
               👑クイズロワイヤル
@@ -36,10 +40,10 @@ export default function MultiGamesSection() {
         </div>
 
         {/* サバイバルクイズ */}
-        <div className="relative text-center max-w-[280px]">
-          <span className="absolute -top-3 -left-4 z-10 px-3 py-1 text-xs md:text-sm font-bold rounded-full border-2 border-white bg-red-500 text-white shadow-md rotate-[-8deg]">
+        <div className="text-center max-w-[280px]">
+          {/* <span className="absolute -top-3 -left-4 z-10 px-3 py-1 text-xs md:text-sm font-bold rounded-full border-2 border-white bg-red-500 text-white shadow-md rotate-[-8deg]">
             🔥人気No.1
-          </span>
+          </span> */}
 
           <Link href="/quiz-dobon" className="w-full md:w-auto flex justify-center">
             <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-emerald-700 via-amber-800 to-stone-800 text-white hover:scale-110 transition-all">

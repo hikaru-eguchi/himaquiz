@@ -13,6 +13,7 @@ import DailyHardChallengeCard from "@/app/components/DailyHardChallengeCard";
 import TodayChallengeQuizCard from "@/app/components/TodayChallengeQuizCard";
 import GuestRecommendQuizGames from "@/app/components/GuestRecommendQuizGames";
 import SoloGamesSection from "@/app/components/SoloGamesSection";
+import UranaiSection from "@/app/components/UranaiSection";
 import FriendGamesSection from "@/app/components/FriendGamesSection";
 import MultiGamesSection from "@/app/components/MultiGamesSection";
 import RankingSectionSwitcher from "@/app/components/RankingSectionSwitcher";
@@ -842,6 +843,7 @@ export default async function HomePage({
       <SoloGamesSection />
       <MultiGamesSection />
       <FriendGamesSection />
+      <UranaiSection />
 
       {/* <div className="max-w-[700px] mx-auto border-2 border-black rounded-xl m-5 p-5 bg-gradient-to-b from-orange-50 via-yellow-100 to-amber-200 shadow-lg">
         <p className="text-2xl md:text-4xl font-extrabold mb-2 text-center leading-tight drop-shadow-xl text-orange-500">
