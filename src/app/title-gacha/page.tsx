@@ -164,10 +164,32 @@ const TitleGacha = ({
   const isTenPull = gachaQueue.length > 0;
   const progressText = isTenPull ? `(${gachaIndex + 1}/${gachaQueue.length})` : "";
 
+  // useEffect(() => {
+  //   if (!gachaResult) return;
+
+  //   setShowResult(false);
+  //   setPhase("drop");
+
+  //   const t = setTimeout(() => {
+  //     setPhase("ready");
+  //   }, 1200);
+
+  //   return () => clearTimeout(t);
+  // }, [gachaResult]);
+
   useEffect(() => {
     if (!gachaResult) return;
 
     setShowResult(false);
+
+    // 10連の2個目以降
+    if (gachaQueue.length > 0 && gachaIndex > 0) {
+      setShowResult(true);
+      setPhase("result");
+      return;
+    }
+
+    // 単発 または 10連1個目
     setPhase("drop");
 
     const t = setTimeout(() => {

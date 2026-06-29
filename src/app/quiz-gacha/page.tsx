@@ -163,13 +163,39 @@ const QuizGacha = ({
   const progressText = isTenPull ? `(${gachaIndex + 1}/${gachaQueue.length})` : "";
 
   // ガチャ演出
+  // useEffect(() => {
+  //   if (!gachaResult) return;
+
+  //   if (gachaResult?.isGuarantee) {
+  //     setCapsuleSet(99);
+  //   } else {
+  //     setCapsuleSet((Math.floor(Math.random() * 3) + 1) as 1|2|3);
+  //   }
+
+  //   // 状態リセット
+  //   setShowOpen(false);
+  //   setShowDark(false);
+  //   setShowFlash(false);
+  //   setShowResult(false);
+
+  //   // まず落下
+  //   setPhase("drop");
+
+  //   // 落下アニメ(1.2s)が終わったら「待機」
+  //   const t = setTimeout(() => {
+  //     setPhase("ready");
+  //   }, 1200);
+
+  //   return () => clearTimeout(t);
+  // }, [gachaResult]);
+  // ガチャ演出
   useEffect(() => {
     if (!gachaResult) return;
 
     if (gachaResult?.isGuarantee) {
       setCapsuleSet(99);
     } else {
-      setCapsuleSet((Math.floor(Math.random() * 3) + 1) as 1|2|3);
+      setCapsuleSet((Math.floor(Math.random() * 3) + 1) as 1 | 2 | 3);
     }
 
     // 状態リセット
@@ -178,10 +204,16 @@ const QuizGacha = ({
     setShowFlash(false);
     setShowResult(false);
 
-    // まず落下
+    // 10連の2回目以降は、落下・開封アニメなしで即結果表示
+    if (gachaQueue.length > 0 && gachaIndex > 0) {
+      setShowResult(true);
+      setPhase("result");
+      return;
+    }
+
+    // 単発 または 10連1回目だけ落下演出
     setPhase("drop");
 
-    // 落下アニメ(1.2s)が終わったら「待機」
     const t = setTimeout(() => {
       setPhase("ready");
     }, 1200);
