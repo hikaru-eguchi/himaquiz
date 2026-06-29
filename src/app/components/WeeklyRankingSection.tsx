@@ -4,6 +4,7 @@ import StreakRankingTop10 from "./StreakRankingTop10_10";
 import DungeonRankingTop10 from "./DungeonRankingTop10_10";
 import HimaCharacterRankingTop10 from "./HimaCharacterRankingTop10";
 import ArenaWinRankingTop20 from "./ArenaRankingTop10_10";
+import OverallRankingTop10 from "./OverallRankingTop10";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import Link from "next/link";
 
@@ -36,10 +37,33 @@ type ArenaRankRow = {
   arena_current_win_streak?: number | null;
 };
 
+type OverallRankRow = {
+  user_id: string;
+  username: string | null;
+  avatar_url: string | null;
+  best_streak: number;
+  best_stage: number;
+  arena_wins: number;
+  character_count: number;
+
+  streak_rank: number;
+  dungeon_rank: number;
+  arena_rank: number;
+  character_rank: number;
+
+  streak_point: number;
+  dungeon_point: number;
+  arena_point: number;
+  character_point: number;
+
+  total_rank_score: number;
+  overall_point: number;
+};
+
 export default async function WeeklyRankingSection() {
   const supabase = await createSupabaseServerClient();
 
-  const [streakResult, dungeonResult, characterResult, arenaResult] = await Promise.all([
+  const [streakResult, dungeonResult, characterResult, arenaResult, overallResult] = await Promise.all([
     supabase
       .from("user_public_profiles")
       .select("user_id, username, avatar_url, best_streak")
@@ -67,12 +91,20 @@ export default async function WeeklyRankingSection() {
       .order("arena_wins", { ascending: false })
       .order("updated_at", { ascending: true })
       .limit(30),
+
+    supabase
+      .from("overall_ranking")
+      .select(
+        "user_id, username, avatar_url, best_streak, best_stage, arena_wins, character_count, streak_rank, dungeon_rank, arena_rank, character_rank, streak_point, dungeon_point, arena_point, character_point, total_rank_score, overall_point"
+      )
+      .limit(30),
   ]);
 
   const rows = (streakResult.data ?? []) as StreakRankRow[];
   const rows_d = (dungeonResult.data ?? []) as DungeonRankRow[];
   const rows_c = (characterResult.data ?? []) as CharacterRankRow[];
   const rows_a = (arenaResult.data ?? []) as ArenaRankRow[];
+  const rows_o = (overallResult.data ?? []) as OverallRankRow[];
 
   return (
     <section className="max-w-[700px] mx-auto my-8">
@@ -153,6 +185,10 @@ export default async function WeeklyRankingSection() {
 
               <div className="w-[320px] md:w-[620px] shrink-0">
                 <HimaCharacterRankingTop10 rows={rows_c.slice(0, 30)} />
+              </div>
+
+              <div className="w-[320px] md:w-[620px] shrink-0">
+                <OverallRankingTop10 rows={rows_o.slice(0, 30)} />
               </div>
             </div>
           </div>
