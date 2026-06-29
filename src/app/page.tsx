@@ -18,6 +18,7 @@ import FriendGamesSection from "@/app/components/FriendGamesSection";
 import MultiGamesSection from "@/app/components/MultiGamesSection";
 import RankingSectionSwitcher from "@/app/components/RankingSectionSwitcher";
 import GuestRankingSection from "@/app/components/GuestRankingSection";
+import ActivityFeedCard from "@/app/components/ActivityFeedCard";
 
 export const metadata = {
   title: "無料で遊べる暇つぶしクイズ｜ひまQ",
@@ -976,11 +977,13 @@ export default async function HomePage({
         </div>
       </div> */}
 
-      {/* <WeeklyRankingSection /> */}
-      <RankingSectionSwitcher
+      <WeeklyRankingSection />
+      {/* <RankingSectionSwitcher
         loggedInSection={<WeeklyRankingSection />}
         guestSection={<GuestRankingSection />}
-      />
+      /> */}
+
+      <ActivityFeedCard />
 
       {/* <DailyFunGacha /> */}
 

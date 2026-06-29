@@ -800,6 +800,11 @@ const QuizGacha = ({
                     bg-gradient-to-r ${rarityGradient[gachaResult.rarity]}
                   `}
                 >
+                  {isTenPull && (
+                    <p className="mb-3 text-2xl md:text-4xl font-extrabold text-white">
+                      {progressText}
+                    </p>
+                  )}
                   {gachaResult.isNew && (
                     <div
                       className="

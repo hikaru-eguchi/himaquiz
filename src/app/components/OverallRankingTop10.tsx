@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import UserProfileModal, {
   PublicProfile,
@@ -37,6 +37,14 @@ export default function OverallRankingTop10({
   const list = rows.slice(0, 30);
 
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setIsLoggedIn(!!data.user);
+    });
+  }, [supabase]);
 
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<PublicProfile | null>(null);
@@ -134,12 +142,18 @@ export default function OverallRankingTop10({
                     </p>
                 </div>
 
-                <p className="mt-3 text-xs md:text-sm font-bold text-gray-600">
-                    あらゆる実力を極めた最強プレイヤーは誰だ！？
-                </p>
+                <div className="mt-3 text-xs md:text-sm font-bold text-gray-600">
+                  <p>各ゲームの順位で決まるランキング！</p>
+                  <p>あらゆる実力を極めた最強プレイヤーは誰だ！？</p>
+                </div>
             </div>
 
-            <div className="mt-5 space-y-3 max-h-[830px] overflow-y-auto pr-1">
+            {/* <div className="mt-5 space-y-3 max-h-[830px] overflow-y-auto pr-1"> */}
+            <div
+              className={`mt-5 space-y-3 overflow-y-auto pr-1 ${
+                isLoggedIn ? "max-h-[830px]" : "max-h-[480px]"
+              }`}
+            >
               {list.map((u, idx) => {
                 const rank = idx + 1;
                 const avatar = u.avatar_url ?? "/images/初期アイコン.png";

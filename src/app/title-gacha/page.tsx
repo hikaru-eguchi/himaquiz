@@ -510,6 +510,11 @@ const TitleGacha = ({
                   transition={{ duration: 0.55, ease: "easeOut" }}
                   className="relative z-50 text-center"
                 >
+                  {isTenPull && (
+                    <p className="mb-3 text-2xl md:text-4xl font-extrabold text-white">
+                      {progressText}
+                    </p>
+                  )}
                   {gachaResult.isNew && (
                     <div className="absolute -top-8 left-2 z-20 rounded-full border-4 border-white bg-gradient-to-r from-red-500 via-pink-500 to-yellow-400 px-5 py-2 text-2xl md:text-4xl font-black text-white shadow-xl">
                       NEW

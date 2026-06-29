@@ -118,7 +118,7 @@ export default function MultiGamesSection() {
             </div>
 
             {/* サイコロクイズ */}
-            <div className="text-center max-w-[280px]">
+            {/* <div className="text-center max-w-[280px]">
               <Link href="/quiz-dice" className="w-full md:w-auto flex justify-center">
                 <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-green-700 via-emerald-500 to-amber-300 text-white hover:scale-110 transition-all">
                   🎲サイコロクイズ
@@ -127,15 +127,15 @@ export default function MultiGamesSection() {
 
               <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
                 <p className="text-sm md:text-base text-gray-700 leading-tight">
-                  {/* サイコロ次第でポイント爆増！？ */}
+                  サイコロ次第でポイント爆増！？
                   サイコロひとつで運命が変わる！
                 </p>
                 <p className="text-sm md:text-base text-gray-700 leading-tight">
-                  {/* 運も実力も試されるドキドキクイズ！ */}
+                  運も実力も試されるドキドキクイズ！
                   一発逆転も狙えるスリル満点クイズ！
                 </p>
               </div>
-            </div>
+            </div> */}
 
             {/* クイズおにごっこ */}
             <div className="text-center max-w-[280px]">

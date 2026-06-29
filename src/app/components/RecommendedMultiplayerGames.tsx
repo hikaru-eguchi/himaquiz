@@ -67,15 +67,15 @@ const MULTI_GAMES: GameCard[] = [
   //   buttonClassName:
   //     "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-cyan-400 via-sky-300 to-sky-200 text-white hover:scale-110 transition-all",
   // },
-  {
-    key: "dice",
-    href: "/quiz-dice",
-    label: "🎲サイコロクイズ",
-    desc1: "サイコロひとつで運命が変わる！",
-    desc2: "一発逆転も狙えるスリル満点クイズ！",
-    buttonClassName:
-      "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-green-700 via-emerald-500 to-amber-300 text-white hover:scale-110 transition-all",
-  },
+  // {
+  //   key: "dice",
+  //   href: "/quiz-dice",
+  //   label: "🎲サイコロクイズ",
+  //   desc1: "サイコロひとつで運命が変わる！",
+  //   desc2: "一発逆転も狙えるスリル満点クイズ！",
+  //   buttonClassName:
+  //     "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-green-700 via-emerald-500 to-amber-300 text-white hover:scale-110 transition-all",
+  // },
   {
     key: "onigokko",
     href: "/quiz-onigokko",
