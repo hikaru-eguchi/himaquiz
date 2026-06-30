@@ -203,7 +203,7 @@ export default async function HomePage({
 
       {/* 今日のクイズ表示 */}
       <TodayChallengeQuizCard quiz={randomQuizArticle?.quiz} />
-      <GuestRecommendQuizGames />
+      {/* <GuestRecommendQuizGames /> */}
       <DailyHardChallengeCard />
 
       {/* <div className="

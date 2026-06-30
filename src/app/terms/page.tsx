@@ -156,6 +156,10 @@ export default function TermsPage() {
           変更後の利用規約は、当サイトへ掲載した時点から効力を生じるものとします。
         </p>
 
+        <p className="mt-10 text-sm text-gray-500 text-right">
+          最終更新日：2026年6月30日
+        </p>
+
       </div>
     </div>
   );
