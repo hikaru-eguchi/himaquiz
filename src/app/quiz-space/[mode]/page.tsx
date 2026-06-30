@@ -1743,7 +1743,7 @@ export default function SpaceSurviveModePage() {
                             initial={{ scale: 0.3, opacity: 0 }}
                             animate={{
                               scale: [0.6, 1.8, 1.1],
-                              opacity: [0, 1, 0.9],
+                              opacity: [0, 0.3, 0.15],
                             }}
                             transition={{ duration: 0.65 }}
                           >
@@ -1766,7 +1766,7 @@ export default function SpaceSurviveModePage() {
                                 : "opacity-80"
                             }
 
-                            ${!player.alive ? "opacity-40 grayscale" : ""}
+                            ${!player.alive ? "opacity-[0.05] grayscale" : ""}
                           `}
                         />
 
