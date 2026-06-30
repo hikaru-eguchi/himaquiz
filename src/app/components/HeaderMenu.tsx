@@ -825,6 +825,17 @@ export default function HeaderMenu() {
                 </Link>
 
                 <Link
+                  href="/terms"
+                  onClick={() => {
+                    setInfoOpen(false);
+                    setOpen(false);
+                  }}
+                  className="rounded-xl bg-gray-100 py-3 text-center font-bold text-gray-800 hover:bg-gray-200 transition"
+                >
+                  利用規約
+                </Link>
+
+                <Link
                   href="/privacy"
                   onClick={() => {
                     setInfoOpen(false);

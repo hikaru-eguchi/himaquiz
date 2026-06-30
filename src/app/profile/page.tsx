@@ -11,7 +11,9 @@ const sections = [
     { id: 'otoiawase', title: '3. お問い合わせ' },
     { id: 'koukoku', title: '4. 広告について' },
     { id: 'menseki', title: '5. 免責事項' },
-    { id: 'privacy', title: '6. プライバシーポリシー' },
+    // { id: 'privacy', title: '6. プライバシーポリシー' },
+    { id: "terms", title: "6. 利用規約" },
+    { id: "privacy", title: "7. プライバシーポリシー" },
   ];
 
   const [isOpen, setIsOpen] = useState(true);
@@ -94,6 +96,22 @@ const sections = [
         <p>
           掲載内容には十分注意を払っていますが、情報の正確性・安全性を保証するものではありません。商品の購入やサービスの利用などはご自身の責任でお願いいたします。
         </p>
+        <h2
+          id="terms"
+          className="text-3xl font-bold text-gray-800 mt-5 mb-4"
+        >
+          利用規約
+        </h2>
+
+        <p>
+          利用規約については、以下👇のリンクからご覧ください。
+        </p>
+
+        <Link href="/terms">
+          <button className="px-4 hover:underline">
+            利用規約
+          </button>
+        </Link>
         <h2 id="privacy" className="text-3xl font-bold text-gray-800 mt-5 mb-4">プライバシーポリシー</h2>
         <p>
           プライバシーポリシーについては、以下👇のリンクからご覧ください。

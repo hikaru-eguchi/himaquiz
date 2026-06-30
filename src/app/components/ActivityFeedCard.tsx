@@ -80,6 +80,18 @@ export default function ActivityFeedCard() {
         );
     }
 
+    if (log.type === "arena_wins") {
+        return (
+            <>
+            {username} が{" "}
+            <span className="font-black text-blue-600">
+                アリーナ{value}勝
+            </span>
+            を達成！
+            </>
+        );
+    }
+
     if (log.type === "arena_win_streak") {
         return (
         <>
@@ -173,6 +185,16 @@ export default function ActivityFeedCard() {
             iconBg: "bg-purple-100",
             iconText: "text-purple-600",
             nameText: "text-sky-600",
+            };
+        }
+
+        if (type === "arena_wins") {
+            return {
+                border: "border-blue-200",
+                bg: "bg-blue-50",
+                iconBg: "bg-blue-100",
+                iconText: "text-blue-600",
+                nameText: "text-sky-600",
             };
         }
 
