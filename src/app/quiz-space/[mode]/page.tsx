@@ -1455,7 +1455,7 @@ export default function SpaceSurviveModePage() {
               あなた：{playerName}
             </p> */}
             <div className="flex items-center justify-center gap-3 mb-6">
-              <p className="text-xl md:text-3xl font-bold text-gray-700">
+              <p className="text-xl md:text-3xl font-bold text-gray-100">
                 あなた：
               </p>
               <img
@@ -1463,7 +1463,7 @@ export default function SpaceSurviveModePage() {
                 alt={playerName}
                 className="w-10 h-10 md:w-14 md:h-14 rounded-full object-cover border-2 border-black bg-white"
               />
-              <p className="text-xl md:text-3xl font-bold text-gray-700">
+              <p className="text-xl md:text-3xl font-bold text-gray-100">
                 {playerName}
               </p>
             </div>
@@ -1586,7 +1586,7 @@ export default function SpaceSurviveModePage() {
                       </span>
 
                       <span className="text-2xl md:text-4xl font-black text-yellow-200 md:text-4xl animate-pulse">
-                        {gameState?.timeLeft ?? 10}
+                        {gameState?.timeLeft ?? 5}
                       </span>
 
                       <span className="ml-1 text-xl font-black text-yellow-100">
