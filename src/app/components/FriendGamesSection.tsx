@@ -151,7 +151,7 @@ export default function FriendGamesSection() {
             </div> */}
             
             {/* ひらめきクイズ */}
-            <div className="text-center max-w-[280px]">
+            {/* <div className="text-center max-w-[280px]">
             <Link href="/quiz-hirameki" className="w-full md:w-auto flex justify-center">
                 <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-yellow-400 via-amber-300 to-orange-300 text-white hover:scale-110 transition-all">
                 💡ひらめきクイズ
@@ -166,7 +166,7 @@ export default function FriendGamesSection() {
                 みんなでできる早押しクイズゲーム！
                 </p>
             </div>
-            </div>
+            </div> */}
 
             {/* これどっち？ */}
             <div className="text-center max-w-[280px]">

@@ -18,6 +18,12 @@ export default function QuizHiramekiPage() {
     "/images/quiz_woman.png",
   ];
 
+  const [limitTime] = useState<number | null>(5);
+
+  const handleRandomQuizStart = () => {
+    router.push(`/quiz-hirameki/random?time=${limitTime}`);
+  };
+
   const mobileCharacters = ["/images/quiz_hirameki.png", "/images/quiz_woman.png"];
 
   const [characters, setCharacters] = useState<string[]>([]);
@@ -78,7 +84,8 @@ export default function QuizHiramekiPage() {
       </h1>
 
       <p className="text-md md:text-2xl font-semibold text-orange-800 mb-2 md:mb-4">
-        ＜友達と遊べるクイズゲーム＞
+        {/* ＜友達と遊べるクイズゲーム＞ */}
+        ＜みんなで遊べるクイズゲーム＞
       </p>
 
       <p className="text-md md:text-2xl font-semibold text-orange-800 mb-8">
@@ -140,13 +147,38 @@ export default function QuizHiramekiPage() {
         ))}
       </div>
 
-      <div className="flex flex-col md:flex-row justify-center gap-3 md:gap-4 max-w-4xl mx-auto">
+      {/* <div className="flex flex-col md:flex-row justify-center gap-3 md:gap-4 max-w-4xl mx-auto">
         <div>
           <button
             onClick={() => setShowCodeInput(true)}
             className="w-full md:w-80 px-6 py-2 md:px-8 md:py-4 bg-gradient-to-r from-yellow-500 via-amber-500 to-orange-500 text-white rounded-full cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
           >
             あいことばでマッチ
+          </button>
+          <p className="text-sm text-orange-800 mt-1">
+            ※2人〜8人でプレイできます。
+          </p>
+        </div>
+      </div> */}
+      <div className="flex flex-col md:flex-row justify-center gap-3 md:gap-4 max-w-4xl mx-auto">
+        <div>
+          <button
+            onClick={handleRandomQuizStart}
+            className="w-full md:w-80 px-6 py-2 md:px-8 md:py-4 bg-gradient-to-r from-yellow-500 via-amber-500 to-orange-500 text-white rounded-full cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
+          >
+            オンラインで対戦
+          </button>
+          <p className="text-sm text-orange-800 mt-1">
+            ※4人でプレイできます。
+          </p>
+        </div>
+
+        <div>
+          <button
+            onClick={() => setShowCodeInput(true)}
+            className="w-full md:w-80 px-6 py-2 md:px-8 md:py-4 bg-gradient-to-r from-yellow-100 via-yellow-300 to-orange-300 text-orange-900 rounded-full cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
+          >
+            あいことばで対戦
           </button>
           <p className="text-sm text-orange-800 mt-1">
             ※2人〜8人でプレイできます。
@@ -244,7 +276,7 @@ export default function QuizHiramekiPage() {
           答えを早く当てるヒント早押しゲームです！💡
           <br />
           最初はかんたんなヒントからスタートし、
-          10秒ごとに新しいヒントが追加されます。
+          時間が経つと新しいヒントが追加されます。
           <br />
           文字数は「□□□□」のように表示されるので、
           ひらめいたら答えをひらがなで入力して送信！
@@ -253,7 +285,7 @@ export default function QuizHiramekiPage() {
           <br />
           知識だけじゃなく、連想力・発想力・ひらめき力が勝負のカギ！✨
           <br />
-          ※あいことばでのみマッチできます。
+          {/* ※あいことばでのみマッチできます。 */}
         </p>
       </div>
     </div>

@@ -61,6 +61,24 @@ export default function MultiGamesSection() {
           </div>
         </div>
 
+        {/* ひらめきクイズ */}
+        <div className="text-center max-w-[280px]">
+          <Link href="/quiz-hirameki" className="w-full md:w-auto flex justify-center">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-yellow-400 via-amber-300 to-orange-300 text-white hover:scale-110 transition-all">
+              💡ひらめきクイズ
+              </button>
+          </Link>
+
+          <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+              でてくるヒントで答えを当てろ！
+              </p>
+              <p className="text-sm md:text-base text-gray-700 leading-tight">
+              みんなでできる早押しクイズゲーム！
+              </p>
+          </div>
+        </div>
+
         {/* クイズアリーナ */}
         <div className="text-center max-w-[280px]">
           <Link href="/quiz-arena" className="w-full md:w-auto flex justify-center">

@@ -298,19 +298,6 @@ export default function NavButtons() {
                   <div className={gameScrollOuter}>
                     <div className={gameRow}>
                       <Link
-                        href="/quiz-battle"
-                        onClick={() => handleNavClick("/quiz-battle")}
-                      >
-                        <button
-                          className={`${baseStyle} bg-gradient-to-r from-pink-500 via-yellow-400 to-green-500 text-white ring-2 ring-pink-500 md:hover:scale-110 ${
-                            activeUrl === "/quiz-battle" ? activeStyle : ""
-                          }`}
-                        >
-                          クイズバトル
-                        </button>
-                      </Link>
-
-                      <Link
                         href="/quiz-royal"
                         onClick={() => handleNavClick("/quiz-royal")}
                       >
@@ -324,19 +311,6 @@ export default function NavButtons() {
                       </Link>
 
                       <Link
-                        href="/quiz-adventure"
-                        onClick={() => handleNavClick("/quiz-adventure")}
-                      >
-                        <button
-                          className={`${baseStyle} bg-gradient-to-r from-indigo-500 via-blue-500 to-sky-500 text-white ring-2 ring-blue-500 md:hover:scale-110 ${
-                            activeUrl === "/quiz-adventure" ? activeStyle : ""
-                          }`}
-                        >
-                          協力ダンジョン
-                        </button>
-                      </Link>
-
-                      <Link
                         href="/quiz-dobon"
                         onClick={() => handleNavClick("/quiz-dobon")}
                       >
@@ -346,6 +320,32 @@ export default function NavButtons() {
                           }`}
                         >
                           サバイバルクイズ
+                        </button>
+                      </Link>
+
+                      <Link
+                        href="/quiz-arena"
+                        onClick={() => handleNavClick("/quiz-arena")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-[radial-gradient(circle_at_top,#fde68a_0%,#fb7185_28%,#7c3aed_62%,#111827_100%)] text-white ring-2 ring-red-400 md:hover:scale-110 ${
+                            activeUrl === "/quiz-arena" ? activeStyle : ""
+                          }`}
+                        >
+                          クイズアリーナ
+                        </button>
+                      </Link>
+
+                      <Link
+                        href="/quiz-hirameki"
+                        onClick={() => handleNavClick("/quiz-hirameki")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-gradient-to-r from-yellow-400 via-amber-300 to-orange-300 text-white ring-2 ring-yellow-500 md:hover:scale-110 ${
+                            activeUrl === "/quiz-hirameki" ? activeStyle : ""
+                          }`}
+                        >
+                          ひらめきクイズ
                         </button>
                       </Link>
 
@@ -428,15 +428,28 @@ export default function NavButtons() {
                       </Link>
 
                       <Link
-                        href="/quiz-arena"
-                        onClick={() => handleNavClick("/quiz-arena")}
+                        href="/quiz-adventure"
+                        onClick={() => handleNavClick("/quiz-adventure")}
                       >
                         <button
-                          className={`${baseStyle} bg-[radial-gradient(circle_at_top,#fde68a_0%,#fb7185_28%,#7c3aed_62%,#111827_100%)] text-white ring-2 ring-red-400 md:hover:scale-110 ${
-                            activeUrl === "/quiz-arena" ? activeStyle : ""
+                          className={`${baseStyle} bg-gradient-to-r from-indigo-500 via-blue-500 to-sky-500 text-white ring-2 ring-blue-500 md:hover:scale-110 ${
+                            activeUrl === "/quiz-adventure" ? activeStyle : ""
                           }`}
                         >
-                          クイズアリーナ
+                          協力ダンジョン
+                        </button>
+                      </Link>
+
+                      <Link
+                        href="/quiz-battle"
+                        onClick={() => handleNavClick("/quiz-battle")}
+                      >
+                        <button
+                          className={`${baseStyle} bg-gradient-to-r from-pink-500 via-yellow-400 to-green-500 text-white ring-2 ring-pink-500 md:hover:scale-110 ${
+                            activeUrl === "/quiz-battle" ? activeStyle : ""
+                          }`}
+                        >
+                          クイズバトル
                         </button>
                       </Link>
 
@@ -565,7 +578,7 @@ export default function NavButtons() {
                         </button>
                       </Link>
 
-                      <Link
+                      {/* <Link
                         href="/quiz-hirameki"
                         onClick={() => handleNavClick("/quiz-hirameki")}
                       >
@@ -576,7 +589,7 @@ export default function NavButtons() {
                         >
                           ひらめきクイズ
                         </button>
-                      </Link>
+                      </Link> */}
 
                       <Link
                         href="/quiz-koredochi"

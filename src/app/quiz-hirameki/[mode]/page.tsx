@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useRef } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useBattle } from "../../../hooks/useBattle";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
@@ -158,8 +158,21 @@ export default function QuizHiramekiCodePage() {
   const { user, loading: userLoading } = useSupabaseUser();
   const searchParams = useSearchParams();
 
+  const pathname = usePathname();
+  const mode = pathname.split("/").pop() || "code";
+  const isRandomMatch = mode === "random";
+
   const code = searchParams?.get("code") || "";
-  const countParam = searchParams?.get("count") || "2";
+  // const countParam = searchParams?.get("count") || "2";
+
+  // const playerMaxCount = (() => {
+  //   const n = Number(countParam);
+  //   if (!Number.isFinite(n)) return 2;
+  //   if (n < 2) return 2;
+  //   if (n > 8) return 8;
+  //   return n;
+  // })();
+  const countParam = isRandomMatch ? "4" : searchParams?.get("count") || "2";
 
   const playerMaxCount = (() => {
     const n = Number(countParam);
@@ -170,10 +183,11 @@ export default function QuizHiramekiCodePage() {
   })();
 
   const questionCountParam = Number(searchParams?.get("questions") || "");
-  const questionCount =
-    Number.isFinite(questionCountParam) && questionCountParam > 0
-      ? questionCountParam
-      : 5;
+  // const questionCount =
+  //   Number.isFinite(questionCountParam) && questionCountParam > 0
+  //     ? questionCountParam
+  //     : 5;
+  const questionCount = 1;
 
   const theme = getTheme();
 
@@ -218,6 +232,7 @@ export default function QuizHiramekiCodePage() {
   const [finished, setFinished] = useState(false);
 
   const {
+    joinRandom,
     joinWithCode,
     players: rawPlayers,
     mySocketId,
@@ -268,12 +283,23 @@ export default function QuizHiramekiCodePage() {
     setPlayerCount(`0/${playerMaxCount}`);
     setReadyToStart(false);
 
-    const normalizedRoomCode = `hirameki_${code}`;
+    // const normalizedRoomCode = `hirameki_${code}`;
 
-    setRoomCode(normalizedRoomCode);
+    // setRoomCode(normalizedRoomCode);
+    // setPhase("waiting");
+
+    // joinWithCode(code, String(playerMaxCount), "hirameki");
+    if (isRandomMatch) {
+      joinRandom({ maxPlayers: playerMaxCount, gameType: "hirameki" }, (roomCode) => {
+        setRoomCode(roomCode);
+      });
+    } else {
+      const normalizedRoomCode = `hirameki_${code}`;
+      setRoomCode(normalizedRoomCode);
+      joinWithCode(code, String(playerMaxCount), "hirameki");
+    }
+
     setPhase("waiting");
-
-    joinWithCode(code, String(playerMaxCount), "hirameki");
   }, [
     user,
     userLoading,
@@ -281,6 +307,8 @@ export default function QuizHiramekiCodePage() {
     phase,
     code,
     playerMaxCount,
+    isRandomMatch,
+    joinRandom,
     joinWithCode,
   ]);
 
@@ -306,6 +334,14 @@ export default function QuizHiramekiCodePage() {
   }, [displayPlayers, scores]);
 
   const myScore = mySocketId ? scores[mySocketId] ?? 0 : 0;
+
+  const getPlayerTimeText = (socketId: string) => {
+    const correctPlayer = roundResults[0]?.correctPlayers.find(
+      (p) => p.socketId === socketId
+    );
+
+    return correctPlayer ? `${formatTime(correctPlayer.elapsedMs)}秒` : "タイムアップ";
+  };
 
   const timeLeftMs = Math.max(0, deadline - now);
   const timeLeftSeconds = Math.ceil(timeLeftMs / 1000);
@@ -339,12 +375,23 @@ export default function QuizHiramekiCodePage() {
 
     setNameError(null);
 
-    const normalizedRoomCode = `hirameki_${code}`;
+    // const normalizedRoomCode = `hirameki_${code}`;
 
-    setRoomCode(normalizedRoomCode);
+    // setRoomCode(normalizedRoomCode);
+    // setPhase("waiting");
+
+    // joinWithCode(code, String(playerMaxCount), "hirameki");
     setPhase("waiting");
 
-    joinWithCode(code, String(playerMaxCount), "hirameki");
+    if (isRandomMatch) {
+      joinRandom({ maxPlayers: playerMaxCount, gameType: "hirameki" }, (roomCode) => {
+        setRoomCode(roomCode);
+      });
+    } else {
+      const normalizedRoomCode = `hirameki_${code}`;
+      setRoomCode(normalizedRoomCode);
+      joinWithCode(code, String(playerMaxCount), "hirameki");
+    }
   };
 
   const handleStartReady = () => {
@@ -402,11 +449,49 @@ export default function QuizHiramekiCodePage() {
     setFinished(false);
   };
 
+  // const handleRematch = () => {
+  //   if (!socket || !roomCode) return;
+
+  //   resetLocalGame();
+  //   setReadyToStart(false);
+
+  //   socket.emit("request_rematch", {
+  //     roomCode,
+  //     gameType: "hirameki",
+  //   });
+
+  //   setPhase("waiting");
+  // };
   const handleRematch = () => {
-    if (!socket || !roomCode) return;
+    if (!socket) return;
 
     resetLocalGame();
     setReadyToStart(false);
+    setRoomPlayers([]);
+    setPlayerCount(`0/${playerMaxCount}`);
+
+    if (isRandomMatch) {
+      if (roomCode) {
+        socket.emit("leave_room", { roomCode });
+      }
+
+      setRoomCode("");
+      setPhase("waiting");
+
+      joinRandom(
+        {
+          maxPlayers: playerMaxCount,
+          gameType: "hirameki",
+        },
+        (newRoomCode) => {
+          setRoomCode(newRoomCode);
+        }
+      );
+
+      return;
+    }
+
+    if (!roomCode) return;
 
     socket.emit("request_rematch", {
       roomCode,
@@ -529,7 +614,8 @@ export default function QuizHiramekiCodePage() {
 
       if (payload.socketId === mySocketId) {
         setSubmittedCorrect(true);
-        setAnswerMessage(`正解！${payload.rank}位 / +${payload.addScore}点`);
+        // setAnswerMessage(`正解！${payload.rank}位 / +${payload.addScore}点`);
+        setAnswerMessage(`正解！${payload.rank}位`);
       }
     };
 
@@ -638,12 +724,22 @@ export default function QuizHiramekiCodePage() {
               onClick={handleJoin}
               className={`mt-6 w-full rounded-full border-4 border-black px-6 py-4 text-xl md:text-2xl font-extrabold shadow-lg transition-all ${theme.button}`}
             >
-              あいことばでマッチ
+              {/* あいことばでマッチ */}
+              {isRandomMatch ? "オンラインでマッチ" : "あいことばでマッチ"}
             </button>
 
-            <p className="mt-3 text-sm font-bold text-gray-600">
+            {/* <p className="mt-3 text-sm font-bold text-gray-600">
               あいことば：{code || "未入力"} / 参加人数：{playerMaxCount}人
-            </p>
+            </p> */}
+            {isRandomMatch ? (
+              <p className="mt-3 text-sm font-bold text-gray-600">
+                ランダムマッチ / 参加人数：{playerMaxCount}人
+              </p>
+            ) : (
+              <p className="mt-3 text-sm font-bold text-gray-600">
+                あいことば：{code || "未入力"} / 参加人数：{playerMaxCount}人
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -665,9 +761,14 @@ export default function QuizHiramekiCodePage() {
             参加人数：{playerCount}
           </p>
 
-          <p className="mt-2 text-sm md:text-base text-gray-600">
+          {/* <p className="mt-2 text-sm md:text-base text-gray-600">
             あいことば：{code}
-          </p>
+          </p> */}
+          {!isRandomMatch && (
+            <p className="mt-2 text-sm md:text-base text-gray-600">
+              あいことば：{code}
+            </p>
+          )}
 
           {playerName && (
             // <p className="mt-5 text-lg md:text-xl font-bold text-gray-700">
@@ -826,7 +927,7 @@ export default function QuizHiramekiCodePage() {
     <div className={`${theme.page} px-4 py-6 text-center`}>
       <div className="mx-auto max-w-4xl">
         <div className="mb-5 rounded-[32px] border-4 border-black bg-gradient-to-r from-yellow-400 via-amber-400 to-orange-400 p-1 shadow-[0_8px_0_rgba(0,0,0,1)]">
-          <div className="rounded-[28px] bg-white/95 p-4">
+          <div className="rounded-[28px] bg-white/95 p-1 md:p-4">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between">
               <div className="text-center md:text-left">
                 <p className="text-3xl md:text-2xl font-black text-gray-900">
@@ -847,14 +948,14 @@ export default function QuizHiramekiCodePage() {
                 </div>
               </div>
 
-              <div className="mt-4 flex justify-center gap-2 md:mt-0 md:justify-end">
-                <div className="min-w-[120px] rounded-2xl border-4 border-black bg-orange-500 px-4 py-2 text-white shadow">
-                  {/* <p className="text-xs font-black">あなた</p> */}
+              <div className="mt-2 md:mt-4 flex justify-center gap-1 md:gap-2 md:mt-0 md:justify-end">
+                {/* <div className="min-w-[120px] rounded-2xl border-4 border-black bg-orange-500 px-4 py-2 text-white shadow">
+                  <p className="text-xs font-black">あなた</p>
                   <p className="text-xs font-black">
                     {ellipsizeName(playerName)}
                   </p>
                   <p className="text-2xl font-black">{myScore}点</p>
-                </div>
+                </div> */}
 
                 <div className="min-w-[120px] rounded-2xl border-4 border-black bg-yellow-400 px-4 py-2 text-gray-900 shadow">
                   <p className="text-xs font-black">残り時間</p>
@@ -887,7 +988,7 @@ export default function QuizHiramekiCodePage() {
                 );
               })}
             </div> */}
-            <div className="mt-4 flex flex-wrap justify-center gap-2">
+            <div className="mt-2 md:mt-4 flex flex-wrap justify-center gap-1 md:gap-2">
               {displayPlayers.map((p) => {
                 const me = p.socketId === mySocketId;
                 const score = scores[p.socketId] ?? 0;
@@ -896,8 +997,8 @@ export default function QuizHiramekiCodePage() {
                   <div
                     key={p.socketId}
                     className={`
-                      flex items-center gap-2
-                      rounded-full border-4 px-3 py-2 font-black shadow-sm
+                      flex items-center gap-1 md:gap-2
+                      rounded-full border-2 md:border-4 px-1 md:px-3 py-1 md:py-2 font-black shadow-sm
                       ${
                         me
                           ? "border-black bg-yellow-300 text-gray-900"
@@ -908,15 +1009,15 @@ export default function QuizHiramekiCodePage() {
                     <img
                       src={p.avatarUrl || "/images/初期アイコン.png"}
                       alt={p.playerName}
-                      className="w-12 h-12 rounded-full object-cover border-2 border-black bg-white"
+                      className="w-9 h-9 md:w-12 md:h-12 rounded-full object-cover border-2 border-black bg-white"
                     />
 
-                    <span>
+                    <span className="text-sm md:text-base">
                       {/* {me ? `👑 ${ellipsizeName(playerName)}` : `💡 ${ellipsizeName(p.playerName)}`} */}
                       {me ? `${ellipsizeName(playerName)}` : `${ellipsizeName(p.playerName)}`}
                     </span>
 
-                    <span className="text-sm">({score}点)</span>
+                    {/* <span className="text-sm">({score}点)</span> */}
                   </div>
                 );
               })}
@@ -995,7 +1096,7 @@ export default function QuizHiramekiCodePage() {
 
                 {revealedHintCount < hints.length && (
                   <p className="mt-4 text-sm md:text-base font-bold text-gray-500">
-                    次のヒントは10秒ごとに追加されます
+                    時間がたつと新しいヒントが追加されます💡
                   </p>
                 )}
               </div>
@@ -1058,7 +1159,8 @@ export default function QuizHiramekiCodePage() {
                         key={p.socketId}
                         className="rounded-2xl border-2 border-black bg-yellow-50 px-4 py-2 font-bold text-gray-800"
                       >
-                        {p.rank}位：{p.playerName}さん / {formatTime(p.elapsedMs)}秒 / +{p.addScore}点
+                        {/* {p.rank}位：{p.playerName}さん / {formatTime(p.elapsedMs)}秒 / +{p.addScore}点 */}
+                        {p.rank}位：{p.playerName}さん / {formatTime(p.elapsedMs)}秒
                       </div>
                     ))}
                   </div>
@@ -1127,7 +1229,8 @@ export default function QuizHiramekiCodePage() {
                           {p.rank === 1 ? "🏆" : `${p.rank}位`} {p.playerName}さん
                         </p>
                         <p className="mt-1 text-sm md:text-base font-bold text-gray-600">
-                          {formatTime(p.elapsedMs)}秒 / +{p.addScore}点
+                          {/* {formatTime(p.elapsedMs)}秒 / +{p.addScore}点 */}
+                          {formatTime(p.elapsedMs)}秒
                         </p>
                       </div>
                     ))}
@@ -1168,7 +1271,8 @@ export default function QuizHiramekiCodePage() {
                     🏆 {ranking[0].playerName}さん
                   </p>
                   <p className="mt-3 text-2xl md:text-3xl font-black text-orange-600">
-                    {ranking[0].score}点
+                    {/* {ranking[0].score}点 */}
+                    {getPlayerTimeText(ranking[0].socketId)}
                   </p>
                 </div>
               )}
@@ -1192,7 +1296,8 @@ export default function QuizHiramekiCodePage() {
                       </p>
 
                       <p className="text-xl md:text-2xl font-black text-orange-600">
-                        {player.score}点
+                        {/* {player.score}点 */}
+                        {getPlayerTimeText(player.socketId)}
                       </p>
                     </div>
 
