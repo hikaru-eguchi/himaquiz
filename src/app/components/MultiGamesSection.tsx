@@ -192,7 +192,7 @@ export default function MultiGamesSection() {
             </div>
 
             {/* ワードチェイス */}
-            <div className="text-center max-w-[280px]">
+            {/* <div className="text-center max-w-[280px]">
               <Link href="/quiz-word" className="w-full md:w-auto flex justify-center">
                 <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-[#6b1d1d] via-[#a16207] to-[#f59e0b] text-white hover:scale-110 transition-all">
                   🔍ワードチェイス
@@ -207,7 +207,7 @@ export default function MultiGamesSection() {
                   誰よりも早く単語を当てる探索クイズ！
                 </p>
               </div>
-            </div>
+            </div> */}
           </>
         )}
       </div>

@@ -103,15 +103,15 @@ const MULTI_GAMES: GameCard[] = [
     buttonClassName:
       "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-cyan-500 via-purple-600 to-fuchsia-500 text-white hover:scale-110 transition-all",
   },
-  {
-    key: "word",
-    href: "/quiz-word",
-    label: "🔍ワードチェイス",
-    desc1: "迷路の中で文字を集めろ！",
-    desc2: "誰よりも早く単語を当てる探索クイズ！",
-    buttonClassName:
-      "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-[#6b1d1d] via-[#a16207] to-[#f59e0b] text-white hover:scale-110 transition-all",
-  },
+  // {
+  //   key: "word",
+  //   href: "/quiz-word",
+  //   label: "🔍ワードチェイス",
+  //   desc1: "迷路の中で文字を集めろ！",
+  //   desc2: "誰よりも早く単語を当てる探索クイズ！",
+  //   buttonClassName:
+  //     "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-[#6b1d1d] via-[#a16207] to-[#f59e0b] text-white hover:scale-110 transition-all",
+  // },
   {
     key: "arena",
     href: "/quiz-arena",

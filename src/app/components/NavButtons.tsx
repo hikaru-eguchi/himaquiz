@@ -414,7 +414,7 @@ export default function NavButtons() {
                         </button>
                       </Link>
 
-                      <Link
+                      {/* <Link
                         href="/quiz-word"
                         onClick={() => handleNavClick("/quiz-word")}
                       >
@@ -425,7 +425,7 @@ export default function NavButtons() {
                         >
                           ワードチェイス
                         </button>
-                      </Link>
+                      </Link> */}
 
                       <Link
                         href="/quiz-adventure"

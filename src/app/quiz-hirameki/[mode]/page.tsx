@@ -83,6 +83,22 @@ type HiramekiGameEndPayload = {
   results?: HiramekiRoundResultPayload[];
 };
 
+type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
+
+const getHiramekiRankBonus = (rank: number) => {
+  if (rank === 1) return 300;
+  if (rank === 2) return 200;
+  if (rank === 3) return 100;
+  return 50;
+};
+
+const getHiramekiRankBonusLabel = (rank: number) => {
+  if (rank === 1) return "1位ボーナス";
+  if (rank === 2) return "2位ボーナス";
+  if (rank === 3) return "3位ボーナス";
+  return "参加ボーナス";
+};
+
 const bannedWords = [
   "ばか",
   "馬鹿",
@@ -231,6 +247,11 @@ export default function QuizHiramekiCodePage() {
   const [scores, setScores] = useState<Record<string, number>>({});
   const [finished, setFinished] = useState(false);
 
+  const [earnedPoints, setEarnedPoints] = useState(0);
+  const [awardBonusLabel, setAwardBonusLabel] = useState("");
+  const [awardStatus, setAwardStatus] = useState<AwardStatus>("idle");
+  const awardedOnceRef = useRef(false);
+
   const {
     joinRandom,
     joinWithCode,
@@ -343,6 +364,64 @@ export default function QuizHiramekiCodePage() {
     return correctPlayer ? `${formatTime(correctPlayer.elapsedMs)}秒` : "タイムアップ";
   };
 
+  const getMyResultRank = () => {
+    if (!mySocketId) return 0;
+    return ranking.findIndex((p) => p.socketId === mySocketId) + 1;
+  };
+
+  useEffect(() => {
+    if (!finished) return;
+    if (!mySocketId) return;
+    if (ranking.length === 0) return;
+    if (awardedOnceRef.current) return;
+
+    const myRank = getMyResultRank();
+    if (myRank <= 0) return;
+
+    const points = getHiramekiRankBonus(myRank);
+    const label = getHiramekiRankBonusLabel(myRank);
+
+    setEarnedPoints(points);
+    setAwardBonusLabel(label);
+
+    if (!user) {
+      setAwardStatus("need_login");
+      return;
+    }
+
+    awardedOnceRef.current = true;
+
+    const run = async () => {
+      setAwardStatus("awarding");
+
+      const { error } = await supabase.rpc("add_points_and_exp", {
+        p_user_id: user.id,
+        p_points: points,
+        p_exp: 0,
+      });
+
+      if (error) {
+        console.error("hirameki add_points_and_exp error:", error);
+        awardedOnceRef.current = false;
+        setAwardStatus("error");
+        return;
+      }
+
+      await supabase.from("user_point_logs").insert({
+        user_id: user.id,
+        change: points,
+        reason: `ひらめきクイズ ${label}（${myRank}位）`,
+      });
+
+      window.dispatchEvent(new Event("points:updated"));
+      window.dispatchEvent(new Event("profile:updated"));
+
+      setAwardStatus("awarded");
+    };
+
+    run();
+  }, [finished, mySocketId, ranking, user, supabase]);
+
   const timeLeftMs = Math.max(0, deadline - now);
   const timeLeftSeconds = Math.ceil(timeLeftMs / 1000);
   const elapsedMs = startedAt > 0 ? Math.max(0, now - startedAt) : 0;
@@ -447,6 +526,11 @@ export default function QuizHiramekiCodePage() {
     setRoundResults([]);
     setScores({});
     setFinished(false);
+
+    setEarnedPoints(0);
+    setAwardBonusLabel("");
+    setAwardStatus("idle");
+    awardedOnceRef.current = false;
   };
 
   // const handleRematch = () => {
@@ -1048,12 +1132,12 @@ export default function QuizHiramekiCodePage() {
                 </div>
               </div>
 
-              <div className={`mt-5 rounded-3xl border-4 px-4 py-5 shadow ${theme.questionBox}`}>
+              <div className={`mt-2 md:mt-4 rounded-3xl border-4 px-2 md:px-4 py-2 md:py-4 shadow ${theme.questionBox}`}>
                 <p className="text-sm md:text-base font-black text-orange-600">
                   答えの文字数
                 </p>
 
-                <div className="mt-3 flex flex-wrap justify-center gap-2">
+                {/* <div className="mt-3 flex flex-wrap justify-center gap-2">
                   {answerBoxes.map((char, index) => (
                     <div
                       key={`${char}-${index}`}
@@ -1062,15 +1146,31 @@ export default function QuizHiramekiCodePage() {
                       {char}
                     </div>
                   ))}
+                </div> */}
+                <div className="mt-1 md:mt-3">
+                  <div className="flex flex-wrap justify-center gap-1 md:gap-2">
+                    {answerBoxes.map((char, index) => (
+                      <div
+                        key={`${char}-${index}`}
+                        className="flex h-12 w-12 md:h-16 md:w-16 items-center justify-center rounded-2xl border-4 border-black bg-yellow-100 text-3xl md:text-5xl font-black text-gray-900 shadow"
+                      >
+                        {char}
+                      </div>
+                    ))}
+                  </div>
+
+                  <p className="mt-1 md:mt-3 text-center text-sm md:text-base font-bold text-gray-600">
+                    （{answerLength}文字）
+                  </p>
                 </div>
               </div>
 
-              <div className="mt-5 rounded-3xl border-4 border-black bg-white px-4 py-5 shadow">
+              <div className="mt-3 md:mt-5 rounded-3xl border-4 border-black bg-white px-2 md:px-4 py-3 md:py-5 shadow">
                 <p className="text-xl md:text-2xl font-black text-gray-900">
                   💡 ヒント
                 </p>
 
-                <div className="mt-4 space-y-3 text-left">
+                <div className="mt-2 md:mt-4 space-y-1 md:space-y-3 text-left">
                   {visibleHints.length > 0 ? (
                     visibleHints.map((hint, index) => (
                       <motion.div
@@ -1265,19 +1365,19 @@ export default function QuizHiramekiCodePage() {
               </h2>
 
               {ranking[0] && (
-                <div className="mt-5 rounded-3xl border-4 border-black bg-gradient-to-br from-yellow-100 via-white to-orange-100 px-4 py-5 shadow">
+                <div className="mt-3 md:mt-5 rounded-3xl border-4 border-black bg-gradient-to-br from-yellow-100 via-white to-orange-100 px-2 md:px-4 py-3 md:py-5 shadow">
                   <p className="text-xl font-black text-gray-500">優勝</p>
-                  <p className="mt-2 text-4xl md:text-6xl font-black text-gray-900">
+                  <p className="mt-1 md:mt-2 text-4xl md:text-6xl font-black text-gray-900">
                     🏆 {ranking[0].playerName}さん
                   </p>
-                  <p className="mt-3 text-2xl md:text-3xl font-black text-orange-600">
+                  <p className="mt-2 md:mt-3 text-2xl md:text-3xl font-black text-orange-600">
                     {/* {ranking[0].score}点 */}
                     {getPlayerTimeText(ranking[0].socketId)}
                   </p>
                 </div>
               )}
 
-              <div className="mt-6 space-y-4">
+              <div className="mt-3 md:mt-6 space-y-2 md:space-y-4">
                 {ranking.map((player, index) => (
                   <div
                     key={player.socketId}
@@ -1317,7 +1417,7 @@ export default function QuizHiramekiCodePage() {
               </div>
 
               {roundResults.length > 0 && (
-                <div className="mt-6 rounded-3xl border-4 border-black bg-white/90 p-4 text-left">
+                <div className="mt-3 md:mt-6 rounded-3xl border-4 border-black bg-white/90 p-2 md:p-4 text-left">
                   <p className="text-xl md:text-2xl font-extrabold text-gray-900 text-center">
                     問題ごとの結果
                   </p>
@@ -1348,7 +1448,45 @@ export default function QuizHiramekiCodePage() {
                 </div>
               )}
 
-              <div className="mt-6 flex flex-col md:flex-row justify-center gap-3">
+              <div className="mt-4 rounded-3xl border-4 border-black bg-white px-4 py-5 shadow">
+                <p className="text-lg md:text-xl font-black text-gray-500">
+                  あなたの獲得報酬
+                </p>
+
+                <p className="mt-2 text-2xl md:text-3xl font-black text-orange-600">
+                  {awardBonusLabel || "順位ボーナス"}
+                </p>
+
+                <p className="mt-2 text-4xl md:text-5xl font-black text-yellow-600">
+                  +{earnedPoints}P
+                </p>
+
+                {awardStatus === "awarding" && (
+                  <p className="mt-2 text-sm md:text-base font-bold text-gray-500">
+                    ポイント反映中...
+                  </p>
+                )}
+
+                {awardStatus === "awarded" && (
+                  <p className="mt-2 text-sm md:text-base font-bold text-green-600">
+                    ✅ ポイントを加算しました！
+                  </p>
+                )}
+
+                {awardStatus === "need_login" && (
+                  <p className="mt-2 text-sm md:text-base font-bold text-gray-600">
+                    ※未ログインのため受け取れません。ログインするとポイントを受け取れます。
+                  </p>
+                )}
+
+                {awardStatus === "error" && (
+                  <p className="mt-2 text-sm md:text-base font-bold text-red-600">
+                    ❌ ポイント加算に失敗しました。
+                  </p>
+                )}
+              </div>
+
+              <div className="mt-6 flex flex-col md:flex-row justify-center gap-2 md:gap-3">
                 <button
                   onClick={handleShareX}
                   className="rounded-xl border-4 border-black bg-black px-6 py-3 text-xl font-extrabold text-white shadow-md transition-all hover:scale-105"

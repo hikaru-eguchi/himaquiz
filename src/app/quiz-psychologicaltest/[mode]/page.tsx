@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
-import RecommendedSoloGames from "@/app/components/RecommendedSoloGames";
+import RecommendedUranaiGames from "@/app/components/RecommendedUranaiGames";
 import { diagnosisGames, type DiagnosisGame } from "@/lib/diagnosis_psychologicaltest";
 import { getTopDiagnosisResult } from "@/lib/diagnosis_psychologicaltest/results";
 
@@ -133,8 +133,8 @@ const QuizResult = ({
 
       {showButton && (
         <div className="mt-6">
-          <RecommendedSoloGames
-            title="次はどれで遊ぶ？🎮"
+          <RecommendedUranaiGames
+            title="次はどれで遊ぶ？🔍"
             count={4}
             excludeHref="/quiz-psychologicaltest"
           />

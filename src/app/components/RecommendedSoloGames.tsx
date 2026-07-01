@@ -78,33 +78,33 @@ const SOLO_GAMES: GameCard[] = [
     buttonClassName:
       "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-amber-700 to-orange-500 text-white hover:scale-110 transition-all",
   },
-  {
-    key: "fortune",
-    href: "/quiz-fortune",
-    label: "🔮ひまQ占い",
-    desc1: "直感で答えるひまQ占い！",
-    desc2: "今日の運勢は★いくつ？",
-    buttonClassName:
-      "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-purple-600 via-fuchsia-500 to-pink-500 text-white hover:scale-110 transition-all",
-  },
-  {
-    key: "personality",
-    href: "/quiz-personality",
-    label: "🔍ひまQ診断",
-    desc1: "直感で答えるタイプ診断！",
-    desc2: "あなたはどのタイプ？",
-    buttonClassName:
-      "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-blue-500 to-cyan-400 text-white hover:scale-110 transition-all",
-  },
-  {
-    key: "psychologicaltest",
-    href: "/quiz-psychologicaltest",
-    label: "❤心理テスト",
-    desc1: "直感でわかる性格診断！",
-    desc2: "あなたの本当のタイプは？",
-    buttonClassName:
-      "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-pink-500 via-rose-500 to-fuchsia-500 text-white hover:scale-110 transition-all",
-  },
+  // {
+  //   key: "fortune",
+  //   href: "/quiz-fortune",
+  //   label: "🔮ひまQ占い",
+  //   desc1: "直感で答えるひまQ占い！",
+  //   desc2: "今日の運勢は★いくつ？",
+  //   buttonClassName:
+  //     "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-purple-600 via-fuchsia-500 to-pink-500 text-white hover:scale-110 transition-all",
+  // },
+  // {
+  //   key: "personality",
+  //   href: "/quiz-personality",
+  //   label: "🔍ひまQ診断",
+  //   desc1: "直感で答えるタイプ診断！",
+  //   desc2: "あなたはどのタイプ？",
+  //   buttonClassName:
+  //     "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-blue-500 to-cyan-400 text-white hover:scale-110 transition-all",
+  // },
+  // {
+  //   key: "psychologicaltest",
+  //   href: "/quiz-psychologicaltest",
+  //   label: "❤心理テスト",
+  //   desc1: "直感でわかる性格診断！",
+  //   desc2: "あなたの本当のタイプは？",
+  //   buttonClassName:
+  //     "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-pink-500 via-rose-500 to-fuchsia-500 text-white hover:scale-110 transition-all",
+  // },
 ];
 
 // Fisher–Yates shuffle（重複なしでランダム抽出）

@@ -6,7 +6,7 @@ import QuizQuestion5 from "../../components/QuizQuestion5";
 import { QuizData } from "@/lib/articles5";
 import { useSupabaseUser } from "../../../hooks/useSupabaseUser";
 import { openXShare, buildTopUrl } from "@/lib/shareX";
-import RecommendedSoloGames from "@/app/components/RecommendedSoloGames";
+import RecommendedUranaiGames from "@/app/components/RecommendedUranaiGames";
 import { motion } from "framer-motion";
 
 interface ArticleData {
@@ -395,8 +395,8 @@ const QuizResult = ({
 
       {showButton && (
         <div className="mt-6">
-          <RecommendedSoloGames
-            title="次はどれで遊ぶ？🎮"
+          <RecommendedUranaiGames
+            title="次はどれで遊ぶ？🔍"
             count={4}
             excludeHref="/streak-challenge" // 今のページを出したくないなら
           />
