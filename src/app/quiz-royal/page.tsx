@@ -64,7 +64,8 @@ export default function QuizMasterPage() {
   const [playerCount, setPlayerCount] = useState<number | null>(2);
 
   return (
-    <div className="container mx-auto px-4 py-8 text-center bg-gradient-to-b from-yellow-400 via-amber-300 to-blue-400">
+    // <div className="container mx-auto px-4 py-8 text-center bg-gradient-to-b from-yellow-400 via-amber-300 to-blue-400">
+    <div className="container mx-auto px-4 py-8 text-center bg-gradient-to-b from-red-400 via-yellow-300 to-blue-400">
       <h1
         className="text-5xl md:text-7xl font-extrabold mb-6 text-center"
         style={{
@@ -130,7 +131,7 @@ export default function QuizMasterPage() {
           <div>
             <button
               onClick={() => setShowCodeInput(true)}
-              className="w-full md:w-80 px-6 py-2 md:px-8 md:py-4 bg-yellow-500 text-white rounded-full hover:bg-yellow-600 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
+              className="w-full md:w-80 px-6 py-2 md:px-8 md:py-4 bg-yellow-400 text-white rounded-full hover:bg-yellow-500 cursor-pointer text-lg md:text-2xl font-semibold shadow-lg transition-transform hover:scale-105 border-2 border-black"
             >
               あいことばで対戦
             </button>

@@ -16,7 +16,7 @@ const MULTI_GAMES: GameCard[] = [
   {
     key: "battle",
     href: "/quiz-battle",
-    label: "🔥クイズバトル",
+    label: "🔥2人クイズバトル",
     desc1: "1分間でどれだけ正解できるか勝負だ！",
     desc2: "相手よりハイスコアを狙おう！",
     buttonClassName:
@@ -29,7 +29,8 @@ const MULTI_GAMES: GameCard[] = [
     desc1: "みんなで1分間のクイズバトル！",
     desc2: "正解を積み上げて王冠をつかみ取れ！",
     buttonClassName:
-      "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-yellow-500 via-amber-300 to-blue-500 text-white hover:scale-110 transition-all",
+      // "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-yellow-500 via-amber-300 to-blue-500 text-white hover:scale-110 transition-all",
+      "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-red-500 via-yellow-400 to-blue-500 text-white hover:scale-110 transition-all",
   },
   {
     key: "adventure",
@@ -56,7 +57,7 @@ const MULTI_GAMES: GameCard[] = [
     desc1: "でてくるヒントで答えを当てろ！",
     desc2: "みんなでできる早押しクイズゲーム！",
     buttonClassName:
-      "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-yellow-400 via-amber-300 to-orange-300 text-white hover:scale-110 transition-all",
+      "w-[220px] md:w-[260px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-yellow-500 via-yellow-300 to-amber-400 text-white hover:scale-110 transition-all",
   },
   // {
   //   key: "majority",

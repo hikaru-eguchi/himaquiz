@@ -24,7 +24,8 @@ export default function MultiGamesSection() {
           </span>
 
           <Link href="/quiz-royal" className="w-full md:w-auto flex justify-center">
-            <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-yellow-500 via-amber-300 to-blue-500 text-white hover:scale-110 transition-all">
+            {/* <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-yellow-500 via-amber-300 to-blue-500 text-white hover:scale-110 transition-all"> */}
+            <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-red-500 via-yellow-400 to-blue-500 text-white hover:scale-110 transition-all">
               👑クイズロワイヤル
             </button>
           </Link>
@@ -64,7 +65,7 @@ export default function MultiGamesSection() {
         {/* ひらめきクイズ */}
         <div className="text-center max-w-[280px]">
           <Link href="/quiz-hirameki" className="w-full md:w-auto flex justify-center">
-              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-yellow-400 via-amber-300 to-orange-300 text-white hover:scale-110 transition-all">
+              <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-yellow-500 via-yellow-300 to-amber-400 text-white hover:scale-110 transition-all">
               💡ひらめきクイズ
               </button>
           </Link>
@@ -80,7 +81,7 @@ export default function MultiGamesSection() {
         </div>
 
         {/* クイズアリーナ */}
-        <div className="text-center max-w-[280px]">
+        {/* <div className="text-center max-w-[280px]">
           <Link href="/quiz-arena" className="w-full md:w-auto flex justify-center">
             <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-[radial-gradient(circle_at_top,#fde68a_0%,#fb7185_28%,#7c3aed_62%,#111827_100%)] text-white hover:scale-110 transition-all">
               ⚔クイズアリーナ
@@ -95,42 +96,24 @@ export default function MultiGamesSection() {
               ひまQのキャラで戦う白熱クイズバトル！
             </p>
           </div>
-        </div>
+        </div> */}
 
         {showMore && (
           <>
-            {/* クイズバトル */}
+            {/* クイズアリーナ */}
             <div className="text-center max-w-[280px]">
-              <Link href="/quiz-battle" className="w-full md:w-auto flex justify-center">
-                <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-pink-500 via-yellow-400 to-green-500 text-white hover:scale-110 transition-all">
-                  🔥クイズバトル
+              <Link href="/quiz-arena" className="w-full md:w-auto flex justify-center">
+                <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-[radial-gradient(circle_at_top,#fde68a_0%,#fb7185_28%,#7c3aed_62%,#111827_100%)] text-white hover:scale-110 transition-all">
+                  ⚔クイズアリーナ
                 </button>
               </Link>
 
               <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
                 <p className="text-sm md:text-base text-gray-700 leading-tight">
-                  1分間でどれだけ正解できるか勝負だ！
+                  相手より先に倒せ！
                 </p>
                 <p className="text-sm md:text-base text-gray-700 leading-tight">
-                  相手よりハイスコアを狙おう！
-                </p>
-              </div>
-            </div>
-
-            {/* 協力ダンジョン */}
-            <div className="text-center max-w-[280px]">
-              <Link href="/quiz-adventure" className="w-full md:w-auto flex justify-center">
-                <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-indigo-500 via-blue-500 to-sky-500 text-white hover:scale-110 transition-all">
-                  ⚔協力ダンジョン
-                </button>
-              </Link>
-
-              <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
-                <p className="text-sm md:text-base text-gray-700 leading-tight">
-                  仲間と力を合わせてクイズに挑め！
-                </p>
-                <p className="text-sm md:text-base text-gray-700 leading-tight">
-                  クイズに正解して、強敵を打ち倒そう！
+                  ひまQのキャラで戦う白熱クイズバトル！
                 </p>
               </div>
             </div>
@@ -208,6 +191,42 @@ export default function MultiGamesSection() {
                 </p>
               </div>
             </div> */}
+
+            {/* 協力ダンジョン */}
+            <div className="text-center max-w-[280px]">
+              <Link href="/quiz-adventure" className="w-full md:w-auto flex justify-center">
+                <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-indigo-500 via-blue-500 to-sky-500 text-white hover:scale-110 transition-all">
+                  ⚔協力ダンジョン
+                </button>
+              </Link>
+
+              <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
+                <p className="text-sm md:text-base text-gray-700 leading-tight">
+                  仲間と力を合わせてクイズに挑め！
+                </p>
+                <p className="text-sm md:text-base text-gray-700 leading-tight">
+                  クイズに正解して、強敵を打ち倒そう！
+                </p>
+              </div>
+            </div>
+
+            {/* クイズバトル */}
+            <div className="text-center max-w-[280px]">
+              <Link href="/quiz-battle" className="w-full md:w-auto flex justify-center">
+                <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-pink-500 via-yellow-400 to-green-500 text-white hover:scale-110 transition-all">
+                  🔥2人クイズバトル
+                </button>
+              </Link>
+
+              <div className="mt-1 rounded-2xl bg-white/65 px-2 py-2 shadow-sm border border-white/70">
+                <p className="text-sm md:text-base text-gray-700 leading-tight">
+                  1分間でどれだけ正解できるか勝負だ！
+                </p>
+                <p className="text-sm md:text-base text-gray-700 leading-tight">
+                  相手よりハイスコアを狙おう！
+                </p>
+              </div>
+            </div>
           </>
         )}
       </div>

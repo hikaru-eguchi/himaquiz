@@ -83,7 +83,8 @@ export default function GuestRecommendQuizGames() {
             👑 熱いオンライン対戦ならこれ！
           </p>
           <Link href="/quiz-royal" className="flex justify-center">
-            <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-yellow-500 via-amber-300 to-blue-500 text-white hover:scale-110 transition-all">
+            {/* <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-yellow-500 via-amber-300 to-blue-500 text-white hover:scale-110 transition-all"> */}
+            <button className="w-[240px] md:w-[280px] px-4 md:px-6 text-xl md:text-2xl py-2 border-2 border-black rounded-full font-bold shadow-xl bg-gradient-to-r from-red-500 via-yellow-400 to-blue-500 text-white hover:scale-110 transition-all">
               👑クイズロワイヤル
             </button>
           </Link>

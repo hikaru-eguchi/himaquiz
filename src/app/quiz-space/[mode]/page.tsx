@@ -23,6 +23,7 @@ type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
 type RoomPlayer = {
   socketId: string;
   playerName: string;
+  avatarUrl?: string | null;
 };
 
 type RankRow = {
@@ -1500,11 +1501,31 @@ export default function SpaceSurviveModePage() {
             メンバーが揃ったよ！
           </h1>
 
-          <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+          {/* <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
             {roomPlayers.map((p, i) => (
               <SpaceGlassCard key={p.socketId} className="p-3">
-                {/* <p className="text-3xl">{PLAYER_EMOJIS[i % PLAYER_EMOJIS.length]}</p> */}
+                <p className="text-3xl">{PLAYER_EMOJIS[i % PLAYER_EMOJIS.length]}</p>
                 <p className="truncate font-black text-white">{p.playerName}</p>
+              </SpaceGlassCard>
+            ))}
+          </div> */}
+          <div className="mb-3 md:mb-6 flex flex-col items-center gap-1 md:gap-3 md:grid md:grid-cols-4">
+            {roomPlayers.map((p) => (
+              <SpaceGlassCard
+                key={p.socketId}
+                className="w-[250px] p-2 md:p-3 md:w-auto"
+              >
+                <div className="relative flex items-center">
+                  <img
+                    src={p.avatarUrl || "/images/初期アイコン.png"}
+                    alt={p.playerName}
+                    className="absolute left-1 h-9 w-9 rounded-full border-2 border-black bg-white object-contain"
+                  />
+
+                  <p className="w-full pl-5 text-center truncate font-black text-white">
+                    {p.playerName}
+                  </p>
+                </div>
               </SpaceGlassCard>
             ))}
           </div>

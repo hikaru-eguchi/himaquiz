@@ -23,6 +23,7 @@ type AwardStatus = "idle" | "awarding" | "awarded" | "need_login" | "error";
 type RoomPlayer = {
   socketId: string;
   playerName: string;
+  avatarUrl?: string | null;
 };
 
 type RankRow = {
@@ -954,11 +955,23 @@ export default function QuizOnigokkoModePage() {
 
   const DEFAULT_PLAYER_IMAGE = "/images/skin_chara1_ボード.png";
 
+  // const getPlayerImage = (player: WordPlayer) => {
+  //   // 鬼になったプレイヤーは、スキンに関係なく鬼画像で固定
+  //   if (isOniPlayer(player)) return ONIGOKKO_ONI_IMAGE;
+
+  //   if (player.isCpu) return DEFAULT_PLAYER_IMAGE;
+
+  //   if (player.skinImageUrl) {
+  //     return player.skinImageUrl.startsWith("/")
+  //       ? player.skinImageUrl
+  //       : `/${player.skinImageUrl}`;
+  //   }
+
+  //   return DEFAULT_PLAYER_IMAGE;
+  // };
   const getPlayerImage = (player: WordPlayer) => {
     // 鬼になったプレイヤーは、スキンに関係なく鬼画像で固定
     if (isOniPlayer(player)) return ONIGOKKO_ONI_IMAGE;
-
-    if (player.isCpu) return DEFAULT_PLAYER_IMAGE;
 
     if (player.skinImageUrl) {
       return player.skinImageUrl.startsWith("/")
@@ -1843,11 +1856,26 @@ export default function QuizOnigokkoModePage() {
             メンバーが揃ったよ！
           </h1>
 
-          <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
-            {roomPlayers.map((p, i) => (
+          <div className="mb-3 md:mb-6 flex flex-col items-center gap-1 md:gap-3 md:grid md:grid-cols-4">
+            {/* {roomPlayers.map((p, i) => (
               <WordGlassCard key={p.socketId} className="p-3">
-                {/* <p className="text-3xl">{PLAYER_EMOJIS[i % PLAYER_EMOJIS.length]}</p> */}
+                <p className="text-3xl">{PLAYER_EMOJIS[i % PLAYER_EMOJIS.length]}</p>
                 <p className="truncate font-black text-white">{p.playerName}</p>
+              </WordGlassCard>
+            ))} */}
+            {roomPlayers.map((p) => (
+              <WordGlassCard key={p.socketId}  className="w-[250px] p-2 md:p-3 md:w-auto">
+                <div className="relative flex items-center">
+                  <img
+                    src={p.avatarUrl || "/images/初期アイコン.png"}
+                    alt={p.playerName}
+                    className="absolute left-1 h-9 w-9 rounded-full border-2 border-black bg-white object-contain"
+                  />
+
+                  <p className="w-full pl-5 text-center truncate font-black text-white">
+                    {p.playerName}
+                  </p>
+                </div>
               </WordGlassCard>
             ))}
           </div>

@@ -1542,7 +1542,8 @@ export default function QuizModePage() {
   return (
     <>
     <OnlineGameNotice />
-    <div className="container mx-auto p-1 md:p-8 text-center bg-gradient-to-b from-yellow-300 via-amber-200 to-blue-300">
+    {/* <div className="container mx-auto p-1 md:p-8 text-center bg-gradient-to-b from-yellow-300 via-amber-200 to-blue-300"> */}
+    <div className="container mx-auto p-1 md:p-8 text-center bg-gradient-to-b from-red-300 via-yellow-200 to-blue-300">
       {countdown !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
           <motion.div
