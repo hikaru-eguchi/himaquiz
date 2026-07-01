@@ -1509,7 +1509,7 @@ export default function SpaceSurviveModePage() {
               </SpaceGlassCard>
             ))}
           </div> */}
-          <div className="mb-3 md:mb-6 flex flex-col items-center gap-1 md:gap-3 md:grid md:grid-cols-4">
+          <div className="mb-3 md:mb-6 flex flex-col items-center gap-2 md:gap-3 md:grid md:grid-cols-4">
             {roomPlayers.map((p) => (
               <SpaceGlassCard
                 key={p.socketId}

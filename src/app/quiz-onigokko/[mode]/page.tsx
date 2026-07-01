@@ -1856,7 +1856,7 @@ export default function QuizOnigokkoModePage() {
             メンバーが揃ったよ！
           </h1>
 
-          <div className="mb-3 md:mb-6 flex flex-col items-center gap-1 md:gap-3 md:grid md:grid-cols-4">
+          <div className="mb-3 md:mb-6 flex flex-col items-center gap-2 md:gap-3 md:grid md:grid-cols-4">
             {/* {roomPlayers.map((p, i) => (
               <WordGlassCard key={p.socketId} className="p-3">
                 <p className="text-3xl">{PLAYER_EMOJIS[i % PLAYER_EMOJIS.length]}</p>
